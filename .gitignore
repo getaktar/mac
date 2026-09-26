@@ -1,0 +1,36 @@
+# XcodeGen generates the Xcode project from project.yml; the generated
+# project (and anything Xcode writes into it, like the signing team or
+# per-user schemes) should never be committed. Run `xcodegen generate`
+# after cloning.
+*.xcodeproj/
+*.xcworkspace/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Xcode
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Release artifacts (built by scripts/release.sh)
+dist/
+
+# macOS
+.DS_Store
+
+# ─── Secrets & signing material — MUST NEVER be committed ───
+# Credentials live in Keychain at runtime, never on disk, but this is a
+# defense-in-depth net against accidental key/cert exports or stray env files.
+*.pem
+*private*key*
+*PrivateKey*
+*.p12
+*.cer
+*.cert
+*.mobileprovision
+*.provisionprofile
+.env
+.env.*
+*.netrc

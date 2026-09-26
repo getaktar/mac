@@ -1,0 +1,38 @@
+name: Aktar
+options:
+  bundleIdPrefix: com.getaktar
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+packages:
+  Soto:
+    url: https://github.com/soto-project/soto.git
+    from: 7.0.0
+
+targets:
+  Aktar:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/Aktar
+    dependencies:
+      - package: Soto
+        product: SotoS3
+      - sdk: PDFKit.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac
+        PRODUCT_NAME: Aktar
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        CODE_SIGN_ENTITLEMENTS: Sources/Aktar/Aktar.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        MACOSX_DEPLOYMENT_TARGET: "14.0"

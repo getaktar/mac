@@ -1,0 +1,28 @@
+import SwiftData
+import SwiftUI
+
+@main
+struct AktarApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+    var body: some Scene {
+        Window("Library", id: "library") {
+            LibraryView()
+                .environment(appDelegate.appState)
+                .modelContext(appDelegate.appState.repository.modelContext)
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 960, height: 640)
+
+        Window("Settings", id: "settings") {
+            SettingsView()
+                .environment(appDelegate.appState)
+        }
+
+        Window("Welcome", id: "onboarding") {
+            OnboardingView()
+                .environment(appDelegate.appState)
+        }
+        .windowResizability(.contentSize)
+    }
+}
