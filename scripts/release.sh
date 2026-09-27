@@ -17,8 +17,15 @@ SCHEME="Aktar"
 TEAM_ID="${TEAM_ID:-Y86FU5TSPQ}"
 SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application: Mert Topuz (${TEAM_ID})}"
 KEYCHAIN_PROFILE="${KEYCHAIN_PROFILE:-aktar-notarization}"
-VERSION="${VERSION:-$(grep 'MARKETING_VERSION' project.yml | head -1 | sed 's/.*: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')}"
-BUILD="$(grep 'CURRENT_PROJECT_VERSION' project.yml | head -1 | sed 's/.*: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')"
+# Read the build settings themselves (`KEY: "value"` lines), not comments or
+# Info.plist entries that merely mention them.
+setting() { grep -E "^ *$1: " project.yml | head -1 | sed 's/.*: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/'; }
+VERSION="${VERSION:-$(setting MARKETING_VERSION)}"
+BUILD="$(setting CURRENT_PROJECT_VERSION)"
+if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || ! [[ "$BUILD" =~ ^[0-9]+$ ]]; then
+  echo "Could not read MARKETING_VERSION ($VERSION) / CURRENT_PROJECT_VERSION ($BUILD) from project.yml" >&2
+  exit 1
+fi
 REPO_URL="https://github.com/getaktar/mac"
 FEED_URL="$REPO_URL/releases/latest/download/appcast.xml"
 
