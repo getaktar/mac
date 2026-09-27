@@ -1,4 +1,5 @@
 import Foundation
+import KeyboardShortcuts
 import Observation
 
 @MainActor
@@ -11,5 +12,13 @@ final class AppState {
     init() {
         uploadManager = UploadManager(destinationStore: destinationStore, repository: repository)
         NotificationService.requestAuthorizationIfNeeded()
+        KeyboardShortcuts.onKeyDown(for: .uploadFromClipboard) { [weak self] in
+            Task { @MainActor in self?.uploadFromClipboard() }
+        }
+    }
+
+    func uploadFromClipboard() {
+        guard let input = ClipboardService.readFileInput() else { return }
+        uploadManager.upload([input])
     }
 }

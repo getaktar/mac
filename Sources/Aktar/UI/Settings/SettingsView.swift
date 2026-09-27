@@ -1,3 +1,4 @@
+import KeyboardShortcuts
 import SwiftUI
 
 private enum SettingsTab: String, CaseIterable, Identifiable {
@@ -104,6 +105,22 @@ private struct GeneralSettingsView: View {
                         subtitle: "Open the app automatically when you sign in",
                         isOn: launchAtLoginBinding
                     )
+                }
+            }
+
+            SettingsSection(title: "Keyboard shortcut") {
+                SettingsCard {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Paste & upload from anywhere")
+                            Text("Works even when the panel is closed. Click to record, or press Delete to clear it.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        KeyboardShortcuts.Recorder(for: .uploadFromClipboard)
+                    }
+                    .padding(12)
                 }
             }
 
