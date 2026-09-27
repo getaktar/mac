@@ -24,6 +24,8 @@ get a public link back on your clipboard.
 - Browse each bucket folder by folder, including files uploaded elsewhere:
   search the whole bucket, preview, copy links or temporary links, upload into a folder, create
   folders, rename, move, and delete
+- Raycast extension: upload, search history, and browse buckets from
+  Raycast (opt-in, see Settings > Integrations)
 - Launch at login
 
 ## Privacy & security
@@ -34,6 +36,10 @@ Aktar has no backend, no telemetry, and no account system. The only other
 request it makes is the update check ([Sparkle](https://sparkle-project.org)),
 which downloads `appcast.xml` from this repository's latest GitHub release and
 sends no information about you or your Mac; you can turn it off in Settings.
+If you turn on Settings > Integrations > Allow local connections (off by
+default, and what the Raycast extension uses), Aktar also listens on
+`127.0.0.1` for requests carrying a random token that is kept in the Keychain.
+It never accepts connections from other machines or from web pages.
 See [SECURITY.md](SECURITY.md) for the disclosure policy.
 
 ## Requirements

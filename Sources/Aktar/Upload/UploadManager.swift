@@ -34,6 +34,12 @@ final class UploadManager {
         job.state = .cancelled
     }
 
+    /// Drops a finished job from the list, e.g. one started through the
+    /// local API whose staged file is already gone, so it can't be retried.
+    func dismiss(_ job: UploadJob) {
+        jobs.removeAll { $0 === job }
+    }
+
     func retry(_ job: UploadJob) {
         job.state = .waiting
         drainQueue()

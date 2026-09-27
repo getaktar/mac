@@ -39,6 +39,10 @@ final class MenuBarPanelController: NSObject, NSWindowDelegate {
         )
         panel.contentView = hostingView
         panel.delegate = self
+        // Build the SwiftUI view now rather than on first open: it's what
+        // turns "open window" requests (aktar://settings, aktar://library)
+        // into windows, so it has to exist even if the panel never opened.
+        hostingView.layoutSubtreeIfNeeded()
 
         NotificationCenter.default.addObserver(
             self,

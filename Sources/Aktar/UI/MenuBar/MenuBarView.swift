@@ -23,6 +23,9 @@ struct MenuBarView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .onDrop(of: [.fileURL], isTargeted: $isTargeted, perform: handleDrop)
         .background(hiddenShortcuts)
+        .onReceive(NotificationCenter.default.publisher(for: .aktarOpenWindow)) { notification in
+            if let id = notification.object as? String { openAppWindow(id) }
+        }
     }
 
     /// Global-feeling shortcuts (⌘V paste-and-upload, ⌘, for Settings, ⌘Q to

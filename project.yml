@@ -44,6 +44,12 @@ targets:
         SUPublicEDKey: +IpZTPTgNR/L/LUW8RMQEY6yzAKG4MTngEbS26PkqD8=
         # Sandboxed apps install updates through Sparkle's XPC installer.
         SUEnableInstallerLauncherService: true
+        # aktar:// links (upload-clipboard, library, settings, connect),
+        # used by the Raycast extension; see URLSchemeHandler.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.getaktar.mac
+            CFBundleURLSchemes:
+              - aktar
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac

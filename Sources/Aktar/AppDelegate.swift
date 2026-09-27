@@ -5,8 +5,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let appState = AppState()
     private var menuBarController: MenuBarPanelController?
 
+    /// aktar:// links that arrive before launch finishes are the ones that
+    /// launched the app. They're held until the app is set up, and handled
+    /// as launch links so actions that should only run in an already open
+    /// app (uploading the clipboard) are skipped.
+    private var hasFinishedLaunching = false
+    private var launchURLs: [URL] = []
+    private let launchDate = Date()
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // Handle aktar:// links ourselves. Left to SwiftUI, a URL open would
+        // bring up one of the app's windows instead of just running the action.
+        NSAppleEventManager.shared().setEventHandler(
+            self,
+            andSelector: #selector(handleGetURLEvent(_:withReplyEvent:)),
+            forEventClass: AEEventClass(kInternetEventClass),
+            andEventID: AEEventID(kAEGetURL)
+        )
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController = MenuBarPanelController(appState: appState)
+        LocalAPIService.shared.configure(appState: appState)
 
         // Aktar is an accessory app (no Dock icon) so it stays out of the way
         // day-to-day, but that also hides it from Cmd+Tab even while a real
@@ -24,6 +44,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSWindow.willCloseNotification,
             object: nil
         )
+
+        hasFinishedLaunching = true
+        // Next run loop turn, once the menu bar view (which opens windows
+        // for aktar://settings and aktar://library) is up and listening.
+        let pending = launchURLs
+        launchURLs = []
+        DispatchQueue.main.async { [appState] in
+            for url in pending {
+                URLSchemeHandler.handle(url, appState: appState, launchedApp: true)
+            }
+        }
+    }
+
+    @objc private func handleGetURLEvent(_ event: NSAppleEventDescriptor, withReplyEvent reply: NSAppleEventDescriptor) {
+        guard let string = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
+              let url = URL(string: string) else { return }
+        guard hasFinishedLaunching else {
+            launchURLs.append(url)
+            return
+        }
+        // Belt and braces in case the launch link is delivered just after
+        // launch instead of during it.
+        let justLaunched = Date().timeIntervalSince(launchDate) < 2
+        URLSchemeHandler.handle(url, appState: appState, launchedApp: justLaunched)
     }
 
     private func isTrackedWindow(_ window: NSWindow) -> Bool {

@@ -13,19 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   folder by folder (including files not uploaded with Aktar), search the whole
   bucket, preview files, copy links or temporary links that also work for private buckets, upload
   into a folder, create folders, rename or move files, and delete them
+- Raycast integration: an opt-in local API (Settings > Integrations, off by
+  default, 127.0.0.1 only, token-protected) that the Aktar Raycast extension
+  uses to upload files and the clipboard, search history, and browse buckets.
+  Pair it from Raycast with "Connect to Aktar", which Aktar asks you to approve
+- `aktar://` links: `aktar://upload-clipboard` (only while Aktar is already
+  running, so opening a link can't upload the clipboard by launching it),
+  `aktar://library`, and `aktar://settings`
 
 ### Fixed
 
 - Retrying a failed upload, or uploads queued for different destinations at
   the same time, now go to the destination they were started for instead of
   the current default
-- A new upload's row in the Library no longer shows up clipped to half its
-  height
-- Thumbnails keep the image's aspect ratio (and orientation) instead of being
-  squashed into a square, and are sharper on Retina displays
-
-### Fixed
-
 - A new upload's row in the Library no longer shows up clipped to half its
   height
 - Thumbnails keep the image's aspect ratio (and orientation) instead of being
