@@ -57,6 +57,9 @@ echo "==> Regenerating Xcode project"
 xcodegen generate
 
 echo "==> Archiving Aktar $VERSION"
+# C code in the dependencies (BoringSSL in swift-nio-ssl) embeds source
+# paths for its assertions; map the home folder away so the shipped binary
+# doesn't carry the release machine's user name.
 xcodebuild archive \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
@@ -64,7 +67,8 @@ xcodebuild archive \
   -archivePath "$ARCHIVE" \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="Developer ID Application" \
-  DEVELOPMENT_TEAM="$TEAM_ID"
+  DEVELOPMENT_TEAM="$TEAM_ID" \
+  OTHER_CFLAGS="\$(inherited) -ffile-prefix-map=$HOME=/build"
 
 cat > "$EXPORT_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
