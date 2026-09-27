@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- App icon now follows the macOS icon shape instead of appearing as a black
+  square inside a grey plate
+
 ## [0.2.0] - 2026-09-27
 
 ### Added

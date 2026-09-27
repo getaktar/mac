@@ -1,18 +1,26 @@
 #!/bin/bash
 # Populates Sources/Aktar/Assets.xcassets/AppIcon.appiconset from a single
-# master PNG (ideally 1024x1024, square, no transparency needed but fine
-# either way).
+# full-bleed square artwork PNG (1024x1024, no rounded corners). The artwork
+# is first fitted onto Apple's macOS icon grid (squircle body, transparent
+# margin, drop shadow) by shape_macos_icon.swift; macOS doesn't do this
+# itself and shows unshaped icons inside a grey plate.
 #
-# Usage: scripts/make_iconset.sh path/to/logo-1024.png
+# Usage: scripts/make_iconset.sh docs/app-icon-artwork.png
 set -euo pipefail
 
-SRC="${1:?Usage: scripts/make_iconset.sh path/to/logo-1024.png}"
-DEST="$(cd "$(dirname "$0")/.." && pwd)/Sources/Aktar/Assets.xcassets/AppIcon.appiconset"
+INPUT="${1:?Usage: scripts/make_iconset.sh path/to/artwork-1024.png}"
+SCRIPTS="$(cd "$(dirname "$0")" && pwd)"
+DEST="$SCRIPTS/../Sources/Aktar/Assets.xcassets/AppIcon.appiconset"
 
-if [ ! -f "$SRC" ]; then
-  echo "No such file: $SRC" >&2
+if [ ! -f "$INPUT" ]; then
+  echo "No such file: $INPUT" >&2
   exit 1
 fi
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+SRC="$WORK/icon.png"
+swift "$SCRIPTS/shape_macos_icon.swift" "$INPUT" "$SRC"
 
 SIZES=(16 32 32 64 128 256 256 512 512 1024)
 NAMES=(
