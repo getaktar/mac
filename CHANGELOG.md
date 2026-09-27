@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Japanese, and Simplified Chinese, matching the languages of getaktar.com.
   The app follows the macOS system language by default; pick a different one
   in Settings > General > Language
+- About tab in Settings with version info and links to the website, source
+  code, changelog, issue tracker, and developer; the About Aktar panel now
+  shows the same links
 
 ### Fixed
 

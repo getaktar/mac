@@ -5,6 +5,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case destinations
     case output
+    case about
 
     var id: String { rawValue }
 
@@ -16,6 +17,8 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
             return "Destinations"
         case .output:
             return "Output"
+        case .about:
+            return "About"
         }
     }
 
@@ -27,6 +30,8 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
             return "cloud"
         case .output:
             return "square.on.square"
+        case .about:
+            return "info.circle"
         }
     }
 }
@@ -74,6 +79,9 @@ struct SettingsView: View {
 
         case .output:
             OutputSettingsView()
+
+        case .about:
+            AboutSettingsView()
         }
     }
 
