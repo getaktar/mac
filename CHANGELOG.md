@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Bucket browser in the Library window: browse each destination's bucket
+  folder by folder (including files not uploaded with Aktar), search the whole
+  bucket, preview files, copy links or temporary links that also work for private buckets, upload
+  into a folder, create folders, rename or move files, and delete them
+
+### Fixed
+
+- Retrying a failed upload, or uploads queued for different destinations at
+  the same time, now go to the destination they were started for instead of
+  the current default
+- A new upload's row in the Library no longer shows up clipped to half its
+  height
+- Thumbnails keep the image's aspect ratio (and orientation) instead of being
+  squashed into a square, and are sharper on Retina displays
+
 ### Fixed
 
 - A new upload's row in the Library no longer shows up clipped to half its

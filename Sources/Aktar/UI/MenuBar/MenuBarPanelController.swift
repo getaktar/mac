@@ -4,6 +4,8 @@ import SwiftUI
 
 extension Notification.Name {
     static let aktarClosePanel = Notification.Name("aktarClosePanel")
+    /// Posted after an upload finishes; `object` is the destination's UUID.
+    static let aktarUploadSucceeded = Notification.Name("aktarUploadSucceeded")
 }
 
 /// Owns the status bar icon and the popover panel. Replaces SwiftUI's

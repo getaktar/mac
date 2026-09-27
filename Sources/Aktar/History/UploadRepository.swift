@@ -39,4 +39,28 @@ final class UploadRepository {
         try? modelContext.save()
         ThumbnailCache.remove(for: record.id)
     }
+
+    /// Keeps history in step with changes made from the bucket browser: an
+    /// object that was deleted there drops out of history, and one that was
+    /// renamed or moved gets its new key and link.
+    func objectDeleted(key: String, destinationID: UUID) {
+        for record in records(key: key, destinationID: destinationID) {
+            delete(record)
+        }
+    }
+
+    func objectMoved(from oldKey: String, to newKey: String, destination: DestinationConfig) {
+        for record in records(key: oldKey, destinationID: destination.id) {
+            record.objectKey = newKey
+            record.publicURLString = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey).absoluteString
+        }
+        try? modelContext.save()
+    }
+
+    private func records(key: String, destinationID: UUID) -> [UploadRecord] {
+        let descriptor = FetchDescriptor<UploadRecord>(
+            predicate: #Predicate { $0.objectKey == key && $0.destinationID == destinationID }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
 }

@@ -6,6 +6,24 @@ struct ConnectionResult {
     let publicURLReachable: Bool?
 }
 
+/// One level of a bucket, as S3 lists it with a "/" delimiter: the
+/// "folders" (common prefixes) and objects directly under `prefix`.
+struct BucketListing: Sendable {
+    let prefix: String
+    let folders: [String]
+    let objects: [BucketObject]
+    let nextContinuationToken: String?
+}
+
+struct BucketObject: Sendable, Identifiable, Hashable {
+    let key: String
+    let size: Int64
+    let lastModified: Date?
+
+    var id: String { key }
+    var name: String { String(key.split(separator: "/", omittingEmptySubsequences: false).last ?? "") }
+}
+
 struct UploadResult: Sendable {
     let objectKey: String
     let publicURL: URL
@@ -44,4 +62,10 @@ protocol StorageProvider {
         progress: (@MainActor (Double) -> Void)?
     ) async throws -> UploadResult
     func delete(objectKey: String) async throws
+    func list(prefix: String, continuationToken: String?) async throws -> BucketListing
+    func listRecursively(prefix: String, continuationToken: String?) async throws -> BucketListing
+    func objectExists(key: String) async throws -> Bool
+    func copy(from sourceKey: String, to destinationKey: String) async throws
+    func createFolder(prefix: String) async throws
+    func temporaryURL(for objectKey: String, expiresIn seconds: Int64) async throws -> URL
 }

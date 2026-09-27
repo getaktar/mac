@@ -12,7 +12,7 @@ struct AktarApp: App {
                 .modelContext(appDelegate.appState.repository.modelContext)
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 960, height: 640)
+        .defaultSize(width: 1100, height: 680)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Aktar") { AboutPanel.show() }

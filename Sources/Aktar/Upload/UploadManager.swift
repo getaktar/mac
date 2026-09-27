@@ -24,9 +24,9 @@ final class UploadManager {
 
     func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil) {
         guard let destination = destination ?? destinationStore.defaultDestination else { return }
-        let newJobs = inputs.map { UploadJob(input: $0) }
+        let newJobs = inputs.map { UploadJob(input: $0, destination: destination) }
         jobs.insert(contentsOf: newJobs, at: 0)
-        drainQueue(destination: destination)
+        drainQueue()
     }
 
     func cancel(_ job: UploadJob) {
@@ -35,9 +35,8 @@ final class UploadManager {
     }
 
     func retry(_ job: UploadJob) {
-        guard let destination = destinationStore.defaultDestination else { return }
         job.state = .waiting
-        drainQueue(destination: destination)
+        drainQueue()
     }
 
     /// Deletes the remote object and, on success, the local history entry.
@@ -56,14 +55,14 @@ final class UploadManager {
         repository.delete(record)
     }
 
-    private func drainQueue(destination: DestinationConfig) {
+    private func drainQueue() {
         let pending = jobs.filter {
             if case .waiting = $0.state { return true }
             return false
         }
         for job in pending {
             guard activeCount < maxConcurrent else { break }
-            start(job: job, destination: destination)
+            start(job: job, destination: job.destination)
         }
     }
 
@@ -76,7 +75,7 @@ final class UploadManager {
             do {
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
-                let objectKey = ObjectKeyGenerator.generate(
+                let objectKey = job.input.objectKey ?? ObjectKeyGenerator.generate(
                     template: destination.objectPathTemplate,
                     originalFilename: job.input.originalFilename
                 )
@@ -90,9 +89,9 @@ final class UploadManager {
                     job.state = .uploading(progress: progress)
                 }
 
-                await self.finish(job: job, result: result, destination: destination)
+                self.finish(job: job, result: result, destination: destination)
             } catch {
-                await self.fail(job: job, error: error, destination: destination)
+                self.fail(job: job, error: error, destination: destination)
             }
         }
     }
@@ -109,6 +108,11 @@ final class UploadManager {
         )
         ClipboardService.copy(output)
         NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename)
+        NotificationCenter.default.post(
+            name: .aktarUploadSucceeded,
+            object: destination.id,
+            userInfo: ["objectKey": result.objectKey, "byteSize": Int64(result.byteSize)]
+        )
 
         let closeAfterUpload = UserDefaults.standard.object(forKey: "closePopoverAfterUpload") as? Bool ?? true
         if closeAfterUpload {
@@ -116,7 +120,7 @@ final class UploadManager {
         }
 
         activeCount -= 1
-        drainQueue(destination: destination)
+        drainQueue()
     }
 
     private func fail(job: UploadJob, error: Error, destination: DestinationConfig) {
@@ -125,6 +129,6 @@ final class UploadManager {
         NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
 
         activeCount -= 1
-        drainQueue(destination: destination)
+        drainQueue()
     }
 }

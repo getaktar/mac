@@ -13,10 +13,12 @@ enum UploadJobState: Equatable {
 final class UploadJob: Identifiable {
     let id = UUID()
     let input: UploadInput
+    let destination: DestinationConfig
     var state: UploadJobState = .waiting
     var task: Task<Void, Never>?
 
-    init(input: UploadInput) {
+    init(input: UploadInput, destination: DestinationConfig) {
         self.input = input
+        self.destination = destination
     }
 }

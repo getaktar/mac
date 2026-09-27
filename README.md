@@ -21,6 +21,9 @@ get a public link back on your clipboard.
   Markdown)
 - Copy the link as a plain URL, Markdown, HTML, or a custom template
 - Delete the remote file straight from the history view
+- Browse each bucket folder by folder, including files uploaded elsewhere:
+  search the whole bucket, preview, copy links or temporary links, upload into a folder, create
+  folders, rename, move, and delete
 - Launch at login
 
 ## Privacy & security

@@ -4,6 +4,28 @@ import PDFKit
 import SwiftData
 import UniformTypeIdentifiers
 
+/// What the Library window's source list is showing: Aktar's own upload
+/// history, or a live view of one destination's bucket.
+private enum LibrarySource: Hashable {
+    case history
+    case bucket(UUID)
+}
+
+/// Keeps one browser per destination alive while the window is open, so
+/// switching between buckets returns to the folder you were in. A plain
+/// class rather than state, since it's filled lazily while rendering.
+@MainActor
+private final class BucketBrowserCache {
+    private var models: [UUID: BucketBrowserModel] = [:]
+
+    func model(for destination: DestinationConfig) -> BucketBrowserModel {
+        if let model = models[destination.id], model.destination == destination { return model }
+        let model = BucketBrowserModel(destination: destination)
+        models[destination.id] = model
+        return model
+    }
+}
+
 struct LibraryView: View {
     @Environment(AppState.self) private var appState
     @Query(sort: \UploadRecord.createdAt, order: .reverse) private var records: [UploadRecord]
@@ -15,16 +37,31 @@ struct LibraryView: View {
     @State private var deletionErrors: [UUID: String] = [:]
     @State private var zoomedRecord: UploadRecord?
     @State private var isDropTargeted = false
+    @State private var source: LibrarySource? = .history
+    @State private var browserCache = BucketBrowserCache()
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         NavigationSplitView {
-            sidebar
-                .navigationSplitViewColumnWidth(280)
+            sourceList
+                .navigationSplitViewColumnWidth(min: 170, ideal: 200, max: 260)
+        } content: {
+            Group {
+                if let browser = currentBrowser {
+                    BucketListView(model: browser)
+                } else {
+                    sidebar
+                }
+            }
+            .navigationSplitViewColumnWidth(min: 260, ideal: 320)
         } detail: {
-            detail
+            if let browser = currentBrowser {
+                BucketDetailView(model: browser)
+            } else {
+                detail
+            }
         }
-        .frame(minWidth: 620, minHeight: 500)
+        .frame(minWidth: 860, minHeight: 500)
         .background(hiddenShortcuts)
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted, perform: handleDrop)
         .overlay {
@@ -57,7 +94,42 @@ struct LibraryView: View {
         }
     }
 
-    // MARK: - Sidebar
+    // MARK: - Source list
+
+    private var sourceList: some View {
+        List(selection: $source) {
+            Section("Library") {
+                Label("History", systemImage: "clock")
+                    .tag(LibrarySource.history)
+            }
+            if !appState.destinationStore.destinations.isEmpty {
+                Section("Buckets") {
+                    ForEach(appState.destinationStore.destinations) { destination in
+                        Label {
+                            Text(verbatim: destination.name)
+                        } icon: {
+                            Image(systemName: destination.preset.symbolName)
+                        }
+                        .help(destination.bucket)
+                        .tag(LibrarySource.bucket(destination.id))
+                    }
+                }
+            }
+        }
+        .onChange(of: appState.destinationStore.destinations) { _, destinations in
+            if case .bucket(let id) = source, !destinations.contains(where: { $0.id == id }) {
+                source = .history
+            }
+        }
+    }
+
+    private var currentBrowser: BucketBrowserModel? {
+        guard case .bucket(let id) = source,
+              let destination = appState.destinationStore.destinations.first(where: { $0.id == id }) else { return nil }
+        return browserCache.model(for: destination)
+    }
+
+    // MARK: - History
 
     @ViewBuilder
     private var sidebar: some View {
@@ -391,7 +463,10 @@ struct LibraryView: View {
             }
         }
         group.notify(queue: .main) {
-            if !inputs.isEmpty {
+            guard !inputs.isEmpty else { return }
+            if let browser = currentBrowser {
+                browser.upload(inputs.map(\.fileURL), source: .dragDrop, using: appState.uploadManager)
+            } else {
                 appState.uploadManager.upload(inputs)
             }
         }
@@ -554,13 +629,13 @@ private struct LibraryThumbnail: View {
 /// so a stalled connection resolves to `.failure` instead of spinning
 /// forever, and `URLCache.shared` reuse so a preview already loaded
 /// elsewhere in the app shows up instantly here too.
-private enum RemoteImagePhase {
+enum RemoteImagePhase {
     case empty
     case success(Image)
     case failure
 }
 
-private struct RemoteImage<Content: View>: View {
+struct RemoteImage<Content: View>: View {
     let url: URL?
     @ViewBuilder let content: (RemoteImagePhase) -> Content
 
@@ -596,13 +671,13 @@ private struct RemoteImage<Content: View>: View {
 /// Downloads a remote file's raw bytes for preview (PDF, text, markdown).
 /// The original upload isn't kept locally, so this fetches on demand each
 /// time a non-image detail is viewed, same as `RemoteImage` does.
-private enum RemoteFilePhase {
+enum RemoteFilePhase {
     case loading
     case success(Data)
     case failure
 }
 
-private struct RemoteFileLoader<Content: View>: View {
+struct RemoteFileLoader<Content: View>: View {
     let url: URL?
     @ViewBuilder let content: (RemoteFilePhase) -> Content
 
@@ -631,7 +706,7 @@ private struct RemoteFileLoader<Content: View>: View {
     }
 }
 
-private struct PDFKitView: NSViewRepresentable {
+struct PDFKitView: NSViewRepresentable {
     let data: Data
 
     func makeNSView(context: Context) -> PDFView {
@@ -646,7 +721,7 @@ private struct PDFKitView: NSViewRepresentable {
     }
 }
 
-private struct TextFilePreview: View {
+struct TextFilePreview: View {
     let data: Data
     let renderMarkdown: Bool
 
@@ -817,7 +892,7 @@ private struct MarkdownBlocksView: View {
     }
 }
 
-private struct CheckerboardBackground: View {
+struct CheckerboardBackground: View {
     var body: some View {
         Canvas { context, size in
             let step: CGFloat = max(size.width / 8, 4)
@@ -1155,7 +1230,7 @@ private struct UploadDetailView: View {
     }
 }
 
-private struct DetailRow: View {
+struct DetailRow: View {
     let label: LocalizedStringKey
     let value: String
     var tooltip: String?
