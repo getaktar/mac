@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A new upload's row in the Library no longer shows up clipped to half its
+  height
+- Thumbnails keep the image's aspect ratio (and orientation) instead of being
+  squashed into a square, and are sharper on Retina displays
+
 ## [0.3.0] - 2026-09-27
 
 ### Added

@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import ImageIO
 
 /// History is metadata-first: the original uploaded file is never copied
 /// permanently, only a small local thumbnail.
@@ -12,17 +13,22 @@ enum ThumbnailCache {
         return base
     }()
 
-    static func store(sourceURL: URL, for id: UUID) {
-        guard let image = NSImage(contentsOf: sourceURL) else { return }
-        let targetSize = NSSize(width: 160, height: 160)
-        let thumbnail = NSImage(size: targetSize)
-        thumbnail.lockFocus()
-        image.draw(in: NSRect(origin: .zero, size: targetSize), from: .zero, operation: .copy, fraction: 1)
-        thumbnail.unlockFocus()
+    /// Longest side of a stored thumbnail, in pixels. History rows show
+    /// them at up to 96pt, so this stays sharp on Retina displays.
+    private static let maxPixelSize = 320
 
-        guard let tiff = thumbnail.tiffRepresentation,
-              let rep = NSBitmapImageRep(data: tiff),
-              let pngData = rep.representation(using: .png, properties: [:]) else { return }
+    static func store(sourceURL: URL, for id: UUID) {
+        // Image I/O decodes straight to a downscaled bitmap that keeps the
+        // aspect ratio and honors EXIF orientation, without loading the
+        // full-size image first.
+        guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil) else { return }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+        ]
+        guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary),
+              let pngData = NSBitmapImageRep(cgImage: thumbnail).representation(using: .png, properties: [:]) else { return }
 
         try? pngData.write(to: fileURL(for: id))
     }

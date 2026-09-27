@@ -115,6 +115,11 @@ struct LibraryView: View {
                 }
             }
         }
+        // macOS List sometimes keeps a newly inserted row (like the first
+        // upload of the day, which also adds the "Today" section) at the
+        // default single-line height, clipping the thumbnail and subtitle.
+        // Rows here are all 48pt, so make that the floor.
+        .environment(\.defaultMinListRowHeight, 48)
     }
 
     private func row(for record: UploadRecord) -> some View {
