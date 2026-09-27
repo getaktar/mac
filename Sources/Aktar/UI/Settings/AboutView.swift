@@ -63,6 +63,8 @@ enum AboutPanel {
 }
 
 struct AboutSettingsView: View {
+    @Environment(AppState.self) private var appState
+
     var body: some View {
         SettingsPage(title: "About", subtitle: "Version details, links, and who makes Aktar.") {
             HStack(spacing: 14) {
@@ -78,6 +80,9 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
+                Spacer()
+                Button("Check for Updates\u{2026}") { appState.updater.checkForUpdates() }
+                    .disabled(!appState.updater.canCheckForUpdates)
             }
 
             SettingsSection(title: "Aktar") {

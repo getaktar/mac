@@ -27,8 +27,11 @@ get a public link back on your clipboard.
 
 Your storage credentials are kept in the macOS Keychain and never leave your
 Mac except in direct requests to the S3-compatible endpoint you configure.
-Aktar has no backend, no telemetry, and no account system. See
-[SECURITY.md](SECURITY.md) for the disclosure policy.
+Aktar has no backend, no telemetry, and no account system. The only other
+request it makes is the update check ([Sparkle](https://sparkle-project.org)),
+which downloads `appcast.xml` from this repository's latest GitHub release and
+sends no information about you or your Mac; you can turn it off in Settings.
+See [SECURITY.md](SECURITY.md) for the disclosure policy.
 
 ## Requirements
 

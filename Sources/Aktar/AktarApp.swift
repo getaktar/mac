@@ -16,6 +16,8 @@ struct AktarApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Aktar") { AboutPanel.show() }
+                Button("Check for Updates\u{2026}") { appDelegate.appState.updater.checkForUpdates() }
+                    .disabled(!appDelegate.appState.updater.canCheckForUpdates)
             }
         }
 

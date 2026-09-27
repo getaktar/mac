@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - About tab in Settings with version info and links to the website, source
   code, changelog, issue tracker, and developer; the About Aktar panel now
   shows the same links
+- Automatic updates via Sparkle: Aktar checks GitHub for new versions and can
+  download and install them for you (Settings > General > Updates). This is
+  the first version with an updater, so it has to be installed manually once
 
 ### Fixed
 

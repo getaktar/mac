@@ -5,6 +5,8 @@
 #   security find-identity -v -p codesigning   # confirm a "Developer ID Application" cert exists
 #   xcrun notarytool store-credentials aktar-notarization \
 #     --key <path-to-AuthKey.p8> --key-id <key-id> --issuer <issuer-id>
+#   Sparkle's EdDSA private key in the login Keychain (created once with
+#   Sparkle's generate_keys; its public half is SUPublicEDKey in project.yml)
 #
 # Usage: scripts/release.sh
 set -euo pipefail
@@ -16,6 +18,9 @@ TEAM_ID="${TEAM_ID:-Y86FU5TSPQ}"
 SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application: Mert Topuz (${TEAM_ID})}"
 KEYCHAIN_PROFILE="${KEYCHAIN_PROFILE:-aktar-notarization}"
 VERSION="${VERSION:-$(grep 'MARKETING_VERSION' project.yml | head -1 | sed 's/.*: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')}"
+BUILD="$(grep 'CURRENT_PROJECT_VERSION' project.yml | head -1 | sed 's/.*: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')"
+REPO_URL="https://github.com/getaktar/mac"
+FEED_URL="$REPO_URL/releases/latest/download/appcast.xml"
 
 DIST="dist"
 ARCHIVE="$DIST/Aktar.xcarchive"
@@ -25,6 +30,17 @@ ZIP="$DIST/Aktar.zip"
 DMG="$DIST/Aktar-$VERSION.dmg"
 DMG_ROOT="$DIST/dmg-root"
 EXPORT_PLIST="$DIST/ExportOptions.plist"
+APPCAST="$DIST/appcast.xml"
+
+# Sparkle only offers an update whose build number (CFBundleVersion) is
+# higher than the installed one, so a release that forgets to bump
+# CURRENT_PROJECT_VERSION would silently never reach anyone.
+echo "==> Checking build number against the published appcast"
+PUBLISHED_BUILD="$(curl -fsSL "$FEED_URL" 2>/dev/null | sed -n 's:.*<sparkle\:version>\(.*\)</sparkle\:version>.*:\1:p' | head -1 || true)"
+if [ -n "$PUBLISHED_BUILD" ] && [ "$BUILD" -le "$PUBLISHED_BUILD" ]; then
+  echo "CURRENT_PROJECT_VERSION ($BUILD) must be higher than the published build ($PUBLISHED_BUILD). Bump it in project.yml." >&2
+  exit 1
+fi
 
 echo "==> Cleaning $DIST"
 rm -rf "$DIST"
@@ -88,4 +104,41 @@ echo "==> Verifying Gatekeeper acceptance"
 spctl -a -vvv --type execute "$APP"
 spctl -a -vvv --type install "$DMG"
 
+echo "==> Signing the update for Sparkle"
+# sign_update ships with the Sparkle package; Xcode resolved it into
+# DerivedData while archiving. Override with SPARKLE_BIN=/path/to/bin.
+SPARKLE_BIN="${SPARKLE_BIN:-$(dirname "$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*/artifacts/sparkle/Sparkle/bin/sign_update' -print -quit 2>/dev/null)")}"
+if [ ! -x "$SPARKLE_BIN/sign_update" ]; then
+  echo "Could not find Sparkle's sign_update. Set SPARKLE_BIN to Sparkle's bin directory." >&2
+  exit 1
+fi
+# Prints: sparkle:edSignature="..." length="..."
+SIGNATURE="$("$SPARKLE_BIN/sign_update" "$DMG")"
+
+echo "==> Writing $APPCAST"
+# Release notes come from this version's CHANGELOG section.
+NOTES="$(python3 scripts/changelog_notes.py "$VERSION")"
+
+cat > "$APPCAST" <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Aktar</title>
+    <link>https://getaktar.com</link>
+    <item>
+      <title>Aktar $VERSION</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <sparkle:version>$BUILD</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+$NOTES
+      ]]></description>
+      <enclosure url="$REPO_URL/releases/download/v$VERSION/$(basename "$DMG")" type="application/octet-stream" $SIGNATURE />
+    </item>
+  </channel>
+</rss>
+XML
+
 echo "==> Done: $DMG"
+echo "    Upload $APPCAST with it; the running apps read it from the latest release."

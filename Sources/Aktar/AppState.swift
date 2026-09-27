@@ -8,6 +8,7 @@ final class AppState {
     let destinationStore = DestinationStore()
     let repository = UploadRepository()
     let uploadManager: UploadManager
+    let updater = AppUpdater()
 
     init() {
         uploadManager = UploadManager(destinationStore: destinationStore, repository: repository)

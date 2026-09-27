@@ -100,6 +100,7 @@ struct SettingsView: View {
 }
 
 private struct GeneralSettingsView: View {
+    @Environment(AppState.self) private var appState
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showNotificationAfterUpload") private var showNotification = true
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
@@ -144,6 +145,26 @@ private struct GeneralSettingsView: View {
                         .padding(12)
                     }
                 }
+            }
+
+            SettingsSection(title: "Updates") {
+                @Bindable var updater = appState.updater
+                SettingsCard {
+                    SettingsToggleRow(
+                        title: "Automatically check for updates",
+                        subtitle: "Look for a new version on GitHub once a day",
+                        isOn: $updater.automaticallyChecksForUpdates
+                    )
+                    SettingsCardDivider()
+                    SettingsToggleRow(
+                        title: "Automatically install updates",
+                        subtitle: "Download new versions in the background and install them when Aktar quits",
+                        isOn: $updater.automaticallyDownloadsUpdates
+                    )
+                    .disabled(!updater.automaticallyChecksForUpdates)
+                }
+                Button("Check for Updates\u{2026}") { updater.checkForUpdates() }
+                    .disabled(!updater.canCheckForUpdates)
             }
 
             SettingsSection(title: "Startup") {
