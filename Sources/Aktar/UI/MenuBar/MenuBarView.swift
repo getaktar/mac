@@ -229,8 +229,7 @@ struct MenuBarView: View {
     }
 
     private func uploadClipboard() {
-        guard let input = ClipboardService.readFileInput() else { return }
-        appState.uploadManager.upload([input])
+        appState.uploadFromClipboard()
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
