@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Localization in Turkish, German, French, Spanish, Brazilian Portuguese,
   Japanese, and Simplified Chinese, matching the languages of getaktar.com.
-  The app follows the macOS system language, or the per-app language set in
-  System Settings > General > Language & Region
+  The app follows the macOS system language by default; pick a different one
+  in Settings > General > Language
 
 ### Fixed
 

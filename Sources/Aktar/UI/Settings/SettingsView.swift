@@ -95,9 +95,49 @@ private struct GeneralSettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showNotificationAfterUpload") private var showNotification = true
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
+    @State private var language = AppLanguage.override
 
     var body: some View {
         SettingsPage(title: "General", subtitle: "Control how the app behaves.") {
+            SettingsSection(title: "Language") {
+                SettingsCard {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("App language")
+                            Text("Follows your Mac\u{2019}s language unless you pick one here.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Picker("App language", selection: $language) {
+                            Text("System Default").tag(String?.none)
+                            Divider()
+                            ForEach(AppLanguage.supported, id: \.code) { language in
+                                Text(verbatim: language.name).tag(Optional(language.code))
+                            }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        .onChange(of: language) { _, newValue in
+                            AppLanguage.override = newValue
+                        }
+                    }
+                    .padding(12)
+
+                    if language != AppLanguage.atLaunch {
+                        SettingsCardDivider()
+                        HStack {
+                            Text("Restart Aktar to apply the new language.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Restart Now") { AppLanguage.relaunch() }
+                        }
+                        .padding(12)
+                    }
+                }
+            }
+
             SettingsSection(title: "Startup") {
                 SettingsCard {
                     SettingsToggleRow(
