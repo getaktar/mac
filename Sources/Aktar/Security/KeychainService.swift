@@ -13,8 +13,8 @@ enum KeychainError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notFound: return "No credentials found in Keychain for this destination."
-        case .unhandled(let status): return "Keychain error (\(status))."
+        case .notFound: return String(localized: "No credentials found in Keychain for this destination.")
+        case .unhandled(let status): return String(localized: "Keychain error (\(status)).")
         }
     }
 }

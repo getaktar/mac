@@ -22,13 +22,13 @@ enum StorageError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidCredentials:
-            return "Could not authenticate. Check your Access Key ID and Secret Access Key."
+            return String(localized: "Could not authenticate. Check your Access Key ID and Secret Access Key.")
         case .bucketNotFound(let bucket):
-            return "Bucket \"\(bucket)\" could not be found."
+            return String(localized: "Bucket \u{201C}\(bucket)\u{201D} could not be found.")
         case .accessDenied:
-            return "Connected successfully, but this key cannot upload files."
+            return String(localized: "Connected successfully, but this key cannot upload files.")
         case .network(let message):
-            return "Upload interrupted. \(message)"
+            return String(localized: "Upload interrupted. \(message)")
         case .unknown(let message):
             return message
         }

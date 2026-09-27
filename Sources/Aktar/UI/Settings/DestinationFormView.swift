@@ -35,7 +35,7 @@ struct DestinationFormView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Text(existing == nil ? "Add Destination" : "Edit Destination")
+            Text(existing == nil ? LocalizedStringKey("Add Destination") : LocalizedStringKey("Edit Destination"))
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -71,7 +71,7 @@ struct DestinationFormView: View {
                     Text("Connection")
                 } footer: {
                     if preset == .cloudflareR2 {
-                        Text(endpoint.isEmpty ? "Endpoint is derived from the Account ID." : endpoint)
+                        Text(endpoint.isEmpty ? String(localized: "Endpoint is derived from the Account ID.") : endpoint)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -122,7 +122,7 @@ struct DestinationFormView: View {
             Divider()
 
             HStack {
-                Button(isTesting ? "Testing…" : "Test Connection") {
+                Button(isTesting ? LocalizedStringKey("Testing…") : LocalizedStringKey("Test Connection")) {
                     Task { await testConnection() }
                 }
                 .disabled(isTesting || !canTest)
@@ -173,13 +173,23 @@ struct DestinationFormView: View {
         do {
             let result = try await provider.testConnection()
             testSucceeded = result.writable
-            var message = "Bucket reachable. Write access: \(result.writable ? "Yes" : "No")."
-            if let publicURLReachable = result.publicURLReachable {
-                message += publicURLReachable
-                    ? " Public URL: Reachable."
-                    : " ⚠ Public URL does not appear to be publicly accessible."
+            var parts: [String] = []
+            if result.writable {
+                parts.append(String(localized: "✓ Connection successful."))
             }
-            testResultMessage = (result.writable ? "✓ Connection successful. " : "") + message
+            parts.append(
+                result.writable
+                    ? String(localized: "Bucket reachable. Write access: Yes.")
+                    : String(localized: "Bucket reachable. Write access: No.")
+            )
+            if let publicURLReachable = result.publicURLReachable {
+                parts.append(
+                    publicURLReachable
+                        ? String(localized: "Public URL: Reachable.")
+                        : String(localized: "⚠ Public URL does not appear to be publicly accessible.")
+                )
+            }
+            testResultMessage = parts.joined(separator: " ")
         } catch {
             testSucceeded = false
             testResultMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

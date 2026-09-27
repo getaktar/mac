@@ -3,8 +3,8 @@ import SwiftUI
 /// Shared page chrome for a Settings tab: a title, a one-line subtitle, and
 /// left-aligned, top-anchored content (never vertically centered).
 struct SettingsPage<Content: View>: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -26,7 +26,7 @@ struct SettingsPage<Content: View>: View {
 }
 
 struct SettingsSection<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -62,8 +62,8 @@ struct SettingsCardDivider: View {
 }
 
 struct SettingsToggleRow: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     @Binding var isOn: Bool
 
     var body: some View {

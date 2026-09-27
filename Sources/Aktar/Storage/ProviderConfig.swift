@@ -17,7 +17,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .minIO: return "MinIO"
         case .backblazeB2: return "Backblaze B2"
         case .digitalOceanSpaces: return "DigitalOcean Spaces"
-        case .customS3: return "Other S3-Compatible"
+        case .customS3: return String(localized: "Other S3-Compatible")
         }
     }
 

@@ -45,7 +45,7 @@ struct MenuBarView: View {
 
     private var emptyStateView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Aktar").font(.headline)
+            Text(verbatim: "Aktar").font(.headline)
             Text("Connect your own S3-compatible storage to start uploading.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -113,7 +113,7 @@ struct MenuBarView: View {
     }
 
     private var currentDestinationLabel: String {
-        guard let destination = appState.destinationStore.defaultDestination else { return "No destination" }
+        guard let destination = appState.destinationStore.defaultDestination else { return String(localized: "No destination") }
         return destinationLabel(destination)
     }
 

@@ -8,7 +8,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .general:
             return "General"
@@ -82,7 +82,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var sidebarFooter: some View {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            Text("Aktar \(version)")
+            Text(verbatim: "Aktar \(version)")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
@@ -240,7 +240,7 @@ private struct DestinationRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(destination.name)
-                Text("\(destination.preset.displayName) · \(destination.bucket)")
+                Text(verbatim: "\(destination.preset.displayName) · \(destination.bucket)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -311,7 +311,7 @@ private struct OutputSettingsView: View {
 
                     OutputOptionRow(
                         title: "Custom",
-                        example: "Define your own template.",
+                        example: String(localized: "Define your own template."),
                         isSelected: manager.outputMode == .custom
                     ) { manager.outputMode = .custom }
 
@@ -334,7 +334,7 @@ private struct OutputSettingsView: View {
 }
 
 private struct OutputOptionRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let example: String
     let isSelected: Bool
     let select: () -> Void

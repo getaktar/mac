@@ -7,7 +7,7 @@ enum NotificationService {
 
     static func notifyUploadSucceeded(filename: String) {
         let content = UNMutableNotificationContent()
-        content.title = "Uploaded"
+        content.title = String(localized: "Uploaded")
         content.body = filename
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
@@ -15,7 +15,7 @@ enum NotificationService {
 
     static func notifyUploadFailed(filename: String, reason: String) {
         let content = UNMutableNotificationContent()
-        content.title = "Upload failed"
+        content.title = String(localized: "Upload failed")
         content.body = "\(filename): \(reason)"
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)

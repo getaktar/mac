@@ -44,7 +44,10 @@ struct LibraryView: View {
             )
         ) {
             Button("Cancel", role: .cancel) { recordsPendingDeletion = [] }
-            Button(recordsPendingDeletion.count > 1 ? "Delete Remote Files" : "Delete Remote File", role: .destructive) {
+            Button(
+                recordsPendingDeletion.count > 1 ? LocalizedStringKey("Delete Remote Files") : LocalizedStringKey("Delete Remote File"),
+                role: .destructive
+            ) {
                 let targets = recordsPendingDeletion
                 recordsPendingDeletion = []
                 Task { await deleteRemote(targets) }
@@ -143,9 +146,9 @@ struct LibraryView: View {
     private var destinationFilterLabel: String {
         guard let destinationFilter,
               let match = availableDestinations.first(where: { $0.id == destinationFilter }) else {
-            return "Destination: All"
+            return String(localized: "Destination: All")
         }
-        return "Destination: \(match.name)"
+        return String(localized: "Destination: \(match.name)")
     }
 
     @ViewBuilder
@@ -251,9 +254,9 @@ struct LibraryView: View {
             let key: String
             let title: String
             if calendar.isDateInToday(record.createdAt) {
-                key = "today"; title = "Today"
+                key = "today"; title = String(localized: "Today")
             } else if calendar.isDateInYesterday(record.createdAt) {
-                key = "yesterday"; title = "Yesterday"
+                key = "yesterday"; title = String(localized: "Yesterday")
             } else {
                 let day = calendar.startOfDay(for: record.createdAt)
                 key = ISO8601DateFormatter().string(from: day)
@@ -310,9 +313,9 @@ struct LibraryView: View {
         let calendar = Calendar.current
         let day: String
         if calendar.isDateInToday(record.createdAt) {
-            day = "Today"
+            day = String(localized: "Today")
         } else if calendar.isDateInYesterday(record.createdAt) {
-            day = "Yesterday"
+            day = String(localized: "Yesterday")
         } else {
             day = record.createdAt.formatted(.dateTime.month(.abbreviated).day())
         }
@@ -392,19 +395,19 @@ struct LibraryView: View {
 
     private var deleteAlertTitle: String {
         if recordsPendingDeletion.count > 1 {
-            return "Delete \(recordsPendingDeletion.count) files?"
+            return String(localized: "Delete \(recordsPendingDeletion.count) files?")
         }
         if let record = recordsPendingDeletion.first {
-            return "Delete \u{201C}\(record.localFilename)\u{201D} from \(record.destinationName)?"
+            return String(localized: "Delete \u{201C}\(record.localFilename)\u{201D} from \(record.destinationName)?")
         }
         return ""
     }
 
     private var deleteAlertMessage: String {
         if recordsPendingDeletion.count > 1 {
-            return "The remote files will be removed and their links may stop working. This can\u{2019}t be undone."
+            return String(localized: "The remote files will be removed and their links may stop working. This can\u{2019}t be undone.")
         }
-        return "The remote file will be removed and its link may stop working. This can\u{2019}t be undone."
+        return String(localized: "The remote file will be removed and its link may stop working. This can\u{2019}t be undone.")
     }
 
     private func deleteRemote(_ recordsToDelete: [UploadRecord]) async {
@@ -777,7 +780,7 @@ private struct MarkdownBlocksView: View {
             inlineText(text)
         case .listItem(let text):
             HStack(alignment: .top, spacing: 6) {
-                Text("\u{2022}")
+                Text(verbatim: "\u{2022}")
                 inlineText(text)
             }
         case .codeBlock(let text):
@@ -1095,7 +1098,7 @@ private struct UploadDetailView: View {
             Button {
                 copyURL()
             } label: {
-                Label(justCopiedURL ? "Copied" : "Copy URL", systemImage: justCopiedURL ? "checkmark" : "doc.on.doc")
+                Label(justCopiedURL ? LocalizedStringKey("Copied") : LocalizedStringKey("Copy URL"), systemImage: justCopiedURL ? "checkmark" : "doc.on.doc")
             }
             Menu {
                 Menu("Copy As") {
@@ -1148,7 +1151,7 @@ private struct UploadDetailView: View {
 }
 
 private struct DetailRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     var tooltip: String?
 
