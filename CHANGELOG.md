@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- "Set as Default" in Settings > Destinations now shows the new default right
+  away. The default did change, but Settings kept showing the old one; saved
+  settings with this mismatch are corrected on launch
+
 ## [0.4.0] - 2026-09-28
 
 ### Added

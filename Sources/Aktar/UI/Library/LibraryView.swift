@@ -19,7 +19,13 @@ private final class BucketBrowserCache {
     private var models: [UUID: BucketBrowserModel] = [:]
 
     func model(for destination: DestinationConfig) -> BucketBrowserModel {
-        if let model = models[destination.id], model.destination == destination { return model }
+        // Which destination is the default doesn't affect the browser, so
+        // changing it keeps you in the folder you were in.
+        if let model = models[destination.id] {
+            var current = model.destination
+            current.isDefault = destination.isDefault
+            if current == destination { return model }
+        }
         let model = BucketBrowserModel(destination: destination)
         models[destination.id] = model
         return model

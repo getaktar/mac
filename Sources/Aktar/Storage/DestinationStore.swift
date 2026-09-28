@@ -7,6 +7,9 @@ import Observation
 @Observable
 final class DestinationStore {
     private(set) var destinations: [DestinationConfig] = []
+    /// The default destination. Each destination's `isDefault` flag mirrors
+    /// this (Settings shows the flag), and `syncDefaultFlags()` keeps the
+    /// two in step after every change.
     private var defaultID: UUID?
 
     private let fileURL: URL
@@ -30,12 +33,14 @@ final class DestinationStore {
             defaultID = destination.id
         }
         destinations.append(destination)
+        syncDefaultFlags()
         save()
     }
 
     func update(_ destination: DestinationConfig) {
         guard let index = destinations.firstIndex(where: { $0.id == destination.id }) else { return }
         destinations[index] = destination
+        syncDefaultFlags()
         save()
     }
 
@@ -45,12 +50,27 @@ final class DestinationStore {
         if defaultID == destination.id {
             defaultID = destinations.first?.id
         }
+        syncDefaultFlags()
         save()
     }
 
     func setDefault(_ destination: DestinationConfig) {
         defaultID = destination.id
+        syncDefaultFlags()
         save()
+    }
+
+    /// Before this existed, "Set as Default" only moved `defaultID` and left
+    /// the flags as they were, so saved files can disagree. `defaultID` is
+    /// what uploads use, so it wins; the flags are only a fallback when it
+    /// points nowhere.
+    private func syncDefaultFlags() {
+        if !destinations.contains(where: { $0.id == defaultID }) {
+            defaultID = destinations.first(where: \.isDefault)?.id ?? destinations.first?.id
+        }
+        for index in destinations.indices {
+            destinations[index].isDefault = destinations[index].id == defaultID
+        }
     }
 
     private struct Wrapper: Codable {
@@ -63,6 +83,7 @@ final class DestinationStore {
               let wrapper = try? JSONDecoder().decode(Wrapper.self, from: data) else { return }
         destinations = wrapper.destinations
         defaultID = wrapper.defaultID
+        syncDefaultFlags()
     }
 
     private func save() {
