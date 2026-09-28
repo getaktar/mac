@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- What's New in Settings > About opens the release notes on getaktar.com in
+  the app's language, and the update window links to them too
+
 ### Fixed
 
 - "Set as Default" in Settings > Destinations now shows the new default right

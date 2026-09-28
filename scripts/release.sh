@@ -142,6 +142,8 @@ cat > "$APPCAST" <<XML
       <sparkle:version>$BUILD</sparkle:version>
       <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <link>https://getaktar.com/changelog/$VERSION/</link>
+      <sparkle:fullReleaseNotesLink>https://getaktar.com/changelog/</sparkle:fullReleaseNotesLink>
       <description><![CDATA[
 $NOTES
       ]]></description>

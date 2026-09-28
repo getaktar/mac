@@ -14,9 +14,14 @@ enum AppInfo {
     static let developerWebsite = URL(string: "https://merttopuz.com")!
     static let developerGitHub = URL(string: "https://github.com/merttopuz")!
     static let repository = URL(string: "https://github.com/getaktar/mac")!
-    static let changelog = URL(string: "https://github.com/getaktar/mac/blob/main/CHANGELOG.md")!
     static let issues = URL(string: "https://github.com/getaktar/mac/issues")!
     static let sponsor = URL(string: "https://buymeacoffee.com/merttopuz")!
+
+    /// The release notes on getaktar.com, one post per version, in the app's
+    /// language.
+    static var changelog: URL {
+        URL(string: "changelog/", relativeTo: website)?.absoluteURL ?? website
+    }
 
     /// getaktar.com in the language the app is running in, so the site opens
     /// on the matching locale (the site uses lowercase path prefixes).
