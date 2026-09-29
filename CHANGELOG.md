@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-30
+
+### Added
+
+- Expiring uploads: a "Delete after" choice (1, 7, 14 or 30 days) next to the
+  destination picker in the menu bar. Expiring files go under `tmp/{N}d/` and
+  the bucket deletes them itself through lifecycle rules, so they're removed
+  on schedule even when Aktar isn't running. The choice becomes available
+  once the destination's bucket has Aktar's rules, which Aktar sets up from
+  the same menu or the destination's settings (keeping the bucket's other
+  rules). If the key can't manage lifecycle rules, Aktar says which rules to
+  add in the provider's dashboard
+- Auto-delete can be turned off per destination, keeping or removing the
+  bucket's rules
+- History, the Library and upload notifications show when an expiring file
+  will be deleted
+- The local API takes `expires=` (days) on uploads and returns `expiresAt`
+
 ## [0.4.1] - 2026-09-28
 
 ### Changed
