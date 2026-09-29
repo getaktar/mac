@@ -24,8 +24,9 @@ get a public link back on your clipboard.
 - Browse each bucket folder by folder, including files uploaded elsewhere:
   search the whole bucket, preview, copy links or temporary links, upload into a folder, create
   folders, rename, move, and delete
-- Raycast extension: upload, search history, and browse buckets from
-  Raycast (opt-in, see Settings > Integrations)
+- [Raycast extension](https://www.raycast.com/merttopuz/aktar): upload,
+  search history, and browse buckets from Raycast (opt-in, see Settings >
+  Integrations)
 - Launch at login
 
 ## Install
