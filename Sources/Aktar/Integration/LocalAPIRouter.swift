@@ -8,8 +8,8 @@ import SwiftData
 ///     GET    /v1/status
 ///     GET    /v1/destinations
 ///     GET    /v1/uploads?query=&destinationId=&limit=
-///     POST   /v1/uploads?filename=&destinationId=&prefix=     (raw file bytes)
-///     POST   /v1/uploads/clipboard?destinationId=
+///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=     (raw file bytes)
+///     POST   /v1/uploads/clipboard?destinationId=&expires=
 ///     DELETE /v1/uploads/{id}
 ///     GET    /v1/destinations/{id}/objects?prefix=&continuationToken=
 ///     DELETE /v1/destinations/{id}/objects?key=
@@ -115,6 +115,15 @@ final class LocalAPIRouter {
         guard let destination = destination(id: request.query["destinationId"]) else {
             return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
         }
+        guard let expiryDays = Self.expiryDays(request) else {
+            return .error(400, Self.invalidExpiryMessage)
+        }
+        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
+            return .error(409, Self.expiryNotSetUpMessage)
+        }
+        if expiryDays > 0, request.query["prefix"] != nil {
+            return .error(400, "The expires and prefix query parameters can't be combined.")
+        }
 
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("AktarLocalAPI", isDirectory: true)
@@ -141,24 +150,41 @@ final class LocalAPIRouter {
                 return failure(error)
             }
         }
-        return await run(input, to: destination)
+        return await run(input, to: destination, expiryDays: expiryDays)
     }
 
     private func uploadClipboard(_ request: HTTPRequest) async -> HTTPResponse {
         guard let destination = destination(id: request.query["destinationId"]) else {
             return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
         }
+        guard let expiryDays = Self.expiryDays(request) else {
+            return .error(400, Self.invalidExpiryMessage)
+        }
+        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
+            return .error(409, Self.expiryNotSetUpMessage)
+        }
         guard let input = ClipboardService.readFileInput() else {
             return .error(422, "The clipboard has no file or image to upload.")
         }
-        return await run(input, to: destination)
+        return await run(input, to: destination, expiryDays: expiryDays)
     }
+
+    /// `expires` is in days. Leaving it out keeps the file, whatever the menu
+    /// bar's "Delete after" is set to, so scripts are never surprised.
+    private static func expiryDays(_ request: HTTPRequest) -> Int? {
+        guard let raw = request.query["expires"], !raw.isEmpty else { return 0 }
+        guard let days = Int(raw), UploadExpiry.isValid(days) else { return nil }
+        return days
+    }
+
+    private static let expiryNotSetUpMessage = "Auto-delete isn't set up for this destination. Set it up from Aktar's menu bar (Delete after) or the destination's settings."
+    private static let invalidExpiryMessage = "expires must be 0, 1, 7, 14 or 30 (days)."
 
     /// Queues the upload and waits for it to settle, so the caller gets the
     /// finished history entry (and its links) back in the response.
-    private func run(_ input: UploadInput, to destination: DestinationConfig) async -> HTTPResponse {
+    private func run(_ input: UploadInput, to destination: DestinationConfig, expiryDays: Int) async -> HTTPResponse {
         let manager = appState.uploadManager
-        manager.upload([input], to: destination)
+        manager.upload([input], to: destination, expiryDays: expiryDays)
         guard let job = manager.jobs.first(where: { $0.input.fileURL == input.fileURL }) else {
             return .error(500, "The upload could not be queued.")
         }
@@ -333,6 +359,7 @@ final class LocalAPIRouter {
             mimeType: record.mimeType,
             size: record.byteSize,
             createdAt: record.createdAt,
+            expiresAt: record.expiresAt,
             formats: .init(url: formatted(.url), markdown: formatted(.markdown), html: formatted(.html), custom: formatted(.custom))
         )
     }
@@ -394,6 +421,7 @@ private struct UploadDTO: Encodable {
     let mimeType: String
     let size: Int
     let createdAt: Date
+    let expiresAt: Date?
     let formats: Formats
 }
 

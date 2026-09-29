@@ -537,10 +537,18 @@ private struct LibraryRowView: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(record.localFilename)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(subtitle)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    if let expiresAt = record.expiresAt {
+                        Label(UploadExpiry.deletionLabel(for: expiresAt), systemImage: "timer")
+                            .foregroundStyle(.orange)
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
+                }
+                .font(.caption)
             }
             if isDeleting {
                 Spacer()
@@ -1165,6 +1173,13 @@ private struct UploadDetailView: View {
                     value: record.createdAt.formatted(date: .abbreviated, time: .shortened),
                     tooltip: record.createdAt.formatted(date: .complete, time: .standard)
                 )
+                if let expiresAt = record.expiresAt {
+                    DetailRow(
+                        label: "Deletes",
+                        value: expiresAt.formatted(date: .abbreviated, time: .shortened),
+                        tooltip: expiresAt.formatted(date: .complete, time: .standard)
+                    )
+                }
             }
         }
     }

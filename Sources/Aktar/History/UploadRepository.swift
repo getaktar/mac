@@ -18,7 +18,8 @@ final class UploadRepository {
     }
 
     @discardableResult
-    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig) -> UploadRecord {
+    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil) -> UploadRecord {
+        let createdAt = Date.now
         let record = UploadRecord(
             localFilename: input.originalFilename,
             objectKey: result.objectKey,
@@ -26,7 +27,9 @@ final class UploadRepository {
             destinationID: destination.id,
             destinationName: destination.name,
             mimeType: ContentTypeResolver.resolve(for: input.fileURL),
-            byteSize: result.byteSize
+            byteSize: result.byteSize,
+            createdAt: createdAt,
+            expiresAt: expiryDays.map { createdAt.addingTimeInterval(TimeInterval($0) * 86_400) }
         )
         modelContext.insert(record)
         try? modelContext.save()
@@ -52,9 +55,33 @@ final class UploadRepository {
     func objectMoved(from oldKey: String, to newKey: String, destination: DestinationConfig) {
         for record in records(key: oldKey, destinationID: destination.id) {
             record.objectKey = newKey
+            // Moving a file out of its expiring prefix keeps it, and moving
+            // one into a prefix makes it expire (a copy counts from now).
+            if let days = UploadExpiry.days(forKey: newKey) {
+                if UploadExpiry.days(forKey: oldKey) != days {
+                    record.expiresAt = Date.now.addingTimeInterval(TimeInterval(days) * 86_400)
+                }
+            } else {
+                record.expiresAt = nil
+            }
             record.publicURLString = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey).absoluteString
         }
         try? modelContext.save()
+    }
+
+    /// Expiring uploads whose time is up. The bucket's lifecycle rule usually
+    /// deletes the object first; these are what the app still has to clean up.
+    func expiredRecords(now: Date = .now) -> [UploadRecord] {
+        let descriptor = FetchDescriptor<UploadRecord>(
+            predicate: #Predicate { record in
+                if let expiresAt = record.expiresAt {
+                    return expiresAt <= now
+                } else {
+                    return false
+                }
+            }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     private func records(key: String, destinationID: UUID) -> [UploadRecord] {

@@ -8,6 +8,7 @@ struct MenuBarView: View {
     @Environment(\.openWindow) private var openWindow
     @Query(sort: \UploadRecord.createdAt, order: .reverse) private var records: [UploadRecord]
     @State private var isTargeted = false
+    @State private var isSettingUpExpiry = false
 
     var body: some View {
         Group {
@@ -65,7 +66,10 @@ struct MenuBarView: View {
     private var uploadStateView: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
-            destinationPicker
+            HStack(alignment: .bottom, spacing: 8) {
+                destinationPicker
+                expiryPicker
+            }
             dropzone
             recentSection
         }
@@ -115,6 +119,68 @@ struct MenuBarView: View {
         }
     }
 
+    // MARK: - Expiry
+
+    /// Durations are only offered once the destination's bucket has the
+    /// lifecycle rules; until then the menu offers to set them up.
+    private var expiryPicker: some View {
+        @Bindable var manager = appState.uploadManager
+        let destination = appState.destinationStore.defaultDestination
+        let isReady = destination.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
+        return VStack(alignment: .leading, spacing: 4) {
+            Text("Delete after").font(.caption).foregroundStyle(.secondary)
+            Menu {
+                Picker("Delete after", selection: $manager.expiryDays) {
+                    ForEach([0] + UploadExpiry.options, id: \.self) { days in
+                        Text(UploadExpiry.label(days: days)).tag(days)
+                    }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+                .disabled(!isReady)
+                if !isReady, let destination {
+                    Divider()
+                    Button(isSettingUpExpiry ? String(localized: "Setting Up\u{2026}") : String(localized: "Set Up Auto-Delete\u{2026}")) {
+                        Task { await setUpExpiry(for: destination) }
+                    }
+                    .disabled(isSettingUpExpiry)
+                }
+            } label: {
+                Text(UploadExpiry.label(days: manager.effectiveExpiryDays(for: destination)))
+                    .lineLimit(1)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+        }
+    }
+
+    private func setUpExpiry(for destination: DestinationConfig) async {
+        isSettingUpExpiry = true
+        defer { isSettingUpExpiry = false }
+        do {
+            try await appState.uploadManager.setUpExpiryRules(for: destination)
+        } catch {
+            showExpirySetupFailure(error)
+        }
+    }
+
+    /// A real alert rather than text squeezed into the panel: the reason is
+    /// long, and it's something to act on in the provider's dashboard.
+    private func showExpirySetupFailure(_ error: Error) {
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        alert.informativeText = DestinationFormView.refusedExplanation
+        alert.addButton(withTitle: String(localized: "OK"))
+        alert.runModal()
+    }
+
     private var currentDestinationLabel: String {
         guard let destination = appState.destinationStore.defaultDestination else { return String(localized: "No destination") }
         return destinationLabel(destination)
@@ -143,6 +209,17 @@ struct MenuBarView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+            }
+
+            // Kept visible whenever it's on, so a sticky "Delete after"
+            // choice can't quietly apply to a file meant to stay.
+            if appState.uploadManager.effectiveExpiryDays(for: appState.destinationStore.defaultDestination) > 0 {
+                Label(
+                    String(localized: "Deletes after \(UploadExpiry.label(days: appState.uploadManager.expiryDays))"),
+                    systemImage: "timer"
+                )
+                .font(.caption)
+                .foregroundStyle(.orange)
             }
         }
         .frame(maxWidth: .infinity)
@@ -306,7 +383,16 @@ private struct RecentRowView: View {
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(record.localFilename).font(.caption).lineLimit(1)
-                    Text(displayURL).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    HStack(spacing: 4) {
+                        if let expiresAt = record.expiresAt {
+                            Label(UploadExpiry.deletionLabel(for: expiresAt), systemImage: "timer")
+                                .labelStyle(.titleAndIcon)
+                                .foregroundStyle(.orange)
+                                .fixedSize()
+                        }
+                        Text(displayURL).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    .font(.caption2)
                 }
             }
             .buttonStyle(.plain)

@@ -21,6 +21,8 @@ get a public link back on your clipboard.
   Markdown)
 - Copy the link as a plain URL, Markdown, HTML, or a custom template
 - Delete the remote file straight from the history view
+- Expiring uploads: "Delete after" 1, 7, 14, or 30 days, deleted by the
+  bucket's own lifecycle rules even when Aktar isn't running
 - Browse each bucket folder by folder, including files uploaded elsewhere:
   search the whole bucket, preview, copy links or temporary links, upload into a folder, create
   folders, rename, move, and delete

@@ -47,6 +47,7 @@ final class DestinationStore {
     func remove(_ destination: DestinationConfig) {
         destinations.removeAll { $0.id == destination.id }
         try? KeychainService.delete(for: destination.id)
+        ExpiryRuleStore.shared.set(destination.id, active: false)
         if defaultID == destination.id {
             defaultID = destinations.first?.id
         }

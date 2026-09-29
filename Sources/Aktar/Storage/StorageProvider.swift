@@ -34,6 +34,7 @@ enum StorageError: Error, LocalizedError {
     case invalidCredentials
     case bucketNotFound(String)
     case accessDenied
+    case lifecycleNotAllowed
     case network(String)
     case unknown(String)
 
@@ -45,6 +46,8 @@ enum StorageError: Error, LocalizedError {
             return String(localized: "Bucket \u{201C}\(bucket)\u{201D} could not be found.")
         case .accessDenied:
             return String(localized: "Connected successfully, but this key cannot upload files.")
+        case .lifecycleNotAllowed:
+            return String(localized: "This key can't change the bucket's lifecycle rules.")
         case .network(let message):
             return String(localized: "Upload interrupted. \(message)")
         case .unknown(let message):
@@ -68,4 +71,6 @@ protocol StorageProvider {
     func copy(from sourceKey: String, to destinationKey: String) async throws
     func createFolder(prefix: String) async throws
     func temporaryURL(for objectKey: String, expiresIn seconds: Int64) async throws -> URL
+    func ensureExpiryRules() async throws
+    func removeExpiryRules() async throws
 }

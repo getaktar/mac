@@ -13,6 +13,8 @@ final class UploadRecord: Identifiable {
     var byteSize: Int
     var createdAt: Date
     var remoteDeletedAt: Date?
+    /// When an expiring upload is due to be deleted; nil for a normal one.
+    var expiresAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -23,7 +25,8 @@ final class UploadRecord: Identifiable {
         destinationName: String,
         mimeType: String,
         byteSize: Int,
-        createdAt: Date = .now
+        createdAt: Date = .now,
+        expiresAt: Date? = nil
     ) {
         self.id = id
         self.localFilename = localFilename
@@ -34,6 +37,7 @@ final class UploadRecord: Identifiable {
         self.mimeType = mimeType
         self.byteSize = byteSize
         self.createdAt = createdAt
+        self.expiresAt = expiresAt
     }
 
     /// Some destinations were saved with a schemeless base URL (e.g.

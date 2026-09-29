@@ -16,6 +16,17 @@ final class AppState {
         KeyboardShortcuts.onKeyDown(for: .uploadFromClipboard) { [weak self] in
             Task { @MainActor in self?.uploadFromClipboard() }
         }
+        startExpirySweep()
+    }
+
+    /// Checks for expired uploads at launch and then hourly.
+    private func startExpirySweep() {
+        Task { [weak self] in
+            while let manager = self?.uploadManager {
+                await manager.deleteExpired()
+                try? await Task.sleep(for: .seconds(3600))
+            }
+        }
     }
 
     func uploadFromClipboard() {

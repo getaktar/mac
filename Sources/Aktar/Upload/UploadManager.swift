@@ -14,6 +14,12 @@ final class UploadManager {
     var outputMode: OutputMode = .url
     var customTemplate: String = "![{filename}]({url})"
 
+    /// The "Delete after" choice in the menu bar, in days (0 = keep). It
+    /// sticks between uploads and launches, like the default destination.
+    var expiryDays: Int = UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey) {
+        didSet { UserDefaults.standard.set(expiryDays, forKey: UploadExpiry.defaultsKey) }
+    }
+
     private let destinationStore: DestinationStore
     private let repository: UploadRepository
 
@@ -22,9 +28,27 @@ final class UploadManager {
         self.repository = repository
     }
 
-    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil) {
+    /// The "Delete after" choice that actually applies to `destination`:
+    /// none until its bucket has Aktar's lifecycle rules.
+    func effectiveExpiryDays(for destination: DestinationConfig?) -> Int {
+        guard let destination, ExpiryRuleStore.shared.isActive(destination.id) else { return 0 }
+        return expiryDays
+    }
+
+    /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
+    /// the file). Uploads to an exact key, such as from the bucket browser,
+    /// never expire, and neither does anything sent to a destination whose
+    /// bucket doesn't have the lifecycle rules.
+    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil) {
         guard let destination = destination ?? destinationStore.defaultDestination else { return }
-        let newJobs = inputs.map { UploadJob(input: $0, destination: destination) }
+        let days = ExpiryRuleStore.shared.isActive(destination.id) ? expiryDays ?? self.expiryDays : 0
+        let newJobs = inputs.map {
+            UploadJob(
+                input: $0,
+                destination: destination,
+                expiryDays: $0.objectKey == nil && UploadExpiry.options.contains(days) ? days : nil
+            )
+        }
         jobs.insert(contentsOf: newJobs, at: 0)
         drainQueue()
     }
@@ -61,6 +85,29 @@ final class UploadManager {
         repository.delete(record)
     }
 
+    /// Clears expiring uploads whose time is up out of history. The bucket's
+    /// lifecycle rule normally deleted the object already (deleting a missing
+    /// object still succeeds); this also covers rules removed since. A
+    /// failure leaves the record for the next pass.
+    func deleteExpired() async {
+        for record in repository.expiredRecords() {
+            try? await deleteRemote(record)
+        }
+    }
+
+    /// Installs the bucket's lifecycle rules for a saved destination, which
+    /// is what makes "Delete after" available for it.
+    func setUpExpiryRules(for destination: DestinationConfig) async throws {
+        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        do {
+            try await provider.ensureExpiryRules()
+            ExpiryRuleStore.shared.set(destination.id, active: true)
+        } catch {
+            ExpiryRuleStore.shared.set(destination.id, active: false)
+            throw error
+        }
+    }
+
     private func drainQueue() {
         let pending = jobs.filter {
             if case .waiting = $0.state { return true }
@@ -81,9 +128,12 @@ final class UploadManager {
             do {
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
-                let objectKey = job.input.objectKey ?? ObjectKeyGenerator.generate(
-                    template: destination.objectPathTemplate,
-                    originalFilename: job.input.originalFilename
+                let objectKey = job.input.objectKey ?? UploadExpiry.key(
+                    ObjectKeyGenerator.generate(
+                        template: destination.objectPathTemplate,
+                        originalFilename: job.input.originalFilename
+                    ),
+                    days: job.expiryDays
                 )
                 let contentType = ContentTypeResolver.resolve(for: job.input.fileURL)
 
@@ -104,7 +154,7 @@ final class UploadManager {
 
     private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
-        repository.record(result: result, input: job.input, destination: destination)
+        repository.record(result: result, input: job.input, destination: destination, expiryDays: job.expiryDays)
 
         let output = OutputFormatter.format(
             publicURL: result.publicURL,
@@ -113,7 +163,7 @@ final class UploadManager {
             customTemplate: customTemplate
         )
         ClipboardService.copy(output)
-        NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename)
+        NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename, expiryDays: job.expiryDays)
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,

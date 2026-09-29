@@ -1,4 +1,6 @@
 import Foundation
+import CryptoKit
+import NIOHTTP1
 import SotoS3
 
 /// S3-compatible storage adapter. Every provider preset (AWS S3, Cloudflare
@@ -191,6 +193,113 @@ final class S3Provider: StorageProvider, Sendable {
             throw StorageError.unknown(String(localized: "The endpoint URL is not valid."))
         }
         return try await s3.signURL(url: url, httpMethod: .GET, expires: .seconds(seconds))
+    }
+
+    /// Makes sure the bucket has one lifecycle rule per expiry duration (see
+    /// `UploadExpiry`). A PUT replaces the bucket's whole lifecycle
+    /// configuration, so every rule that isn't Aktar's is sent back exactly
+    /// as it came (see `LifecycleXML` for why this isn't done with typed
+    /// requests), and nothing is written when the rules are already there.
+    /// Many keys can't manage lifecycle rules (an R2 "Object Read & Write"
+    /// token, for one); that comes back as `.lifecycleNotAllowed`.
+    func ensureExpiryRules() async throws {
+        let url = try bucketURL(query: "lifecycle")
+        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
+        var existing: [LifecycleXML.Rule] = []
+        if (200..<300).contains(status) {
+            existing = LifecycleXML.rules(in: body)
+        } else if LifecycleXML.error(in: body).code != "NoSuchLifecycleConfiguration" {
+            // A bucket without any rules answers with that error rather
+            // than an empty list; anything else is a real failure.
+            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
+        }
+
+        guard let xml = LifecycleXML.merged(existing) else { return }
+        let (putStatus, putBody) = try await lifecycleRequest(url: url, method: .PUT, body: Data(xml.utf8))
+        guard (200..<300).contains(putStatus) else {
+            throw Self.lifecycleError(status: putStatus, body: putBody, bucket: config.bucket)
+        }
+    }
+
+    /// Takes Aktar's expiry rules back out of the bucket, leaving its other
+    /// rules as they are. Files already under `tmp/` then stay for good.
+    func removeExpiryRules() async throws {
+        let url = try bucketURL(query: "lifecycle")
+        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
+        guard (200..<300).contains(status) else {
+            if LifecycleXML.error(in: body).code == "NoSuchLifecycleConfiguration" { return }
+            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
+        }
+        guard let xml = LifecycleXML.removingAktarRules(LifecycleXML.rules(in: body)) else { return }
+        let (writeStatus, writeBody) = xml.isEmpty
+            ? try await lifecycleRequest(url: url, method: .DELETE)
+            : try await lifecycleRequest(url: url, method: .PUT, body: Data(xml.utf8))
+        guard (200..<300).contains(writeStatus) else {
+            throw Self.lifecycleError(status: writeStatus, body: writeBody, bucket: config.bucket)
+        }
+    }
+
+    private func lifecycleRequest(url: URL, method: HTTPMethod, body: Data? = nil) async throws -> (Int, String) {
+        var headers = HTTPHeaders()
+        if let body {
+            headers.add(name: "Content-Type", value: "application/xml")
+            headers.add(name: "Content-MD5", value: Data(Insecure.MD5.hash(data: body)).base64EncodedString())
+        }
+        let signed = try await s3.signHeaders(
+            url: url,
+            httpMethod: method,
+            headers: headers,
+            body: body.map { .init(bytes: $0) } ?? .init()
+        )
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+        request.httpBody = body
+        request.timeoutInterval = 20
+        for (name, value) in signed {
+            request.setValue(value, forHTTPHeaderField: name)
+        }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            return ((response as? HTTPURLResponse)?.statusCode ?? 0, String(decoding: data, as: UTF8.self))
+        } catch {
+            throw StorageError.network(error.localizedDescription)
+        }
+    }
+
+    private static func lifecycleError(status: Int, body: String, bucket: String) -> StorageError {
+        let (code, message) = LifecycleXML.error(in: body)
+        switch (status, code) {
+        case (_, "NoSuchBucket"):
+            return .bucketNotFound(bucket)
+        case (_, "InvalidAccessKeyId"), (_, "SignatureDoesNotMatch"):
+            return .invalidCredentials
+        case (403, _), (_, "AccessDenied"):
+            return .lifecycleNotAllowed
+        case (405, _), (501, _), (_, "NotImplemented"):
+            return .unknown(String(localized: "This provider doesn't support lifecycle rules."))
+        default:
+            return .unknown(message ?? code ?? "HTTP \(status)")
+        }
+    }
+
+    /// `https://endpoint/bucket?query` (path style) or
+    /// `https://bucket.endpoint/?query` (virtual hosted), like `temporaryURL`.
+    private func bucketURL(query: String) throws -> URL {
+        guard var components = URLComponents(string: config.endpoint.contains("://") ? config.endpoint : "https://\(config.endpoint)"),
+              components.host?.isEmpty == false, !config.bucket.isEmpty else {
+            throw StorageError.unknown(String(localized: "The endpoint URL is not valid."))
+        }
+        if config.forcePathStyle {
+            components.percentEncodedPath = "/\(config.bucket)"
+        } else {
+            components.host = "\(config.bucket).\(components.host ?? "")"
+            components.percentEncodedPath = "/"
+        }
+        components.percentEncodedQuery = query
+        guard let url = components.url else {
+            throw StorageError.unknown(String(localized: "The endpoint URL is not valid."))
+        }
+        return url
     }
 
     private static func encodePath(_ key: String) -> String {
