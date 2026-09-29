@@ -28,6 +28,17 @@ get a public link back on your clipboard.
   Raycast (opt-in, see Settings > Integrations)
 - Launch at login
 
+## Install
+
+Download the [latest DMG](https://github.com/getaktar/mac/releases/latest/download/Aktar.dmg),
+or install with [Homebrew](https://brew.sh):
+
+```bash
+brew install --cask getaktar/tap/aktar
+```
+
+Aktar updates itself, so there's no need to run `brew upgrade` for it.
+
 ## Privacy & security
 
 Your storage credentials are kept in the macOS Keychain and never leave your

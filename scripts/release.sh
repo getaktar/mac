@@ -155,3 +155,4 @@ XML
 
 echo "==> Done: $DMG"
 echo "    Upload $APPCAST with it; the running apps read it from the latest release."
+echo "    After publishing the release, run scripts/update_cask.sh to bump the Homebrew cask."
