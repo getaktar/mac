@@ -6,6 +6,12 @@ options:
   createIntermediateGroups: true
   developmentLanguage: en
 
+# One version for the app and its Share extension, which must match.
+settings:
+  base:
+    MARKETING_VERSION: "0.6.0"
+    CURRENT_PROJECT_VERSION: "9"
+
 packages:
   Soto:
     url: https://github.com/soto-project/soto.git
@@ -29,6 +35,7 @@ targets:
       - package: KeyboardShortcuts
       - package: Sparkle
       - sdk: PDFKit.framework
+      - target: AktarShare
     info:
       path: Sources/Aktar/Info.plist
       properties:
@@ -50,12 +57,21 @@ targets:
           - CFBundleURLName: com.getaktar.mac
             CFBundleURLSchemes:
               - aktar
+        # "Upload with Aktar" for files selected in Finder (right-click >
+        # Quick Actions or Services); see FinderService. The title is
+        # translated in ServicesMenu.xcstrings.
+        NSServices:
+          - NSMenuItem:
+              default: Upload with Aktar
+            NSMessage: uploadFiles
+            NSPortName: Aktar
+            NSRequiredContext: {}
+            NSSendFileTypes:
+              - public.item
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac
         PRODUCT_NAME: Aktar
-        MARKETING_VERSION: "0.6.0"
-        CURRENT_PROJECT_VERSION: "9"
         SWIFT_VERSION: "6.0"
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
@@ -67,4 +83,36 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Mert Topuz"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+  # "Aktar" in the Share menu of Finder and other apps. It passes the shared
+  # files to the app's "Upload with Aktar" service; see ShareViewController.
+  AktarShare:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Sources/AktarShare
+    info:
+      path: Sources/AktarShare/Info.plist
+      properties:
+        CFBundleDisplayName: Aktar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsFileWithMaxCount: 50
+              NSExtensionActivationSupportsImageWithMaxCount: 50
+              NSExtensionActivationSupportsMovieWithMaxCount: 50
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac.share
+        PRODUCT_NAME: AktarShare
+        SWIFT_VERSION: "6.0"
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: Sources/AktarShare/AktarShare.entitlements
+        GENERATE_INFOPLIST_FILE: YES
         MACOSX_DEPLOYMENT_TARGET: "14.0"

@@ -694,8 +694,100 @@
         }
       }
     },
+    "Add a destination in Aktar's Settings first." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge zuerst in den Einstellungen von Aktar ein Ziel hinzu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero añade un destino en los Ajustes de Aktar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez d’abord une destination dans les Réglages d’Aktar."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まずAktarの設定でアップロード先を追加してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeiro adicione um destino nos Ajustes do Aktar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce Aktar'ın Ayarlar'ından bir hedef ekle."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先在 Aktar 的设置中添加上传目标。"
+          }
+        }
+      }
+    },
     "Aktar" : {
       "shouldTranslate" : false
+    },
+    "Aktar can only upload files, not folders." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar kann nur Dateien hochladen, keine Ordner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar solo puede subir archivos, no carpetas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar ne peut envoyer que des fichiers, pas des dossiers."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarがアップロードできるのはファイルのみで、フォルダはアップロードできません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Aktar só envia arquivos, não pastas."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar yalnızca dosya yükleyebilir, klasör yükleyemez."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 只能上传文件，不能上传文件夹。"
+          }
+        }
+      }
     },
     "Aktar for Raycast" : {
       "localizations" : {

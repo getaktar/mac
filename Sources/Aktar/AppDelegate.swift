@@ -4,6 +4,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let appState = AppState()
     private var menuBarController: MenuBarPanelController?
+    private var finderService: FinderService?
 
     /// aktar:// links that arrive before launch finishes are the ones that
     /// launched the app. They're held until the app is set up, and handled
@@ -27,6 +28,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController = MenuBarPanelController(appState: appState)
         LocalAPIService.shared.configure(appState: appState)
+
+        // "Upload with Aktar" in Finder's right-click menu; see FinderService.
+        let finderService = FinderService(appState: appState)
+        self.finderService = finderService
+        NSApp.servicesProvider = finderService
+        NSUpdateDynamicServices()
 
         // Aktar is an accessory app (no Dock icon) so it stays out of the way
         // day-to-day, but that also hides it from Cmd+Tab even while a real

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- "Upload with Aktar" in Finder: right-click files and choose it under
+  Services to upload them to the selected destination, with its copy
+  format, Link and Delete after. Folders are skipped
+- The same service can get a keyboard shortcut in System Settings >
+  Keyboard > Keyboard Shortcuts > Services, which then uploads whatever is
+  selected in Finder
+- Aktar in the Share menu of Finder, Photos, Safari and other apps. macOS
+  keeps new Share menu extensions off until you turn them on
+
 ## [0.6.0] - 2026-09-30
 
 ### Added
