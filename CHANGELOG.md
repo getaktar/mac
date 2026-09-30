@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-09-30
+
+### Added
+
+- Upload profiles: each destination keeps its own "Copy as" (URL, Markdown,
+  HTML or custom) and "Delete after", set in the destination's Upload
+  Defaults. Pick "Builds", "Logs" or "Screenshots" in the menu bar and
+  uploads go to that bucket and path with its settings
+- Duplicate in a destination's menu in Settings, to start another profile
+  on the same bucket with the same keys
+
+### Changed
+
+- The menu bar's "Delete after" choice is saved for the selected
+  destination instead of for all of them
+
+### Fixed
+
+- The Settings > Output choice is kept between launches
+
 ## [0.5.2] - 2026-09-30
 
 ### Changed
