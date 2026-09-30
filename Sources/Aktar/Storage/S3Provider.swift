@@ -204,20 +204,16 @@ final class S3Provider: StorageProvider, Sendable {
     /// token, for one); that comes back as `.lifecycleNotAllowed`.
     func ensureExpiryRules() async throws {
         let url = try bucketURL(query: "lifecycle")
-        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
-        var existing: [LifecycleXML.Rule] = []
-        if (200..<300).contains(status) {
-            existing = LifecycleXML.rules(in: body)
-        } else if LifecycleXML.error(in: body).code != "NoSuchLifecycleConfiguration" {
-            // A bucket without any rules answers with that error rather
-            // than an empty list; anything else is a real failure.
-            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
-        }
-
+        let existing = try await lifecycleRules(url: url) ?? []
         guard let xml = LifecycleXML.merged(existing) else { return }
         let (putStatus, putBody) = try await lifecycleRequest(url: url, method: .PUT, body: Data(xml.utf8))
         guard (200..<300).contains(putStatus) else {
             throw Self.lifecycleError(status: putStatus, body: putBody, bucket: config.bucket)
+        }
+        // Read back: a provider can answer 200 to a configuration it
+        // ignored, and "active" means the bucket really deletes the files.
+        guard LifecycleXML.isInPlace(try await lifecycleRules(url: url) ?? []) else {
+            throw StorageError.unknown(String(localized: "The provider didn't keep the lifecycle rules."))
         }
     }
 
@@ -225,18 +221,65 @@ final class S3Provider: StorageProvider, Sendable {
     /// rules as they are. Files already under `tmp/` then stay for good.
     func removeExpiryRules() async throws {
         let url = try bucketURL(query: "lifecycle")
-        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
-        guard (200..<300).contains(status) else {
-            if LifecycleXML.error(in: body).code == "NoSuchLifecycleConfiguration" { return }
-            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
-        }
-        guard let xml = LifecycleXML.removingAktarRules(LifecycleXML.rules(in: body)) else { return }
+        guard let existing = try await lifecycleRules(url: url),
+              let xml = LifecycleXML.removingAktarRules(existing) else { return }
         let (writeStatus, writeBody) = xml.isEmpty
             ? try await lifecycleRequest(url: url, method: .DELETE)
             : try await lifecycleRequest(url: url, method: .PUT, body: Data(xml.utf8))
         guard (200..<300).contains(writeStatus) else {
             throw Self.lifecycleError(status: writeStatus, body: writeBody, bucket: config.bucket)
         }
+    }
+
+    /// Which of the `tmp/{N}d/` folders already hold files while their rule
+    /// isn't in place yet. Setting the rules up makes the bucket delete
+    /// those too, including ones older than N days, so the user is asked
+    /// first. Empty when the rules are all in place or can't be read
+    /// (setting up then reports why).
+    func expiryPrefixesInUse() async throws -> [String] {
+        guard let url = try? bucketURL(query: "lifecycle"),
+              let existing = try? await lifecycleRules(url: url) ?? [] else { return [] }
+        var inUse: [String] = []
+        for days in LifecycleXML.missingDurations(existing) {
+            let prefix = UploadExpiry.prefix(days: days)
+            do {
+                let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: prefix)
+                if !(output.contents ?? []).isEmpty { inUse.append(prefix) }
+            } catch {
+                throw Self.mapError(error, bucket: config.bucket)
+            }
+        }
+        return inUse
+    }
+
+    /// When the object at exactly `key` was last written, or nil when there's
+    /// no such object (`.distantPast` when the provider leaves the date out).
+    /// Listed rather than HEADed, like `objectExists`.
+    func lastModified(key: String) async throws -> Date? {
+        do {
+            let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
+            guard let object = output.contents?.first, object.key == key else { return nil }
+            return object.lastModified ?? .distantPast
+        } catch {
+            throw Self.mapError(error, bucket: config.bucket)
+        }
+    }
+
+    /// The bucket's lifecycle rules, or nil when it has none. Anything that
+    /// doesn't read as a complete lifecycle configuration stops here, before
+    /// a write could replace the bucket's own rules.
+    private func lifecycleRules(url: URL) async throws -> [LifecycleXML.Rule]? {
+        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
+        guard (200..<300).contains(status) else {
+            // A bucket without any rules answers with that error rather
+            // than an empty list; anything else is a real failure.
+            if LifecycleXML.error(in: body).code == "NoSuchLifecycleConfiguration" { return nil }
+            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
+        }
+        guard let rules = LifecycleXML.configurationRules(in: body) else {
+            throw StorageError.unknown(String(localized: "The bucket's lifecycle rules couldn't be read, so nothing was changed."))
+        }
+        return rules
     }
 
     private func lifecycleRequest(url: URL, method: HTTPMethod, body: Data? = nil) async throws -> (Int, String) {

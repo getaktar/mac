@@ -247,7 +247,12 @@ final class LocalAPIRouter {
                 }
                 try await storage.copy(from: body.from, to: newKey)
                 try await storage.delete(objectKey: body.from)
-                appState.repository.objectMoved(from: body.from, to: newKey, destination: destination)
+                appState.repository.objectMoved(
+                    from: body.from,
+                    to: newKey,
+                    destination: destination,
+                    rulesActive: ExpiryRuleStore.shared.isActive(destination.id)
+                )
                 return .json(200, objectDTO(BucketObject(key: newKey, size: 0, lastModified: .now), destination: destination))
 
             case ("POST", ["folders"]):

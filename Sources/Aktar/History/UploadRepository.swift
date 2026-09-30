@@ -52,19 +52,38 @@ final class UploadRepository {
         }
     }
 
-    func objectMoved(from oldKey: String, to newKey: String, destination: DestinationConfig) {
+    /// Moving a file out of its expiring prefix keeps it, and moving one into
+    /// a prefix makes it expire (a copy counts from now), but only when
+    /// `rulesActive`: without Aktar's rules in the bucket nothing deletes it,
+    /// and a folder that happens to be called `tmp/7d/` is just a folder.
+    func objectMoved(from oldKey: String, to newKey: String, destination: DestinationConfig, rulesActive: Bool) {
         for record in records(key: oldKey, destinationID: destination.id) {
             record.objectKey = newKey
-            // Moving a file out of its expiring prefix keeps it, and moving
-            // one into a prefix makes it expire (a copy counts from now).
             if let days = UploadExpiry.days(forKey: newKey) {
-                if UploadExpiry.days(forKey: oldKey) != days {
+                if UploadExpiry.days(forKey: oldKey) == days {
+                    // Renamed inside its folder: expires on the same day.
+                } else if rulesActive {
                     record.expiresAt = Date.now.addingTimeInterval(TimeInterval(days) * 86_400)
+                } else {
+                    record.expiresAt = nil
                 }
             } else {
                 record.expiresAt = nil
             }
             record.publicURLString = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey).absoluteString
+        }
+        try? modelContext.save()
+    }
+
+    /// Uploads to `destinationID` stop expiring: its bucket no longer has
+    /// Aktar's rules, so those files stay for good, and neither the history
+    /// nor the expiry sweep may treat them as due.
+    func clearExpiry(destinationID: UUID) {
+        let descriptor = FetchDescriptor<UploadRecord>(
+            predicate: #Predicate { $0.destinationID == destinationID && $0.expiresAt != nil }
+        )
+        for record in (try? modelContext.fetch(descriptor)) ?? [] {
+            record.expiresAt = nil
         }
         try? modelContext.save()
     }

@@ -161,11 +161,31 @@ struct MenuBarView: View {
     private func setUpExpiry(for destination: DestinationConfig) async {
         isSettingUpExpiry = true
         defer { isSettingUpExpiry = false }
+        // Files already in those folders would start expiring with the
+        // rules, so that's confirmed first. A failed check is left to
+        // setting up, which reports the same problem.
+        if let inUse = try? await appState.uploadManager.expiryPrefixesInUse(for: destination),
+           !inUse.isEmpty, !confirmSetUp(deleting: inUse) {
+            return
+        }
         do {
             try await appState.uploadManager.setUpExpiryRules(for: destination)
         } catch {
             showExpirySetupFailure(error)
         }
+    }
+
+    private func confirmSetUp(deleting prefixes: [String]) -> Bool {
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = String(localized: "Files already in these folders will be deleted")
+        alert.informativeText = String(localized: "\(prefixes.joined(separator: ", ")) already hold files. Once the rules are set up, the bucket deletes them too when they're older than the folder's number of days.")
+        let setUp = alert.addButton(withTitle: String(localized: "Set Up Anyway"))
+        setUp.hasDestructiveAction = true
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        return alert.runModal() == .alertFirstButtonReturn
     }
 
     /// A real alert rather than text squeezed into the panel: the reason is

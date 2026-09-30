@@ -30,17 +30,44 @@ enum LifecycleXML {
         }
     }
 
-    /// The configuration to PUT: the bucket's other rules untouched, then
-    /// Aktar's expiry rules (replacing older versions of them). Nil when all
-    /// of Aktar's rules are already in place, so nothing needs writing.
-    static func merged(_ existing: [Rule]) -> String? {
-        let isInPlace = UploadExpiry.options.allSatisfy { days in
-            existing.contains {
+    /// The rules of a GET ?lifecycle response, or nil when it doesn't read
+    /// as a lifecycle configuration whose every rule could be parsed: a
+    /// proxy's HTML page, a provider answering with something else, or
+    /// elements this parser doesn't follow (namespace prefixes). Writing
+    /// Aktar's rules on top of a misread configuration would replace the
+    /// bucket's own rules, so nothing is written then.
+    static func configurationRules(in xml: String) -> [Rule]? {
+        guard blocks("LifecycleConfiguration", in: xml).count == 1 else { return nil }
+        let parsed = rules(in: xml)
+        var opened = 0
+        var rest = xml[...]
+        while let open = rest.range(of: "<Rule", options: .literal) {
+            rest = rest[open.upperBound...]
+            if isTagEnd(rest) { opened += 1 }
+        }
+        return parsed.count == opened ? parsed : nil
+    }
+
+    /// Whether all of Aktar's rules are in `rules`, exactly as installed.
+    static func isInPlace(_ rules: [Rule]) -> Bool {
+        missingDurations(rules).isEmpty
+    }
+
+    /// The durations whose rule isn't in place yet.
+    static func missingDurations(_ rules: [Rule]) -> [Int] {
+        UploadExpiry.options.filter { days in
+            !rules.contains {
                 $0.id == UploadExpiry.ruleID(days: days) && $0.prefix == UploadExpiry.prefix(days: days)
                     && $0.expirationDays == days && $0.status == "Enabled"
             }
         }
-        if isInPlace { return nil }
+    }
+
+    /// The configuration to PUT: the bucket's other rules untouched, then
+    /// Aktar's expiry rules (replacing older versions of them). Nil when all
+    /// of Aktar's rules are already in place, so nothing needs writing.
+    static func merged(_ existing: [Rule]) -> String? {
+        if isInPlace(existing) { return nil }
 
         let aktarIDs = Set(UploadExpiry.options.map(UploadExpiry.ruleID(days:)))
         let kept = existing.filter { !aktarIDs.contains($0.id ?? "") }.map(\.raw)
@@ -84,7 +111,8 @@ enum LifecycleXML {
         var rest = xml[...]
         while let open = rest.range(of: "<\(tag)", options: .literal) {
             let afterName = rest[open.upperBound...]
-            guard let next = afterName.first, next == ">" || next == " " || next == "/" else {
+            // `<Rules>` isn't a `<Rule>`.
+            guard isTagEnd(afterName) else {
                 rest = afterName
                 continue
             }
@@ -101,6 +129,11 @@ enum LifecycleXML {
             rest = content[close.upperBound...]
         }
         return result
+    }
+
+    private static func isTagEnd(_ rest: Substring) -> Bool {
+        guard let next = rest.first else { return false }
+        return next == ">" || next == "/" || next.isWhitespace
     }
 
     private static func value(_ tag: String, in xml: String) -> String? {

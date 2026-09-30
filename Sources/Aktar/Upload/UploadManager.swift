@@ -36,18 +36,22 @@ final class UploadManager {
     }
 
     /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
-    /// the file). Uploads to an exact key, such as from the bucket browser,
-    /// never expire, and neither does anything sent to a destination whose
-    /// bucket doesn't have the lifecycle rules.
+    /// the file). Nothing sent to a destination whose bucket doesn't have the
+    /// lifecycle rules expires. An upload to an exact key (the bucket
+    /// browser, the local API's prefix=) is exactly where the user put it:
+    /// it stays, unless that's inside a `tmp/{N}d/` folder the bucket's rules
+    /// empty, where it goes after N days like any other file there.
     func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil) {
         guard let destination = destination ?? destinationStore.defaultDestination else { return }
-        let days = ExpiryRuleStore.shared.isActive(destination.id) ? expiryDays ?? self.expiryDays : 0
-        let newJobs = inputs.map {
-            UploadJob(
-                input: $0,
-                destination: destination,
-                expiryDays: $0.objectKey == nil && UploadExpiry.options.contains(days) ? days : nil
-            )
+        let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
+        let days = rulesActive ? expiryDays ?? self.expiryDays : 0
+        let newJobs = inputs.map { input in
+            let jobDays: Int? = if let key = input.objectKey {
+                rulesActive ? UploadExpiry.days(forKey: key) : nil
+            } else {
+                UploadExpiry.options.contains(days) ? days : nil
+            }
+            return UploadJob(input: input, destination: destination, expiryDays: jobDays)
         }
         jobs.insert(contentsOf: newJobs, at: 0)
         drainQueue()
@@ -86,13 +90,57 @@ final class UploadManager {
     }
 
     /// Clears expiring uploads whose time is up out of history. The bucket's
-    /// lifecycle rule normally deleted the object already (deleting a missing
-    /// object still succeeds); this also covers rules removed since. A
-    /// failure leaves the record for the next pass.
+    /// lifecycle rule has normally deleted the file already; see
+    /// `sweep(_:)` for when Aktar deletes it itself. A failure (offline)
+    /// leaves the record for the next pass, and a destination that fails
+    /// three times is skipped until then.
     func deleteExpired() async {
+        var failures: [UUID: Int] = [:]
         for record in repository.expiredRecords() {
-            try? await deleteRemote(record)
+            let destinationID = record.destinationID
+            if failures[destinationID, default: 0] >= 3 { continue }
+            do {
+                try await sweep(record)
+            } catch {
+                failures[destinationID, default: 0] += 1
+            }
         }
+    }
+
+    /// What the sweep does with one expired upload. Aktar deletes the file
+    /// itself only as a stand-in for the bucket's own rule, so only where
+    /// that rule is known to be in place, and only the upload it recorded:
+    /// - The destination or its keys are gone: nothing to delete from; the
+    ///   record goes.
+    /// - Its rules aren't active (turned off, or the destination now points
+    ///   at another bucket): whatever the bucket does with the file is up to
+    ///   its rules; the record goes, the file isn't touched.
+    /// - The object at that key was written after this upload (the same
+    ///   name uploaded again): it's someone else's upload now, so it stays.
+    /// - Otherwise the file is deleted like "Delete Remote File", which
+    ///   succeeds for one the rule already deleted.
+    private func sweep(_ record: UploadRecord) async throws {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }),
+              let credentials = try? KeychainService.load(for: destination.id),
+              ExpiryRuleStore.shared.isActive(destination.id) else {
+            repository.delete(record)
+            return
+        }
+        let provider = S3Provider(config: destination, credentials: credentials)
+        guard let written = try await provider.lastModified(key: record.objectKey),
+              !Self.uploadedAgain(record, writtenAt: written) else {
+            repository.delete(record)
+            return
+        }
+        try await provider.delete(objectKey: record.objectKey)
+        repository.delete(record)
+    }
+
+    /// Whether the object's last write is newer than this upload: S3 keeps
+    /// whole seconds, so anything more than a minute after the record was
+    /// created is a later upload to the same key.
+    private static func uploadedAgain(_ record: UploadRecord, writtenAt: Date) -> Bool {
+        writtenAt > record.createdAt.addingTimeInterval(60)
     }
 
     /// Installs the bucket's lifecycle rules for a saved destination, which
@@ -106,6 +154,13 @@ final class UploadManager {
             ExpiryRuleStore.shared.set(destination.id, active: false)
             throw error
         }
+    }
+
+    /// The `tmp/{N}d/` folders of a saved destination that already hold
+    /// files and would start expiring once the missing rules are set up.
+    func expiryPrefixesInUse(for destination: DestinationConfig) async throws -> [String] {
+        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        return try await provider.expiryPrefixesInUse()
     }
 
     private func drainQueue() {

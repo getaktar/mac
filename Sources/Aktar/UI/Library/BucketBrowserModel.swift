@@ -352,7 +352,12 @@ final class BucketBrowserModel {
             }
             try await storage.copy(from: object.key, to: newKey)
             try await storage.delete(objectKey: object.key)
-            repository.objectMoved(from: object.key, to: newKey, destination: destination)
+            repository.objectMoved(
+                from: object.key,
+                to: newKey,
+                destination: destination,
+                rulesActive: ExpiryRuleStore.shared.isActive(destination.id)
+            )
             temporaryURLs[object.key] = nil
             objects.removeAll { $0.key == object.key }
             removeFromSearchIndex(key: object.key)

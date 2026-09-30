@@ -4,6 +4,52 @@
     "" : {
       "shouldTranslate" : false
     },
+    "%@ already hold files. Once the rules are set up, the bucket deletes them too when they're older than the folder's number of days." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %@ liegen schon Dateien. Sobald die Regeln eingerichtet sind, löscht der Bucket auch diese, wenn sie älter als die Tage des Ordners sind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ya contienen archivos. Una vez configuradas las reglas, el bucket también los eliminará cuando superen los días de la carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ contiennent déjà des fichiers. Une fois les règles en place, le bucket les supprime aussi lorsqu'ils dépassent le nombre de jours du dossier."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ にはすでにファイルがあります。ルールを設定すると、フォルダの日数より古いファイルもバケットが削除します。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ já contêm arquivos. Depois que as regras forem configuradas, o bucket também os apagará quando passarem do número de dias da pasta."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ içinde zaten dosyalar var. Kurallar kurulunca bucket, klasörün gün sayısından eski olan bu dosyaları da siler."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 中已有文件。规则设置后，存储桶也会删除其中超过该文件夹天数的文件。"
+          }
+        }
+      }
+    },
     "%@ · Uploaded %@" : {
       "localizations" : {
         "de" : {
@@ -4469,6 +4515,52 @@
         }
       }
     },
+    "Files already in these folders will be deleted" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateien, die schon in diesen Ordnern liegen, werden gelöscht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se eliminarán los archivos que ya están en estas carpetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les fichiers déjà présents dans ces dossiers seront supprimés"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これらのフォルダにある既存のファイルは削除されます"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os arquivos que já estão nessas pastas serão apagados"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu klasörlerdeki mevcut dosyalar silinecek"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这些文件夹中已有的文件将被删除"
+          }
+        }
+      }
+    },
     "Files uploaded with “Delete after” go under tmp/ and are deleted by the bucket itself, even when Aktar isn't running." : {
       "localizations" : {
         "de" : {
@@ -5486,6 +5578,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "修改日期"
+          }
+        }
+      }
+    },
+    "Name the rules aktar-expire-1d, aktar-expire-7d, aktar-expire-14d, and aktar-expire-30d, or Aktar won't recognize them." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benenne die Regeln aktar-expire-1d, aktar-expire-7d, aktar-expire-14d und aktar-expire-30d, sonst erkennt Aktar sie nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombra las reglas aktar-expire-1d, aktar-expire-7d, aktar-expire-14d y aktar-expire-30d, o Aktar no las reconocerá."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommez les règles aktar-expire-1d, aktar-expire-7d, aktar-expire-14d et aktar-expire-30d, sinon Aktar ne les reconnaîtra pas."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルール名は aktar-expire-1d、aktar-expire-7d、aktar-expire-14d、aktar-expire-30d にしてください。それ以外の名前では Aktar が認識しません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nomeie as regras aktar-expire-1d, aktar-expire-7d, aktar-expire-14d e aktar-expire-30d, ou o Aktar não as reconhecerá."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuralları aktar-expire-1d, aktar-expire-7d, aktar-expire-14d ve aktar-expire-30d olarak adlandırın; aksi halde Aktar onları tanımaz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请将规则命名为 aktar-expire-1d、aktar-expire-7d、aktar-expire-14d 和 aktar-expire-30d，否则 Aktar 无法识别。"
           }
         }
       }
@@ -8161,6 +8299,52 @@
         }
       }
     },
+    "Set Up Anyway" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trotzdem einrichten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar de todos modos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurer quand même"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このまま設定"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar mesmo assim"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yine de Kur"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仍然设置"
+          }
+        }
+      }
+    },
     "Set Up Auto-Delete…" : {
       "localizations" : {
         "de" : {
@@ -8989,6 +9173,52 @@
         }
       }
     },
+    "The bucket's lifecycle rules couldn't be read, so nothing was changed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Lebenszyklusregeln des Buckets konnten nicht gelesen werden, daher wurde nichts geändert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron leer las reglas de ciclo de vida del bucket, así que no se cambió nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les règles de cycle de vie du bucket n'ont pas pu être lues, donc rien n'a été modifié."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バケットのライフサイクルルールを読み取れなかったため、何も変更していません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler as regras de ciclo de vida do bucket, então nada foi alterado."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket'ın yaşam döngüsü kuralları okunamadı, bu yüzden hiçbir şey değiştirilmedi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取存储桶的生命周期规则，因此未做任何更改。"
+          }
+        }
+      }
+    },
     "The domain files are served from, for example a custom domain or CDN in front of the bucket." : {
       "localizations" : {
         "de" : {
@@ -9123,6 +9353,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "端口必须是 1024 到 65535 之间的数字。"
+          }
+        }
+      }
+    },
+    "The provider didn't keep the lifecycle rules." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Anbieter hat die Lebenszyklusregeln nicht übernommen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El proveedor no conservó las reglas de ciclo de vida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fournisseur n'a pas conservé les règles de cycle de vie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロバイダがライフサイクルルールを保持しませんでした。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O provedor não manteve as regras de ciclo de vida."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı yaşam döngüsü kurallarını saklamadı."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务商未保留生命周期规则。"
           }
         }
       }

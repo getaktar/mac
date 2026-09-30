@@ -5,6 +5,7 @@ struct DestinationFormView: View {
     var onSave: (DestinationConfig, StorageCredentials) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
 
     @State private var preset: ProviderPreset
     @State private var name: String
@@ -20,6 +21,8 @@ struct DestinationFormView: View {
     @State private var testSucceeded = false
     @State private var isTesting = false
     @State private var expiryRulesActive: Bool
+    /// Whether the saved destination had the rules when the form opened.
+    private let initialExpiryRulesActive: Bool
     @State private var expiryRulesError: String?
     /// The bucket refused the rules, as opposed to the keys not loading.
     @State private var expiryRulesRefused = false
@@ -27,7 +30,13 @@ struct DestinationFormView: View {
     /// Set once the rules were checked, set up or turned off here, so saving
     /// records that result instead of guessing from what was edited.
     @State private var checkedExpiryRules = false
+    /// The bucket that result is about: the connection fields can still
+    /// change afterwards, and a result about another bucket must not be
+    /// saved for this one.
+    @State private var checkedConnection: Connection?
     @State private var isConfirmingExpiryOff = false
+    /// `tmp/{N}d/` folders that already hold files, while confirming set up.
+    @State private var prefixesInUse: [String]?
     /// Stays the same for a new destination, so a result recorded before it
     /// was saved still belongs to it.
     @State private var destinationID: UUID
@@ -44,7 +53,8 @@ struct DestinationFormView: View {
         _publicBaseURL = State(initialValue: existing?.publicBaseURL ?? "")
         _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
         _destinationID = State(initialValue: existing?.id ?? UUID())
-        _expiryRulesActive = State(initialValue: existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false)
+        initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
+        _expiryRulesActive = State(initialValue: initialExpiryRulesActive)
     }
 
     var body: some View {
@@ -65,7 +75,7 @@ struct DestinationFormView: View {
                     }
                     .onChange(of: preset) { _, newValue in
                         region = newValue.defaultRegion
-                        testResultMessage = nil
+                        connectionEdited()
                     }
 
                     TextField("Profile Name", text: $name, prompt: Text("Production Files"))
@@ -134,6 +144,9 @@ struct DestinationFormView: View {
                 }
             }
             .formStyle(.grouped)
+            .onChange(of: endpoint) { connectionEdited() }
+            .onChange(of: region) { connectionEdited() }
+            .onChange(of: bucket) { connectionEdited() }
 
             Divider()
 
@@ -177,6 +190,15 @@ struct DestinationFormView: View {
                 }
                 .disabled(isSettingUpExpiry)
             }
+            .alert(
+                "Files already in these folders will be deleted",
+                isPresented: Binding(get: { prefixesInUse != nil }, set: { if !$0 { prefixesInUse = nil } })
+            ) {
+                Button("Set Up Anyway", role: .destructive) { Task { await applyExpiryRules() } }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("\((prefixesInUse ?? []).joined(separator: ", ")) already hold files. Once the rules are set up, the bucket deletes them too when they're older than the folder's number of days.")
+            }
             .confirmationDialog("Turn off auto-delete for this destination?", isPresented: $isConfirmingExpiryOff) {
                 Button("Turn Off") { turnOffExpiry(removingRules: false) }
                 Button("Turn Off and Remove Rules", role: .destructive) { turnOffExpiry(removingRules: true) }
@@ -205,7 +227,39 @@ struct DestinationFormView: View {
         }
     }
 
-    static let refusedExplanation = String(localized: "\u{201C}Delete after\u{201D} stays off until the bucket has Aktar's lifecycle rules. This key can't add them: use a key with admin access to the bucket, or add these rules in your provider's dashboard and check again: tmp/1d/ after 1 day, tmp/7d/ after 7 days, tmp/14d/ after 14 days, tmp/30d/ after 30 days.")
+    /// Aktar recognizes the rules by their IDs, so ones added by hand under
+    /// other names would leave "Delete after" off.
+    static var refusedExplanation: String {
+        [
+            String(localized: "\u{201C}Delete after\u{201D} stays off until the bucket has Aktar's lifecycle rules. This key can't add them: use a key with admin access to the bucket, or add these rules in your provider's dashboard and check again: tmp/1d/ after 1 day, tmp/7d/ after 7 days, tmp/14d/ after 14 days, tmp/30d/ after 30 days."),
+            String(localized: "Name the rules aktar-expire-1d, aktar-expire-7d, aktar-expire-14d, and aktar-expire-30d, or Aktar won't recognize them."),
+        ].joined(separator: " ")
+    }
+
+    /// The bucket a rules result was obtained for.
+    private struct Connection: Equatable {
+        let endpoint: String
+        let bucket: String
+        let region: String
+
+        init(_ config: DestinationConfig) {
+            endpoint = config.endpoint.trimmingCharacters(in: .whitespaces)
+            bucket = config.bucket.trimmingCharacters(in: .whitespaces)
+            region = config.region.trimmingCharacters(in: .whitespaces)
+        }
+    }
+
+    /// A rules result for the bucket the form pointed at before isn't true
+    /// of the one it points at now.
+    private func connectionEdited() {
+        testResultMessage = nil
+        guard checkedExpiryRules || expiryRulesActive || expiryRulesError != nil else { return }
+        checkedExpiryRules = false
+        checkedConnection = nil
+        expiryRulesActive = false
+        expiryRulesError = nil
+        expiryRulesRefused = false
+    }
 
     /// Entered keys, or the saved ones when editing without retyping them.
     /// Read only when needed, not while drawing, so a Keychain problem shows
@@ -219,6 +273,21 @@ struct DestinationFormView: View {
     }
 
     private func setUpExpiryRules() async {
+        isSettingUpExpiry = true
+        defer { isSettingUpExpiry = false }
+        // Files already in those folders would start expiring with the
+        // rules, so that's confirmed first. A failed check is left to
+        // setting up, which reports the same problem with more to go on.
+        if let credentials = try? formCredentials(),
+           let inUse = try? await S3Provider(config: currentConfig(), credentials: credentials).expiryPrefixesInUse(),
+           !inUse.isEmpty {
+            prefixesInUse = inUse
+            return
+        }
+        await applyExpiryRules()
+    }
+
+    private func applyExpiryRules() async {
         isSettingUpExpiry = true
         defer { isSettingUpExpiry = false }
         let config = currentConfig()
@@ -241,6 +310,7 @@ struct DestinationFormView: View {
             return
         }
         checkedExpiryRules = true
+        checkedConnection = Connection(config)
         ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)
     }
 
@@ -262,7 +332,14 @@ struct DestinationFormView: View {
             expiryRulesError = nil
             expiryRulesRefused = false
             checkedExpiryRules = true
+            checkedConnection = Connection(config)
             ExpiryRuleStore.shared.set(config.id, active: false)
+            // Files already under tmp/ now stay for good, as the dialog
+            // promises, so the sweep has to leave them alone too. Only for
+            // the saved bucket: history holds nothing from another one.
+            if removingRules, let existing, Connection(existing) == Connection(config) {
+                appState.repository.clearExpiry(destinationID: config.id)
+            }
         }
     }
 
@@ -330,10 +407,13 @@ struct DestinationFormView: View {
             credentials = existingCredentials
         }
         let config = currentConfig()
-        if checkedExpiryRules {
+        if checkedExpiryRules, checkedConnection == Connection(config) {
             ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)
-        } else if let existing, existing.endpoint != config.endpoint || existing.bucket != config.bucket
-                    || existing.region != config.region || !accessKeyId.isEmpty {
+        } else if let existing, Connection(existing) == Connection(config), accessKeyId.isEmpty {
+            // The saved bucket and key, back to what they were before any
+            // check here that was about another bucket.
+            ExpiryRuleStore.shared.set(config.id, active: initialExpiryRulesActive)
+        } else {
             // A different bucket or key hasn't been checked for the rules.
             ExpiryRuleStore.shared.set(config.id, active: false)
         }
