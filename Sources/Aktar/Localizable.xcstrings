@@ -1019,48 +1019,48 @@
         }
       }
     },
-    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too." : {
+    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets."
+            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets. Bild-Metadaten gelten für Fotos: „Standort entfernen“ löscht die GPS-Position, „Alle entfernen“ auch Kamera, Datum und weitere Angaben."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados."
+            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados. Metadatos de imagen se aplica a las fotos: Quitar ubicación elimina la posición GPS y Quitar todo también la cámara, la fecha y otros datos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés."
+            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés. Les métadonnées des images concernent les photos : Supprimer la position retire la position GPS, Tout supprimer retire aussi l’appareil, la date et d’autres détails."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。"
+            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。画像のメタデータは写真に適用されます。「位置情報を削除」はGPSの位置を、「すべて削除」はカメラや日時などの情報も削除します。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados."
+            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados. Metadados da imagem valem para fotos: Remover localização apaga a posição GPS e Remover tudo também apaga a câmera, a data e outros detalhes."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır."
+            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır. Görsel meta verileri fotoğraflar için geçerlidir: Konumu kaldır GPS konumunu siler, Tümünü kaldır kamera, tarih ve diğer bilgileri de siler."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。"
+            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。图片元数据适用于照片：“移除位置信息”会删除 GPS 位置，“全部移除”还会删除相机、日期等其他信息。"
           }
         }
       }
@@ -3039,6 +3039,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法验证身份。请检查访问密钥 ID 和私有访问密钥。"
+          }
+        }
+      }
+    },
+    "Couldn't remove the metadata from %@, so it wasn't uploaded. Set Image metadata to Keep all for this destination to upload it as it is." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Metadaten von %@ konnten nicht entfernt werden, deshalb wurde die Datei nicht hochgeladen. Stelle Bild-Metadaten für dieses Ziel auf „Alle behalten“, um sie unverändert hochzuladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron quitar los metadatos de %@, así que no se subió. Pon Metadatos de imagen en Conservar todo en este destino para subirlo tal cual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de supprimer les métadonnées de %@, le fichier n’a donc pas été envoyé. Réglez Métadonnées des images sur Tout conserver pour cette destination pour l’envoyer tel quel."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のメタデータを削除できなかったため、アップロードしませんでした。そのままアップロードするには、このアップロード先の画像のメタデータを「すべて残す」にしてください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível remover os metadados de %@, então o arquivo não foi enviado. Defina Metadados da imagem como Manter tudo neste destino para enviá-lo como está."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dosyasının meta verileri kaldırılamadı, bu yüzden yüklenmedi. Olduğu gibi yüklemek için bu hedefte Görsel meta verileri seçeneğini Tümünü koru yap."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法移除 %@ 的元数据，因此没有上传。要按原样上传，请将此上传目标的“图片元数据”设为“全部保留”。"
           }
         }
       }
@@ -5349,6 +5395,52 @@
         }
       }
     },
+    "Image metadata" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild-Metadaten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metadatos de imagen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Métadonnées des images"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像のメタデータ"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metadados da imagem"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görsel meta verileri"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片元数据"
+          }
+        }
+      }
+    },
     "Integrations" : {
       "localizations" : {
         "de" : {
@@ -5391,6 +5483,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "集成"
+          }
+        }
+      }
+    },
+    "Keep all" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle behalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conservar todo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout conserver"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて残す"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter tudo"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümünü koru"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部保留"
           }
         }
       }
@@ -7931,6 +8069,52 @@
         }
       }
     },
+    "Remove all" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle entfernen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar todo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout supprimer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて削除"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover tudo"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümünü kaldır"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部移除"
+          }
+        }
+      }
+    },
     "Remove from History" : {
       "localizations" : {
         "de" : {
@@ -7973,6 +8157,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "从历史记录中移除"
+          }
+        }
+      }
+    },
+    "Remove location" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standort entfernen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar ubicación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la position"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報を削除"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover localização"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumu kaldır"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除位置信息"
           }
         }
       }

@@ -233,8 +233,17 @@ final class UploadManager {
                 )
                 let contentType = ContentTypeResolver.resolve(for: job.input.fileURL)
 
+                // Photos lose their location (or all metadata) first, on a
+                // copy; everything else is uploaded as it is.
+                let policy = destination.imageMetadata ?? .default
+                let original = job.input.fileURL
+                let stripped = try await Task.detached(priority: .userInitiated) {
+                    try ImageMetadataStripper.strippedCopy(of: original, policy: policy)
+                }.value
+                defer { if let stripped { ImageMetadataStripper.removeCopy(stripped) } }
+
                 let result = try await provider.upload(
-                    fileURL: job.input.fileURL,
+                    fileURL: stripped ?? job.input.fileURL,
                     objectKey: objectKey,
                     contentType: contentType
                 ) { progress in

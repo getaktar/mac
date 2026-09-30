@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Image metadata in each destination's Upload Defaults: photos lose their
+  GPS location before they're uploaded (the default), lose all metadata
+  (camera, lens, date, location), or are uploaded as they are. Orientation
+  and color profile are kept, the image isn't recompressed where the
+  format allows it, and files without anything to remove are uploaded
+  untouched. If the metadata can't be removed, the upload stops instead of
+  sharing the location. Covers JPEG, HEIC, PNG and TIFF, from every way of
+  uploading, including the Finder service, the Share menu and the local API
+
 ## [0.7.0] - 2026-09-30
 
 ### Added

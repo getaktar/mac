@@ -68,6 +68,9 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// Copy a temporary link valid this long after each upload instead of
     /// the public URL; nil copies the public URL.
     var temporaryLink: TemporaryLinkDuration?
+    /// What to strip from photos before they're uploaded here; nil is
+    /// `ImageMetadataPolicy.default` (remove the location).
+    var imageMetadata: ImageMetadataPolicy?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"
