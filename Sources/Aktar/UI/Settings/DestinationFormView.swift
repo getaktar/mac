@@ -22,6 +22,7 @@ struct DestinationFormView: View {
     @State private var expiryDays: Int
     @State private var temporaryLink: TemporaryLinkDuration?
     @State private var imageMetadata: ImageMetadataPolicy
+    @State private var folderUpload: FolderUploadMode
     @State private var testResult: ConnectionResult?
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
@@ -61,6 +62,7 @@ struct DestinationFormView: View {
         _outputMode = State(initialValue: existing?.outputMode)
         _temporaryLink = State(initialValue: existing?.temporaryLink)
         _imageMetadata = State(initialValue: existing?.imageMetadata ?? .default)
+        _folderUpload = State(initialValue: existing?.folderUpload ?? .default)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
@@ -210,10 +212,15 @@ struct DestinationFormView: View {
                     Text(policy.label).tag(policy)
                 }
             }
+            Picker("Folders", selection: $folderUpload) {
+                ForEach(FolderUploadMode.allCases) { mode in
+                    Text(mode.label).tag(mode)
+                }
+            }
         } header: {
             Text("Upload Defaults")
         } footer: {
-            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details.")
+            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -420,7 +427,8 @@ struct DestinationFormView: View {
             outputMode: outputMode,
             expiryDays: expiryDays,
             temporaryLink: temporaryLink,
-            imageMetadata: imageMetadata
+            imageMetadata: imageMetadata,
+            folderUpload: folderUpload
         )
     }
 

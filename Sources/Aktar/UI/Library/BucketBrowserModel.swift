@@ -277,6 +277,8 @@ final class BucketBrowserModel {
 
     /// Uploads into the current folder under each file's own name, adding
     /// " 2", " 3"… when that name is already taken so nothing is overwritten.
+    /// A folder keeps its structure here, like copying it in Finder, and
+    /// packages (a Keynote document) go up as a ZIP.
     func upload(_ fileURLs: [URL], source: UploadSource, using uploadManager: UploadManager) {
         let targetPrefix = prefix
         Task {
@@ -284,14 +286,29 @@ final class BucketBrowserModel {
             var claimed = Set<String>()
             for fileURL in fileURLs {
                 do {
-                    let key = try await availableKey(for: fileURL.lastPathComponent, in: targetPrefix, excluding: claimed)
-                    claimed.insert(key)
-                    inputs.append(UploadInput(
-                        fileURL: fileURL,
-                        originalFilename: fileURL.lastPathComponent,
-                        source: source,
-                        objectKey: key
-                    ))
+                    var files: [(url: URL, folder: String, name: String)] = []
+                    let isPackage = (try? fileURL.resourceValues(forKeys: [.isPackageKey]))?.isPackage == true
+                    if FolderUpload.isFolder(fileURL), !isPackage {
+                        let root = targetPrefix + fileURL.lastPathComponent + "/"
+                        for entry in try FolderUpload.files(in: fileURL) {
+                            let directory = (entry.relativePath as NSString).deletingLastPathComponent
+                            files.append((entry.fileURL, directory.isEmpty ? root : root + directory + "/", entry.fileURL.lastPathComponent))
+                        }
+                    } else {
+                        files.append((fileURL, targetPrefix, fileURL.lastPathComponent))
+                    }
+                    for file in files {
+                        let isZip = FolderUpload.isFolder(file.url)
+                        let name = isZip ? file.name + ".zip" : file.name
+                        let key = try await availableKey(for: name, in: file.folder, excluding: claimed)
+                        claimed.insert(key)
+                        inputs.append(UploadInput(
+                            fileURL: file.url,
+                            originalFilename: name,
+                            source: source,
+                            objectKey: key
+                        ))
+                    }
                 } catch {
                     actionError = Self.message(for: error)
                     return

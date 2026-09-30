@@ -184,6 +184,10 @@ final class LocalAPIRouter {
     /// finished history entry (and its links) back in the response.
     private func run(_ input: UploadInput, to destination: DestinationConfig, expiryDays: Int) async -> HTTPResponse {
         let manager = appState.uploadManager
+        // One request, one upload: a folder (from the clipboard) always
+        // goes up as a ZIP here, whatever the destination does with folders.
+        var destination = destination
+        if FolderUpload.isFolder(input.fileURL) { destination.folderUpload = .zip }
         manager.upload([input], to: destination, expiryDays: expiryDays)
         guard let job = manager.jobs.first(where: { $0.input.fileURL == input.fileURL }) else {
             return .error(500, "The upload could not be queued.")

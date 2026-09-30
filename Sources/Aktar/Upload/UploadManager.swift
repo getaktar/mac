@@ -10,6 +10,9 @@ final class UploadManager {
     private(set) var jobs: [UploadJob] = []
     private var activeCount = 0
     private let maxConcurrent = 3
+    /// Folders uploaded with their structure that still have files going:
+    /// what's been copied so far, by position in the folder.
+    private var openGroups: [UUID: [Int: (link: URL, filename: String)]] = [:]
 
     /// Settings > Output: what's copied after an upload, unless the
     /// destination has its own choice.
@@ -86,7 +89,7 @@ final class UploadManager {
         guard let destination = destination ?? destinationStore.defaultDestination else { return }
         let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
         let days = rulesActive ? expiryDays ?? self.expiryDays(for: destination) : 0
-        let newJobs = inputs.map { input in
+        let newJobs = expandingFolders(inputs, for: destination).map { input in
             let jobDays: Int? = if let key = input.objectKey {
                 rulesActive ? UploadExpiry.days(forKey: key) : nil
             } else {
@@ -101,6 +104,40 @@ final class UploadManager {
     func cancel(_ job: UploadJob) {
         job.task?.cancel()
         job.state = .cancelled
+        if let group = job.input.group { finishGroupIfDone(group, destination: job.destination) }
+    }
+
+    /// Folders become one ZIP input (zipped when its turn comes, so a big
+    /// folder doesn't hold up the UI) or one input per file, depending on
+    /// the destination. Exact keys (the bucket browser) are left alone.
+    private func expandingFolders(_ inputs: [UploadInput], for destination: DestinationConfig) -> [UploadInput] {
+        inputs.flatMap { input -> [UploadInput] in
+            guard input.objectKey == nil, input.folderKey == nil, FolderUpload.isFolder(input.fileURL) else { return [input] }
+            let name = input.fileURL.lastPathComponent
+            switch destination.folderUpload ?? .default {
+            case .zip:
+                var zipped = input
+                zipped.originalFilename = name + ".zip"
+                return [zipped]
+            case .keepStructure:
+                do {
+                    let entries = try FolderUpload.files(in: input.fileURL)
+                    let prefix = FolderUpload.keyPrefix(template: destination.objectPathTemplate, folderName: name)
+                    let groupID = UUID()
+                    openGroups[groupID] = [:]
+                    return entries.enumerated().map { index, entry in
+                        var file = UploadInput(fileURL: entry.fileURL, originalFilename: entry.fileURL.lastPathComponent, source: input.source)
+                        file.folderKey = prefix + entry.relativePath
+                        file.group = UploadGroup(id: groupID, name: name, index: index, count: entries.count)
+                        return file
+                    }
+                } catch {
+                    let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                    NotificationService.notifyUploadFailed(filename: name, reason: message)
+                    return []
+                }
+            }
+        }
     }
 
     /// Drops a finished job from the list, e.g. one started through the
@@ -225,25 +262,37 @@ final class UploadManager {
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
                 let objectKey = job.input.objectKey ?? UploadExpiry.key(
-                    ObjectKeyGenerator.generate(
+                    job.input.folderKey ?? ObjectKeyGenerator.generate(
                         template: destination.objectPathTemplate,
                         originalFilename: job.input.originalFilename
                     ),
                     days: job.expiryDays
                 )
-                let contentType = ContentTypeResolver.resolve(for: job.input.fileURL)
+                // A folder (or a package, such as a Keynote document) goes
+                // up as a ZIP made on the spot.
+                var fileURL = job.input.fileURL
+                var zipped: URL?
+                if FolderUpload.isFolder(fileURL) {
+                    let folder = fileURL
+                    zipped = try await Task.detached(priority: .userInitiated) {
+                        try FolderUpload.zip(folder)
+                    }.value
+                    fileURL = zipped ?? fileURL
+                }
+                defer { if let zipped { FolderUpload.removeZip(zipped) } }
+                let contentType = ContentTypeResolver.resolve(for: fileURL)
 
                 // Photos lose their location (or all metadata) first, on a
                 // copy; everything else is uploaded as it is.
                 let policy = destination.imageMetadata ?? .default
-                let original = job.input.fileURL
+                let original = fileURL
                 let stripped = try await Task.detached(priority: .userInitiated) {
                     try ImageMetadataStripper.strippedCopy(of: original, policy: policy)
                 }.value
                 defer { if let stripped { ImageMetadataStripper.removeCopy(stripped) } }
 
                 let result = try await provider.upload(
-                    fileURL: stripped ?? job.input.fileURL,
+                    fileURL: stripped ?? fileURL,
                     objectKey: objectKey,
                     contentType: contentType
                 ) { progress in
@@ -258,7 +307,7 @@ final class UploadManager {
                     link = signed
                 }
 
-                self.finish(job: job, result: result, destination: destination, link: link)
+                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL)
             } catch {
                 self.fail(job: job, error: error, destination: destination)
             }
@@ -267,37 +316,73 @@ final class UploadManager {
 
     /// `link` is what's copied: the public URL, or a temporary link when
     /// the destination is set to one. History keeps the public URL.
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL) {
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
-        repository.record(result: result, input: job.input, destination: destination, expiryDays: job.expiryDays)
-
-        let output = OutputFormatter.format(
-            publicURL: link,
-            mode: outputMode(for: destination),
-            filename: job.input.originalFilename,
-            customTemplate: customTemplate
-        )
-        ClipboardService.copy(output)
-        NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename, expiryDays: job.expiryDays)
+        repository.record(result: result, input: job.input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL)
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
             userInfo: ["objectKey": result.objectKey, "byteSize": Int64(result.byteSize)]
         )
 
-        let closeAfterUpload = UserDefaults.standard.object(forKey: "closePopoverAfterUpload") as? Bool ?? true
-        if closeAfterUpload {
-            NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        // A file from a folder waits for the rest of it: the links are
+        // copied together, with one notification, once the last is done.
+        if let group = job.input.group, openGroups[group.id] != nil {
+            openGroups[group.id]?[group.index] = (link, job.input.originalFilename)
+            finishGroupIfDone(group, destination: destination)
+        } else {
+            ClipboardService.copy(format(link, filename: job.input.originalFilename, for: destination))
+            NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename, expiryDays: job.expiryDays)
+            closePanelIfWanted()
         }
 
         activeCount -= 1
         drainQueue()
     }
 
+    private func format(_ link: URL, filename: String, for destination: DestinationConfig) -> String {
+        OutputFormatter.format(publicURL: link, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
+    }
+
+    private func closePanelIfWanted() {
+        let closeAfterUpload = UserDefaults.standard.object(forKey: "closePopoverAfterUpload") as? Bool ?? true
+        if closeAfterUpload {
+            NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        }
+    }
+
+    /// Once none of a folder's files is waiting or uploading, copies the
+    /// links of the ones that made it, one per line and in folder order.
+    /// Failed files have their own notifications and can still be retried;
+    /// a retry then copies just its own link.
+    private func finishGroupIfDone(_ group: UploadGroup, destination: DestinationConfig) {
+        guard let links = openGroups[group.id] else { return }
+        let stillGoing = jobs.contains { job in
+            guard job.input.group?.id == group.id else { return false }
+            switch job.state {
+            case .waiting, .uploading: return true
+            case .succeeded, .failed, .cancelled: return false
+            }
+        }
+        guard !stillGoing else { return }
+        openGroups[group.id] = nil
+        guard !links.isEmpty else { return }
+        let output = links.keys.sorted().compactMap { links[$0] }
+            .map { format($0.link, filename: $0.filename, for: destination) }
+            .joined(separator: "\n")
+        ClipboardService.copy(output)
+        let summary = links.count == group.count
+            ? String(localized: "\(group.name) (\(group.count) files)")
+            : String(localized: "\(group.name) (\(links.count) of \(group.count) files)")
+        NotificationService.notifyUploadSucceeded(filename: summary)
+        closePanelIfWanted()
+    }
+
     private func fail(job: UploadJob, error: Error, destination: DestinationConfig) {
         let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         job.state = .failed(message)
         NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
+        if let group = job.input.group { finishGroupIfDone(group, destination: destination) }
 
         activeCount -= 1
         drainQueue()

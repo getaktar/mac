@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Folder uploads: drop a folder on the menu bar, send it from Finder's
+  Services or Share menu, or copy it and use the shortcut. A new Folders
+  choice in each destination's Upload Defaults uploads it as one ZIP (the
+  default, one link to share) or file by file with its subfolders, under a
+  new folder in the bucket, copying all the links at once when it's done.
+  Hidden files such as .env, .git and .DS_Store are left out either way
+- Dropping a folder into the bucket browser uploads it with its structure
+  into the current folder
+
 ## [0.8.0] - 2026-09-30
 
 ### Added

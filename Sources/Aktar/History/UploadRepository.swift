@@ -18,7 +18,10 @@ final class UploadRepository {
     }
 
     @discardableResult
-    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil) -> UploadRecord {
+    /// `uploadedFileURL` is the file that was actually sent when it isn't
+    /// `input.fileURL` itself, such as the ZIP of a folder.
+    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil, uploadedFileURL: URL? = nil) -> UploadRecord {
+        let fileURL = uploadedFileURL ?? input.fileURL
         let createdAt = Date.now
         let record = UploadRecord(
             localFilename: input.originalFilename,
@@ -26,14 +29,14 @@ final class UploadRepository {
             publicURLString: result.publicURL.absoluteString,
             destinationID: destination.id,
             destinationName: destination.name,
-            mimeType: ContentTypeResolver.resolve(for: input.fileURL),
+            mimeType: ContentTypeResolver.resolve(for: fileURL),
             byteSize: result.byteSize,
             createdAt: createdAt,
             expiresAt: expiryDays.map { createdAt.addingTimeInterval(TimeInterval($0) * 86_400) }
         )
         modelContext.insert(record)
         try? modelContext.save()
-        ThumbnailCache.store(sourceURL: input.fileURL, for: record.id)
+        ThumbnailCache.store(sourceURL: fileURL, for: record.id)
         return record
     }
 

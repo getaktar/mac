@@ -4,6 +4,98 @@
     "" : {
       "shouldTranslate" : false
     },
+    "%@ (%lld files)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld Dateien)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld archivos)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld fichiers)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（%lld 個のファイル）"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld arquivos)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld dosya)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（%lld 个文件）"
+          }
+        }
+      }
+    },
+    "%@ (%lld of %lld files)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld von %lld Dateien)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld de %lld archivos)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld fichiers sur %lld)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（%lld/%lld 個のファイル）"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld de %lld arquivos)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld/%lld dosya)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（%lld/%lld 个文件）"
+          }
+        }
+      }
+    },
     "%@ Copy" : {
       "localizations" : {
         "de" : {
@@ -92,6 +184,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 中已有文件。规则设置后，存储桶也会删除其中超过该文件夹天数的文件。"
+          }
+        }
+      }
+    },
+    "%@ has more than %lld files. Upload it as a ZIP instead." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ enthält mehr als %lld Dateien. Lade den Ordner stattdessen als ZIP hoch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tiene más de %lld archivos. Súbela como ZIP."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ contient plus de %lld fichiers. Envoyez-le plutôt en ZIP."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ には %lld 個を超えるファイルがあります。ZIPでアップロードしてください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tem mais de %lld arquivos. Envie como ZIP."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ içinde %lld dosyadan fazlası var. Bunun yerine ZIP olarak yükle."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 中的文件超过 %lld 个，请改为以 ZIP 上传。"
+          }
+        }
+      }
+    },
+    "%@ has no files to upload." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ enthält keine Dateien zum Hochladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no tiene archivos para subir."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ne contient aucun fichier à envoyer."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ にはアップロードするファイルがありません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não tem arquivos para enviar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ içinde yüklenecek dosya yok."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 中没有可上传的文件。"
           }
         }
       }
@@ -1019,48 +1203,48 @@
         }
       }
     },
-    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details." : {
+    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets. Bild-Metadaten gelten für Fotos: „Standort entfernen“ löscht die GPS-Position, „Alle entfernen“ auch Kamera, Datum und weitere Angaben."
+            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets. Bild-Metadaten gelten für Fotos: „Standort entfernen“ löscht die GPS-Position, „Alle entfernen“ auch Kamera, Datum und weitere Angaben. Ein Ordner wird als eine ZIP-Datei hochgeladen oder Datei für Datei mit seinen Unterordnern."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados. Metadatos de imagen se aplica a las fotos: Quitar ubicación elimina la posición GPS y Quitar todo también la cámara, la fecha y otros datos."
+            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados. Metadatos de imagen se aplica a las fotos: Quitar ubicación elimina la posición GPS y Quitar todo también la cámara, la fecha y otros datos. Una carpeta se sube como un solo archivo ZIP o archivo por archivo con sus subcarpetas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés. Les métadonnées des images concernent les photos : Supprimer la position retire la position GPS, Tout supprimer retire aussi l’appareil, la date et d’autres détails."
+            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés. Les métadonnées des images concernent les photos : Supprimer la position retire la position GPS, Tout supprimer retire aussi l’appareil, la date et d’autres détails. Un dossier est envoyé sous forme d’un seul fichier ZIP, ou fichier par fichier avec ses sous-dossiers."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。画像のメタデータは写真に適用されます。「位置情報を削除」はGPSの位置を、「すべて削除」はカメラや日時などの情報も削除します。"
+            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。画像のメタデータは写真に適用されます。「位置情報を削除」はGPSの位置を、「すべて削除」はカメラや日時などの情報も削除します。フォルダは1つのZIPファイルとして、またはサブフォルダを保ったままファイルごとにアップロードされます。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados. Metadados da imagem valem para fotos: Remover localização apaga a posição GPS e Remover tudo também apaga a câmera, a data e outros detalhes."
+            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados. Metadados da imagem valem para fotos: Remover localização apaga a posição GPS e Remover tudo também apaga a câmera, a data e outros detalhes. Uma pasta é enviada como um único arquivo ZIP ou arquivo por arquivo com as subpastas."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır. Görsel meta verileri fotoğraflar için geçerlidir: Konumu kaldır GPS konumunu siler, Tümünü kaldır kamera, tarih ve diğer bilgileri de siler."
+            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır. Görsel meta verileri fotoğraflar için geçerlidir: Konumu kaldır GPS konumunu siler, Tümünü kaldır kamera, tarih ve diğer bilgileri de siler. Bir klasör tek bir ZIP dosyası olarak ya da alt klasörleriyle birlikte dosya dosya yüklenir."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。图片元数据适用于照片：“移除位置信息”会删除 GPS 位置，“全部移除”还会删除相机、日期等其他信息。"
+            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。图片元数据适用于照片：“移除位置信息”会删除 GPS 位置，“全部移除”还会删除相机、日期等其他信息。文件夹会作为一个 ZIP 文件上传，或连同子文件夹逐个文件上传。"
           }
         }
       }
@@ -3039,6 +3223,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法验证身份。请检查访问密钥 ID 和私有访问密钥。"
+          }
+        }
+      }
+    },
+    "Couldn't make a ZIP of %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus %@ konnte kein ZIP erstellt werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo crear un ZIP de %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de créer un ZIP de %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のZIPを作成できませんでした。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível criar um ZIP de %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için ZIP oluşturulamadı."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法为 %@ 创建 ZIP。"
           }
         }
       }
@@ -5067,6 +5297,52 @@
         }
       }
     },
+    "Folders" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossiers"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フォルダ"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pastas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasörler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文件夹"
+          }
+        }
+      }
+    },
     "Folders: %lld · Files: %lld%@" : {
       "localizations" : {
         "de" : {
@@ -5529,6 +5805,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部保留"
+          }
+        }
+      }
+    },
+    "Keep folder structure" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordnerstruktur beibehalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantener la estructura de carpetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conserver l’arborescence"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フォルダ構造を保持"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter a estrutura de pastas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasör yapısını koru"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留文件夹结构"
           }
         }
       }
@@ -10507,6 +10829,52 @@
         }
       }
     },
+    "This upload's destination was removed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel dieses Uploads wurde entfernt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se eliminó el destino de esta subida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La destination de cet envoi a été supprimée."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアップロードのアップロード先は削除されました。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O destino deste envio foi removido."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu yüklemenin hedefi kaldırıldı."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此次上传的上传目标已被移除。"
+          }
+        }
+      }
+    },
     "This upload’s destination was removed." : {
       "localizations" : {
         "de" : {
@@ -11104,6 +11472,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上传文件…"
+          }
+        }
+      }
+    },
+    "Upload as ZIP" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als ZIP hochladen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subir como ZIP"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer en ZIP"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZIPでアップロード"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar como ZIP"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZIP olarak yükle"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以 ZIP 上传"
           }
         }
       }
