@@ -231,9 +231,29 @@ private struct GeneralSettingsView: View {
 }
 
 private struct DestinationsSettingsView: View {
+    /// What the destination form is open for. The sheet is driven by this
+    /// value itself (`sheet(item:)`), so the form always gets the
+    /// destination that was clicked; with a separate flag it could open
+    /// with a stale, empty one.
+    private enum FormTarget: Identifiable {
+        case add
+        case edit(DestinationConfig)
+
+        var id: String {
+            switch self {
+            case .add: return "add"
+            case .edit(let destination): return destination.id.uuidString
+            }
+        }
+
+        var destination: DestinationConfig? {
+            if case .edit(let destination) = self { return destination }
+            return nil
+        }
+    }
+
     @Environment(AppState.self) private var appState
-    @State private var isPresentingForm = false
-    @State private var editingDestination: DestinationConfig?
+    @State private var formTarget: FormTarget?
 
     var body: some View {
         SettingsPage(title: "Destinations", subtitle: "Manage where your files are uploaded.") {
@@ -246,15 +266,11 @@ private struct DestinationsSettingsView: View {
                             if index > 0 { SettingsCardDivider() }
                             DestinationRow(
                                 destination: destination,
-                                onEdit: {
-                                    editingDestination = destination
-                                    isPresentingForm = true
-                                },
+                                onEdit: { formTarget = .edit(destination) },
                                 onSetDefault: { appState.destinationStore.setDefault(destination) },
                                 onDuplicate: {
                                     guard let copy = appState.destinationStore.duplicate(destination) else { return }
-                                    editingDestination = copy
-                                    isPresentingForm = true
+                                    formTarget = .edit(copy)
                                 },
                                 onRemove: { appState.destinationStore.remove(destination) }
                             )
@@ -263,23 +279,22 @@ private struct DestinationsSettingsView: View {
                 }
 
                 Button {
-                    editingDestination = nil
-                    isPresentingForm = true
+                    formTarget = .add
                 } label: {
                     Label("Add Destination", systemImage: "plus")
                 }
                 .buttonStyle(.bordered)
             }
         }
-        .sheet(isPresented: $isPresentingForm) {
-            DestinationFormView(existing: editingDestination) { config, credentials in
-                if editingDestination != nil {
+        .sheet(item: $formTarget) { target in
+            DestinationFormView(existing: target.destination) { config, credentials in
+                if target.destination != nil {
                     appState.destinationStore.update(config)
                 } else {
                     appState.destinationStore.add(config)
                 }
                 try? KeychainService.save(credentials, for: config.id)
-                isPresentingForm = false
+                formTarget = nil
             }
         }
     }
@@ -295,8 +310,7 @@ private struct DestinationsSettingsView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                editingDestination = nil
-                isPresentingForm = true
+                formTarget = .add
             } label: {
                 Text("Add Destination")
             }

@@ -112,7 +112,9 @@ struct DestinationFormView: View {
                 }
 
                 Section {
-                    TextField("Access Key ID", text: $accessKeyId)
+                    // Saved keys stay in the Keychain and aren't shown;
+                    // leaving both fields empty keeps them.
+                    TextField("Access Key ID", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
                     SecureField(
                         "Secret Access Key",
                         text: $secretAccessKey,

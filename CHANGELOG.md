@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sharing the location. Covers JPEG, HEIC, PNG and TIFF, from every way of
   uploading, including the Finder service, the Share menu and the local API
 
+### Fixed
+
+- Editing a destination could open an empty form, as if adding a new one.
+  The form now always opens with the destination you clicked, and the key
+  fields say "Unchanged" when the saved keys are kept
+
 ## [0.7.0] - 2026-09-30
 
 ### Added
