@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-09-30
+
+### Changed
+
+- Test Connection shows each step on its own line: whether the upload
+  worked and whether the test file's public link opens, with the HTTP status
+  when it doesn't (for example 403)
+- When the public link fails, the result says what to do: allow public
+  reads on the bucket (on R2, turn on the r2.dev URL or connect a custom
+  domain), check the Public Base URL, or keep the bucket private and share
+  with Copy Temporary Link in the Library
+
+### Fixed
+
+- A bucket that accepts uploads but doesn't serve them no longer gets a test
+  result that starts with "Connection successful"
+- The public link check retries with GET when a server doesn't answer HEAD
+
 ## [0.5.1] - 2026-09-30
 
 ### Fixed
