@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-30
+
+### Added
+
+- A "Link" choice next to "Delete after" in the menu bar and in each
+  destination's Upload Defaults: copy the public URL, or a temporary link
+  valid for 1 hour, 24 hours or 7 days. Temporary links work for private
+  buckets, so a profile like "Temporary: 24 hours, delete after 1 day" or
+  "Private team bucket: 7 days" needs no trip to the provider's dashboard
+- Copy Temporary Link for uploads in the menu bar's recent list and in the
+  Library, to share a file again with a fresh link
+
 ## [0.5.3] - 2026-09-30
 
 ### Added
