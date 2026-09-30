@@ -251,6 +251,11 @@ private struct DestinationsSettingsView: View {
                                     isPresentingForm = true
                                 },
                                 onSetDefault: { appState.destinationStore.setDefault(destination) },
+                                onDuplicate: {
+                                    guard let copy = appState.destinationStore.duplicate(destination) else { return }
+                                    editingDestination = copy
+                                    isPresentingForm = true
+                                },
                                 onRemove: { appState.destinationStore.remove(destination) }
                             )
                         }
@@ -307,6 +312,7 @@ private struct DestinationRow: View {
     let destination: DestinationConfig
     let onEdit: () -> Void
     let onSetDefault: () -> Void
+    let onDuplicate: () -> Void
     let onRemove: () -> Void
 
     var body: some View {
@@ -335,6 +341,7 @@ private struct DestinationRow: View {
                 if !destination.isDefault {
                     Button("Set as Default", action: onSetDefault)
                 }
+                Button("Duplicate", action: onDuplicate)
                 Divider()
                 Button("Remove", role: .destructive, action: onRemove)
             } label: {

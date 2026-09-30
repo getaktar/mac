@@ -11,11 +11,18 @@ final class UploadManager {
     private var activeCount = 0
     private let maxConcurrent = 3
 
-    var outputMode: OutputMode = .url
-    var customTemplate: String = "![{filename}]({url})"
+    /// Settings > Output: what's copied after an upload, unless the
+    /// destination has its own choice.
+    var outputMode: OutputMode = UserDefaults.standard.string(forKey: "outputMode").flatMap(OutputMode.init(rawValue:)) ?? .url {
+        didSet { UserDefaults.standard.set(outputMode.rawValue, forKey: "outputMode") }
+    }
+    var customTemplate: String = UserDefaults.standard.string(forKey: "customTemplate") ?? "![{filename}]({url})" {
+        didSet { UserDefaults.standard.set(customTemplate, forKey: "customTemplate") }
+    }
 
-    /// The "Delete after" choice in the menu bar, in days (0 = keep). It
-    /// sticks between uploads and launches, like the default destination.
+    /// The last "Delete after" choice, in days (0 = keep), from before
+    /// destinations kept their own. It still applies to a destination that
+    /// hasn't had one picked yet.
     var expiryDays: Int = UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey) {
         didSet { UserDefaults.standard.set(expiryDays, forKey: UploadExpiry.defaultsKey) }
     }
@@ -32,7 +39,24 @@ final class UploadManager {
     /// none until its bucket has Aktar's lifecycle rules.
     func effectiveExpiryDays(for destination: DestinationConfig?) -> Int {
         guard let destination, ExpiryRuleStore.shared.isActive(destination.id) else { return 0 }
-        return expiryDays
+        return expiryDays(for: destination)
+    }
+
+    /// The "Delete after" choice for `destination`, whether or not its
+    /// bucket has the rules yet.
+    func expiryDays(for destination: DestinationConfig) -> Int {
+        destination.expiryDays ?? expiryDays
+    }
+
+    /// Picking "Delete after" in the menu bar sets it for that destination.
+    func setExpiryDays(_ days: Int, for destination: DestinationConfig) {
+        var destination = destination
+        destination.expiryDays = days
+        destinationStore.update(destination)
+    }
+
+    func outputMode(for destination: DestinationConfig) -> OutputMode {
+        destination.outputMode ?? outputMode
     }
 
     /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
@@ -44,7 +68,7 @@ final class UploadManager {
     func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil) {
         guard let destination = destination ?? destinationStore.defaultDestination else { return }
         let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
-        let days = rulesActive ? expiryDays ?? self.expiryDays : 0
+        let days = rulesActive ? expiryDays ?? self.expiryDays(for: destination) : 0
         let newJobs = inputs.map { input in
             let jobDays: Int? = if let key = input.objectKey {
                 rulesActive ? UploadExpiry.days(forKey: key) : nil
@@ -213,7 +237,7 @@ final class UploadManager {
 
         let output = OutputFormatter.format(
             publicURL: result.publicURL,
-            mode: outputMode,
+            mode: outputMode(for: destination),
             filename: job.input.originalFilename,
             customTemplate: customTemplate
         )

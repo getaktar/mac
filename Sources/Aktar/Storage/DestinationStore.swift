@@ -55,6 +55,24 @@ final class DestinationStore {
         save()
     }
 
+    /// A copy under a new ID with the same keys, as a starting point for
+    /// another profile on the same bucket. Nil if the keys can't be read.
+    func duplicate(_ destination: DestinationConfig) -> DestinationConfig? {
+        guard let credentials = try? KeychainService.load(for: destination.id) else { return nil }
+        var copy = destination
+        copy.id = UUID()
+        copy.name = String(localized: "\(destination.name) Copy")
+        copy.isDefault = false
+        do {
+            try KeychainService.save(credentials, for: copy.id)
+        } catch {
+            return nil
+        }
+        ExpiryRuleStore.shared.set(copy.id, active: ExpiryRuleStore.shared.isActive(destination.id))
+        add(copy)
+        return copy
+    }
+
     func setDefault(_ destination: DestinationConfig) {
         defaultID = destination.id
         syncDefaultFlags()

@@ -17,6 +17,9 @@ struct DestinationFormView: View {
     @State private var bucket: String
     @State private var publicBaseURL: String
     @State private var objectPathTemplate: String
+    /// Nil follows Settings > Output.
+    @State private var outputMode: OutputMode?
+    @State private var expiryDays: Int
     @State private var testResult: ConnectionResult?
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
@@ -53,6 +56,8 @@ struct DestinationFormView: View {
         _bucket = State(initialValue: existing?.bucket ?? "")
         _publicBaseURL = State(initialValue: existing?.publicBaseURL ?? "")
         _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
+        _outputMode = State(initialValue: existing?.outputMode)
+        _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
         _expiryRulesActive = State(initialValue: initialExpiryRulesActive)
@@ -136,6 +141,8 @@ struct DestinationFormView: View {
 
                 autoDeleteSection
 
+                uploadDefaultsSection
+
                 if let testError {
                     Section {
                         Label(testError, systemImage: "xmark.circle.fill")
@@ -168,6 +175,31 @@ struct DestinationFormView: View {
             .padding()
         }
         .frame(width: 520, height: 580)
+    }
+
+    /// What makes a destination an upload profile: pick it in the menu bar
+    /// and its uploads are copied and expire the way it says.
+    private var uploadDefaultsSection: some View {
+        Section {
+            Picker("Copy as", selection: $outputMode) {
+                Text("Same as Settings").tag(OutputMode?.none)
+                ForEach(OutputMode.allCases) { mode in
+                    Text(LocalizedStringKey(mode.displayName)).tag(OutputMode?.some(mode))
+                }
+            }
+            Picker("Delete after", selection: $expiryDays) {
+                ForEach([0] + UploadExpiry.options, id: \.self) { days in
+                    Text(UploadExpiry.label(days: days)).tag(days)
+                }
+            }
+            .disabled(!expiryRulesActive)
+        } header: {
+            Text("Upload Defaults")
+        } footer: {
+            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var autoDeleteSection: some View {
@@ -367,7 +399,9 @@ struct DestinationFormView: View {
             publicBaseURL: publicBaseURL,
             objectPathTemplate: objectPathTemplate,
             forcePathStyle: preset.defaultForcePathStyle,
-            isDefault: existing?.isDefault ?? false
+            isDefault: existing?.isDefault ?? false,
+            outputMode: outputMode,
+            expiryDays: expiryDays
         )
     }
 

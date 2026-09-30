@@ -124,13 +124,17 @@ struct MenuBarView: View {
     /// Durations are only offered once the destination's bucket has the
     /// lifecycle rules; until then the menu offers to set them up.
     private var expiryPicker: some View {
-        @Bindable var manager = appState.uploadManager
+        let manager = appState.uploadManager
         let destination = appState.destinationStore.defaultDestination
         let isReady = destination.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
+        let selection = Binding(
+            get: { destination.map(manager.expiryDays(for:)) ?? 0 },
+            set: { days in destination.map { manager.setExpiryDays(days, for: $0) } }
+        )
         return VStack(alignment: .leading, spacing: 4) {
             Text("Delete after").font(.caption).foregroundStyle(.secondary)
             Menu {
-                Picker("Delete after", selection: $manager.expiryDays) {
+                Picker("Delete after", selection: selection) {
                     ForEach([0] + UploadExpiry.options, id: \.self) { days in
                         Text(UploadExpiry.label(days: days)).tag(days)
                     }
@@ -233,9 +237,10 @@ struct MenuBarView: View {
 
             // Kept visible whenever it's on, so a sticky "Delete after"
             // choice can't quietly apply to a file meant to stay.
-            if appState.uploadManager.effectiveExpiryDays(for: appState.destinationStore.defaultDestination) > 0 {
+            let expiryDays = appState.uploadManager.effectiveExpiryDays(for: appState.destinationStore.defaultDestination)
+            if expiryDays > 0 {
                 Label(
-                    String(localized: "Deletes after \(UploadExpiry.label(days: appState.uploadManager.expiryDays))"),
+                    String(localized: "Deletes after \(UploadExpiry.label(days: expiryDays))"),
                     systemImage: "timer"
                 )
                 .font(.caption)

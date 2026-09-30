@@ -58,6 +58,13 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     var objectPathTemplate: String
     var forcePathStyle: Bool
     var isDefault: Bool
+    /// What's copied after an upload here; nil follows Settings > Output.
+    /// With this and `expiryDays`, destinations work as upload profiles
+    /// ("Builds", "Logs", "Screenshots"), even several on one bucket.
+    var outputMode: OutputMode?
+    /// "Delete after" for uploads here, in days (0 keeps them); nil until
+    /// it's picked for this destination, when the last choice applies.
+    var expiryDays: Int?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"
