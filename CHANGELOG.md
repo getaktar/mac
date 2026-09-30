@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-09-30
+
+### Added
+
+- 5 minute and 15 minute temporary links, in the menu bar's Link choice,
+  a destination's Upload Defaults and Copy Temporary Link. For credentials
+  and other confidential files, the link stops working minutes after it's
+  sent, and Delete Remote File removes the file once it has arrived
+
 ## [0.9.0] - 2026-09-30
 
 ### Added
