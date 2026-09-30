@@ -59,6 +59,23 @@ final class UploadManager {
         destination.outputMode ?? outputMode
     }
 
+    /// Picking "Link" in the menu bar sets it for that destination.
+    func setTemporaryLink(_ duration: TemporaryLinkDuration?, for destination: DestinationConfig) {
+        var destination = destination
+        destination.temporaryLink = duration
+        destinationStore.update(destination)
+    }
+
+    /// A new temporary link to an uploaded file, for sharing it from
+    /// history, e.g. when the bucket is private.
+    func temporaryURL(for record: UploadRecord, validFor duration: TemporaryLinkDuration) async throws -> URL {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) else {
+            throw StorageError.unknown(String(localized: "This upload's destination was removed."))
+        }
+        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        return try await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue)
+    }
+
     /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
     /// the file). Nothing sent to a destination whose bucket doesn't have the
     /// lifecycle rules expires. An upload to an exact key (the bucket
@@ -224,19 +241,29 @@ final class UploadManager {
                     job.state = .uploading(progress: progress)
                 }
 
-                self.finish(job: job, result: result, destination: destination)
+                // Signing happens locally, so this only fails on a broken
+                // endpoint, where the public URL is the better fallback.
+                var link = result.publicURL
+                if let duration = destination.temporaryLink,
+                   let signed = try? await provider.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
+                    link = signed
+                }
+
+                self.finish(job: job, result: result, destination: destination, link: link)
             } catch {
                 self.fail(job: job, error: error, destination: destination)
             }
         }
     }
 
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig) {
+    /// `link` is what's copied: the public URL, or a temporary link when
+    /// the destination is set to one. History keeps the public URL.
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
         repository.record(result: result, input: job.input, destination: destination, expiryDays: job.expiryDays)
 
         let output = OutputFormatter.format(
-            publicURL: result.publicURL,
+            publicURL: link,
             mode: outputMode(for: destination),
             filename: job.input.originalFilename,
             customTemplate: customTemplate

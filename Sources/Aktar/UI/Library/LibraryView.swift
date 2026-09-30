@@ -252,6 +252,7 @@ struct LibraryView: View {
             Button("Copy URL") { ClipboardService.copy(record.publicURLString) }
             Button("Copy Markdown") { ClipboardService.copy(markdown(for: record)) }
             Button("Copy HTML") { ClipboardService.copy(html(for: record)) }
+            RecordTemporaryLinkMenu(record: record)
             Divider()
             Button("Open in Browser") {
                 if let url = record.publicURL { NSWorkspace.shared.open(url) }
@@ -1233,6 +1234,7 @@ private struct UploadDetailView: View {
                     }
                 }
                 Button("Copy Object Key") { ClipboardService.copy(record.objectKey) }
+                RecordTemporaryLinkMenu(record: record)
                 Divider()
                 Button("Open in Browser") {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }

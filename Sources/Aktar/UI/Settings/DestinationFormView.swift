@@ -20,6 +20,7 @@ struct DestinationFormView: View {
     /// Nil follows Settings > Output.
     @State private var outputMode: OutputMode?
     @State private var expiryDays: Int
+    @State private var temporaryLink: TemporaryLinkDuration?
     @State private var testResult: ConnectionResult?
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
@@ -57,6 +58,7 @@ struct DestinationFormView: View {
         _publicBaseURL = State(initialValue: existing?.publicBaseURL ?? "")
         _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
         _outputMode = State(initialValue: existing?.outputMode)
+        _temporaryLink = State(initialValue: existing?.temporaryLink)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
@@ -187,6 +189,12 @@ struct DestinationFormView: View {
                     Text(LocalizedStringKey(mode.displayName)).tag(OutputMode?.some(mode))
                 }
             }
+            Picker("Link", selection: $temporaryLink) {
+                Text(TemporaryLinkDuration.label(nil)).tag(TemporaryLinkDuration?.none)
+                ForEach(TemporaryLinkDuration.allCases) { duration in
+                    Text(TemporaryLinkDuration.label(duration)).tag(TemporaryLinkDuration?.some(duration))
+                }
+            }
             Picker("Delete after", selection: $expiryDays) {
                 ForEach([0] + UploadExpiry.options, id: \.self) { days in
                     Text(UploadExpiry.label(days: days)).tag(days)
@@ -196,7 +204,7 @@ struct DestinationFormView: View {
         } header: {
             Text("Upload Defaults")
         } footer: {
-            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults.")
+            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -401,7 +409,8 @@ struct DestinationFormView: View {
             forcePathStyle: preset.defaultForcePathStyle,
             isDefault: existing?.isDefault ?? false,
             outputMode: outputMode,
-            expiryDays: expiryDays
+            expiryDays: expiryDays,
+            temporaryLink: temporaryLink
         )
     }
 

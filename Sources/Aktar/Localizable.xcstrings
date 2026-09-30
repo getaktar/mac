@@ -280,6 +280,144 @@
         }
       }
     },
+    "1 hour" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Stunde"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 hora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 heure"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1時間"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 hora"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 saat"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 小时"
+          }
+        }
+      }
+    },
+    "24 hours" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 Stunden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 horas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 heures"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24時間"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 horas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 saat"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 小时"
+          }
+        }
+      }
+    },
+    "7 days" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Tage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 jours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7日"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 dias"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 gün"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 天"
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "de" : {
@@ -789,48 +927,48 @@
         }
       }
     },
-    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults." : {
+    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards."
+            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores."
+            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages."
+            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。"
+            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões."
+            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır."
+            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。"
+            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。"
           }
         }
       }
@@ -2717,6 +2855,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "复制为"
+          }
+        }
+      }
+    },
+    "Copy the public URL after an upload, or a temporary link that stops working after this long. Temporary links also work for private buckets." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem Upload die öffentliche URL kopieren oder einen temporären Link, der nach dieser Zeit nicht mehr funktioniert. Temporäre Links funktionieren auch bei privaten Buckets."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia la URL pública tras la subida, o un enlace temporal que deja de funcionar pasado este tiempo. Los enlaces temporales también funcionan con buckets privados."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copier l’URL publique après l’envoi, ou un lien temporaire qui cesse de fonctionner après ce délai. Les liens temporaires fonctionnent aussi avec les buckets privés."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード後に公開URLをコピーするか、この時間が過ぎると使えなくなる期限付きリンクをコピーします。期限付きリンクは非公開のバケットでも使えます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia a URL pública após o envio, ou um link temporário que para de funcionar depois desse tempo. Links temporários também funcionam com buckets privados."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemeden sonra genel URL'yi ya da bu süre dolunca çalışmayı bırakan süreli bir bağlantıyı kopyala. Süreli bağlantılar gizli bucket'larda da çalışır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传后复制公开 URL，或复制一个在此时长后失效的临时链接。临时链接也适用于私有存储桶。"
           }
         }
       }
@@ -7146,6 +7330,52 @@
         }
       }
     },
+    "Public" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentlich"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Público"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Público"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herkese açık"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开"
+          }
+        }
+      }
+    },
     "Public Base URL" : {
       "localizations" : {
         "de" : {
@@ -9951,6 +10181,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此服务商不支持生命周期规则。"
+          }
+        }
+      }
+    },
+    "This upload’s destination was removed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel dieses Uploads wurde entfernt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se eliminó el destino de esta subida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La destination de cet envoi a été supprimée."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアップロードのアップロード先は削除されています。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O destino deste envio foi removido."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu yüklemenin hedefi kaldırılmış."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此上传的目标已被移除。"
           }
         }
       }

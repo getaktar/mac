@@ -69,6 +69,7 @@ struct MenuBarView: View {
             HStack(alignment: .bottom, spacing: 8) {
                 destinationPicker
                 expiryPicker
+                linkPicker
             }
             dropzone
             recentSection
@@ -116,6 +117,42 @@ struct MenuBarView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6))
             }
             .menuStyle(.borderlessButton)
+        }
+    }
+
+    // MARK: - Link
+
+    /// Public URL or a temporary link, for the selected destination.
+    private var linkPicker: some View {
+        let manager = appState.uploadManager
+        let destination = appState.destinationStore.defaultDestination
+        let selection = Binding(
+            get: { destination?.temporaryLink },
+            set: { duration in destination.map { manager.setTemporaryLink(duration, for: $0) } }
+        )
+        return VStack(alignment: .leading, spacing: 4) {
+            Text("Link").font(.caption).foregroundStyle(.secondary)
+            Menu {
+                Picker("Link", selection: selection) {
+                    Text(TemporaryLinkDuration.label(nil)).tag(TemporaryLinkDuration?.none)
+                    ForEach(TemporaryLinkDuration.allCases) { duration in
+                        Text(TemporaryLinkDuration.label(duration)).tag(TemporaryLinkDuration?.some(duration))
+                    }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } label: {
+                Text(TemporaryLinkDuration.label(destination?.temporaryLink))
+                    .lineLimit(1)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .disabled(destination == nil)
+            .help("Copy the public URL after an upload, or a temporary link that stops working after this long. Temporary links also work for private buckets.")
         }
     }
 
@@ -433,6 +470,7 @@ private struct RecentRowView: View {
                 Button("Copy URL") { ClipboardService.copy(record.publicURLString) }
                 Button("Copy Markdown") { copy(mode: .markdown) }
                 Button("Copy HTML") { copy(mode: .html) }
+                RecordTemporaryLinkMenu(record: record)
                 Divider()
                 Button("Open in Browser") {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }

@@ -2,24 +2,6 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// How long a "Copy Temporary Link" link stays valid. Seven days is the
-/// longest an S3 presigned URL can last.
-private enum TemporaryLinkDuration: Int64, CaseIterable, Identifiable {
-    case hour = 3600
-    case day = 86_400
-    case week = 604_800
-
-    var id: Int64 { rawValue }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .hour: return "Valid for 1 Hour"
-        case .day: return "Valid for 1 Day"
-        case .week: return "Valid for 7 Days"
-        }
-    }
-}
-
 // MARK: - List (content column)
 
 private struct SearchTrigger: Equatable {

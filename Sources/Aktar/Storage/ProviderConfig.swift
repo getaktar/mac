@@ -65,6 +65,9 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// "Delete after" for uploads here, in days (0 keeps them); nil until
     /// it's picked for this destination, when the last choice applies.
     var expiryDays: Int?
+    /// Copy a temporary link valid this long after each upload instead of
+    /// the public URL; nil copies the public URL.
+    var temporaryLink: TemporaryLinkDuration?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"
