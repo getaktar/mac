@@ -9,8 +9,8 @@ options:
 # One version for the app and its Share extension, which must match.
 settings:
   base:
-    MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "9"
+    MARKETING_VERSION: "0.7.0"
+    CURRENT_PROJECT_VERSION: "10"
 
 packages:
   Soto:
