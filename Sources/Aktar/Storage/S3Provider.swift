@@ -56,17 +56,17 @@ final class S3Provider: StorageProvider, Sendable {
             writable = false
         }
 
-        var publicURLReachable: Bool?
+        var publicLink: PublicLinkCheck?
         if writable, !config.publicBaseURL.isEmpty {
             let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: testKey)
-            publicURLReachable = await Self.probe(url: url)
+            publicLink = await Self.probe(url: url)
         }
 
         if writable {
             _ = try? await s3.deleteObject(.init(bucket: config.bucket, key: testKey))
         }
 
-        return ConnectionResult(bucketReachable: true, writable: writable, publicURLReachable: publicURLReachable)
+        return ConnectionResult(bucketReachable: true, writable: writable, publicLink: publicLink)
     }
 
     func upload(
@@ -351,17 +351,22 @@ final class S3Provider: StorageProvider, Sendable {
             .joined(separator: "/")
     }
 
-    private static func probe(url: URL) async -> Bool {
+    private static func probe(url: URL) async -> PublicLinkCheck {
+        let head = await status(of: url, method: "HEAD")
+        // Some servers and CDNs don't answer HEAD; ask again the way a
+        // browser would before calling the link broken.
+        let status = head == 405 || head == 501 ? await status(of: url, method: "GET") : head
+        guard let status else { return .noResponse }
+        return (200..<300).contains(status) ? .reachable : .status(status)
+    }
+
+    private static func status(of url: URL, method: String) async -> Int? {
         var request = URLRequest(url: url)
-        request.httpMethod = "HEAD"
+        request.httpMethod = method
         request.timeoutInterval = 8
-        do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            if let http = response as? HTTPURLResponse { return (200..<300).contains(http.statusCode) }
-            return false
-        } catch {
-            return false
-        }
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        let response = try? await URLSession.shared.data(for: request).1
+        return (response as? HTTPURLResponse)?.statusCode
     }
 
     private static func mapError(_ error: Error, bucket: String) -> StorageError {

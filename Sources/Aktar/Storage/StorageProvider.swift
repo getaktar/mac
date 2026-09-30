@@ -3,7 +3,19 @@ import Foundation
 struct ConnectionResult {
     let bucketReachable: Bool
     let writable: Bool
-    let publicURLReachable: Bool?
+    /// What opening the test file's public link returned. Nil when nothing
+    /// was uploaded to open.
+    let publicLink: PublicLinkCheck?
+}
+
+/// The outcome of opening a link the way someone it's shared with would.
+enum PublicLinkCheck: Equatable {
+    case reachable
+    /// The server answered with a status outside 2xx, such as 403 from a
+    /// bucket that accepts uploads but doesn't allow public reads.
+    case status(Int)
+    /// No HTTP answer at all: DNS, TLS or a timeout.
+    case noResponse
 }
 
 /// One level of a bucket, as S3 lists it with a "/" delimiter: the

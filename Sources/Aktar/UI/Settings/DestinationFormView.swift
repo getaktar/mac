@@ -17,8 +17,9 @@ struct DestinationFormView: View {
     @State private var bucket: String
     @State private var publicBaseURL: String
     @State private var objectPathTemplate: String
-    @State private var testResultMessage: String?
-    @State private var testSucceeded = false
+    @State private var testResult: ConnectionResult?
+    /// Why the test couldn't reach the bucket at all.
+    @State private var testError: String?
     @State private var isTesting = false
     @State private var expiryRulesActive: Bool
     /// Whether the saved destination had the rules when the form opened.
@@ -135,12 +136,13 @@ struct DestinationFormView: View {
 
                 autoDeleteSection
 
-                if let testResultMessage {
+                if let testError {
                     Section {
-                        Text(testResultMessage)
-                            .font(.caption)
-                            .foregroundStyle(testSucceeded ? .green : .red)
+                        Label(testError, systemImage: "xmark.circle.fill")
+                            .foregroundStyle(.red)
                     }
+                } else if let testResult {
+                    testResultSection(testResult)
                 }
             }
             .formStyle(.grouped)
@@ -252,7 +254,8 @@ struct DestinationFormView: View {
     /// A rules result for the bucket the form pointed at before isn't true
     /// of the one it points at now.
     private func connectionEdited() {
-        testResultMessage = nil
+        testResult = nil
+        testError = nil
         guard checkedExpiryRules || expiryRulesActive || expiryRulesError != nil else { return }
         checkedExpiryRules = false
         checkedConnection = nil
@@ -375,28 +378,57 @@ struct DestinationFormView: View {
         let credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
         let provider = S3Provider(config: config, credentials: credentials)
         do {
-            let result = try await provider.testConnection()
-            testSucceeded = result.writable
-            var parts: [String] = []
-            if result.writable {
-                parts.append(String(localized: "✓ Connection successful."))
-            }
-            parts.append(
-                result.writable
-                    ? String(localized: "Bucket reachable. Write access: Yes.")
-                    : String(localized: "Bucket reachable. Write access: No.")
-            )
-            if let publicURLReachable = result.publicURLReachable {
-                parts.append(
-                    publicURLReachable
-                        ? String(localized: "Public URL: Reachable.")
-                        : String(localized: "⚠ Public URL does not appear to be publicly accessible.")
-                )
-            }
-            testResultMessage = parts.joined(separator: " ")
+            testResult = try await provider.testConnection()
+            testError = nil
         } catch {
-            testSucceeded = false
-            testResultMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            testResult = nil
+            testError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    /// One line per step of the test, so a bucket that takes uploads but
+    /// won't serve them reads as a problem instead of a success.
+    private func testResultSection(_ result: ConnectionResult) -> some View {
+        Section {
+            if result.writable {
+                Label("Upload: works", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            } else {
+                Label("Upload: failed. This key can read the bucket but can\u{2019}t write to it.", systemImage: "xmark.circle.fill")
+                    .foregroundStyle(.red)
+            }
+            switch result.publicLink {
+            case .reachable:
+                Label("Public link: works", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            case .status(let code):
+                Label("Public link: failed (HTTP \(String(code)))", systemImage: "xmark.circle.fill")
+                    .foregroundStyle(.red)
+            case .noResponse:
+                Label("Public link: no response", systemImage: "xmark.circle.fill")
+                    .foregroundStyle(.red)
+            case nil:
+                EmptyView()
+            }
+        } footer: {
+            if let hint = publicLinkHint(result.publicLink) {
+                Text(hint)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func publicLinkHint(_ check: PublicLinkCheck?) -> String? {
+        switch check {
+        case .status(401), .status(403):
+            return String(localized: "Uploads work, but anyone who opens a link gets an error. Allow public reads on the bucket (on R2, turn on the r2.dev URL or connect a custom domain), or keep it private and share files with Copy Temporary Link in the Library.")
+        case .status(404):
+            return String(localized: "The test file was uploaded, but it isn\u{2019}t at the Public Base URL. Check that the URL points to this bucket.")
+        case .status, .noResponse:
+            return String(localized: "The Public Base URL didn\u{2019}t serve the test file. Check the domain and that it points to this bucket.")
+        case .reachable, nil:
+            return nil
         }
     }
 

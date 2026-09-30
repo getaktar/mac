@@ -1065,98 +1065,6 @@
         }
       }
     },
-    "Bucket reachable. Write access: No." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket erreichbar. Schreibzugriff: Nein."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket accesible. Acceso de escritura: no."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket accessible. Accès en écriture : non."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "バケットに接続できました。書き込み権限: なし。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket acessível. Acesso de gravação: não."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket'a erişildi. Yazma izni: Yok."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "存储桶可访问。写入权限：无。"
-          }
-        }
-      }
-    },
-    "Bucket reachable. Write access: Yes." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket erreichbar. Schreibzugriff: Ja."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket accesible. Acceso de escritura: sí."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket accessible. Accès en écriture : oui."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "バケットに接続できました。書き込み権限: あり。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket acessível. Acesso de gravação: sim."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucket'a erişildi. Yazma izni: Var."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "存储桶可访问。写入权限：有。"
-          }
-        }
-      }
-    },
     "Bucket “%@” could not be found." : {
       "localizations" : {
         "de" : {
@@ -7100,48 +7008,140 @@
         }
       }
     },
-    "Public URL: Reachable." : {
+    "Public link: failed (HTTP %@)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffentliche URL: Erreichbar."
+            "value" : "Öffentlicher Link: fehlgeschlagen (HTTP %@)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL pública: accesible."
+            "value" : "Enlace público: falló (HTTP %@)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL publique : accessible."
+            "value" : "Lien public : échec (HTTP %@)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公開URL: アクセス可能。"
+            "value" : "公開リンク: 失敗 (HTTP %@)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL pública: acessível."
+            "value" : "Link público: falhou (HTTP %@)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genel URL: Erişilebilir."
+            "value" : "Genel bağlantı: başarısız (HTTP %@)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公开 URL：可访问。"
+            "value" : "公开链接：失败 (HTTP %@)"
+          }
+        }
+      }
+    },
+    "Public link: no response" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentlicher Link: keine Antwort"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enlace público: sin respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lien public : aucune réponse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開リンク: 応答なし"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link público: sem resposta"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bağlantı: yanıt yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开链接：无响应"
+          }
+        }
+      }
+    },
+    "Public link: works" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentlicher Link: funktioniert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enlace público: funciona"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lien public : fonctionne"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開リンク: 成功"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link público: funciona"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bağlantı: çalışıyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开链接：正常"
           }
         }
       }
@@ -9127,6 +9127,52 @@
         }
       }
     },
+    "The Public Base URL didn’t serve the test file. Check the domain and that it points to this bucket." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die öffentliche Basis-URL hat die Testdatei nicht ausgeliefert. Prüfe die Domain und ob sie auf diesen Bucket zeigt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La URL base pública no sirvió el archivo de prueba. Comprueba el dominio y que apunte a este bucket."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’URL de base publique n’a pas servi le fichier de test. Vérifiez le domaine et qu’il pointe vers ce bucket."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開ベースURLからテストファイルを取得できませんでした。ドメインと、それがこのバケットを指しているか確認してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A URL base pública não serviu o arquivo de teste. Verifique o domínio e se ele aponta para este bucket."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel Temel URL test dosyasını sunmadı. Alan adını ve bu bucket'ı gösterdiğini kontrol et."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开基础 URL 未能提供测试文件。请检查域名以及它是否指向此存储桶。"
+          }
+        }
+      }
+    },
     "The Raycast extension “%@” wants to upload files, browse your buckets, and manage your upload history through Aktar. This turns on Aktar’s local API, which you can turn off any time in Settings > Integrations." : {
       "localizations" : {
         "de" : {
@@ -9491,6 +9537,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "远程文件将被删除，其链接可能会失效。此操作无法撤销。"
+          }
+        }
+      }
+    },
+    "The test file was uploaded, but it isn’t at the Public Base URL. Check that the URL points to this bucket." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Testdatei wurde hochgeladen, ist aber unter der öffentlichen Basis-URL nicht zu finden. Prüfe, ob die URL auf diesen Bucket zeigt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo de prueba se subió, pero no está en la URL base pública. Comprueba que la URL apunte a este bucket."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier de test a été envoyé, mais il n’est pas à l’URL de base publique. Vérifiez que l’URL pointe vers ce bucket."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テストファイルはアップロードされましたが、公開ベースURLにありません。URLがこのバケットを指しているか確認してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo de teste foi enviado, mas não está na URL base pública. Verifique se a URL aponta para este bucket."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test dosyası yüklendi ama Genel Temel URL'de bulunamadı. URL'nin bu bucket'ı gösterdiğini kontrol et."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "测试文件已上传，但在公开基础 URL 下找不到。请检查该 URL 是否指向此存储桶。"
           }
         }
       }
@@ -10418,6 +10510,98 @@
         }
       }
     },
+    "Upload: failed. This key can read the bucket but can’t write to it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upload: fehlgeschlagen. Dieser Schlüssel kann den Bucket lesen, aber nicht hineinschreiben."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subida: falló. Esta clave puede leer el bucket, pero no escribir en él."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoi : échec. Cette clé peut lire le bucket, mais pas y écrire."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード: 失敗。このキーはバケットを読み取れますが、書き込みはできません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envio: falhou. Esta chave consegue ler o bucket, mas não gravar nele."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme: başarısız. Bu anahtar bucket'ı okuyabiliyor ama yazamıyor."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传：失败。此密钥可以读取存储桶，但无法写入。"
+          }
+        }
+      }
+    },
+    "Upload: works" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upload: funktioniert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subida: funciona"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoi : fonctionne"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード: 成功"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envio: funciona"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme: çalışıyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传：正常"
+          }
+        }
+      }
+    },
     "Uploaded" : {
       "localizations" : {
         "de" : {
@@ -10506,6 +10690,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上传"
+          }
+        }
+      }
+    },
+    "Uploads work, but anyone who opens a link gets an error. Allow public reads on the bucket (on R2, turn on the r2.dev URL or connect a custom domain), or keep it private and share files with Copy Temporary Link in the Library." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uploads funktionieren, aber wer einen Link öffnet, bekommt einen Fehler. Erlaube öffentliches Lesen für den Bucket (bei R2 die r2.dev-URL aktivieren oder eine eigene Domain verbinden) oder lass ihn privat und teile Dateien mit „Temporären Link kopieren“ in der Mediathek."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las subidas funcionan, pero quien abra un enlace verá un error. Permite la lectura pública del bucket (en R2, activa la URL r2.dev o conecta un dominio propio), o mantenlo privado y comparte archivos con «Copiar enlace temporal» en la Biblioteca."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les envois fonctionnent, mais toute personne qui ouvre un lien obtient une erreur. Autorisez la lecture publique du bucket (sur R2, activez l’URL r2.dev ou connectez un domaine personnalisé), ou gardez-le privé et partagez les fichiers avec « Copier un lien temporaire » dans la Bibliothèque."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロードはできますが、リンクを開いた人にはエラーが表示されます。バケットの公開読み取りを許可するか（R2 では r2.dev URL を有効にするか独自ドメインを接続）、非公開のままライブラリの「期限付きリンクをコピー」でファイルを共有してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os envios funcionam, mas quem abrir um link verá um erro. Permita leitura pública no bucket (no R2, ative a URL r2.dev ou conecte um domínio próprio), ou mantenha-o privado e compartilhe arquivos com “Copiar link temporário” na Biblioteca."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme çalışıyor ama linki açan herkes hata alacak. Bucket'ta herkese açık okumaya izin ver (R2'de r2.dev URL'sini aç ya da özel bir alan adı bağla) veya bucket'ı gizli tut ve dosyaları Arşiv'deki \"Süreli Bağlantıyı Kopyala\" ile paylaş."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传正常，但任何人打开链接都会看到错误。请允许公开读取此存储桶（在 R2 上开启 r2.dev URL 或连接自定义域名），或保持私有，并在上传记录中用“复制临时链接”分享文件。"
           }
         }
       }
@@ -11386,98 +11616,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此目标将不再提供“删除时间”。只要存储桶保留 Aktar 的规则，tmp/ 下已有的文件仍会按时删除；移除规则后，这些文件将被永久保留。"
-          }
-        }
-      }
-    },
-    "⚠ Public URL does not appear to be publicly accessible." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ Die öffentliche URL scheint nicht öffentlich erreichbar zu sein."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ La URL pública no parece ser accesible públicamente."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ L’URL publique ne semble pas accessible publiquement."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ 公開URLが一般からアクセスできないようです。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ A URL pública não parece estar acessível publicamente."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ Genel URL herkese açık görünmüyor."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠ 公开 URL 似乎无法公开访问。"
-          }
-        }
-      }
-    },
-    "✓ Connection successful." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ Verbindung erfolgreich."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ Conexión correcta."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ Connexion réussie."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ 接続に成功しました。"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ Conexão bem-sucedida."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ Bağlantı başarılı."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ 连接成功。"
           }
         }
       }
