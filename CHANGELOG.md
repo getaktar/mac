@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-09-30
+
+### Fixed
+
+- The hourly expiry cleanup only deletes a file itself while the bucket has
+  Aktar's rules, the file is still there and it wasn't uploaded again since;
+  otherwise it just clears the history entry. Removing the rules keeps
+  already uploaded files for good, in history too
+- Aktar no longer rewrites a bucket's lifecycle rules when it can't fully
+  read the existing ones, so the bucket's other rules can't be lost, and it
+  reads the rules back after setting them up
+- Files moved or uploaded into a `tmp/{N}d/` folder only count as expiring
+  while the bucket has Aktar's rules
+- A rules check in the destination form no longer carries over to another
+  bucket, endpoint or region entered after it
+- Setting up the rules asks first when `tmp/{N}d/` folders already hold
+  files, since the bucket would start deleting those too
+- The manual setup help names the rule IDs Aktar recognizes
+
 ## [0.5.0] - 2026-09-30
 
 ### Added
