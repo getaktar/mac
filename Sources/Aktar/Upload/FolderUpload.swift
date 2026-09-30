@@ -104,7 +104,10 @@ enum FolderUpload {
     /// aside first, then archived with the system's own zip
     /// (NSFileCoordinator's "for uploading", as Finder's Compress uses).
     /// A package (a Keynote document) is zipped whole, as Finder would.
-    static func zip(_ folder: URL) throws -> URL {
+    /// Photos in the folder go in without the metadata `imageMetadata`
+    /// removes, the same as photos uploaded on their own; one that can't be
+    /// cleaned stops the ZIP rather than share where it was taken.
+    static func zip(_ folder: URL, imageMetadata: ImageMetadataPolicy) throws -> URL {
         let name = folder.lastPathComponent
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("AktarZip", isDirectory: true)
@@ -119,7 +122,12 @@ enum FolderUpload {
                 for entry in try files(in: folder, limit: nil) {
                     let target = source.appendingPathComponent(entry.relativePath)
                     try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
-                    try FileManager.default.copyItem(at: entry.fileURL, to: target)
+                    if let cleaned = try ImageMetadataStripper.strippedCopy(of: entry.fileURL, policy: imageMetadata) {
+                        try FileManager.default.moveItem(at: cleaned, to: target)
+                        ImageMetadataStripper.removeCopy(cleaned)
+                    } else {
+                        try FileManager.default.copyItem(at: entry.fileURL, to: target)
+                    }
                 }
             } catch {
                 try? FileManager.default.removeItem(at: directory)

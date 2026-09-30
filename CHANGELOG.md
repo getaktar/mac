@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   choice in each destination's Upload Defaults uploads it as one ZIP (the
   default, one link to share) or file by file with its subfolders, under a
   new folder in the bucket, copying all the links at once when it's done.
-  Hidden files such as .env, .git and .DS_Store are left out either way
+  Hidden files such as .env, .git and .DS_Store are left out either way,
+  and photos lose their metadata as Image metadata says, inside a ZIP too
 - Dropping a folder into the bucket browser uploads it with its structure
   into the current folder
 

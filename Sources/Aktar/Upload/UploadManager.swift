@@ -269,13 +269,15 @@ final class UploadManager {
                     days: job.expiryDays
                 )
                 // A folder (or a package, such as a Keynote document) goes
-                // up as a ZIP made on the spot.
+                // up as a ZIP made on the spot, its photos cleaned the same
+                // way as below.
+                let policy = destination.imageMetadata ?? .default
                 var fileURL = job.input.fileURL
                 var zipped: URL?
                 if FolderUpload.isFolder(fileURL) {
                     let folder = fileURL
                     zipped = try await Task.detached(priority: .userInitiated) {
-                        try FolderUpload.zip(folder)
+                        try FolderUpload.zip(folder, imageMetadata: policy)
                     }.value
                     fileURL = zipped ?? fileURL
                 }
@@ -284,7 +286,6 @@ final class UploadManager {
 
                 // Photos lose their location (or all metadata) first, on a
                 // copy; everything else is uploaded as it is.
-                let policy = destination.imageMetadata ?? .default
                 let original = fileURL
                 let stripped = try await Task.detached(priority: .userInitiated) {
                     try ImageMetadataStripper.strippedCopy(of: original, policy: policy)
