@@ -16,7 +16,14 @@ final class AppState {
         KeyboardShortcuts.onKeyDown(for: .uploadFromClipboard) { [weak self] in
             Task { @MainActor in self?.uploadFromClipboard() }
         }
+        KeyboardShortcuts.onKeyDown(for: .renameAndUploadFromClipboard) { [weak self] in
+            Task { @MainActor in self?.uploadFromClipboard(rename: true) }
+        }
         startExpirySweep()
+        let destinations = destinationStore.destinations
+        Task.detached(priority: .utility) {
+            await MultipartUploader.cleanUp(destinations: destinations)
+        }
     }
 
     /// Checks for expired uploads at launch and then hourly.
@@ -29,8 +36,11 @@ final class AppState {
         }
     }
 
-    func uploadFromClipboard() {
+    /// `rename` asks for the file's name first; see `RenamePrompt`.
+    func uploadFromClipboard(rename: Bool = false) {
         guard let input = ClipboardService.readFileInput() else { return }
-        uploadManager.upload([input])
+        let inputs = rename ? RenamePrompt.rename([input]) : [input]
+        guard !inputs.isEmpty else { return }
+        uploadManager.upload(inputs)
     }
 }

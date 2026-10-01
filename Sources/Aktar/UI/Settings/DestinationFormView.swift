@@ -23,6 +23,9 @@ struct DestinationFormView: View {
     @State private var temporaryLink: TemporaryLinkDuration?
     @State private var imageMetadata: ImageMetadataPolicy
     @State private var folderUpload: FolderUploadMode
+    @State private var imageFormat: ImageProcessing.Format
+    @State private var imageQuality: Int?
+    @State private var imageMaxLongEdge: Int?
     @State private var testResult: ConnectionResult?
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
@@ -63,6 +66,9 @@ struct DestinationFormView: View {
         _temporaryLink = State(initialValue: existing?.temporaryLink)
         _imageMetadata = State(initialValue: existing?.imageMetadata ?? .default)
         _folderUpload = State(initialValue: existing?.folderUpload ?? .default)
+        _imageFormat = State(initialValue: existing?.imageProcessing?.format ?? .original)
+        _imageQuality = State(initialValue: existing?.imageProcessing?.quality)
+        _imageMaxLongEdge = State(initialValue: existing?.imageProcessing?.maxLongEdge)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
@@ -142,14 +148,20 @@ struct DestinationFormView: View {
                 } header: {
                     Text("Object Path")
                 } footer: {
-                    Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext}")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext} {md5} {sha256}")
+                        Text(verbatim: "{md5}: ") + Text("MD5 of the file's contents")
+                        Text(verbatim: "{sha256}: ") + Text("SHA-256 of the file's contents")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
 
                 autoDeleteSection
 
                 uploadDefaultsSection
+
+                imageProcessingSection
 
                 if let testError {
                     Section {
@@ -221,6 +233,42 @@ struct DestinationFormView: View {
             Text("Upload Defaults")
         } footer: {
             Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Conversion, recompression and resizing of photos, next to what
+    /// happens to their metadata.
+    private var imageProcessingSection: some View {
+        Section {
+            Picker("Format", selection: $imageFormat) {
+                ForEach(ImageProcessing.Format.allCases) { format in
+                    if format == .avif, !ImageProcessor.canEncodeAVIF {
+                        Text(verbatim: "\(format.label) (\(String(localized: "Needs a newer macOS")))")
+                            .tag(format)
+                            .selectionDisabled()
+                    } else {
+                        Text(format.label).tag(format)
+                    }
+                }
+            }
+            Picker("Compression", selection: $imageQuality) {
+                Text(ImageProcessing.qualityLabel(nil)).tag(Int?.none)
+                ForEach(ImageProcessing.qualityOptions, id: \.self) { quality in
+                    Text(ImageProcessing.qualityLabel(quality)).tag(Int?.some(quality))
+                }
+            }
+            Picker("Resize", selection: $imageMaxLongEdge) {
+                Text(ImageProcessing.sizeLabel(nil)).tag(Int?.none)
+                ForEach(ImageProcessing.sizeOptions, id: \.self) { size in
+                    Text(ImageProcessing.sizeLabel(size)).tag(Int?.some(size))
+                }
+            }
+        } header: {
+            Text("Image Processing")
+        } footer: {
+            Text("Applies to JPEG, PNG, HEIC, WebP, TIFF and BMP photos and screenshots. GIFs, SVGs and files inside ZIPs are left as they are.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -428,8 +476,15 @@ struct DestinationFormView: View {
             expiryDays: expiryDays,
             temporaryLink: temporaryLink,
             imageMetadata: imageMetadata,
-            folderUpload: folderUpload
+            folderUpload: folderUpload,
+            imageProcessing: currentImageProcessing
         )
+    }
+
+    /// Nil when everything is off, so the destination stays as before.
+    private var currentImageProcessing: ImageProcessing? {
+        let processing = ImageProcessing(format: imageFormat, quality: imageQuality, maxLongEdge: imageMaxLongEdge)
+        return processing.isOff ? nil : processing
     }
 
     private func testConnection() async {

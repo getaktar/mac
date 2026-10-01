@@ -8,7 +8,7 @@ import SwiftData
 ///     GET    /v1/status
 ///     GET    /v1/destinations
 ///     GET    /v1/uploads?query=&destinationId=&limit=
-///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=     (raw file bytes)
+///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=     (raw file bytes; "reused" in the reply)
 ///     POST   /v1/uploads/clipboard?destinationId=&expires=
 ///     DELETE /v1/uploads/{id}
 ///     GET    /v1/destinations/{id}/objects?prefix=&continuationToken=
@@ -198,7 +198,9 @@ final class LocalAPIRouter {
                 guard let record = record(publicURLString: publicURLString, destinationID: destination.id) else {
                     return .error(500, "The upload finished but its history entry is missing.")
                 }
-                return .json(201, ["upload": uploadDTO(record)])
+                // `reused`: nothing was uploaded, the same file was already
+                // there and this is its earlier upload.
+                return .json(201, ["upload": uploadDTO(record, reused: job.reused)])
             // The staged copy of the file is deleted once this returns, so
             // a failed job can't be retried from the panel; remove it and
             // let the caller (Raycast) show the error instead.
@@ -352,6 +354,10 @@ final class LocalAPIRouter {
     }
 
     private func uploadDTO(_ record: UploadRecord) -> UploadDTO {
+        uploadDTO(record, reused: nil)
+    }
+
+    private func uploadDTO(_ record: UploadRecord, reused: Bool?) -> UploadDTO {
         let url = record.publicURL
         let manager = appState.uploadManager
         func formatted(_ mode: OutputMode) -> String {
@@ -369,7 +375,8 @@ final class LocalAPIRouter {
             size: record.byteSize,
             createdAt: record.createdAt,
             expiresAt: record.expiresAt,
-            formats: .init(url: formatted(.url), markdown: formatted(.markdown), html: formatted(.html), custom: formatted(.custom))
+            formats: .init(url: formatted(.url), markdown: formatted(.markdown), html: formatted(.html), custom: formatted(.custom)),
+            reused: reused
         )
     }
 
@@ -432,6 +439,8 @@ private struct UploadDTO: Encodable {
     let createdAt: Date
     let expiresAt: Date?
     let formats: Formats
+    /// Only in the response to an upload.
+    let reused: Bool?
 }
 
 private struct ListingDTO: Encodable {

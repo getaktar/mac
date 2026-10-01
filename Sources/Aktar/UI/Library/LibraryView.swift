@@ -253,6 +253,9 @@ struct LibraryView: View {
             Button("Copy Markdown") { ClipboardService.copy(markdown(for: record)) }
             Button("Copy HTML") { ClipboardService.copy(html(for: record)) }
             RecordTemporaryLinkMenu(record: record)
+            Button("Show QR Code") {
+                QRCodeWindowController.shared.show(for: record, uploadManager: appState.uploadManager)
+            }
             Divider()
             Button("Open in Browser") {
                 if let url = record.publicURL { NSWorkspace.shared.open(url) }
@@ -383,11 +386,12 @@ struct LibraryView: View {
         }
     }
 
+    /// Cancelled jobs stay for a moment so the row can say so.
     private var activeJobs: [UploadJob] {
         appState.uploadManager.jobs.filter {
             switch $0.state {
-            case .waiting, .uploading, .failed: return true
-            case .succeeded, .cancelled: return false
+            case .waiting, .uploading, .failed, .cancelled: return true
+            case .succeeded: return false
             }
         }
     }
@@ -579,6 +583,9 @@ private struct ActiveUploadRow: View {
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
+                    if job.resuming {
+                        Text("Resuming upload\u{2026}").font(.caption).foregroundStyle(.secondary)
+                    }
                 case .waiting:
                     Text("Waiting\u{2026}").font(.caption).foregroundStyle(.secondary)
                 case .failed(let message):
@@ -589,9 +596,24 @@ private struct ActiveUploadRow: View {
                             .buttonStyle(.plain)
                             .foregroundStyle(Color.accentColor)
                     }
-                case .succeeded, .cancelled:
+                case .cancelled:
+                    Text("Cancelled").font(.caption).foregroundStyle(.secondary)
+                case .succeeded:
                     EmptyView()
                 }
+            }
+            switch job.state {
+            case .waiting, .uploading, .failed:
+                Button {
+                    appState.uploadManager.cancel(job)
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Cancel")
+            case .succeeded, .cancelled:
+                EmptyView()
             }
         }
         .padding(.vertical, 2)
@@ -1150,6 +1172,12 @@ private struct UploadDetailView: View {
                 }
                 .help("Copy URL")
                 Button {
+                    QRCodeWindowController.shared.show(for: record, uploadManager: appState.uploadManager)
+                } label: {
+                    Image(systemName: "qrcode")
+                }
+                .help("Show QR Code")
+                Button {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }
                 } label: {
                     Image(systemName: "arrow.up.forward.square")
@@ -1235,6 +1263,9 @@ private struct UploadDetailView: View {
                 }
                 Button("Copy Object Key") { ClipboardService.copy(record.objectKey) }
                 RecordTemporaryLinkMenu(record: record)
+                Button("Show QR Code") {
+                    QRCodeWindowController.shared.show(for: record, uploadManager: appState.uploadManager)
+                }
                 Divider()
                 Button("Open in Browser") {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }

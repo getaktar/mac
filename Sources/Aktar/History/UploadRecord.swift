@@ -15,6 +15,10 @@ final class UploadRecord: Identifiable {
     var remoteDeletedAt: Date?
     /// When an expiring upload is due to be deleted; nil for a normal one.
     var expiresAt: Date?
+    /// SHA-256 (lowercase hex) of the bytes that were uploaded, for
+    /// reusing this upload's link when the same file comes up again. Nil
+    /// for uploads from before it was recorded, or when it wasn't needed.
+    var contentHash: String?
 
     init(
         id: UUID = UUID(),
@@ -26,7 +30,8 @@ final class UploadRecord: Identifiable {
         mimeType: String,
         byteSize: Int,
         createdAt: Date = .now,
-        expiresAt: Date? = nil
+        expiresAt: Date? = nil,
+        contentHash: String? = nil
     ) {
         self.id = id
         self.localFilename = localFilename
@@ -38,6 +43,7 @@ final class UploadRecord: Identifiable {
         self.byteSize = byteSize
         self.createdAt = createdAt
         self.expiresAt = expiresAt
+        self.contentHash = contentHash
     }
 
     /// Some destinations were saved with a schemeless base URL (e.g.

@@ -9,4 +9,7 @@ extension KeyboardShortcuts.Name {
         "uploadFromClipboard",
         default: .init(.u, modifiers: [.command, .shift, .control])
     )
+
+    /// The same, but asking for the file's name first. Unset by default.
+    nonisolated(unsafe) static let renameAndUploadFromClipboard = Self("renameAndUploadFromClipboard")
 }

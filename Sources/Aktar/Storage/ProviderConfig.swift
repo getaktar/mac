@@ -74,6 +74,9 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// How folders are uploaded here; nil is `FolderUploadMode.default`
     /// (as a ZIP).
     var folderUpload: FolderUploadMode?
+    /// Conversion, recompression and resizing of photos before they're
+    /// uploaded here; nil leaves them as they are.
+    var imageProcessing: ImageProcessing?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"

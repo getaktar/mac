@@ -1,7 +1,9 @@
 import Foundation
 
 enum ObjectKeyGenerator {
-    static func generate(template: String, originalFilename: String, date: Date = .now) -> String {
+    /// `hashes` fills {md5} and {sha256}; see `ContentHasher`. Left empty,
+    /// those variables are dropped.
+    static func generate(template: String, originalFilename: String, date: Date = .now, hashes: ContentHashes = ContentHashes()) -> String {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents([.year, .month, .day], from: date)
 
@@ -32,6 +34,8 @@ enum ObjectKeyGenerator {
             ("{uuid}", uuid),
             ("{random}", random),
             ("{ext}", ext),
+            ("{md5}", hashes.md5 ?? ""),
+            ("{sha256}", hashes.sha256 ?? ""),
         ]
 
         var result = template
@@ -40,4 +44,9 @@ enum ObjectKeyGenerator {
         }
         return result
     }
+
+    /// Which content hashes `template` needs, so they're only computed
+    /// when used.
+    static func usesMD5(_ template: String) -> Bool { template.contains("{md5}") }
+    static func usesSHA256(_ template: String) -> Bool { template.contains("{sha256}") }
 }

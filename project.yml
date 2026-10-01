@@ -22,6 +22,10 @@ packages:
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle.git
     from: 2.7.0
+  # WebP encoding for Image Processing; ImageIO can only read WebP.
+  libwebp:
+    url: https://github.com/SDWebImage/libwebp-Xcode.git
+    from: 1.5.0
 
 targets:
   Aktar:
@@ -34,6 +38,7 @@ targets:
         product: SotoS3
       - package: KeyboardShortcuts
       - package: Sparkle
+      - package: libwebp
       - sdk: PDFKit.framework
       - target: AktarShare
     info:

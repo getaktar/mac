@@ -145,7 +145,7 @@ enum ImageMetadataStripper {
         return false
     }
 
-    private static func stillHasMetadataToRemove(at url: URL, policy: ImageMetadataPolicy) -> Bool {
+    static func stillHasMetadataToRemove(at url: URL, policy: ImageMetadataPolicy) -> Bool {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else { return true }
         if properties[kCGImagePropertyGPSDictionary] != nil { return true }

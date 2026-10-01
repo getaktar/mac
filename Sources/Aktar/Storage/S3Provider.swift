@@ -7,12 +7,15 @@ import SotoS3
 /// R2, MinIO, Backblaze B2, DigitalOcean Spaces, custom) goes through this
 /// single adapter, never a separate upload engine per provider.
 final class S3Provider: StorageProvider, Sendable {
-    private let config: DestinationConfig
+    let config: DestinationConfig
     private let client: AWSClient
-    private let s3: S3
+    let s3: S3
+    /// For signing the uploads sent with URLSession; see S3Transfer.
+    let credentials: StorageCredentials
 
     init(config: DestinationConfig, credentials: StorageCredentials) {
         self.config = config
+        self.credentials = credentials
         self.client = AWSClient(
             credentialProvider: .static(
                 accessKeyId: credentials.accessKeyId,
@@ -69,27 +72,36 @@ final class S3Provider: StorageProvider, Sendable {
         return ConnectionResult(bucketReachable: true, writable: writable, publicLink: publicLink)
     }
 
+    /// One streaming PUT up to `multipartThreshold`, a multipart upload
+    /// above it (see `MultipartUploader`, which can also resume one).
     func upload(
         fileURL: URL,
         objectKey: String,
         contentType: String,
         progress: (@MainActor (Double) -> Void)?
     ) async throws -> UploadResult {
-        let data = try Data(contentsOf: fileURL)
+        let size = try Self.fileSize(of: fileURL)
         await progress?(0)
-        do {
-            _ = try await s3.putObject(.init(
-                body: .init(bytes: data),
-                bucket: config.bucket,
+        let reporter = ProgressReporter(total: size, report: progress)
+        if size > Self.multipartThreshold {
+            try await MultipartUploader.upload(
+                provider: self,
+                fileURL: fileURL,
+                fileSize: size,
+                objectKey: objectKey,
                 contentType: contentType,
-                key: objectKey
-            ))
-        } catch {
-            throw Self.mapError(error, bucket: config.bucket)
+                session: nil,
+                identity: nil,
+                reporter: reporter
+            )
+        } else {
+            try await putObject(fileURL: fileURL, objectKey: objectKey, contentType: contentType) { sent in
+                reporter.update(part: 0, sent: sent)
+            }
         }
         await progress?(1)
         let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: objectKey)
-        return UploadResult(objectKey: objectKey, publicURL: url, byteSize: data.count)
+        return UploadResult(objectKey: objectKey, publicURL: url, byteSize: Int(size))
     }
 
     func delete(objectKey: String) async throws {
@@ -345,7 +357,7 @@ final class S3Provider: StorageProvider, Sendable {
         return url
     }
 
-    private static func encodePath(_ key: String) -> String {
+    static func encodePath(_ key: String) -> String {
         key.split(separator: "/", omittingEmptySubsequences: false)
             .map { $0.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed.subtracting(CharacterSet(charactersIn: "/"))) ?? String($0) }
             .joined(separator: "/")
@@ -369,7 +381,7 @@ final class S3Provider: StorageProvider, Sendable {
         return (response as? HTTPURLResponse)?.statusCode
     }
 
-    private static func mapError(_ error: Error, bucket: String) -> StorageError {
+    static func mapError(_ error: Error, bucket: String) -> StorageError {
         let description = String(describing: error).lowercased()
         if description.contains("nosuchbucket") {
             return .bucketNotFound(bucket)

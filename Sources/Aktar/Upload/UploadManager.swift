@@ -30,6 +30,13 @@ final class UploadManager {
         didSet { UserDefaults.standard.set(expiryDays, forKey: UploadExpiry.defaultsKey) }
     }
 
+    /// Settings > General: a file that's already in the destination is
+    /// not uploaded again; its link is copied instead.
+    static let reuseDuplicatesKey = "reuseDuplicateLinks"
+    var reuseDuplicateLinks: Bool {
+        UserDefaults.standard.object(forKey: Self.reuseDuplicatesKey) as? Bool ?? true
+    }
+
     private let destinationStore: DestinationStore
     private let repository: UploadRepository
 
@@ -79,6 +86,18 @@ final class UploadManager {
         return try await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue)
     }
 
+    /// The link copying an upload would give now: a fresh temporary link
+    /// when its destination is set to them, otherwise the public URL
+    /// (also when the destination is gone or signing fails).
+    func shareLink(for record: UploadRecord) async -> URL? {
+        if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }),
+           let duration = destination.temporaryLink,
+           let url = try? await temporaryURL(for: record, validFor: duration) {
+            return url
+        }
+        return record.publicURL
+    }
+
     /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
     /// the file). Nothing sent to a destination whose bucket doesn't have the
     /// lifecycle rules expires. An upload to an exact key (the bucket
@@ -101,10 +120,38 @@ final class UploadManager {
         drainQueue()
     }
 
+    /// Stops the job: in-flight parts stop and its multipart upload is
+    /// aborted (see `MultipartUploader`), also one kept from a failed try.
+    /// The row says Cancelled for a moment, then goes.
     func cancel(_ job: UploadJob) {
-        job.task?.cancel()
+        let wasRunning: Bool
+        switch job.state {
+        case .uploading: wasRunning = true
+        case .waiting, .failed: wasRunning = false
+        case .succeeded, .cancelled: return
+        }
         job.state = .cancelled
+        if wasRunning {
+            job.task?.cancel()
+        } else if let session = job.multipartSession {
+            Self.abort(session, destination: job.destination)
+        }
+        job.multipartSession = nil
         if let group = job.input.group { finishGroupIfDone(group, destination: job.destination) }
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            self?.dismiss(job)
+        }
+    }
+
+    private static func abort(_ session: MultipartSession, destination: DestinationConfig) {
+        Task.detached {
+            if let credentials = try? KeychainService.load(for: destination.id) {
+                await S3Provider(config: destination, credentials: credentials)
+                    .abortMultipartUpload(objectKey: session.objectKey, uploadId: session.uploadId)
+            }
+            await MultipartSessionStore.shared.remove(session.id)
+        }
     }
 
     /// Folders become one ZIP input (zipped when its turn comes, so a big
@@ -113,7 +160,8 @@ final class UploadManager {
     private func expandingFolders(_ inputs: [UploadInput], for destination: DestinationConfig) -> [UploadInput] {
         inputs.flatMap { input -> [UploadInput] in
             guard input.objectKey == nil, input.folderKey == nil, FolderUpload.isFolder(input.fileURL) else { return [input] }
-            let name = input.fileURL.lastPathComponent
+            // The folder's own name, or the one it was given before upload.
+            let name = input.originalFilename
             switch destination.folderUpload ?? .default {
             case .zip:
                 var zipped = input
@@ -255,50 +303,147 @@ final class UploadManager {
     private func start(job: UploadJob, destination: DestinationConfig) {
         activeCount += 1
         job.state = .uploading(progress: 0)
+        job.resuming = false
+        job.reused = false
+        let reuseDuplicates = reuseDuplicateLinks
 
         job.task = Task { [weak self] in
             guard let self else { return }
             do {
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
-                let objectKey = job.input.objectKey ?? UploadExpiry.key(
-                    job.input.folderKey ?? ObjectKeyGenerator.generate(
-                        template: destination.objectPathTemplate,
-                        originalFilename: job.input.originalFilename
-                    ),
-                    days: job.expiryDays
-                )
                 // A folder (or a package, such as a Keynote document) goes
                 // up as a ZIP made on the spot, its photos cleaned the same
                 // way as below.
                 let policy = destination.imageMetadata ?? .default
                 var fileURL = job.input.fileURL
+                var filename = job.input.originalFilename
                 var zipped: URL?
                 if FolderUpload.isFolder(fileURL) {
                     let folder = fileURL
-                    zipped = try await Task.detached(priority: .userInitiated) {
-                        try FolderUpload.zip(folder, imageMetadata: policy)
-                    }.value
+                    zipped = try await offMain { try FolderUpload.zip(folder, imageMetadata: policy) }
                     fileURL = zipped ?? fileURL
                 }
                 defer { if let zipped { FolderUpload.removeZip(zipped) } }
+
+                // Photos are converted, recompressed or resized as the
+                // destination says (not inside a ZIP), on a copy that has
+                // the metadata policy applied already.
+                let original = fileURL
+                let originalName = filename
+                let processing = zipped == nil ? destination.imageProcessing : nil
+                let processed = try await offMain {
+                    try ImageProcessor.process(original, filename: originalName, settings: processing, policy: policy)
+                }
+                defer { if let processed { ImageProcessor.removeCopy(processed.url) } }
+                if let processed {
+                    fileURL = processed.url
+                    filename = processed.filename
+                }
                 let contentType = ContentTypeResolver.resolve(for: fileURL)
 
-                // Photos lose their location (or all metadata) first, on a
-                // copy; everything else is uploaded as it is.
-                let original = fileURL
-                let stripped = try await Task.detached(priority: .userInitiated) {
-                    try ImageMetadataStripper.strippedCopy(of: original, policy: policy)
-                }.value
+                // Otherwise photos lose their location (or all metadata)
+                // first, on a copy; everything else is uploaded as it is.
+                let unprocessed = fileURL
+                let stripped = processed != nil ? nil : try await offMain {
+                    try ImageMetadataStripper.strippedCopy(of: unprocessed, policy: policy)
+                }
                 defer { if let stripped { ImageMetadataStripper.removeCopy(stripped) } }
+                let uploadURL = stripped ?? fileURL
+                let fileSize = try S3Provider.fileSize(of: uploadURL)
 
-                let result = try await provider.upload(
-                    fileURL: stripped ?? fileURL,
-                    objectKey: objectKey,
-                    contentType: contentType
-                ) { progress in
+                // Hashes of the bytes that go up, only when something needs
+                // them: the path variables, reusing a link, or recognizing a
+                // temporary copy when a multipart upload is resumed.
+                let template = destination.objectPathTemplate
+                let generatesKey = job.input.objectKey == nil && job.input.folderKey == nil
+                let canReuse = reuseDuplicates && job.input.objectKey == nil && job.input.group == nil && zipped == nil
+                let isCopy = uploadURL != job.input.fileURL
+                let wantsMD5 = generatesKey && ObjectKeyGenerator.usesMD5(template)
+                let wantsSHA256 = canReuse || (generatesKey && ObjectKeyGenerator.usesSHA256(template))
+                    || (isCopy && fileSize > S3Provider.multipartThreshold)
+                let hashes = try await offMain {
+                    try ContentHasher.hashes(of: uploadURL, md5: wantsMD5, sha256: wantsSHA256)
+                }
+
+                // A new format means a new extension, also for an exact key
+                // (the bucket browser) and a file in a folder.
+                let extensionChanged = processed != nil
+                    && (originalName as NSString).pathExtension != (filename as NSString).pathExtension
+                func withNewExtension(_ key: String) -> String {
+                    guard extensionChanged else { return key }
+                    return Self.replacingExtension(of: key, with: (filename as NSString).pathExtension)
+                }
+                var objectKey: String
+                if let exact = job.input.objectKey {
+                    objectKey = withNewExtension(exact)
+                    // The bucket browser checked the name the user chose,
+                    // not the converted one: number it rather than replace
+                    // a file that already has that name.
+                    if objectKey != exact {
+                        objectKey = try await Self.freeKey(objectKey, provider: provider)
+                    }
+                } else {
+                    objectKey = UploadExpiry.key(
+                        job.input.folderKey.map(withNewExtension) ?? ObjectKeyGenerator.generate(
+                            template: template,
+                            originalFilename: filename,
+                            hashes: hashes
+                        ),
+                        days: job.expiryDays
+                    )
+                }
+
+                // The same bytes are already in this destination: copy that
+                // link instead of uploading them again. If the bucket can't
+                // be asked, it's uploaded.
+                if canReuse, let sha256 = hashes.sha256,
+                   let record = repository.reusableRecord(destinationID: destination.id, contentHash: sha256, expiryDays: job.expiryDays),
+                   let publicURL = record.publicURL,
+                   (try? await provider.objectExists(key: record.objectKey)) == true {
+                    var link = publicURL
+                    if let duration = destination.temporaryLink,
+                       let signed = try? await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue) {
+                        link = signed
+                    }
+                    self.finishReused(job: job, record: record, destination: destination, link: link)
+                    return
+                }
+
+                let reporter = ProgressReporter(total: fileSize) { progress in
+                    guard case .uploading = job.state else { return }
                     job.state = .uploading(progress: progress)
                 }
+                if fileSize > S3Provider.multipartThreshold {
+                    let identity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256)
+                    let session = await self.resumableSession(for: job, destination: destination, identity: identity, objectKey: objectKey)
+                    if let session {
+                        objectKey = session.objectKey
+                        job.resuming = true
+                    }
+                    try await MultipartUploader.upload(
+                        provider: provider,
+                        fileURL: uploadURL,
+                        fileSize: fileSize,
+                        objectKey: objectKey,
+                        contentType: contentType,
+                        session: session,
+                        identity: identity,
+                        reporter: reporter
+                    ) { session in
+                        job.multipartSession = session
+                    }
+                    job.multipartSession = nil
+                } else {
+                    try await provider.putObject(fileURL: uploadURL, objectKey: objectKey, contentType: contentType) { sent in
+                        reporter.update(part: 0, sent: sent)
+                    }
+                }
+                let result = UploadResult(
+                    objectKey: objectKey,
+                    publicURL: PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey),
+                    byteSize: Int(fileSize)
+                )
 
                 // Signing happens locally, so this only fails on a broken
                 // endpoint, where the public URL is the better fallback.
@@ -308,18 +453,95 @@ final class UploadManager {
                     link = signed
                 }
 
-                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL)
+                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256)
             } catch {
-                self.fail(job: job, error: error, destination: destination)
+                if case .cancelled = job.state {
+                    self.stopped(job: job)
+                } else if error is CancellationError {
+                    job.state = .cancelled
+                    self.stopped(job: job)
+                } else {
+                    self.fail(job: job, error: error, destination: destination)
+                }
             }
         }
     }
 
+    /// The multipart upload to continue for this file, if one was started
+    /// before (in this run or an earlier one). Only one that ends up where
+    /// this upload would: the same key for an exact key, the same "Delete
+    /// after" folder otherwise. One that's too old is aborted.
+    private func resumableSession(for job: UploadJob, destination: DestinationConfig, identity: MultipartFileIdentity, objectKey: String) async -> MultipartSession? {
+        let store = MultipartSessionStore.shared
+        var found = job.multipartSession
+        if found == nil {
+            found = await store.session(destinationID: destination.id, bucket: destination.bucket, identity: identity)
+        }
+        guard let session = found else { return nil }
+        if session.isStale || session.bucket != destination.bucket {
+            Self.abort(session, destination: destination)
+            job.multipartSession = nil
+            return nil
+        }
+        if job.input.objectKey != nil || job.input.folderKey != nil {
+            return session.objectKey == objectKey ? session : nil
+        }
+        return UploadExpiry.days(forKey: session.objectKey) == UploadExpiry.days(forKey: objectKey) ? session : nil
+    }
+
+    /// `key`, or "name 2.ext", "name 3.ext"... when it's taken, numbered the
+    /// way the bucket browser numbers its uploads.
+    private static func freeKey(_ key: String, provider: S3Provider) async throws -> String {
+        let directory = (key as NSString).deletingLastPathComponent
+        let name = (key as NSString).lastPathComponent
+        let base = (name as NSString).deletingPathExtension
+        let ext = (name as NSString).pathExtension
+        var candidate = key
+        var counter = 2
+        while try await provider.objectExists(key: candidate), counter < 1000 {
+            let numbered = ext.isEmpty ? "\(base) \(counter)" : "\(base) \(counter).\(ext)"
+            candidate = directory.isEmpty ? numbered : directory + "/" + numbered
+            counter += 1
+        }
+        return candidate
+    }
+
+    /// "a/photo.png" with "webp" gives "a/photo.webp".
+    nonisolated static func replacingExtension(of key: String, with newExtension: String) -> String {
+        let directory = (key as NSString).deletingLastPathComponent
+        let name = (key as NSString).lastPathComponent
+        let base = (name as NSString).deletingPathExtension
+        let newName = newExtension.isEmpty ? base : base + "." + newExtension
+        return directory.isEmpty ? newName : directory + "/" + newName
+    }
+
+    /// A job that ended without finishing: cancelled.
+    private func stopped(job: UploadJob) {
+        activeCount -= 1
+        drainQueue()
+    }
+
+    /// Nothing was uploaded: the link of `record` is copied, and history
+    /// keeps that one entry.
+    private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL) {
+        job.reused = true
+        job.state = .succeeded(publicURLString: record.publicURLString)
+        ClipboardService.copy(format(link, filename: record.localFilename, for: destination))
+        NotificationService.notifyUploadReused(filename: record.localFilename)
+        closePanelIfWanted()
+        activeCount -= 1
+        drainQueue()
+    }
+
     /// `link` is what's copied: the public URL, or a temporary link when
     /// the destination is set to one. History keeps the public URL.
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL) {
+    /// `filename` is the name the upload goes by, with the extension of a
+    /// converted photo.
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL, filename: String, contentHash: String?) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
-        repository.record(result: result, input: job.input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL)
+        var input = job.input
+        input.originalFilename = filename
+        repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash)
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
@@ -329,11 +551,11 @@ final class UploadManager {
         // A file from a folder waits for the rest of it: the links are
         // copied together, with one notification, once the last is done.
         if let group = job.input.group, openGroups[group.id] != nil {
-            openGroups[group.id]?[group.index] = (link, job.input.originalFilename)
+            openGroups[group.id]?[group.index] = (link, filename)
             finishGroupIfDone(group, destination: destination)
         } else {
-            ClipboardService.copy(format(link, filename: job.input.originalFilename, for: destination))
-            NotificationService.notifyUploadSucceeded(filename: job.input.originalFilename, expiryDays: job.expiryDays)
+            ClipboardService.copy(format(link, filename: filename, for: destination))
+            NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
             closePanelIfWanted()
         }
 
@@ -387,5 +609,15 @@ final class UploadManager {
 
         activeCount -= 1
         drainQueue()
+    }
+}
+
+/// Runs `body` off the main actor, cancelled along with the calling task.
+private func offMain<T: Sendable>(_ body: @escaping @Sendable () throws -> T) async throws -> T {
+    let task = Task.detached(priority: .userInitiated, operation: body)
+    return try await withTaskCancellationHandler {
+        try await task.value
+    } onCancel: {
+        task.cancel()
     }
 }

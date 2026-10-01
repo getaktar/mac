@@ -112,6 +112,7 @@ private struct GeneralSettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showNotificationAfterUpload") private var showNotification = true
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
+    @AppStorage(UploadManager.reuseDuplicatesKey) private var reuseDuplicates = true
     @State private var language = AppLanguage.override
 
     var body: some View {
@@ -198,6 +199,18 @@ private struct GeneralSettingsView: View {
                         KeyboardShortcuts.Recorder(for: .uploadFromClipboard)
                     }
                     .padding(12)
+                    SettingsCardDivider()
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Rename and upload clipboard")
+                            Text("Asks for the file\u{2019}s name first, then uploads it like the shortcut above.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        KeyboardShortcuts.Recorder(for: .renameAndUploadFromClipboard)
+                    }
+                    .padding(12)
                 }
             }
 
@@ -213,6 +226,12 @@ private struct GeneralSettingsView: View {
                         title: "Close popover after upload",
                         subtitle: "Automatically close after a successful upload",
                         isOn: $closePopover
+                    )
+                    SettingsCardDivider()
+                    SettingsToggleRow(
+                        title: "Reuse links for duplicate files",
+                        subtitle: "When a file you already uploaded to the same destination comes up again, Aktar copies its existing link instead of uploading it again.",
+                        isOn: $reuseDuplicates
                     )
                 }
             }

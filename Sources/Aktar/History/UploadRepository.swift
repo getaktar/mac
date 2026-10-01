@@ -20,7 +20,7 @@ final class UploadRepository {
     @discardableResult
     /// `uploadedFileURL` is the file that was actually sent when it isn't
     /// `input.fileURL` itself, such as the ZIP of a folder.
-    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil, uploadedFileURL: URL? = nil) -> UploadRecord {
+    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil, uploadedFileURL: URL? = nil, contentHash: String? = nil) -> UploadRecord {
         let fileURL = uploadedFileURL ?? input.fileURL
         let createdAt = Date.now
         let record = UploadRecord(
@@ -32,7 +32,8 @@ final class UploadRepository {
             mimeType: ContentTypeResolver.resolve(for: fileURL),
             byteSize: result.byteSize,
             createdAt: createdAt,
-            expiresAt: expiryDays.map { createdAt.addingTimeInterval(TimeInterval($0) * 86_400) }
+            expiresAt: expiryDays.map { createdAt.addingTimeInterval(TimeInterval($0) * 86_400) },
+            contentHash: contentHash
         )
         modelContext.insert(record)
         try? modelContext.save()
@@ -104,6 +105,26 @@ final class UploadRepository {
             }
         )
         return (try? modelContext.fetch(descriptor)) ?? []
+    }
+
+    /// An earlier upload of the same bytes to the same destination whose
+    /// link can be handed out again: not deleted, and expiring the same
+    /// way the new upload would. Both never expire, or both are in the
+    /// same `tmp/{N}d/` folder and the earlier one hasn't expired yet.
+    /// Whether the file is still in the bucket is up to the caller.
+    func reusableRecord(destinationID: UUID, contentHash: String, expiryDays: Int?, now: Date = .now) -> UploadRecord? {
+        let hash: String? = contentHash
+        let descriptor = FetchDescriptor<UploadRecord>(
+            predicate: #Predicate { $0.destinationID == destinationID && $0.contentHash == hash && $0.remoteDeletedAt == nil },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        return ((try? modelContext.fetch(descriptor)) ?? []).first { record in
+            if let expiryDays {
+                guard let expiresAt = record.expiresAt, expiresAt > now else { return false }
+                return UploadExpiry.days(forKey: record.objectKey) == expiryDays
+            }
+            return record.expiresAt == nil
+        }
     }
 
     private func records(key: String, destinationID: UUID) -> [UploadRecord] {

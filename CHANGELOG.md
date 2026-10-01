@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Show QR Code for an upload, in the Library (right-click, the detail
+  view's link and its menu) and in the menu bar's recent uploads. It shows
+  the link copying would give (a fresh temporary link when the
+  destination uses them), crisp at any size, with Copy Image and Save
+  Image. Copy Temporary Link can show one as a QR code too
+- Reuse links for duplicate files (Settings > General, on by default): a
+  file that's already in the same destination, expiring the same way, is
+  not uploaded again; its existing link is copied instead. Uploads to an
+  exact place (the bucket browser, the local API's prefix=), folders and
+  ZIPs are always uploaded. The local API's upload reply says whether the
+  link was reused
+- {md5} and {sha256} in a destination's Object Path, the hash of the
+  uploaded file's contents
+- Rename before upload: hold Option while dropping, pasting or choosing
+  files in the menu bar to name each one first, or give "Rename and
+  upload clipboard" its own shortcut in Settings > General. The name
+  replaces {filename} and is what history shows
+- Image Processing in each destination: convert photos to WebP or AVIF,
+  recompress them (Light, Medium or Strong) and shrink them to a longest
+  side of 3840 to 1024 px. Orientation is applied, the color profile is
+  kept and Image metadata still decides what else stays. Applies to
+  JPEG, PNG, HEIC, WebP, TIFF and BMP; GIFs, SVGs and files inside ZIPs
+  are left alone. Off by default
+
+### Changed
+
+- Big files go up as multipart uploads, up to four parts at a time, so
+  there's no 5 GB limit anymore and files are never read into memory
+  whole. Every upload shows real progress, and a dropped connection or a
+  busy provider is retried on its own
+- A failed big upload continues where it stopped on Retry, and uploading
+  the same file again (even after quitting Aktar) resumes it, saying
+  "Resuming upload". Unfinished uploads older than 7 days are cleaned up
+- Uploads in progress can be cancelled from the menu bar and the Library,
+  which also frees what was already sent to the bucket
+
 ## [0.9.1] - 2026-09-30
 
 ### Added

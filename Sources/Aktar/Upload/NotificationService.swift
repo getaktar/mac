@@ -16,6 +16,16 @@ enum NotificationService {
         UNUserNotificationCenter.current().add(request)
     }
 
+    /// Nothing was uploaded: the file was already in the destination, and
+    /// its link was copied.
+    static func notifyUploadReused(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.title = filename
+        content.body = String(localized: "Already uploaded - copied the existing link")
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     static func notifyUploadFailed(filename: String, reason: String) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Upload failed")

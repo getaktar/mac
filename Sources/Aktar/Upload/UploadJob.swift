@@ -18,6 +18,14 @@ final class UploadJob: Identifiable {
     let expiryDays: Int?
     var state: UploadJobState = .waiting
     var task: Task<Void, Never>?
+    /// Continuing a multipart upload started earlier, rather than from
+    /// the start.
+    var resuming = false
+    /// Finished by reusing the link of the same file uploaded before.
+    var reused = false
+    /// The multipart upload this job is sending, kept after a failure so
+    /// Retry continues it and Cancel can abort it.
+    var multipartSession: MultipartSession?
 
     init(input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil) {
         self.input = input

@@ -286,6 +286,7 @@ struct MenuBarView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
+        .help("Hold Option to rename files before they upload")
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(isTargeted ? Color.accentColor.opacity(0.12) : Color.secondary.opacity(0.06))
@@ -336,11 +337,12 @@ struct MenuBarView: View {
         .padding(.vertical, 10)
     }
 
+    /// Cancelled jobs stay for a moment so the row can say so.
     private var activeJobs: [UploadJob] {
         appState.uploadManager.jobs.filter {
             switch $0.state {
-            case .waiting, .uploading, .failed: return true
-            case .succeeded, .cancelled: return false
+            case .waiting, .uploading, .failed, .cancelled: return true
+            case .succeeded: return false
             }
         }
     }
@@ -358,23 +360,38 @@ struct MenuBarView: View {
         NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
     }
 
+    /// Holding Option while dropping, pasting or choosing files asks for
+    /// each one's name first.
+    private var wantsRename: Bool {
+        NSEvent.modifierFlags.contains(.option)
+    }
+
+    private func upload(_ inputs: [UploadInput], rename: Bool) {
+        let named = rename ? RenamePrompt.rename(inputs) : inputs
+        guard !named.isEmpty else { return }
+        appState.uploadManager.upload(named)
+    }
+
     private func chooseFile() {
+        var rename = wantsRename
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         if panel.runModal() == .OK {
+            rename = rename || wantsRename
             let inputs = panel.urls.map {
                 UploadInput(fileURL: $0, originalFilename: $0.lastPathComponent, source: .filePicker)
             }
-            appState.uploadManager.upload(inputs)
+            upload(inputs, rename: rename)
         }
     }
 
     private func uploadClipboard() {
-        appState.uploadFromClipboard()
+        appState.uploadFromClipboard(rename: wantsRename)
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
+        let rename = wantsRename
         var inputs: [UploadInput] = []
         let group = DispatchGroup()
         for provider in providers {
@@ -388,7 +405,7 @@ struct MenuBarView: View {
         }
         group.notify(queue: .main) {
             if !inputs.isEmpty {
-                appState.uploadManager.upload(inputs)
+                upload(inputs, rename: rename)
             }
         }
         return true
@@ -415,6 +432,9 @@ private struct JobRowView: View {
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
+                    if job.resuming {
+                        Text("Resuming upload\u{2026}").font(.caption2).foregroundStyle(.secondary)
+                    }
                 case .failed:
                     HStack(spacing: 6) {
                         Text("Upload failed").font(.caption2).foregroundStyle(.red)
@@ -423,9 +443,25 @@ private struct JobRowView: View {
                             .buttonStyle(.plain)
                             .foregroundStyle(Color.accentColor)
                     }
+                case .cancelled:
+                    Text("Cancelled").font(.caption2).foregroundStyle(.secondary)
                 default:
                     EmptyView()
                 }
+            }
+
+            switch job.state {
+            case .waiting, .uploading, .failed:
+                Button {
+                    appState.uploadManager.cancel(job)
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Cancel")
+            case .succeeded, .cancelled:
+                EmptyView()
             }
         }
     }
@@ -471,6 +507,9 @@ private struct RecentRowView: View {
                 Button("Copy Markdown") { copy(mode: .markdown) }
                 Button("Copy HTML") { copy(mode: .html) }
                 RecordTemporaryLinkMenu(record: record)
+                Button("Show QR Code") {
+                    QRCodeWindowController.shared.show(for: record, uploadManager: appState.uploadManager)
+                }
                 Divider()
                 Button("Open in Browser") {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }
