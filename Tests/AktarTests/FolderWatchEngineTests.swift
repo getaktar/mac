@@ -230,6 +230,43 @@ final class FolderWatchEngineTests: XCTestCase {
         XCTAssertEqual(engine.awaitingConfirmation, 0)
     }
 
+    func testDeletingAHeldBatchWithdrawsTheAsk() async throws {
+        let engine = makeEngine()
+        engine.start()
+        for index in 0..<60 { try write("file-\(index).txt", "content \(index)") }
+        await waitUntil { engine.awaitingConfirmation == 60 }
+        for index in 0..<60 { try remove("file-\(index).txt") }
+        await waitUntil { engine.awaitingConfirmation == 0 }
+        XCTAssertEqual(recorder.confirmations.last, 0)
+        // The folder isn't stuck behind the old ask: a new file goes up.
+        try write("after.txt", "after")
+        await waitUntil { self.uploader.uploadedPaths == ["after.txt"] }
+    }
+
+    func testUploadingAHeldBatchLeavesOutDeletedFiles() async throws {
+        let engine = makeEngine()
+        engine.start()
+        for index in 0..<60 { try write("file-\(index).txt", "content \(index)") }
+        await waitUntil { engine.awaitingConfirmation == 60 }
+        // Deleted, maybe before the engine hears about it.
+        for index in 0..<10 { try remove("file-\(index).txt") }
+        engine.confirmPending()
+        await waitUntil { self.uploader.uploadedPaths.count == 50 }
+        await settle()
+        XCTAssertEqual(uploader.uploadedPaths.count, 50)
+        XCTAssertFalse(uploader.uploadedPaths.contains("file-0.txt"))
+    }
+
+    func testSkippingAHeldBatchLeavesOutDeletedFiles() async throws {
+        let engine = makeEngine()
+        engine.start()
+        for index in 0..<55 { try write("file-\(index).txt") }
+        await waitUntil { engine.awaitingConfirmation == 55 }
+        for index in 0..<5 { try remove("file-\(index).txt") }
+        engine.skipPending()
+        XCTAssertEqual(ledger.count(folderID: engine.folder.id, state: .skipped), 50)
+    }
+
     func testPartialDownloadRenamedToFinalName() async throws {
         let engine = makeEngine()
         engine.start()

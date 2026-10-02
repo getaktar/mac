@@ -107,7 +107,8 @@ protocol WatchEngineDelegate: AnyObject {
     func engine(_ engine: FolderWatchEngine, didUpload upload: WatchedFileUpload)
     func engine(_ engine: FolderWatchEngine, didSettle batch: WatchBatchSummary)
     /// More new files than `WatchTiming.largeBatch` are waiting for
-    /// Upload or Skip.
+    /// Upload or Skip. `count` is 0 once their files were all deleted and
+    /// the ask is withdrawn.
     func engine(_ engine: FolderWatchEngine, needsConfirmation count: Int)
     /// After Upload couldn't be applied, or a similar problem worth showing
     /// on the folder.
@@ -991,6 +992,7 @@ final class FolderWatchEngine {
         readyBatch = []
         readyPaths = []
         guard !files.isEmpty else { return }
+        dropMissingAwaiting()
         let bypass = guardBypassUntil.map { $0 > Date() } ?? false
         if !awaiting.isEmpty || (files.count > timing.largeBatch && !bypass) {
             awaiting.append(contentsOf: files)
@@ -1004,6 +1006,7 @@ final class FolderWatchEngine {
 
     /// Upload on the large-batch prompt.
     func confirmPending() {
+        dropMissingAwaiting()
         let files = awaiting
         awaiting = []
         awaitingPaths = []
@@ -1014,6 +1017,7 @@ final class FolderWatchEngine {
     /// Skip on the large-batch prompt: the files are remembered as handled
     /// and left where they are.
     func skipPending() {
+        dropMissingAwaiting()
         let entries = awaiting.map { file in
             LedgerEntry(
                 folderID: folder.id,
@@ -1032,6 +1036,22 @@ final class FolderWatchEngine {
     }
 
     var awaitingFiles: Int { awaiting.count }
+
+    /// Held files that are no longer on disk leave the large-batch ask, so
+    /// a stale ask doesn't hold every later file back, and Upload or Skip
+    /// only apply to files that are still there.
+    private func dropMissingAwaiting() {
+        guard !awaiting.isEmpty, FileInspector.canList(root) else { return }
+        withdrawAwaiting(Set(awaiting.lazy.map(\.relativePath).filter { FileInspector.isMissing(self.root.appendingPathComponent($0)) }))
+    }
+
+    private func withdrawAwaiting(_ paths: Set<String>) {
+        guard !awaitingPaths.isDisjoint(with: paths) else { return }
+        awaiting.removeAll { paths.contains($0.relativePath) }
+        awaitingPaths.subtract(paths)
+        updateCounts()
+        if awaiting.isEmpty { delegate?.engine(self, needsConfirmation: 0) }
+    }
 
     private func enqueue(_ files: [ReadyFile]) {
         guard !files.isEmpty else { return }
@@ -1288,6 +1308,7 @@ final class FolderWatchEngine {
     /// lost its files.
     private func markGone(_ paths: [String]) {
         guard !paths.isEmpty, runState == .running, health == .ok, FileInspector.canList(root) else { return }
+        withdrawAwaiting(Set(paths))
         let now = Date()
         let result = ledger.markGone(
             folderID: folder.id,

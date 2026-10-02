@@ -616,6 +616,8 @@ extension WatchService: WatchEngineDelegate {
 
     func engine(_ engine: FolderWatchEngine, needsConfirmation count: Int) {
         let folder = engine.folder
+        // Withdrawn: the next large batch is announced again.
+        guard count > 0 else { confirmationNotified.remove(folder.id); return }
         guard !confirmationNotified.contains(folder.id) else { return }
         confirmationNotified.insert(folder.id)
         NotificationService.notifyLargeBatch(count: count, folderName: folder.name)
