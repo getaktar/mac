@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-10-03
+
+### Fixed
+
+- Deleting the files of a large batch that was waiting for "Upload" or
+  "Skip" in a watched folder now withdraws the question. Before, the
+  question stayed until Aktar restarted, and the folder held every new
+  file back behind it instead of uploading it. "Upload" and "Skip" also
+  leave out files that were deleted in the meantime
+
 ## [0.11.0] - 2026-10-02
 
 ### Added
