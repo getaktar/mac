@@ -37,6 +37,17 @@ final class UploadManager {
         UserDefaults.standard.object(forKey: Self.reuseDuplicatesKey) as? Bool ?? true
     }
 
+    /// Settings > General: a notification after each upload. Uploads from
+    /// watched folders follow the folder's own choice instead.
+    static let showNotificationKey = "showNotificationAfterUpload"
+    private var showsSuccessNotifications: Bool {
+        UserDefaults.standard.object(forKey: Self.showNotificationKey) as? Bool ?? true
+    }
+
+    /// Told when an upload from a watched folder ends, however it ends
+    /// (also after a Retry from the panel); see `WatchService`.
+    var onWatchedUploadFinished: ((UploadJob, WatchUploadOutcome) -> Void)?
+
     private let destinationStore: DestinationStore
     private let repository: UploadRepository
 
@@ -117,6 +128,7 @@ final class UploadManager {
             return UploadJob(input: input, destination: destination, expiryDays: jobDays)
         }
         jobs.insert(contentsOf: newJobs, at: 0)
+        for job in newJobs { enqueueForStart(job) }
         drainQueue()
     }
 
@@ -138,6 +150,7 @@ final class UploadManager {
         }
         job.multipartSession = nil
         if let group = job.input.group { finishGroupIfDone(group, destination: job.destination) }
+        if !wasRunning { reportWatched(job, .cancelled) }
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(3))
             self?.dismiss(job)
@@ -194,8 +207,16 @@ final class UploadManager {
         jobs.removeAll { $0 === job }
     }
 
+    /// Drops many finished jobs in one pass.
+    func dismiss(_ finished: [UploadJob]) {
+        guard !finished.isEmpty else { return }
+        let ids = Set(finished.map(ObjectIdentifier.init))
+        jobs.removeAll { ids.contains(ObjectIdentifier($0)) }
+    }
+
     func retry(_ job: UploadJob) {
         job.state = .waiting
+        enqueueForStart(job)
         drainQueue()
     }
 
@@ -289,13 +310,25 @@ final class UploadManager {
         return try await provider.expiryPrefixesInUse()
     }
 
-    private func drainQueue() {
-        let pending = jobs.filter {
-            if case .waiting = $0.state { return true }
-            return false
+    /// Jobs waiting to start, in order: what the user uploads goes ahead
+    /// of a watched folder's files, so a drop of thousands of files there
+    /// never holds up a screenshot pasted by hand.
+    @ObservationIgnored private var manualQueue = JobQueue()
+    @ObservationIgnored private var watchedQueue = JobQueue()
+
+    private func enqueueForStart(_ job: UploadJob) {
+        if job.input.watch != nil {
+            watchedQueue.push(job)
+        } else {
+            manualQueue.push(job)
         }
-        for job in pending {
-            guard activeCount < maxConcurrent else { break }
+    }
+
+    /// Starts waiting jobs while there's room; each job is looked at once.
+    private func drainQueue() {
+        while activeCount < maxConcurrent, let job = manualQueue.pop() ?? watchedQueue.pop() {
+            // Cancelled or started meanwhile.
+            guard case .waiting = job.state else { continue }
             start(job: job, destination: job.destination)
         }
     }
@@ -355,16 +388,23 @@ final class UploadManager {
                 // Hashes of the bytes that go up, only when something needs
                 // them: the path variables, reusing a link, or recognizing a
                 // temporary copy when a multipart upload is resumed.
-                let template = destination.objectPathTemplate
+                let watch = job.input.watch
+                let template = watch?.pathTemplate ?? destination.objectPathTemplate
                 let generatesKey = job.input.objectKey == nil && job.input.folderKey == nil
                 let canReuse = reuseDuplicates && job.input.objectKey == nil && job.input.group == nil && zipped == nil
                 let isCopy = uploadURL != job.input.fileURL
                 let wantsMD5 = generatesKey && ObjectKeyGenerator.usesMD5(template)
+                // A watched folder's file is hashed once: here, in this pass,
+                // or by the watcher, which then hands its hash over.
                 let wantsSHA256 = canReuse || (generatesKey && ObjectKeyGenerator.usesSHA256(template))
                     || (isCopy && fileSize > S3Provider.multipartThreshold)
-                let hashes = try await offMain {
-                    try ContentHasher.hashes(of: uploadURL, md5: wantsMD5, sha256: wantsSHA256)
+                    || (!isCopy && watch?.wantsContentHash == true)
+                let known = isCopy ? nil : watch?.sha256
+                var hashes = try await offMain {
+                    try ContentHasher.hashes(of: uploadURL, md5: wantsMD5, sha256: wantsSHA256 && known == nil)
                 }
+                if wantsSHA256, let known { hashes.sha256 = known }
+                job.originalContentHash = isCopy ? nil : hashes.sha256
 
                 // A new format means a new extension, also for an exact key
                 // (the bucket browser) and a file in a folder.
@@ -385,10 +425,11 @@ final class UploadManager {
                     }
                 } else {
                     objectKey = UploadExpiry.key(
-                        job.input.folderKey.map(withNewExtension) ?? ObjectKeyGenerator.generate(
+                        job.input.folderKey.map(withNewExtension) ?? Self.generatedKey(
                             template: template,
-                            originalFilename: filename,
-                            hashes: hashes
+                            filename: filename,
+                            hashes: hashes,
+                            watch: watch
                         ),
                         days: job.expiryDays
                     )
@@ -506,6 +547,20 @@ final class UploadManager {
         return candidate
     }
 
+    /// The key `template` gives. A file from a watched folder that keeps its
+    /// subfolders goes under them, also when the template has no {subpath}.
+    private static func generatedKey(template: String, filename: String, hashes: ContentHashes, watch: WatchUploadContext?) -> String {
+        let key = ObjectKeyGenerator.generate(
+            template: template,
+            originalFilename: filename,
+            hashes: hashes,
+            folder: watch?.folderName ?? "",
+            subpath: watch?.subpath ?? ""
+        )
+        guard let watch, watch.keepStructure, !template.contains("{subpath}") else { return key }
+        return WatchKeys.insertingSubpath(watch.subpath, into: key)
+    }
+
     /// "a/photo.png" with "webp" gives "a/photo.webp".
     nonisolated static func replacingExtension(of key: String, with newExtension: String) -> String {
         let directory = (key as NSString).deletingLastPathComponent
@@ -517,8 +572,14 @@ final class UploadManager {
 
     /// A job that ended without finishing: cancelled.
     private func stopped(job: UploadJob) {
+        reportWatched(job, .cancelled)
         activeCount -= 1
         drainQueue()
+    }
+
+    private func reportWatched(_ job: UploadJob, _ outcome: WatchUploadOutcome) {
+        guard job.input.watch != nil else { return }
+        onWatchedUploadFinished?(job, outcome)
     }
 
     /// Nothing was uploaded: the link of `record` is copied, and history
@@ -526,9 +587,24 @@ final class UploadManager {
     private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL) {
         job.reused = true
         job.state = .succeeded(publicURLString: record.publicURLString)
-        ClipboardService.copy(format(link, filename: record.localFilename, for: destination))
-        NotificationService.notifyUploadReused(filename: record.localFilename)
-        closePanelIfWanted()
+        if job.input.watch != nil {
+            reportWatched(job, .succeeded(WatchUploadSuccess(
+                objectKey: record.objectKey,
+                publicURL: record.publicURLString,
+                link: link.absoluteString,
+                reused: true,
+                byteSize: Int64(record.byteSize),
+                destinationID: destination.id,
+                filename: record.localFilename,
+                contentHash: job.originalContentHash
+            )))
+        } else {
+            ClipboardService.copy(format(link, filename: record.localFilename, for: destination))
+            if showsSuccessNotifications {
+                NotificationService.notifyUploadReused(filename: record.localFilename)
+            }
+            closePanelIfWanted()
+        }
         activeCount -= 1
         drainQueue()
     }
@@ -548,14 +624,29 @@ final class UploadManager {
             userInfo: ["objectKey": result.objectKey, "byteSize": Int64(result.byteSize)]
         )
 
-        // A file from a folder waits for the rest of it: the links are
-        // copied together, with one notification, once the last is done.
-        if let group = job.input.group, openGroups[group.id] != nil {
+        // A watched folder's file: the folder decides what's copied and
+        // announced. A file from a folder waits for the rest of it: the
+        // links are copied together, with one notification, once the last
+        // is done.
+        if job.input.watch != nil {
+            reportWatched(job, .succeeded(WatchUploadSuccess(
+                objectKey: result.objectKey,
+                publicURL: result.publicURL.absoluteString,
+                link: link.absoluteString,
+                reused: false,
+                byteSize: Int64(result.byteSize),
+                destinationID: destination.id,
+                filename: filename,
+                contentHash: job.originalContentHash
+            )))
+        } else if let group = job.input.group, openGroups[group.id] != nil {
             openGroups[group.id]?[group.index] = (link, filename)
             finishGroupIfDone(group, destination: destination)
         } else {
             ClipboardService.copy(format(link, filename: filename, for: destination))
-            NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
+            if showsSuccessNotifications {
+                NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
+            }
             closePanelIfWanted()
         }
 
@@ -565,6 +656,15 @@ final class UploadManager {
 
     private func format(_ link: URL, filename: String, for destination: DestinationConfig) -> String {
         OutputFormatter.format(publicURL: link, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
+    }
+
+    /// `link` as the destination's "Copy as" formats it, for copying the
+    /// links of a watched folder's uploads.
+    func formatted(_ link: URL, filename: String, destinationID: UUID) -> String {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else {
+            return link.absoluteString
+        }
+        return format(link, filename: filename, for: destination)
     }
 
     private func closePanelIfWanted() {
@@ -597,18 +697,89 @@ final class UploadManager {
         let summary = links.count == group.count
             ? String(localized: "\(group.name) (\(group.count) files)")
             : String(localized: "\(group.name) (\(links.count) of \(group.count) files)")
-        NotificationService.notifyUploadSucceeded(filename: summary)
+        if showsSuccessNotifications {
+            NotificationService.notifyUploadSucceeded(filename: summary)
+        }
         closePanelIfWanted()
     }
 
     private func fail(job: UploadJob, error: Error, destination: DestinationConfig) {
         let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         job.state = .failed(message)
-        NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
+        if job.input.watch != nil {
+            reportWatched(job, .failed(message: message, retryable: Self.isTransient(error)))
+        } else {
+            NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
+        }
         if let group = job.input.group { finishGroupIfDone(group, destination: destination) }
 
         activeCount -= 1
         drainQueue()
+    }
+}
+
+extension UploadManager {
+    /// A failure worth retrying later on its own: the network was down or
+    /// the provider busy (`S3Transfer` reports both as `.network`).
+    nonisolated static func isTransient(_ error: Error) -> Bool {
+        if case StorageError.network = error { return true }
+        if error is URLError { return true }
+        let description = String(describing: error).lowercased()
+        return description.contains("timed out") || description.contains("network connection")
+            || description.contains("internalerror") || description.contains("serviceunavailable")
+    }
+
+    /// Deletes the upload of a file deleted from a watched folder, the way
+    /// the Library deletes one: through `deleteRemote`, so its history
+    /// entries go too. Without any (removed from history), the object is
+    /// deleted directly.
+    func deleteWatchedUpload(key: String, destinationID: UUID, folderID: UUID) async throws {
+        let records = repository.records(key: key, destinationID: destinationID).filter { $0.watchedFolderID == folderID }
+        if let first = records.first {
+            try await deleteRemote(first)
+            for record in records.dropFirst() { repository.delete(record) }
+            return
+        }
+        guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else { return }
+        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        try await provider.delete(objectKey: key)
+    }
+
+    /// Whether history has the object at `key` from anything but this
+    /// watched folder.
+    func isInHistory(key: String, destinationID: UUID, excludingFolderID folderID: UUID) -> Bool {
+        repository.records(key: key, destinationID: destinationID).contains { $0.watchedFolderID != folderID }
+    }
+
+    /// Whether the bucket has `key`, `size` bytes long. A watched folder
+    /// checks this before it moves an uploaded file away.
+    func verifyUploaded(key: String, destinationID: UUID, size: Int64) async -> Bool {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }),
+              let credentials = try? KeychainService.load(for: destination.id) else { return false }
+        let provider = S3Provider(config: destination, credentials: credentials)
+        return (try? await provider.objectSize(key: key)) == size
+    }
+}
+
+/// A first-in, first-out list of jobs that pops in constant time.
+private struct JobQueue {
+    private var items: [UploadJob] = []
+    private var head = 0
+
+    mutating func push(_ job: UploadJob) {
+        items.append(job)
+    }
+
+    mutating func pop() -> UploadJob? {
+        guard head < items.count else { return nil }
+        let job = items[head]
+        head += 1
+        // Drops what was popped once it's most of the array.
+        if head > 256, head * 2 > items.count {
+            items.removeFirst(head)
+            head = 0
+        }
+        return job
     }
 }
 

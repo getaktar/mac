@@ -1,9 +1,10 @@
 import KeyboardShortcuts
 import SwiftUI
 
-private enum SettingsTab: String, CaseIterable, Identifiable {
+enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case destinations
+    case watchedFolders
     case output
     case integrations
     case about
@@ -16,6 +17,8 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
             return "General"
         case .destinations:
             return "Destinations"
+        case .watchedFolders:
+            return "Watched Folders"
         case .output:
             return "Output"
         case .integrations:
@@ -31,6 +34,8 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
             return "gearshape"
         case .destinations:
             return "cloud"
+        case .watchedFolders:
+            return "eye"
         case .output:
             return "square.on.square"
         case .integrations:
@@ -42,6 +47,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
 }
 
 struct SettingsView: View {
+    @Environment(AppState.self) private var appState
     @State private var selectedTab: SettingsTab? = .general
 
     var body: some View {
@@ -53,6 +59,15 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
         .frame(width: .infinity, height: .infinity)
+        // aktar://watch and "Watch Folder with Aktar" open a given tab.
+        .onAppear(perform: showRequestedTab)
+        .onChange(of: appState.requestedSettingsTab) { showRequestedTab() }
+    }
+
+    private func showRequestedTab() {
+        guard let raw = appState.requestedSettingsTab else { return }
+        appState.requestedSettingsTab = nil
+        if let tab = SettingsTab(rawValue: raw) { selectedTab = tab }
     }
 
     // MARK: - Sidebar
@@ -82,6 +97,9 @@ struct SettingsView: View {
         case .destinations:
             DestinationsSettingsView()
 
+        case .watchedFolders:
+            WatchedFoldersSettingsView()
+
         case .output:
             OutputSettingsView()
 
@@ -110,7 +128,7 @@ struct SettingsView: View {
 private struct GeneralSettingsView: View {
     @Environment(AppState.self) private var appState
     @AppStorage("launchAtLogin") private var launchAtLogin = false
-    @AppStorage("showNotificationAfterUpload") private var showNotification = true
+    @AppStorage(UploadManager.showNotificationKey) private var showNotification = true
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
     @AppStorage(UploadManager.reuseDuplicatesKey) private var reuseDuplicates = true
     @State private var language = AppLanguage.override

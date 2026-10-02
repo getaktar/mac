@@ -26,6 +26,9 @@ final class UploadJob: Identifiable {
     /// The multipart upload this job is sending, kept after a failure so
     /// Retry continues it and Cancel can abort it.
     var multipartSession: MultipartSession?
+    /// SHA-256 of the file as it is on disk, when the upload hashed the
+    /// original bytes (for a watched folder's ledger).
+    var originalContentHash: String?
 
     init(input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil) {
         self.input = input

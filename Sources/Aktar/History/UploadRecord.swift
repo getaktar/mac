@@ -19,6 +19,10 @@ final class UploadRecord: Identifiable {
     /// reusing this upload's link when the same file comes up again. Nil
     /// for uploads from before it was recorded, or when it wasn't needed.
     var contentHash: String?
+    /// The watched folder this file was picked up from, and its name at the
+    /// time; nil for everything uploaded by hand.
+    var watchedFolderID: UUID?
+    var watchedFolderName: String?
 
     init(
         id: UUID = UUID(),
@@ -31,7 +35,9 @@ final class UploadRecord: Identifiable {
         byteSize: Int,
         createdAt: Date = .now,
         expiresAt: Date? = nil,
-        contentHash: String? = nil
+        contentHash: String? = nil,
+        watchedFolderID: UUID? = nil,
+        watchedFolderName: String? = nil
     ) {
         self.id = id
         self.localFilename = localFilename
@@ -44,6 +50,13 @@ final class UploadRecord: Identifiable {
         self.createdAt = createdAt
         self.expiresAt = expiresAt
         self.contentHash = contentHash
+        self.watchedFolderID = watchedFolderID
+        self.watchedFolderName = watchedFolderName
+    }
+
+    /// "Watched: Screenshots" for an upload from a watched folder.
+    var sourceLabel: String? {
+        watchedFolderName.map { String(localized: "Watched: \($0)") }
     }
 
     /// Some destinations were saved with a schemeless base URL (e.g.

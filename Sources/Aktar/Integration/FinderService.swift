@@ -8,6 +8,11 @@ import AppKit
 /// app read access to them, so this is how Aktar uploads the Finder
 /// selection without asking to read the whole disk. Folders go up as the
 /// destination's Folders setting says (a ZIP, or file by file).
+///
+/// "Watch Folder with Aktar" (folders only) opens Settings > Watched
+/// Folders to add it. The access a service gets ends with the app, so the
+/// folder is confirmed in a folder picker there, which grants lasting
+/// access.
 @MainActor
 final class FinderService: NSObject {
     private let appState: AppState
@@ -27,5 +32,12 @@ final class FinderService: NSObject {
         }
         let inputs = files.map { UploadInput(fileURL: $0, originalFilename: $0.lastPathComponent, source: .finderExtension) }
         appState.uploadManager.upload(inputs)
+    }
+
+    /// Named by `NSMessage` in the second NSServices entry.
+    @objc func watchFolder(_ pasteboard: NSPasteboard, userData: String?, error: AutoreleasingUnsafeMutablePointer<NSString?>) {
+        let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
+        guard let folder = urls.first(where: FolderUpload.isFolder) else { return }
+        appState.watchFolder(folder)
     }
 }

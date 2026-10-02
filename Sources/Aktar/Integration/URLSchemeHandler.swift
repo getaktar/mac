@@ -12,6 +12,9 @@ extension Notification.Name {
 ///                                while Aktar is already running)
 ///     aktar://library            open the Library window
 ///     aktar://settings           open Settings
+///     aktar://watch              open Settings > Watched Folders
+///     aktar://watch/pause?minutes=60   pause watching (no minutes: until resumed)
+///     aktar://watch/resume       resume watching
 ///     aktar://connect?callback=raycast://extensions/<author>/<extension>/<command>
 ///
 /// `connect` is how the Raycast extension pairs: after the user approves,
@@ -37,6 +40,24 @@ enum URLSchemeHandler {
             NotificationCenter.default.post(name: .aktarOpenWindow, object: "settings")
         case "connect":
             connect(url)
+        case "watch":
+            watch(url, appState: appState)
+        default:
+            break
+        }
+    }
+
+    private static func watch(_ url: URL, appState: AppState) {
+        let service = appState.watchService
+        switch url.path.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "/")) {
+        case "":
+            appState.openSettings(tab: SettingsTab.watchedFolders.rawValue)
+        case "pause":
+            let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            let minutes = items.first(where: { $0.name == "minutes" })?.value.flatMap(Int.init)
+            service.pause(minutes: minutes.flatMap { $0 > 0 ? $0 : nil })
+        case "resume":
+            service.resume()
         default:
             break
         }

@@ -41,6 +41,10 @@ targets:
       - package: libwebp
       - sdk: PDFKit.framework
       - target: AktarShare
+    # One scheme that builds the app and runs the unit tests.
+    scheme:
+      testTargets:
+        - AktarTests
     info:
       path: Sources/Aktar/Info.plist
       properties:
@@ -73,6 +77,15 @@ targets:
             NSRequiredContext: {}
             NSSendFileTypes:
               - public.item
+          # "Watch Folder with Aktar" for a folder selected in Finder: opens
+          # Settings > Watched Folders to add it; see FinderService.
+          - NSMenuItem:
+              default: Watch Folder with Aktar
+            NSMessage: watchFolder
+            NSPortName: Aktar
+            NSRequiredContext: {}
+            NSSendFileTypes:
+              - public.folder
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac
@@ -119,5 +132,23 @@ targets:
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_ENTITLEMENTS: Sources/AktarShare/AktarShare.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+  # Unit tests for the Watched Folders engine. It's built from the engine's
+  # own sources (it doesn't need the app around it), so the tests run
+  # without launching Aktar.
+  AktarTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/AktarTests
+      - path: Sources/Aktar/Watch/Engine
+      - path: Sources/Aktar/Upload/ObjectKeyGenerator.swift
+      - path: Sources/Aktar/Upload/ContentHasher.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac.tests
+        SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
         MACOSX_DEPLOYMENT_TARGET: "14.0"

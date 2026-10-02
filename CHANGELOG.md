@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Watched Folders (Settings > Watched Folders): files that land in a
+  folder you pick are uploaded on their own, once they're completely
+  written. Each folder has its own destination, path, link and "Delete
+  after", which files count (all, images, videos, screenshots only, or
+  your own patterns, with sizes and subfolders), what happens when a file
+  changes (ignore it, upload it again, or replace the upload so the link
+  stays), and what happens to the original afterwards (keep it, move it
+  to the Trash or an "Uploaded" subfolder, or tag it "Aktar" in Finder).
+  Partial downloads, temporary and hidden files are never uploaded, a
+  renamed file isn't uploaded twice, and files that arrived while Aktar
+  wasn't running are picked up when it starts
+- When a file is deleted from a watched folder, its upload can be
+  deleted from the bucket too (off by default, for folders that keep
+  their files). It waits a few seconds in case the file comes back and
+  never deletes an upload something else still uses. "Ask before
+  deleting" (on by default) asks first every time, in the menu bar and in
+  a notification whose Delete from Bucket and Keep Uploaded Files buttons
+  work without opening Aktar; with it off, Aktar still asks when many
+  files disappear at once
+- Upload Screenshots Automatically: watches the folder macOS saves
+  screenshots to and copies each screenshot's link as soon as it's up
+- More than 50 new files at once wait for Upload or Skip, in the menu bar
+  and in Settings, so a folder dropped in by mistake isn't shared
+- Pause watching for an hour, until tomorrow or until you resume it, from
+  the menu bar or Settings, and on battery power or Low Data Mode and
+  metered networks if you like. Files that arrive meanwhile wait in their
+  folder
+- Automation for each watched folder: call a webhook or run a script from
+  Aktar's scripts folder after every upload, with the link, the key and
+  the file
+- "Watch Folder with Aktar" in Finder's right-click menu for folders
+- {folder} and {subpath} in Object Path: the watched folder's name and the
+  subfolders a file is in
+- Uploads from watched folders say where they came from in the menu bar
+  and the Library, which can show only those
+- The local API can list, pause and resume watched folders
+  (/v1/watched-folders), and aktar://watch, aktar://watch/pause and
+  aktar://watch/resume do the same from a link
+
+### Fixed
+
+- "Show notification after upload" in Settings > General is respected
+
 ## [0.10.0] - 2026-10-01
 
 ### Added

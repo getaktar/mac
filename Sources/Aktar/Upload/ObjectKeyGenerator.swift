@@ -2,8 +2,18 @@ import Foundation
 
 enum ObjectKeyGenerator {
     /// `hashes` fills {md5} and {sha256}; see `ContentHasher`. Left empty,
-    /// those variables are dropped.
-    static func generate(template: String, originalFilename: String, date: Date = .now, hashes: ContentHashes = ContentHashes()) -> String {
+    /// those variables are dropped. `folder` and `subpath` fill {folder} and
+    /// {subpath} for a file from a watched folder (its name, and the
+    /// subfolders it's in); they're empty for every other upload. Empty
+    /// segments collapse, so "{folder}/{filename}" is just the name then.
+    static func generate(
+        template: String,
+        originalFilename: String,
+        date: Date = .now,
+        hashes: ContentHashes = ContentHashes(),
+        folder: String = "",
+        subpath: String = ""
+    ) -> String {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents([.year, .month, .day], from: date)
 
@@ -36,13 +46,15 @@ enum ObjectKeyGenerator {
             ("{ext}", ext),
             ("{md5}", hashes.md5 ?? ""),
             ("{sha256}", hashes.sha256 ?? ""),
+            ("{folder}", WatchKeys.sanitizedFolderName(folder)),
+            ("{subpath}", subpath),
         ]
 
         var result = template
         for (token, value) in replacements {
             result = result.replacingOccurrences(of: token, with: value)
         }
-        return result
+        return WatchKeys.collapsingEmptySegments(result)
     }
 
     /// Which content hashes `template` needs, so they're only computed

@@ -48,6 +48,54 @@
           }
         }
       }
+    },
+    "Watch Folder with Aktar" : {
+      "comment" : "Finder's right-click menu (Quick Actions / Services) item for a folder, which adds it to Watched Folders.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner mit Aktar überwachen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vigilar carpeta con Aktar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surveiller le dossier avec Aktar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarでフォルダを監視"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monitorar pasta com o Aktar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasörü Aktar ile İzle"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Aktar 监视文件夹"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

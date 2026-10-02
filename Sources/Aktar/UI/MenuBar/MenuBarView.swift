@@ -72,6 +72,9 @@ struct MenuBarView: View {
                 linkPicker
             }
             dropzone
+            if !appState.watchService.folders.isEmpty {
+                WatchPanelSection()
+            }
             recentSection
         }
     }
@@ -310,14 +313,22 @@ struct MenuBarView: View {
                     .foregroundStyle(Color.accentColor)
             }
 
-            if activeJobs.isEmpty && recentRecords.isEmpty {
+            let queue = queueSummary
+            if queue.rows.isEmpty && queue.watchedWaiting == 0 && recentRecords.isEmpty {
                 emptyRecentState
             } else {
-                ForEach(activeJobs) { job in
-                    JobRowView(job: job)
-                }
-                ForEach(recentRecords) { record in
-                    RecentRowView(record: record, openLibrary: { openAppWindow("library") })
+                LazyVStack(alignment: .leading, spacing: 8) {
+                    ForEach(queue.rows) { job in
+                        JobRowView(job: job)
+                    }
+                    if queue.watchedWaiting > 0 {
+                        Label(String(localized: "Watched: \(queue.watchedWaiting) waiting"), systemImage: "eye")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(recentRecords) { record in
+                        RecentRowView(record: record, openLibrary: { openAppWindow("library") })
+                    }
                 }
             }
         }
@@ -337,14 +348,27 @@ struct MenuBarView: View {
         .padding(.vertical, 10)
     }
 
-    /// Cancelled jobs stay for a moment so the row can say so.
-    private var activeJobs: [UploadJob] {
-        appState.uploadManager.jobs.filter {
-            switch $0.state {
-            case .waiting, .uploading, .failed, .cancelled: return true
-            case .succeeded: return false
+    /// The queue as the panel shows it: every upload made by hand, and of
+    /// a watched folder's (possibly thousands) only the few uploading right
+    /// now, the rest counted on one line. Cancelled jobs stay for a moment
+    /// so the row can say so.
+    private var queueSummary: (rows: [UploadJob], watchedWaiting: Int) {
+        var rows: [UploadJob] = []
+        var watchedWaiting = 0
+        for job in appState.uploadManager.jobs {
+            let watched = job.input.watch != nil
+            switch job.state {
+            case .uploading:
+                rows.append(job)
+            case .waiting where watched:
+                watchedWaiting += 1
+            case .waiting, .failed, .cancelled:
+                rows.append(job)
+            case .succeeded:
+                break
             }
         }
+        return (rows, watchedWaiting)
     }
 
     private var recentRecords: [UploadRecord] {
@@ -429,6 +453,9 @@ private struct JobRowView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(job.input.originalFilename).font(.caption).lineLimit(1)
+                if let folderName = job.input.watch?.folderName {
+                    Text("Watched: \(folderName)").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                }
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
@@ -557,5 +584,67 @@ private struct RecentRowView: View {
         }
         .frame(width: 32, height: 32)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+/// Watched Folders in the panel: what they're doing, Pause or Resume, and
+/// large batches waiting for Upload or Skip.
+private struct WatchPanelSection: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        let service = appState.watchService
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: service.isPaused ? "pause.circle" : "eye")
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(service.isPaused ? String(localized: "Watching paused") : service.statusLine)
+                        .font(.caption)
+                        .help(service.statusLine)
+                    if let activity {
+                        Text(activity).font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                Menu {
+                    if service.manualPause != nil {
+                        Button("Resume Watching") { service.resume() }
+                    } else {
+                        Section("Pause Watching") {
+                            Button("For 1 Hour") { service.pause(minutes: 60) }
+                            Button("Until Tomorrow") { service.pauseUntilTomorrow() }
+                            Button("Until I Resume") { service.pause(minutes: nil) }
+                        }
+                    }
+                    Divider()
+                    Button("Watched Folders\u{2026}") { appState.openSettings(tab: SettingsTab.watchedFolders.rawValue) }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundStyle(.secondary)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .frame(width: 16)
+            }
+            ForEach(service.confirmations, id: \.folder.id) { item in
+                WatchConfirmationBanner(folder: item.folder, count: item.count, compact: true)
+            }
+            ForEach(service.deleteConfirmations, id: \.folder.id) { item in
+                WatchDeleteConfirmationBanner(folder: item.folder, names: item.names, compact: true)
+            }
+        }
+        .padding(8)
+        .background(Color.secondary.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    /// "3 waiting · 2 uploading", or nothing when idle.
+    private var activity: String? {
+        let service = appState.watchService
+        var parts: [String] = []
+        if service.totalWaiting > 0 { parts.append(String(localized: "\(service.totalWaiting) waiting")) }
+        if service.totalUploading > 0 { parts.append(String(localized: "\(service.totalUploading) uploading")) }
+        return parts.isEmpty ? nil : parts.joined(separator: " \u{00B7} ")
     }
 }

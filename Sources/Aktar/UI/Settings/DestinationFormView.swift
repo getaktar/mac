@@ -149,9 +149,10 @@ struct DestinationFormView: View {
                     Text("Object Path")
                 } footer: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext} {md5} {sha256}")
+                        Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext} {md5} {sha256} {folder} {subpath}")
                         Text(verbatim: "{md5}: ") + Text("MD5 of the file's contents")
                         Text(verbatim: "{sha256}: ") + Text("SHA-256 of the file's contents")
+                        Text(verbatim: "{folder} {subpath}: ") + Text("the watched folder\u{2019}s name and the subfolders a file is in, for uploads from Watched Folders")
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)

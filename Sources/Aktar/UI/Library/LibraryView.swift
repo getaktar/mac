@@ -38,6 +38,7 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedIDs: Set<UUID> = []
     @State private var destinationFilter: UUID?
+    @State private var sourceFilter: SourceFilter?
     @State private var recordsPendingDeletion: [UploadRecord] = []
     @State private var deletionInFlight: Set<UUID> = []
     @State private var deletionErrors: [UUID: String] = [:]
@@ -174,8 +175,8 @@ struct LibraryView: View {
                 ActiveUploadRow(job: job)
                     .selectionDisabled()
             }
-            if availableDestinations.count > 1 {
-                destinationFilterRow
+            if availableDestinations.count > 1 || !availableWatchedFolders.isEmpty {
+                filterRow
                     .selectionDisabled()
             }
             if filteredRecords.isEmpty {
@@ -209,21 +210,65 @@ struct LibraryView: View {
         .contextMenu { contextMenuContent(for: record) }
     }
 
-    private var destinationFilterRow: some View {
-        HStack {
+    private var filterRow: some View {
+        HStack(spacing: 12) {
             Spacer()
-            Menu(destinationFilterLabel) {
-                Button("All Destinations") { destinationFilter = nil }
-                Divider()
-                ForEach(availableDestinations, id: \.id) { destination in
-                    Button(destination.name) { destinationFilter = destination.id }
+            if !availableWatchedFolders.isEmpty {
+                Menu(sourceFilterLabel) {
+                    Button("All Sources") { sourceFilter = nil }
+                    Button("Watched Folders") { sourceFilter = .watched }
+                    Divider()
+                    ForEach(availableWatchedFolders, id: \.id) { folder in
+                        Button(folder.name) { sourceFilter = .folder(folder.id) }
+                    }
                 }
+                .menuStyle(.borderlessButton)
+                .font(.caption)
+                .fixedSize()
             }
-            .menuStyle(.borderlessButton)
-            .font(.caption)
-            .fixedSize()
+            if availableDestinations.count > 1 {
+                Menu(destinationFilterLabel) {
+                    Button("All Destinations") { destinationFilter = nil }
+                    Divider()
+                    ForEach(availableDestinations, id: \.id) { destination in
+                        Button(destination.name) { destinationFilter = destination.id }
+                    }
+                }
+                .menuStyle(.borderlessButton)
+                .font(.caption)
+                .fixedSize()
+            }
         }
         .listRowSeparator(.hidden)
+    }
+
+    /// Uploads from watched folders, all or one.
+    private enum SourceFilter: Equatable {
+        case watched
+        case folder(UUID)
+    }
+
+    private var sourceFilterLabel: String {
+        switch sourceFilter {
+        case nil:
+            return String(localized: "Source: All")
+        case .watched:
+            return String(localized: "Source: Watched Folders")
+        case .folder(let id):
+            let name = availableWatchedFolders.first { $0.id == id }?.name ?? ""
+            return String(localized: "Source: \(name)")
+        }
+    }
+
+    private var availableWatchedFolders: [(id: UUID, name: String)] {
+        var seen = Set<UUID>()
+        var result: [(id: UUID, name: String)] = []
+        for record in records {
+            guard let id = record.watchedFolderID, !seen.contains(id) else { continue }
+            seen.insert(id)
+            result.append((id, record.watchedFolderName ?? ""))
+        }
+        return result
     }
 
     private var destinationFilterLabel: String {
@@ -378,6 +423,11 @@ struct LibraryView: View {
         if let destinationFilter {
             result = result.filter { $0.destinationID == destinationFilter }
         }
+        switch sourceFilter {
+        case .watched: result = result.filter { $0.watchedFolderID != nil }
+        case .folder(let id): result = result.filter { $0.watchedFolderID == id }
+        case nil: break
+        }
         guard !searchText.isEmpty else { return result }
         return result.filter {
             $0.localFilename.localizedCaseInsensitiveContains(searchText)
@@ -406,6 +456,9 @@ struct LibraryView: View {
             day = String(localized: "Yesterday")
         } else {
             day = record.createdAt.formatted(.dateTime.month(.abbreviated).day())
+        }
+        if let source = record.sourceLabel {
+            return "\(record.destinationName) \u{00B7} \(source) \u{00B7} \(day), \(time)"
         }
         return "\(record.destinationName) \u{00B7} \(day), \(time)"
     }
@@ -580,6 +633,9 @@ private struct ActiveUploadRow: View {
                 )
             VStack(alignment: .leading, spacing: 4) {
                 Text(job.input.originalFilename).lineLimit(1)
+                if let folderName = job.input.watch?.folderName {
+                    Text("Watched: \(folderName)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                }
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
@@ -1193,6 +1249,9 @@ private struct UploadDetailView: View {
             Text("Details").font(.subheadline.bold()).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 8) {
                 DetailRow(label: "Destination", value: record.destinationName)
+                if let source = record.sourceLabel {
+                    DetailRow(label: "Source", value: source)
+                }
                 DetailRow(
                     label: "File size",
                     value: ByteCountFormatter.string(fromByteCount: Int64(record.byteSize), countStyle: .file)

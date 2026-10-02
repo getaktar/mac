@@ -1,4 +1,5 @@
 import AppKit
+import UserNotifications
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -15,6 +16,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let launchDate = Date()
 
     func applicationWillFinishLaunching(_ notification: Notification) {
+        // Before launch finishes, so an answer to a delete ask that launched
+        // the app reaches it.
+        UNUserNotificationCenter.current().delegate = appState.watchService.notificationActions
+        appState.watchService.notificationActions.service = appState.watchService
+        NotificationService.registerCategories()
         // Handle aktar:// links ourselves. Left to SwiftUI, a URL open would
         // bring up one of the app's windows instead of just running the action.
         NSAppleEventManager.shared().setEventHandler(
@@ -28,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController = MenuBarPanelController(appState: appState)
         LocalAPIService.shared.configure(appState: appState)
+        appState.watchService.start()
 
         // "Upload with Aktar" in Finder's right-click menu; see FinderService.
         let finderService = FinderService(appState: appState)

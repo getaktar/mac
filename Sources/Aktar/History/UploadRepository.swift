@@ -33,7 +33,9 @@ final class UploadRepository {
             byteSize: result.byteSize,
             createdAt: createdAt,
             expiresAt: expiryDays.map { createdAt.addingTimeInterval(TimeInterval($0) * 86_400) },
-            contentHash: contentHash
+            contentHash: contentHash,
+            watchedFolderID: input.watch?.folderID,
+            watchedFolderName: input.watch?.folderName
         )
         modelContext.insert(record)
         try? modelContext.save()
@@ -127,7 +129,8 @@ final class UploadRepository {
         }
     }
 
-    private func records(key: String, destinationID: UUID) -> [UploadRecord] {
+    /// History entries of the object at `key`.
+    func records(key: String, destinationID: UUID) -> [UploadRecord] {
         let descriptor = FetchDescriptor<UploadRecord>(
             predicate: #Predicate { $0.objectKey == key && $0.destinationID == destinationID }
         )

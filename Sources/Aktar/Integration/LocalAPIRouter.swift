@@ -16,6 +16,10 @@ import SwiftData
 ///     POST   /v1/destinations/{id}/objects/move                {"from", "to"}
 ///     POST   /v1/destinations/{id}/folders                     {"prefix", "name"}
 ///     POST   /v1/destinations/{id}/links                       {"key", "expiresIn"}
+///     GET    /v1/watched-folders
+///     POST   /v1/watched-folders/pause                         {"minutes"} (omitted or null: until resumed)
+///     POST   /v1/watched-folders/resume
+///     POST   /v1/watched-folders/{id}                          {"enabled"}
 @MainActor
 final class LocalAPIRouter {
     static let apiVersion = 1
@@ -44,6 +48,15 @@ final class LocalAPIRouter {
             return await uploadClipboard(request)
         case ("DELETE", 2) where route[0] == "uploads":
             return await deleteUpload(id: route[1])
+        case ("GET", 1) where route[0] == "watched-folders":
+            return .json(200, watchedFoldersDTO())
+        case ("POST", 2) where route == ["watched-folders", "pause"]:
+            return pauseWatching(request)
+        case ("POST", 2) where route == ["watched-folders", "resume"]:
+            appState.watchService.resume()
+            return .json(200, watchedFoldersDTO())
+        case ("POST", 2) where route[0] == "watched-folders":
+            return setWatchedFolderEnabled(id: route[1], request: request)
         case (_, 3...) where route[0] == "destinations":
             guard let destination = destination(id: route[1]) else {
                 return .error(404, "No destination with that ID.")
@@ -64,7 +77,8 @@ final class LocalAPIRouter {
             build: info?["CFBundleVersion"] as? String ?? "",
             apiVersion: Self.apiVersion,
             defaultDestinationId: appState.destinationStore.defaultDestination?.id.uuidString,
-            outputFormat: appState.uploadManager.outputMode.rawValue
+            outputFormat: appState.uploadManager.outputMode.rawValue,
+            watching: .init(paused: appState.watchService.isPaused, folders: appState.watchService.folders.count)
         ))
     }
 
@@ -99,6 +113,73 @@ final class LocalAPIRouter {
         } catch {
             return failure(error)
         }
+    }
+
+    // MARK: - Watched folders
+
+    private func pauseWatching(_ request: HTTPRequest) -> HTTPResponse {
+        var minutes: Int?
+        if !request.body.isEmpty {
+            do {
+                minutes = try decode(PauseBody.self, from: request).minutes
+            } catch {
+                return .error(400, "Invalid request body: \(error.localizedDescription)")
+            }
+        }
+        if let minutes, minutes <= 0 {
+            return .error(400, "minutes must be a positive number, or null to pause until resumed.")
+        }
+        appState.watchService.pause(minutes: minutes)
+        return .json(200, watchedFoldersDTO())
+    }
+
+    private func setWatchedFolderEnabled(id: String, request: HTTPRequest) -> HTTPResponse {
+        let service = appState.watchService
+        guard let folder = service.folders.first(where: { $0.id.uuidString.caseInsensitiveCompare(id) == .orderedSame }) else {
+            return .error(404, "No watched folder with that ID.")
+        }
+        guard let body = try? decode(EnabledBody.self, from: request) else {
+            return .error(400, "The body must be {\"enabled\": true} or {\"enabled\": false}.")
+        }
+        service.setEnabled(body.enabled, folderID: folder.id)
+        guard let updated = service.store.folder(id: folder.id) else { return .error(404, "No watched folder with that ID.") }
+        return .json(200, watchedFolderDTO(updated))
+    }
+
+    private func watchedFoldersDTO() -> WatchedFoldersDTO {
+        let service = appState.watchService
+        let pausedUntil: String? = switch service.manualPause {
+        case .until(let date): WatchDates.format(date)
+        case .forever: "forever"
+        case nil: nil
+        }
+        return WatchedFoldersDTO(
+            paused: service.isPaused,
+            pausedUntil: pausedUntil,
+            folders: service.folders.map(watchedFolderDTO)
+        )
+    }
+
+    private func watchedFolderDTO(_ folder: WatchedFolder) -> WatchedFolderDTO {
+        let service = appState.watchService
+        let engine = service.engine(id: folder.id)
+        return WatchedFolderDTO(
+            id: folder.id.uuidString,
+            name: folder.name,
+            path: folder.path,
+            enabled: folder.enabled,
+            status: service.status(for: folder).rawValue,
+            destinationID: folder.destinationID?.uuidString,
+            waiting: engine?.waitingCount ?? 0,
+            uploading: engine?.uploadingCount ?? 0,
+            failed: engine?.failedCount ?? service.ledger.count(folderID: folder.id, state: .failed),
+            awaitingConfirmation: engine?.awaitingConfirmation ?? 0,
+            onDelete: folder.onDelete.rawValue,
+            confirmDelete: folder.confirmDelete,
+            deleting: engine?.deletingCount ?? 0,
+            awaitingDeleteConfirmation: engine?.awaitingDeleteConfirmation ?? 0,
+            lastUploadAt: (engine?.lastUploadAt ?? service.ledger.lastUploadAt(folderID: folder.id)).map(WatchDates.format)
+        )
     }
 
     // MARK: - Uploading
@@ -408,6 +489,78 @@ private struct StatusDTO: Encodable {
     let apiVersion: Int
     let defaultDestinationId: String?
     let outputFormat: String
+    let watching: Watching
+
+    struct Watching: Encodable {
+        let paused: Bool
+        let folders: Int
+    }
+}
+
+/// Nulls are written out, as the Windows app does.
+private struct WatchedFoldersDTO: Encodable {
+    let paused: Bool
+    let pausedUntil: String?
+    let folders: [WatchedFolderDTO]
+
+    private enum CodingKeys: String, CodingKey { case paused, pausedUntil, folders }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(paused, forKey: .paused)
+        try c.encode(pausedUntil, forKey: .pausedUntil)
+        try c.encode(folders, forKey: .folders)
+    }
+}
+
+private struct WatchedFolderDTO: Encodable {
+    let id: String
+    let name: String
+    let path: String
+    let enabled: Bool
+    let status: String
+    let destinationID: String?
+    let waiting: Int
+    let uploading: Int
+    let failed: Int
+    let awaitingConfirmation: Int
+    let onDelete: String
+    let confirmDelete: Bool
+    let deleting: Int
+    let awaitingDeleteConfirmation: Int
+    let lastUploadAt: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, path, enabled, status, destinationID, waiting, uploading, failed, awaitingConfirmation
+        case onDelete, confirmDelete, deleting, awaitingDeleteConfirmation, lastUploadAt
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(name, forKey: .name)
+        try c.encode(path, forKey: .path)
+        try c.encode(enabled, forKey: .enabled)
+        try c.encode(status, forKey: .status)
+        try c.encode(destinationID, forKey: .destinationID)
+        try c.encode(waiting, forKey: .waiting)
+        try c.encode(uploading, forKey: .uploading)
+        try c.encode(failed, forKey: .failed)
+        try c.encode(awaitingConfirmation, forKey: .awaitingConfirmation)
+        try c.encode(onDelete, forKey: .onDelete)
+        try c.encode(confirmDelete, forKey: .confirmDelete)
+        try c.encode(deleting, forKey: .deleting)
+        try c.encode(awaitingDeleteConfirmation, forKey: .awaitingDeleteConfirmation)
+        try c.encode(lastUploadAt, forKey: .lastUploadAt)
+    }
+}
+
+private struct PauseBody: Decodable {
+    let minutes: Int?
+}
+
+private struct EnabledBody: Decodable {
+    let enabled: Bool
 }
 
 private struct DestinationDTO: Encodable {

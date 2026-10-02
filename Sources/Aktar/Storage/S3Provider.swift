@@ -277,6 +277,18 @@ final class S3Provider: StorageProvider, Sendable {
         }
     }
 
+    /// The size of the object at exactly `key`, or nil when there's none.
+    /// Listed rather than HEADed, like `objectExists`.
+    func objectSize(key: String) async throws -> Int64? {
+        do {
+            let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
+            guard let object = output.contents?.first, object.key == key else { return nil }
+            return object.size
+        } catch {
+            throw Self.mapError(error, bucket: config.bucket)
+        }
+    }
+
     /// The bucket's lifecycle rules, or nil when it has none. Anything that
     /// doesn't read as a complete lifecycle configuration stops here, before
     /// a write could replace the bucket's own rules.

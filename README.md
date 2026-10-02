@@ -21,6 +21,9 @@ get a public link back on your clipboard.
   Markdown)
 - Copy the link as a plain URL, Markdown, HTML, or a custom template
 - Delete the remote file straight from the history view
+- Watched Folders: files that land in a folder you pick (your screenshots
+  folder, for one) are uploaded on their own, each folder with its own
+  destination, path, filters and what happens to the original afterwards
 - Expiring uploads: "Delete after" 1, 7, 14, or 30 days, deleted by the
   bucket's own lifecycle rules even when Aktar isn't running
 - Browse each bucket folder by folder, including files uploaded elsewhere:
@@ -54,6 +57,8 @@ If you turn on Settings > Integrations > Allow local connections (off by
 default, and what the Raycast extension uses), Aktar also listens on
 `127.0.0.1` for requests carrying a random token that is kept in the Keychain.
 It never accepts connections from other machines or from web pages.
+A watched folder's webhooks, if you add any, send each upload's link and
+file name to the address you give.
 See [SECURITY.md](SECURITY.md) for the disclosure policy.
 
 ## Requirements
@@ -75,6 +80,12 @@ open Aktar.xcodeproj
 
 Select your own Team under Signing & Capabilities, then build and run
 (`Cmd+R`).
+
+The unit tests (the Watched Folders engine) run with `Cmd+U`, or:
+
+```bash
+xcodebuild test -scheme Aktar CODE_SIGNING_ALLOWED=NO
+```
 
 ## Contributing
 
