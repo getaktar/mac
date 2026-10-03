@@ -91,8 +91,15 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
 - Import: Import from Another Device in Settings > Destinations (and its
   empty state), on the Welcome window, or an `aktar://import#...` link, which
   only fills the link in. Scan the QR code with the Mac's camera or paste the
-  link, type the code, choose Update Existing or Add as Copy if the
-  destination is already there (with a warning when the imported endpoint or
-  bucket differs from the existing one's), then check the prefilled form (Test
-  Connection runs once by itself) and press Import. Nothing is saved before
-  that.
+  link, then type the code; the field formats it as `XXXX-XXXX-XXXX` while
+  it's typed or pasted. If the destination is already there, choose Update
+  Existing or Add as Copy (with a warning when the imported endpoint or
+  bucket differs from the existing one's). There's no form to check: the
+  destination is saved right away, keys in the Keychain, the first one
+  becomes the default, and an imported `customTemplate` is only taken over
+  while the Mac still has the default template. The same window then says it
+  was added or updated, runs Test Connection by itself and shows the result,
+  with Edit (the usual Edit Destination form) and Done. A failed test leaves
+  the destination saved. Update Existing keeps auto-delete as it was while
+  the endpoint, bucket and region stay the same; a new destination starts
+  with auto-delete not set up.

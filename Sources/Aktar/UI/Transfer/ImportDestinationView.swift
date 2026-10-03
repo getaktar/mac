@@ -2,13 +2,13 @@ import AppKit
 import SwiftUI
 
 /// "Import from Another Device": a transfer link, scanned with the camera
-/// or pasted, and the transfer code shown on the other device, then the
-/// destination form filled in with what it carried. Nothing is saved until
-/// Import is pressed there.
+/// or pasted, and the transfer code shown on the other device. The
+/// destination it carries is saved right away, then Test Connection runs by
+/// itself and its result is shown, with Edit for anything to change.
 struct ImportDestinationView: View {
     /// A link from aktar://import, already filled in.
     var initialLink: String?
-    /// After the destination was saved.
+    /// Done, or the destination saved again from Edit.
     var onImported: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -20,28 +20,39 @@ struct ImportDestinationView: View {
     @State private var codeError: String?
     @State private var isOpening = false
     @State private var scanner = TransferScanner()
-    /// Set once the code worked: the form takes over.
-    @State private var imported: Imported?
-    @FocusState private var codeFocused: Bool
+    /// Bumped to put the keyboard focus in the code field.
+    @State private var codeFocusRequest = 0
+    @State private var step = Step.link
+    @State private var testResult: ConnectionResult?
+    /// Why the test couldn't reach the bucket at all.
+    @State private var testError: String?
+    @State private var isTesting = false
 
     init(initialLink: String? = nil, onImported: @escaping () -> Void) {
         self.initialLink = initialLink
         self.onImported = onImported
     }
 
-    private struct Imported {
-        var payload: DestinationTransfer.Payload
-        /// The destination it updates, for Update Existing.
-        var existing: DestinationConfig?
+    private enum Step {
+        case link
+        /// Saved: the test and its result.
+        case saved(DestinationConfig, updated: Bool)
+        /// Edit, the usual form for the saved destination.
+        case editing(DestinationConfig)
     }
 
     var body: some View {
-        if let imported {
-            DestinationFormView(existing: imported.existing, imported: imported.payload) { config, credentials in
-                save(config, credentials: credentials, payload: imported.payload, updating: imported.existing != nil)
-            }
-        } else {
+        switch step {
+        case .link:
             linkAndCode
+        case .saved(let config, let updated):
+            savedResult(config, updated: updated)
+        case .editing(let config):
+            DestinationFormView(existing: config) { config, credentials in
+                appState.destinationStore.update(config)
+                try? KeychainService.save(credentials, for: config.id)
+                onImported()
+            }
         }
     }
 
@@ -70,11 +81,10 @@ struct ImportDestinationView: View {
 
                 if hasValidLink {
                     Section {
-                        TextField("Transfer Code", text: $code, prompt: Text(verbatim: "XXXX-XXXX-XXXX"))
-                            .font(.system(.title3, design: .monospaced))
-                            .focused($codeFocused)
-                            .onSubmit { openLink() }
-                            .onChange(of: code) { codeError = nil }
+                        LabeledContent("Transfer Code") {
+                            TransferCodeField(text: $code, focusRequest: codeFocusRequest)
+                        }
+                        .onChange(of: code) { codeError = nil }
                         if let codeError {
                             Label(codeError, systemImage: "xmark.circle.fill")
                                 .foregroundStyle(.red)
@@ -172,7 +182,7 @@ struct ImportDestinationView: View {
             try DestinationTransfer.envelope(from: link)
             linkError = nil
             scanner.stop()
-            codeFocused = true
+            codeFocusRequest += 1
         } catch {
             linkError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -182,7 +192,7 @@ struct ImportDestinationView: View {
         guard hasValidLink, !isOpening else { return }
         guard DestinationTransfer.normalizeCode(code) != nil else {
             codeError = DestinationTransferError.wrongCode.errorDescription
-            codeFocused = true
+            codeFocusRequest += 1
             return
         }
         isOpening = true
@@ -198,7 +208,7 @@ struct ImportDestinationView: View {
                 resolveDuplicate(payload)
             } catch let error as DestinationTransferError where error == .wrongCode {
                 codeError = error.errorDescription
-                codeFocused = true
+                codeFocusRequest += 1
             } catch {
                 linkError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
@@ -209,7 +219,7 @@ struct ImportDestinationView: View {
     /// both under a new ID and a "Copy" name.
     private func resolveDuplicate(_ payload: DestinationTransfer.Payload) {
         guard let existing = appState.destinationStore.destinations.first(where: { $0.id == payload.destination.id }) else {
-            imported = Imported(payload: payload, existing: nil)
+            save(payload, updating: nil)
             return
         }
         let alert = NSAlert()
@@ -222,26 +232,34 @@ struct ImportDestinationView: View {
         alert.addButton(withTitle: String(localized: "Cancel"))
         switch alert.runModal() {
         case .alertFirstButtonReturn:
-            var payload = payload
-            payload.destination.isDefault = existing.isDefault
-            imported = Imported(payload: payload, existing: existing)
+            save(payload, updating: existing)
         case .alertSecondButtonReturn:
             var payload = payload
             payload.destination.id = UUID()
             payload.destination.name = String(localized: "\(payload.destination.name) Copy")
-            imported = Imported(payload: payload, existing: nil)
+            save(payload, updating: nil)
         default:
             break
         }
     }
 
-    private func save(_ config: DestinationConfig, credentials: StorageCredentials, payload: DestinationTransfer.Payload, updating: Bool) {
+    /// Saves the destination as it came, keys included, then tests it. A
+    /// failed test leaves it saved; Edit is there to fix it.
+    private func save(_ payload: DestinationTransfer.Payload, updating existing: DestinationConfig?) {
         let store = appState.destinationStore
-        try? KeychainService.save(credentials, for: config.id)
-        // `add` makes it the default when it's the first one here.
-        if updating {
+        var config = payload.destination
+        try? KeychainService.save(payload.credentials, for: config.id)
+        if let existing {
+            config.isDefault = existing.isDefault
+            // Auto-delete stays as it was while it's the same bucket; another
+            // bucket hasn't been checked for the rules.
+            let sameBucket = DestinationFormView.Connection(existing) == DestinationFormView.Connection(config)
+            ExpiryRuleStore.shared.set(config.id, active: sameBucket && ExpiryRuleStore.shared.isActive(existing.id))
             store.update(config)
         } else {
+            // A new destination hasn't been checked for the rules either.
+            ExpiryRuleStore.shared.set(config.id, active: false)
+            // `add` makes it the default when it's the first one here.
             store.add(config)
         }
         // The template is app-wide here, so it's only taken over while this
@@ -250,6 +268,74 @@ struct ImportDestinationView: View {
         if let template = payload.customTemplate, manager.customTemplate == UploadManager.defaultCustomTemplate {
             manager.customTemplate = template
         }
-        onImported()
+        step = .saved(config, updated: existing != nil)
+        // Before the result step first draws, so it starts on "Testing…".
+        isTesting = true
+        Task { await testConnection(config, credentials: payload.credentials) }
+    }
+
+    private func testConnection(_ config: DestinationConfig, credentials: StorageCredentials) async {
+        isTesting = true
+        defer { isTesting = false }
+        do {
+            testResult = try await S3Provider(config: config, credentials: credentials).testConnection()
+            testError = nil
+        } catch {
+            testResult = nil
+            testError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    private func savedResult(_ config: DestinationConfig, updated: Bool) -> some View {
+        VStack(spacing: 0) {
+            Text("Import from Another Device")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+
+            Divider()
+
+            Form {
+                Section {
+                    Label(
+                        updated
+                            ? String(localized: "\u{201C}\(config.name)\u{201D} was updated.")
+                            : String(localized: "\u{201C}\(config.name)\u{201D} was added."),
+                        systemImage: "checkmark.circle.fill"
+                    )
+                    .foregroundStyle(.green)
+                    Text(verbatim: "\(config.preset.displayName) · \(config.bucket)")
+                        .foregroundStyle(.secondary)
+                }
+
+                if isTesting {
+                    Section {
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small)
+                            Text("Testing…")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } else {
+                    ConnectionTestSection(result: testResult, error: testError)
+                }
+            }
+            .formStyle(.grouped)
+
+            Divider()
+
+            HStack {
+                Spacer()
+                Button("Edit") {
+                    // The stored copy: the store may have changed the
+                    // default flag on the way in.
+                    step = .editing(appState.destinationStore.destinations.first { $0.id == config.id } ?? config)
+                }
+                Button("Done") { onImported() }
+                    .keyboardShortcut(.defaultAction)
+            }
+            .padding()
+        }
+        .frame(width: 460, height: 560)
     }
 }

@@ -72,6 +72,50 @@ enum DestinationTransfer {
             .joined(separator: "-")
     }
 
+    /// The code field as it's typed: letters and digits only, uppercased,
+    /// at most 12 of them, with a hyphen after every four ("K7P2-QX9").
+    /// Look-alike letters stay as typed; `normalizeCode` maps them.
+    static func formatCodeInput(_ input: String) -> String {
+        grouped(codeCharacters(input))
+    }
+
+    /// An edit to the code field, as what the field shows afterwards and
+    /// where the caret goes. `proposed` and `caret` are the field's text and
+    /// caret right after the edit (UTF-16 offsets), `original` and
+    /// `originalCaret` right before it. The caret stays after the same code
+    /// character it was after, and deleting a hyphen deletes the character
+    /// next to it, which the hyphen would otherwise just come back for.
+    static func editCodeInput(proposed: String, caret: Int, original: String, originalCaret: Int) -> (text: String, caret: Int) {
+        let proposedUTF16 = Array(proposed.utf16)
+        let caret = min(max(caret, 0), proposedUTF16.count)
+        var characters = codeCharacters(proposed)
+        var before = codeCharacters(String(decoding: proposedUTF16[..<caret], as: UTF16.self)).count
+        if proposedUTF16.count < original.utf16.count, characters == codeCharacters(original) {
+            if caret < originalCaret, before > 0 {
+                // Delete backward over a hyphen.
+                characters.remove(at: before - 1)
+                before -= 1
+            } else if caret == originalCaret, before < characters.count {
+                // Delete forward over a hyphen.
+                characters.remove(at: before)
+            }
+        }
+        characters = Array(characters.prefix(codeLength))
+        before = min(before, characters.count)
+        return (grouped(characters), before == 0 ? 0 : before + (before - 1) / 4)
+    }
+
+    private static func codeCharacters(_ input: String) -> [Character] {
+        input.uppercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber) }.map { $0 }
+    }
+
+    private static func grouped(_ characters: [Character]) -> String {
+        let code = characters.prefix(codeLength)
+        return stride(from: 0, to: code.count, by: 4)
+            .map { offset in String(code.dropFirst(offset).prefix(4)) }
+            .joined(separator: "-")
+    }
+
     /// What was typed, as the 12 characters the key is derived from, or nil
     /// if it can't be a code. Case, spaces and hyphens don't matter, and the
     /// letters people mistake for digits count as those digits.

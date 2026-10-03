@@ -16,11 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   link, so Copy Transfer Link can be sent on its own. The window closes
   itself after 10 minutes, and every opening makes a new code
 - Import from Another Device (Settings > Destinations and the Welcome
-  window): scan the QR code with the Mac's camera or paste the link, type
-  the transfer code, and check the filled-in destination before pressing
-  Import. Test Connection runs by itself, and a destination that's
-  already here can be updated or added as a copy. aktar://import links
-  open it with the link filled in
+  window): scan the QR code with the Mac's camera or paste the link and
+  type the transfer code, which formats itself as XXXX-XXXX-XXXX. The
+  destination is saved right away, then Test Connection runs by itself
+  and its result is shown, with Edit to change anything. A destination
+  that's already here can be updated or added as a copy. aktar://import
+  links open it with the link filled in
 
 ## [0.11.1] - 2026-10-03
 

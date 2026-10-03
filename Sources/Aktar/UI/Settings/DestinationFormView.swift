@@ -2,9 +2,6 @@ import SwiftUI
 
 struct DestinationFormView: View {
     var existing: DestinationConfig?
-    /// Import mode: a destination from another device, keys included. It's
-    /// a new destination unless `existing` is the one it updates.
-    var imported: DestinationTransfer.Payload?
     var onSave: (DestinationConfig, StorageCredentials) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -53,46 +50,34 @@ struct DestinationFormView: View {
     /// Stays the same for a new destination, so a result recorded before it
     /// was saved still belongs to it.
     @State private var destinationID: UUID
-    /// Import mode runs Test Connection once by itself.
-    @State private var didAutoTest = false
 
-    init(
-        existing: DestinationConfig?,
-        imported: DestinationTransfer.Payload? = nil,
-        onSave: @escaping (DestinationConfig, StorageCredentials) -> Void
-    ) {
+    init(existing: DestinationConfig?, onSave: @escaping (DestinationConfig, StorageCredentials) -> Void) {
         self.existing = existing
-        self.imported = imported
         self.onSave = onSave
-        // What the fields start from: the imported destination, or the one
-        // being edited.
-        let source = imported?.destination ?? existing
-        _preset = State(initialValue: source?.preset ?? .cloudflareR2)
-        _name = State(initialValue: source?.name ?? "")
-        _accountID = State(initialValue: source?.accountID ?? "")
-        _endpoint = State(initialValue: source?.endpoint ?? "")
-        _region = State(initialValue: source?.region ?? ProviderPreset.cloudflareR2.defaultRegion)
-        _accessKeyId = State(initialValue: imported?.credentials.accessKeyId ?? "")
-        _secretAccessKey = State(initialValue: imported?.credentials.secretAccessKey ?? "")
-        _bucket = State(initialValue: source?.bucket ?? "")
-        _publicBaseURL = State(initialValue: source?.publicBaseURL ?? "")
-        _objectPathTemplate = State(initialValue: source?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
-        _outputMode = State(initialValue: source?.outputMode)
-        _temporaryLink = State(initialValue: source?.temporaryLink)
-        _imageMetadata = State(initialValue: source?.imageMetadata ?? .default)
-        _folderUpload = State(initialValue: source?.folderUpload ?? .default)
-        _imageFormat = State(initialValue: source?.imageProcessing?.format ?? .original)
-        _imageQuality = State(initialValue: source?.imageProcessing?.quality)
-        _imageMaxLongEdge = State(initialValue: source?.imageProcessing?.maxLongEdge)
-        _expiryDays = State(initialValue: source?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
-        _destinationID = State(initialValue: source?.id ?? UUID())
+        _preset = State(initialValue: existing?.preset ?? .cloudflareR2)
+        _name = State(initialValue: existing?.name ?? "")
+        _accountID = State(initialValue: existing?.accountID ?? "")
+        _endpoint = State(initialValue: existing?.endpoint ?? "")
+        _region = State(initialValue: existing?.region ?? ProviderPreset.cloudflareR2.defaultRegion)
+        _bucket = State(initialValue: existing?.bucket ?? "")
+        _publicBaseURL = State(initialValue: existing?.publicBaseURL ?? "")
+        _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
+        _outputMode = State(initialValue: existing?.outputMode)
+        _temporaryLink = State(initialValue: existing?.temporaryLink)
+        _imageMetadata = State(initialValue: existing?.imageMetadata ?? .default)
+        _folderUpload = State(initialValue: existing?.folderUpload ?? .default)
+        _imageFormat = State(initialValue: existing?.imageProcessing?.format ?? .original)
+        _imageQuality = State(initialValue: existing?.imageProcessing?.quality)
+        _imageMaxLongEdge = State(initialValue: existing?.imageProcessing?.maxLongEdge)
+        _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
+        _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
         _expiryRulesActive = State(initialValue: initialExpiryRulesActive)
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            Text(imported != nil ? LocalizedStringKey("Import Destination") : existing == nil ? LocalizedStringKey("Add Destination") : LocalizedStringKey("Edit Destination"))
+            Text(existing == nil ? LocalizedStringKey("Add Destination") : LocalizedStringKey("Edit Destination"))
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -136,13 +121,8 @@ struct DestinationFormView: View {
 
                 Section {
                     // Saved keys stay in the Keychain and aren't shown;
-                    // leaving both fields empty keeps them. Imported keys
-                    // are filled in, but not shown either.
-                    if imported != nil {
-                        SecureField("Access Key ID", text: $accessKeyId)
-                    } else {
-                        TextField("Access Key ID", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
-                    }
+                    // leaving both fields empty keeps them.
+                    TextField("Access Key ID", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
                     SecureField(
                         "Secret Access Key",
                         text: $secretAccessKey,
@@ -184,14 +164,7 @@ struct DestinationFormView: View {
 
                 imageProcessingSection
 
-                if let testError {
-                    Section {
-                        Label(testError, systemImage: "xmark.circle.fill")
-                            .foregroundStyle(.red)
-                    }
-                } else if let testResult {
-                    testResultSection(testResult)
-                }
+                ConnectionTestSection(result: testResult, error: testError)
             }
             .formStyle(.grouped)
             .onChange(of: endpoint) { connectionEdited() }
@@ -209,18 +182,13 @@ struct DestinationFormView: View {
                 Spacer()
 
                 Button("Cancel") { dismiss() }
-                Button(imported != nil ? LocalizedStringKey("Import") : LocalizedStringKey("Save")) { save() }
+                Button("Save") { save() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!canSave)
             }
             .padding()
         }
         .frame(width: 520, height: 580)
-        .task {
-            guard imported != nil, !didAutoTest, canTest else { return }
-            didAutoTest = true
-            await testConnection()
-        }
     }
 
     /// What makes a destination an upload profile: pick it in the menu bar
@@ -369,7 +337,7 @@ struct DestinationFormView: View {
     }
 
     /// The bucket a rules result was obtained for.
-    private struct Connection: Equatable {
+    struct Connection: Equatable {
         let endpoint: String
         let bucket: String
         let region: String
@@ -399,7 +367,7 @@ struct DestinationFormView: View {
     /// up as an error instead of a silently disabled button.
     private func formCredentials() throws -> StorageCredentials {
         if !accessKeyId.isEmpty, !secretAccessKey.isEmpty {
-            return typedCredentials
+            return StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
         }
         guard let existing else { throw KeychainError.notFound }
         return try KeychainService.load(for: existing.id)
@@ -476,17 +444,6 @@ struct DestinationFormView: View {
         }
     }
 
-    /// The keys in the fields. An imported session token goes along while
-    /// the imported keys are left as they are.
-    private var typedCredentials: StorageCredentials {
-        var sessionToken: String?
-        if let credentials = imported?.credentials,
-           credentials.accessKeyId == accessKeyId, credentials.secretAccessKey == secretAccessKey {
-            sessionToken = credentials.sessionToken
-        }
-        return StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: sessionToken)
-    }
-
     private var canTest: Bool {
         !endpoint.isEmpty && !bucket.isEmpty && !accessKeyId.isEmpty && !secretAccessKey.isEmpty
     }
@@ -518,11 +475,12 @@ struct DestinationFormView: View {
         )
     }
 
-    /// The preset decides, except that an imported destination keeps its
-    /// own setting while its provider isn't changed here.
+    /// The preset decides, except that a saved destination (an imported
+    /// one can differ from its preset) keeps its own setting while its
+    /// provider isn't changed here.
     private var forcePathStyle: Bool {
-        if let destination = imported?.destination, destination.preset == preset {
-            return destination.forcePathStyle
+        if let existing, existing.preset == preset {
+            return existing.forcePathStyle
         }
         return preset.defaultForcePathStyle
     }
@@ -537,7 +495,8 @@ struct DestinationFormView: View {
         isTesting = true
         defer { isTesting = false }
         let config = currentConfig()
-        let provider = S3Provider(config: config, credentials: typedCredentials)
+        let credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
+        let provider = S3Provider(config: config, credentials: credentials)
         do {
             testResult = try await provider.testConnection()
             testError = nil
@@ -547,54 +506,8 @@ struct DestinationFormView: View {
         }
     }
 
-    /// One line per step of the test, so a bucket that takes uploads but
-    /// won't serve them reads as a problem instead of a success.
-    private func testResultSection(_ result: ConnectionResult) -> some View {
-        Section {
-            if result.writable {
-                Label("Upload: works", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            } else {
-                Label("Upload: failed. This key can read the bucket but can\u{2019}t write to it.", systemImage: "xmark.circle.fill")
-                    .foregroundStyle(.red)
-            }
-            switch result.publicLink {
-            case .reachable:
-                Label("Public link: works", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            case .status(let code):
-                Label("Public link: failed (HTTP \(String(code)))", systemImage: "xmark.circle.fill")
-                    .foregroundStyle(.red)
-            case .noResponse:
-                Label("Public link: no response", systemImage: "xmark.circle.fill")
-                    .foregroundStyle(.red)
-            case nil:
-                EmptyView()
-            }
-        } footer: {
-            if let hint = publicLinkHint(result.publicLink) {
-                Text(hint)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    private func publicLinkHint(_ check: PublicLinkCheck?) -> String? {
-        switch check {
-        case .status(401), .status(403):
-            return String(localized: "Uploads work, but anyone who opens a link gets an error. Allow public reads on the bucket (on R2, turn on the r2.dev URL or connect a custom domain), or keep it private and share files with Copy Temporary Link in the Library.")
-        case .status(404):
-            return String(localized: "The test file was uploaded, but it isn\u{2019}t at the Public Base URL. Check that the URL points to this bucket.")
-        case .status, .noResponse:
-            return String(localized: "The Public Base URL didn\u{2019}t serve the test file. Check the domain and that it points to this bucket.")
-        case .reachable, nil:
-            return nil
-        }
-    }
-
     private func save() {
-        var credentials = typedCredentials
+        var credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
         if let existing, accessKeyId.isEmpty, secretAccessKey.isEmpty,
            let existingCredentials = try? KeychainService.load(for: existing.id) {
             credentials = existingCredentials
@@ -602,10 +515,9 @@ struct DestinationFormView: View {
         let config = currentConfig()
         if checkedExpiryRules, checkedConnection == Connection(config) {
             ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)
-        } else if let existing, Connection(existing) == Connection(config), accessKeyId.isEmpty || imported != nil {
-            // The saved bucket and key (or the same bucket, imported again),
-            // back to what they were before any check here that was about
-            // another bucket.
+        } else if let existing, Connection(existing) == Connection(config), accessKeyId.isEmpty {
+            // The saved bucket and key, back to what they were before any
+            // check here that was about another bucket.
             ExpiryRuleStore.shared.set(config.id, active: initialExpiryRulesActive)
         } else {
             // A different bucket or key hasn't been checked for the rules.

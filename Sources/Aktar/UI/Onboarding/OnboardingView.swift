@@ -31,11 +31,14 @@ struct OnboardingView: View {
                 dismissWindow(id: "onboarding")
             }
         }
-        .sheet(isPresented: $showImport) {
-            ImportDestinationView {
-                showImport = false
+        // The import saves the destination before its sheet closes, which
+        // can also be from Cancel in its Edit form.
+        .sheet(isPresented: $showImport, onDismiss: {
+            if !appState.destinationStore.destinations.isEmpty {
                 dismissWindow(id: "onboarding")
             }
+        }) {
+            ImportDestinationView { showImport = false }
         }
     }
 }

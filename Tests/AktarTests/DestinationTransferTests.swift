@@ -125,6 +125,61 @@ final class DestinationTransferTests: XCTestCase {
         XCTAssertEqual(DestinationTransfer.displayCode("K7P2QX9M4TRW"), "K7P2-QX9M-4TRW")
     }
 
+    func testCodeInputFormatting() {
+        let cases = [
+            "": "",
+            "k": "K",
+            "k7p2": "K7P2",
+            "k7p2q": "K7P2-Q",
+            "K7P2-QX9M-4TRW": "K7P2-QX9M-4TRW",
+            "k7p2 qx9m 4trw": "K7P2-QX9M-4TRW",
+            " K7P2QX9M4TRW\n": "K7P2-QX9M-4TRW",
+            "K7P2-QX9M-4TRW-XYZ": "K7P2-QX9M-4TRW",
+            "K7P2-": "K7P2",
+            "oil0": "OIL0",
+            "ç!K7_é": "K7",
+        ]
+        for (input, expected) in cases {
+            XCTAssertEqual(DestinationTransfer.formatCodeInput(input), expected, input)
+        }
+    }
+
+    func testCodeInputEditing() {
+        func edit(_ proposed: String, _ caret: Int, from original: String, _ originalCaret: Int) -> String {
+            let result = DestinationTransfer.editCodeInput(proposed: proposed, caret: caret, original: original, originalCaret: originalCaret)
+            var text = result.text
+            text.insert("|", at: text.index(text.startIndex, offsetBy: result.caret))
+            return text
+        }
+        // Typing at the end adds the hyphen and keeps the caret last.
+        XCTAssertEqual(edit("K7P2Q", 5, from: "K7P2", 4), "K7P2-Q|")
+        XCTAssertEqual(edit("k7p2-qx9m4", 10, from: "K7P2-QX9M", 9), "K7P2-QX9M-4|")
+        // A typed hyphen changes nothing.
+        XCTAssertEqual(edit("K7P2-", 5, from: "K7P2", 4), "K7P2|")
+        // Typing in the middle keeps the caret after the new character.
+        XCTAssertEqual(edit("K7AP2-QX9M", 3, from: "K7P2-QX9M", 2), "K7A|P-2QX9-M")
+        XCTAssertEqual(edit("K7P2X-QX9M", 5, from: "K7P2-QX9M", 4), "K7P2-X|QX9-M")
+        // Backspace removes the last character, and the hyphen before it.
+        XCTAssertEqual(edit("K7P2-", 5, from: "K7P2-Q", 6), "K7P2|")
+        // Backspace right after a hyphen removes the character before it.
+        XCTAssertEqual(edit("K7P2QX9M", 4, from: "K7P2-QX9M", 5), "K7P|Q-X9M")
+        // Forward delete right before a hyphen removes the character after it.
+        XCTAssertEqual(edit("K7P2QX9M", 4, from: "K7P2-QX9M", 4), "K7P2|-X9M")
+        // Deleting a selection that was only the hyphen changes nothing.
+        XCTAssertEqual(edit("K7P2QX9M", 4, from: "K7P2-QX9M", -1), "K7P2|-QX9M")
+        // Backspace in the middle.
+        XCTAssertEqual(edit("K7P-QX9M", 3, from: "K7P2-QX9M", 4), "K7P|Q-X9M")
+        // Pasting a whole code, with or without separators.
+        XCTAssertEqual(edit("k7p2 qx9m 4trw", 14, from: "", 0), "K7P2-QX9M-4TRW|")
+        XCTAssertEqual(edit("K7P2QX9M4TRW", 12, from: "", 0), "K7P2-QX9M-4TRW|")
+        XCTAssertEqual(edit("K7P2-QX9M-4TRW", 14, from: "", 0), "K7P2-QX9M-4TRW|")
+        // Past 12 characters the rest is dropped.
+        XCTAssertEqual(edit("K7P2-QX9M-4TRWZ", 15, from: "K7P2-QX9M-4TRW", 14), "K7P2-QX9M-4TRW|")
+        XCTAssertEqual(edit("ZK7P2-QX9M-4TRW", 1, from: "K7P2-QX9M-4TRW", 0), "Z|K7P-2QX9-M4TR")
+        // What it formats to still decodes as the code.
+        XCTAssertEqual(DestinationTransfer.normalizeCode(DestinationTransfer.formatCodeInput("k7p2qx9m4trw")), "K7P2QX9M4TRW")
+    }
+
     func testUploadsToSamePlace() throws {
         let existing = try DestinationTransfer.open(fullURL, code: code).destination
         var imported = existing
