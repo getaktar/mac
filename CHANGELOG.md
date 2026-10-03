@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-10-04
+
+### Fixed
+
+- "Reuse links for duplicate files" no longer hands out a link that now
+  serves a different file. With a path like `{filename}.{ext}`, a file
+  uploaded under a name another file has since taken is uploaded again,
+  and so is one whose file in the bucket changed size or was written
+  after it was uploaded
+- A file uploaded while the Library showed History (or was closed) now
+  shows up when you go back to the bucket. Before, the bucket kept showing
+  the listing from before the upload until you clicked Refresh
+- Changing a destination's settings while its bucket was open in the
+  Library no longer leaves the bucket looking empty, and an error from
+  listing it again is shown instead of an empty list
+- A large upload that's picked up where it stopped no longer keeps its old
+  name in the bucket after you rename the file or change the destination's
+  path. It starts over under the new name, and the unfinished upload is
+  removed from the bucket
+- An aktar://watch/pause link or local API call with a huge number of
+  minutes no longer crashes Aktar. Pauses are capped at one year, and a
+  link with minutes that aren't a positive whole number is ignored
+- A destination whose Public Base URL isn't a valid web address no longer
+  crashes Aktar. Settings now says what's wrong and won't save it, a
+  transfer link carrying one is turned away, and uploads to a destination
+  saved with one stop with a clear error
+- A path without {uuid}, {random}, {md5} or {sha256} (such as a watched
+  folder's default) no longer replaces a file that already has that name
+  in the bucket: the new one is numbered ("name 2.png"). A watched folder
+  set to replace its upload when a file changes still replaces it, so the
+  link stays
+- Deleting an older history entry whose name was uploaded again later no
+  longer deletes the newer file. Only the history entry goes, and the
+  confirmation says so
+- Expiring uploads are only deleted by Aktar while the bucket really has
+  the auto-delete rules. The rules are read on each check; if they're
+  gone, auto-delete is turned off for that destination and nothing is
+  deleted
+- Images copied from the clipboard and items shared from the Share menu
+  get their own temporary folders, so two copied within the same second
+  no longer overwrite each other. Clipboard images are deleted once the
+  upload is done or cancelled, and Aktar's temporary folders are emptied
+  at launch
+- Copying a web link no longer makes "Upload from Clipboard" try to upload
+  the link as a file. An image copied along with it is uploaded instead
+- Text, code, Markdown and PDF previews skip files over 25 MB instead of
+  downloading them whole, and nothing they download is cached on disk
+
+### Security
+
+- Images over 100 megapixels are no longer converted, compressed, resized,
+  previewed or given a thumbnail, so a small file claiming huge dimensions
+  can't use up all memory. They go up as they are, still without the
+  metadata the destination removes; if that can't be done without
+  decoding the image, the upload stops with an error instead
+- HTML, SVG, XML and JavaScript files are uploaded with
+  "Content-Disposition: attachment", so opening their link downloads them
+  instead of running them on your bucket's domain. An SVG in an <img> tag
+  still shows
+- "Remove location" and "Remove all" now also cover WebP, AVIF and GIF
+  images, a PNG's text chunks (under "Remove all"), and .mov, .mp4 and
+  .m4v videos, which are copied without re-encoding and without their
+  location (or all metadata). This also applies inside folder ZIPs. A file
+  that can't be cleaned isn't uploaded
+- aktar://upload-clipboard and aktar://watch/pause links now ask before
+  uploading the clipboard or pausing watched folders, since any web page
+  can open them
+- Transfer links expire an hour after they're made. Copy Transfer Link and
+  the local API token are marked as concealed for clipboard managers, and
+  closing the transfer window clears the copied link from the clipboard
+- Watched folder webhooks must use https:// (plain http:// only for this
+  Mac or the local network) and don't follow redirects to another host
+- HTML and Markdown output escape the file name, so a crafted name can't
+  add markup to what you paste
+- Names typed in the bucket browser (new folders, rename or move), and
+  folder names, prefixes and move targets sent to the local API, can't
+  contain "." or ".." segments, empty folder names, control characters or
+  a leading "/" (a lone "/" still means the bucket's top level). {filename}
+  in a path drops slashes and control characters
+- Every storage request that doesn't carry file data (listing, deleting,
+  copying, lifecycle rules, starting and finishing large uploads) now
+  gives up after 60 seconds instead of possibly waiting forever
+
 ## [0.12.0] - 2026-10-03
 
 ### Added
