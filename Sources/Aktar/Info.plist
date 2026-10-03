@@ -29,6 +29,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Aktar uses the camera to scan the QR code of a destination shared from your other device.</string>
 	<key>NSServices</key>
 	<array>
 		<dict>

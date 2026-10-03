@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Share to Another Device (a destination's menu in Settings >
+  Destinations): shows the destination, keys included, as a QR code for
+  Aktar on another device, with a transfer code to type there. The keys
+  are encrypted with that code, which is never in the QR code or the
+  link, so Copy Transfer Link can be sent on its own. The window closes
+  itself after 10 minutes, and every opening makes a new code
+- Import from Another Device (Settings > Destinations and the Welcome
+  window): scan the QR code with the Mac's camera or paste the link, type
+  the transfer code, and check the filled-in destination before pressing
+  Import. Test Connection runs by itself, and a destination that's
+  already here can be updated or added as a copy. aktar://import links
+  open it with the link filled in
+
 ## [0.11.1] - 2026-10-03
 
 ### Fixed

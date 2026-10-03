@@ -1,0 +1,60 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "comment" : "Shown when macOS asks for camera access, which Aktar uses to scan a destination's transfer QR code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar verwendet die Kamera, um den QR-Code eines Ziels zu scannen, das du von deinem anderen Gerät teilst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar uses the camera to scan the QR code of a destination shared from your other device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar usa la cámara para escanear el código QR de un destino compartido desde tu otro dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar utilise la caméra pour scanner le code QR d’une destination partagée depuis votre autre appareil."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarは、もう一方のデバイスから共有された保存先のQRコードを読み取るためにカメラを使用します。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Aktar usa a câmera para escanear o QR code de um destino compartilhado do seu outro dispositivo."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar, diğer cihazından paylaşılan bir hedefin QR kodunu taramak için kamerayı kullanır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 使用相机扫描从你的另一台设备共享的目标二维码。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

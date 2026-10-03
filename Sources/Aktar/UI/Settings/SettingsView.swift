@@ -275,11 +275,14 @@ private struct DestinationsSettingsView: View {
     private enum FormTarget: Identifiable {
         case add
         case edit(DestinationConfig)
+        /// "Import from Another Device", with a link from aktar://import.
+        case importing(String?)
 
         var id: String {
             switch self {
             case .add: return "add"
             case .edit(let destination): return destination.id.uuidString
+            case .importing(let link): return "import" + (link ?? "")
             }
         }
 
@@ -309,31 +312,50 @@ private struct DestinationsSettingsView: View {
                                     guard let copy = appState.destinationStore.duplicate(destination) else { return }
                                     formTarget = .edit(copy)
                                 },
+                                onShare: {
+                                    ShareDestinationWindowController.shared.show(destination, customTemplate: appState.uploadManager.customTemplate)
+                                },
                                 onRemove: { appState.destinationStore.remove(destination) }
                             )
                         }
                     }
                 }
 
-                Button {
-                    formTarget = .add
-                } label: {
-                    Label("Add Destination", systemImage: "plus")
+                HStack {
+                    Button {
+                        formTarget = .add
+                    } label: {
+                        Label("Add Destination", systemImage: "plus")
+                    }
+                    Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
                 }
                 .buttonStyle(.bordered)
             }
         }
         .sheet(item: $formTarget) { target in
-            DestinationFormView(existing: target.destination) { config, credentials in
-                if target.destination != nil {
-                    appState.destinationStore.update(config)
-                } else {
-                    appState.destinationStore.add(config)
+            if case .importing(let link) = target {
+                ImportDestinationView(initialLink: link) { formTarget = nil }
+            } else {
+                DestinationFormView(existing: target.destination) { config, credentials in
+                    if target.destination != nil {
+                        appState.destinationStore.update(config)
+                    } else {
+                        appState.destinationStore.add(config)
+                    }
+                    try? KeychainService.save(credentials, for: config.id)
+                    formTarget = nil
                 }
-                try? KeychainService.save(credentials, for: config.id)
-                formTarget = nil
             }
         }
+        // aktar://import opens the import with its link filled in.
+        .onAppear(perform: handlePendingImport)
+        .onChange(of: appState.pendingImportLink) { handlePendingImport() }
+    }
+
+    private func handlePendingImport() {
+        guard let link = appState.pendingImportLink else { return }
+        appState.pendingImportLink = nil
+        formTarget = .importing(link)
     }
 
     private var emptyState: some View {
@@ -353,6 +375,8 @@ private struct DestinationsSettingsView: View {
             }
             .buttonStyle(.borderedProminent)
             .padding(.top, 4)
+            Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
+                .buttonStyle(.bordered)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
@@ -364,6 +388,7 @@ private struct DestinationRow: View {
     let onEdit: () -> Void
     let onSetDefault: () -> Void
     let onDuplicate: () -> Void
+    let onShare: () -> Void
     let onRemove: () -> Void
 
     var body: some View {
@@ -393,6 +418,7 @@ private struct DestinationRow: View {
                     Button("Set as Default", action: onSetDefault)
                 }
                 Button("Duplicate", action: onDuplicate)
+                Button("Share to Another Device\u{2026}", action: onShare)
                 Divider()
                 Button("Remove", role: .destructive, action: onRemove)
             } label: {

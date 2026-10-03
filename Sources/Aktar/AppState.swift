@@ -13,6 +13,9 @@ final class AppState {
     /// The Settings tab to show next, by `SettingsTab` raw value; Settings
     /// switches to it and clears it.
     var requestedSettingsTab: String?
+    /// A link from aktar://import for Settings > Destinations to open the
+    /// import with; it clears it.
+    var pendingImportLink: String?
 
     init() {
         uploadManager = UploadManager(destinationStore: destinationStore, repository: repository)
@@ -53,6 +56,13 @@ final class AppState {
     func watchFolder(_ url: URL) {
         watchService.pendingAddURL = url
         openSettings(tab: "watchedFolders")
+    }
+
+    /// aktar://import: Settings opens the import with `link` filled in.
+    /// Only the transfer code and pressing Import there add anything.
+    func importDestination(link: String) {
+        pendingImportLink = link
+        openSettings(tab: SettingsTab.destinations.rawValue)
     }
 
     /// `rename` asks for the file's name first; see `RenamePrompt`.

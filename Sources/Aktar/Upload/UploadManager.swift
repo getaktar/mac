@@ -19,7 +19,8 @@ final class UploadManager {
     var outputMode: OutputMode = UserDefaults.standard.string(forKey: "outputMode").flatMap(OutputMode.init(rawValue:)) ?? .url {
         didSet { UserDefaults.standard.set(outputMode.rawValue, forKey: "outputMode") }
     }
-    var customTemplate: String = UserDefaults.standard.string(forKey: "customTemplate") ?? "![{filename}]({url})" {
+    static let defaultCustomTemplate = "![{filename}]({url})"
+    var customTemplate: String = UserDefaults.standard.string(forKey: "customTemplate") ?? UploadManager.defaultCustomTemplate {
         didSet { UserDefaults.standard.set(customTemplate, forKey: "customTemplate") }
     }
 

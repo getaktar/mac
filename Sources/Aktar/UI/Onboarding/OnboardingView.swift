@@ -4,6 +4,7 @@ struct OnboardingView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismissWindow) private var dismissWindow
     @State private var showForm = false
+    @State private var showImport = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -15,9 +16,11 @@ struct OnboardingView: View {
                 .foregroundStyle(.secondary)
             Button("Connect Storage") { showForm = true }
                 .buttonStyle(.borderedProminent)
+            Button("Import from Another Device") { showImport = true }
+                .buttonStyle(.bordered)
         }
         .padding(40)
-        .frame(width: 420, height: 300)
+        .frame(width: 420, height: 340)
         .sheet(isPresented: $showForm) {
             DestinationFormView(existing: nil) { config, credentials in
                 var config = config
@@ -25,6 +28,12 @@ struct OnboardingView: View {
                 appState.destinationStore.add(config)
                 try? KeychainService.save(credentials, for: config.id)
                 showForm = false
+                dismissWindow(id: "onboarding")
+            }
+        }
+        .sheet(isPresented: $showImport) {
+            ImportDestinationView {
+                showImport = false
                 dismissWindow(id: "onboarding")
             }
         }

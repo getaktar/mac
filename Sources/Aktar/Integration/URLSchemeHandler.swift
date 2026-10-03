@@ -16,6 +16,9 @@ extension Notification.Name {
 ///     aktar://watch/pause?minutes=60   pause watching (no minutes: until resumed)
 ///     aktar://watch/resume       resume watching
 ///     aktar://connect?callback=raycast://extensions/<author>/<extension>/<command>
+///     aktar://import#<data>      open Settings > Destinations to import a
+///                                destination shared from another device
+///                                (the transfer code is still asked for)
 ///
 /// `connect` is how the Raycast extension pairs: after the user approves,
 /// the local API is turned on and its port and token are handed back to
@@ -42,6 +45,10 @@ enum URLSchemeHandler {
             connect(url)
         case "watch":
             watch(url, appState: appState)
+        case "import":
+            // Never saves by itself: it only fills in the link, and the
+            // transfer code and Import are still up to the user.
+            appState.importDestination(link: url.absoluteString)
         default:
             break
         }

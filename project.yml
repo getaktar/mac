@@ -86,6 +86,9 @@ targets:
             NSRequiredContext: {}
             NSSendFileTypes:
               - public.folder
+        # Scanning a destination's transfer QR code from another device;
+        # see TransferScannerView. Translated in InfoPlist.xcstrings.
+        NSCameraUsageDescription: Aktar uses the camera to scan the QR code of a destination shared from your other device.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac
@@ -135,9 +138,10 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         MACOSX_DEPLOYMENT_TARGET: "14.0"
 
-  # Unit tests for the Watched Folders engine. It's built from the engine's
-  # own sources (it doesn't need the app around it), so the tests run
-  # without launching Aktar.
+  # Unit tests for the Watched Folders engine and the destination transfer
+  # format. They're built from those sources and the models they use (they
+  # don't need the app around them), so the tests run without launching
+  # Aktar.
   AktarTests:
     type: bundle.unit-test
     platform: macOS
@@ -146,6 +150,15 @@ targets:
       - path: Sources/Aktar/Watch/Engine
       - path: Sources/Aktar/Upload/ObjectKeyGenerator.swift
       - path: Sources/Aktar/Upload/ContentHasher.swift
+      - path: Sources/Aktar/Transfer/DestinationTransfer.swift
+      - path: Sources/Aktar/Storage/ProviderConfig.swift
+      - path: Sources/Aktar/Security/KeychainService.swift
+      - path: Sources/Aktar/Output/OutputFormatter.swift
+      - path: Sources/Aktar/Upload/TemporaryLinkDuration.swift
+      - path: Sources/Aktar/Upload/ImageMetadata.swift
+      - path: Sources/Aktar/Upload/FolderUpload.swift
+      - path: Sources/Aktar/Upload/ImageProcessing.swift
+      - path: Sources/Aktar/Upload/UploadExpiry.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac.tests
