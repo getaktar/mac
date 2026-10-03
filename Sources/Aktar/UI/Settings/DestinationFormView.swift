@@ -138,9 +138,16 @@ struct DestinationFormView: View {
                 } header: {
                     Text("Bucket")
                 } footer: {
-                    Text("The domain files are served from, for example a custom domain or CDN in front of the bucket.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        if isPublicBaseURLInvalid {
+                            Text("Enter a web address, such as img.example.com or https://img.example.com.")
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
+                        Text("The domain files are served from, for example a custom domain or CDN in front of the bucket.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Section {
@@ -226,7 +233,7 @@ struct DestinationFormView: View {
         } header: {
             Text("Upload Defaults")
         } footer: {
-            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders.")
+            Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos and videos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -448,8 +455,13 @@ struct DestinationFormView: View {
         !endpoint.isEmpty && !bucket.isEmpty && !accessKeyId.isEmpty && !secretAccessKey.isEmpty
     }
 
+    /// Typed but not an http(s) address with a host (and a valid port).
+    private var isPublicBaseURLInvalid: Bool {
+        !publicBaseURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !PublicURLResolver.isValidBaseURL(publicBaseURL)
+    }
+
     private var canSave: Bool {
-        !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty
+        !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
             && (existing != nil || (!accessKeyId.isEmpty && !secretAccessKey.isEmpty))
     }
 

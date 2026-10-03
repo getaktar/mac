@@ -30,6 +30,14 @@ final class UploadJob: Identifiable {
     /// original bytes (for a watched folder's ledger).
     var originalContentHash: String?
 
+    /// Waiting or uploading: its file is still needed.
+    var isActive: Bool {
+        switch state {
+        case .waiting, .uploading: return true
+        case .succeeded, .failed, .cancelled: return false
+        }
+    }
+
     init(input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil) {
         self.input = input
         self.destination = destination

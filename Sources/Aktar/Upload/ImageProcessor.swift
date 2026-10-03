@@ -66,7 +66,8 @@ enum ImageProcessor {
         let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
         guard let pixelWidth = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.intValue,
               let pixelHeight = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.intValue,
-              pixelWidth > 0, pixelHeight > 0 else { return nil }
+              pixelWidth > 0, pixelHeight > 0,
+              !ImagePixelLimit.isTooLarge(width: pixelWidth, height: pixelHeight) else { return nil }
         let longest = max(pixelWidth, pixelHeight)
         let needsResize = settings.maxLongEdge.map { longest > $0 } ?? false
 

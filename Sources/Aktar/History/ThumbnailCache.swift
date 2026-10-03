@@ -20,8 +20,10 @@ enum ThumbnailCache {
     static func store(sourceURL: URL, for id: UUID) {
         // Image I/O decodes straight to a downscaled bitmap that keeps the
         // aspect ratio and honors EXIF orientation, without loading the
-        // full-size image first.
-        guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil) else { return }
+        // full-size image first. Not for every format, so one too large to
+        // decode safely gets no thumbnail.
+        guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
+              !ImagePixelLimit.isTooLarge(source) else { return }
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,

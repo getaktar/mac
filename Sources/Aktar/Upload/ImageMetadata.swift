@@ -40,38 +40,119 @@ enum ImageMetadataError: LocalizedError {
 }
 
 enum ImageMetadataStripper {
-    /// Formats ImageIO can rewrite without re-encoding the pixels.
+    private static let webpType = "org.webmproject.webp"
+    private static let avifType = "public.avif"
+
+    /// Formats ImageIO can rewrite without re-encoding the pixels, or (AVIF)
+    /// at full quality when it can't.
     private static let rewritableTypes: Set<String> = [
         UTType.jpeg.identifier,
         UTType.heic.identifier,
         UTType.heif.identifier,
         UTType.png.identifier,
         UTType.tiff.identifier,
+        avifType,
     ]
 
     /// A copy of `url` without the metadata `policy` removes, or nil when
     /// the original can be uploaded as it is: not a photo format, or
     /// nothing in it to remove. The copy is lossless where ImageIO can
-    /// manage it; the caller deletes it after the upload.
+    /// manage it; the caller deletes it after the upload. WebP and GIF lose
+    /// their metadata blocks as they are (see `ContainerMetadata`), and so
+    /// do a PNG's text chunks under "Remove all". Videos are cleaned by
+    /// `VideoMetadataStripper`.
     static func strippedCopy(of url: URL, policy: ImageMetadataPolicy) throws -> URL? {
         guard policy != .keepAll,
               let source = CGImageSourceCreateWithURL(url as CFURL, nil),
               let type = CGImageSourceGetType(source) as String?,
-              rewritableTypes.contains(type),
               CGImageSourceGetCount(source) > 0 else { return nil }
 
-        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
-        guard hasMetadataToRemove(properties, source: source, policy: policy) else { return nil }
+        switch type {
+        case webpType:
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
+            let hasLocation = properties[kCGImagePropertyGPSDictionary] != nil
+            return try containerCopy(of: url) { data in
+                try ContainerMetadata.webp(data, policy: policy, exifHasLocation: hasLocation)
+            } verify: { data in
+                // Nothing left that the same pass would remove.
+                try ContainerMetadata.webp(data, policy: .removeAll, exifHasLocation: true) == nil
+            }
+        case UTType.gif.identifier:
+            return try containerCopy(of: url) { data in
+                try ContainerMetadata.gif(data, policy: policy)
+            } verify: { data in
+                try ContainerMetadata.gif(data, policy: policy) == nil
+            }
+        case UTType.png.identifier where policy == .removeAll:
+            // Text chunks first, then whatever ImageIO finds (EXIF).
+            guard let withoutText = try containerCopy(of: url, transform: { data in
+                try ContainerMetadata.png(data, policy: policy)
+            }, verify: { data in
+                try ContainerMetadata.png(data, policy: policy) == nil
+            }) else {
+                return try imageIOCopy(of: url, source: source, type: type, policy: policy)
+            }
+            do {
+                guard let textSource = CGImageSourceCreateWithURL(withoutText as CFURL, nil),
+                      let cleaned = try imageIOCopy(of: withoutText, source: textSource, type: type, policy: policy) else {
+                    return withoutText
+                }
+                removeCopy(withoutText)
+                return cleaned
+            } catch {
+                removeCopy(withoutText)
+                throw error
+            }
+        default:
+            guard rewritableTypes.contains(type) else { return nil }
+            return try imageIOCopy(of: url, source: source, type: type, policy: policy)
+        }
+    }
 
+    /// A copy made by changing the file's bytes with `transform` (nil:
+    /// nothing to change), checked with `verify`. Anything that goes wrong
+    /// stops the upload rather than sharing the metadata.
+    private static func containerCopy(of url: URL, transform: (Data) throws -> Data?, verify: (Data) throws -> Bool) throws -> URL? {
+        let cleaned: Data
+        do {
+            let data = try Data(contentsOf: url, options: .mappedIfSafe)
+            guard let result = try transform(data) else { return nil }
+            guard try verify(result) else { throw ContainerMetadata.Failure.malformed }
+            cleaned = result
+        } catch {
+            throw ImageMetadataError.couldNotRewrite(url.lastPathComponent)
+        }
+        let directory = try newDirectory()
+        let output = directory.appendingPathComponent(url.lastPathComponent)
+        do {
+            try cleaned.write(to: output)
+        } catch {
+            try? FileManager.default.removeItem(at: directory)
+            throw ImageMetadataError.couldNotRewrite(url.lastPathComponent)
+        }
+        return output
+    }
+
+    private static func newDirectory() throws -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("AktarMetadata", isDirectory: true)
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
+    /// JPEG, HEIC, PNG, TIFF and AVIF, through ImageIO.
+    private static func imageIOCopy(of url: URL, source: CGImageSource, type: String, policy: ImageMetadataPolicy) throws -> URL? {
+        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
+        guard hasMetadataToRemove(properties, source: source, policy: policy) else { return nil }
+
+        let directory = try newDirectory()
         let output = directory.appendingPathComponent(url.lastPathComponent)
 
         // First try copying the compressed image data as it is, with new
         // metadata. ImageIO handles this differently per format (PNG keeps
-        // its metadata no matter what), so the result is checked.
+        // its metadata no matter what, AVIF can't be copied), so the result
+        // is checked.
         if let destination = CGImageDestinationCreateWithURL(output as CFURL, type as CFString, 1, nil),
            CGImageDestinationCopyImageSource(destination, source, copyOptions(source: source, properties: properties, policy: policy) as CFDictionary, nil),
            !stillHasMetadataToRemove(at: output, policy: policy) {
@@ -79,9 +160,11 @@ enum ImageMetadataStripper {
         }
 
         // Otherwise write the image out again with only the metadata to keep:
-        // lossless for PNG and TIFF, full quality for JPEG and HEIC.
+        // lossless for PNG and TIFF, full quality for JPEG, HEIC and AVIF.
+        // Not for one too large to decode safely, which then isn't uploaded.
         try? FileManager.default.removeItem(at: output)
-        if let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+        if !ImagePixelLimit.isTooLarge(source),
+           let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
            let destination = CGImageDestinationCreateWithURL(output as CFURL, type as CFString, 1, nil) {
             var kept: [CFString: Any]
             if policy == .removeLocation {

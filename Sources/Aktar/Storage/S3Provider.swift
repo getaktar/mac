@@ -26,10 +26,15 @@ final class S3Provider: StorageProvider, Sendable {
         // Soto defaults to path-style addressing, which is what most
         // S3-compatible providers (MinIO, R2, B2, Spaces) expect. Virtual
         // hosted-style is opted into explicitly for providers that prefer it.
+        // Every request made through Soto (listing, deleting, copying,
+        // creating, completing and aborting multipart uploads) has 60
+        // seconds in all, retries and reading the reply included; see
+        // `OverallTimeout`. The file bytes go through S3Transfer instead.
         self.s3 = S3(
             client: client,
             region: Region(rawValue: config.region),
             endpoint: config.endpoint,
+            middleware: OverallTimeout(seconds: Self.requestTimeout),
             options: config.forcePathStyle ? [] : [.s3ForceVirtualHost]
         )
     }
@@ -61,8 +66,11 @@ final class S3Provider: StorageProvider, Sendable {
 
         var publicLink: PublicLinkCheck?
         if writable, !config.publicBaseURL.isEmpty {
-            let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: testKey)
-            publicLink = await Self.probe(url: url)
+            if let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: testKey) {
+                publicLink = await Self.probe(url: url)
+            } else {
+                publicLink = .noResponse
+            }
         }
 
         if writable {
@@ -100,7 +108,9 @@ final class S3Provider: StorageProvider, Sendable {
             }
         }
         await progress?(1)
-        let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: objectKey)
+        guard let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: objectKey) else {
+            throw StorageError.invalidPublicBaseURL
+        }
         return UploadResult(objectKey: objectKey, publicURL: url, byteSize: Int(size))
     }
 
@@ -159,6 +169,18 @@ final class S3Provider: StorageProvider, Sendable {
         do {
             let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
             return output.contents?.first?.key == key
+        } catch {
+            throw Self.mapError(error, bucket: config.bucket)
+        }
+    }
+
+    /// Size and last change of the object at `key`, or nil when there's
+    /// none. Listed for the same reason as `objectExists`.
+    func objectInfo(key: String) async throws -> (size: Int64, lastModified: Date?)? {
+        do {
+            let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
+            guard let object = output.contents?.first, object.key == key else { return nil }
+            return (object.size ?? 0, object.lastModified)
         } catch {
             throw Self.mapError(error, bucket: config.bucket)
         }
@@ -227,6 +249,13 @@ final class S3Provider: StorageProvider, Sendable {
         guard LifecycleXML.isInPlace(try await lifecycleRules(url: url) ?? []) else {
             throw StorageError.unknown(String(localized: "The provider didn't keep the lifecycle rules."))
         }
+    }
+
+    /// Whether the bucket has all of Aktar's expiry rules right now. Throws
+    /// when they can't be read.
+    func expiryRulesInPlace() async throws -> Bool {
+        let url = try bucketURL(query: "lifecycle")
+        return LifecycleXML.isInPlace(try await lifecycleRules(url: url) ?? [])
     }
 
     /// Takes Aktar's expiry rules back out of the bucket, leaving its other
@@ -326,7 +355,7 @@ final class S3Provider: StorageProvider, Sendable {
             request.setValue(value, forHTTPHeaderField: name)
         }
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await Self.controlSession.data(for: request)
             return ((response as? HTTPURLResponse)?.statusCode ?? 0, String(decoding: data, as: UTF8.self))
         } catch {
             throw StorageError.network(error.localizedDescription)
@@ -369,6 +398,19 @@ final class S3Provider: StorageProvider, Sendable {
         return url
     }
 
+    /// The most any request that carries no file bytes may take in all.
+    static let requestTimeout: TimeInterval = 60
+
+    /// For the lifecycle requests: 20 seconds without a byte, 60 in all
+    /// (the reply's body included).
+    private static let controlSession: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForResource = requestTimeout
+        configuration.urlCache = nil
+        return URLSession(configuration: configuration)
+    }()
+
     static func encodePath(_ key: String) -> String {
         key.split(separator: "/", omittingEmptySubsequences: false)
             .map { $0.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed.subtracting(CharacterSet(charactersIn: "/"))) ?? String($0) }
@@ -406,5 +448,31 @@ final class S3Provider: StorageProvider, Sendable {
             return .invalidCredentials
         }
         return .unknown((error as? LocalizedError)?.errorDescription ?? "\(error)")
+    }
+}
+
+/// Gives a request made through Soto `seconds` in all, its retries and
+/// reading the whole reply included; Soto's own timeout only covers the
+/// wait for each attempt's first bytes. Past that it fails as timed out.
+private struct OverallTimeout: AWSMiddlewareProtocol {
+    let seconds: TimeInterval
+
+    func handle(_ request: AWSHTTPRequest, context: AWSMiddlewareContext, next: AWSMiddlewareNextHandler) async throws -> AWSHTTPResponse {
+        let seconds = seconds
+        // The group waits for both tasks before it returns, so `next` is
+        // done with by then; it's only called once, from one task.
+        return try await withoutActuallyEscaping(next) { next in
+            nonisolated(unsafe) let next = next
+            return try await withThrowingTaskGroup(of: AWSHTTPResponse.self) { group in
+                group.addTask { try await next(request, context) }
+                group.addTask {
+                    try await Task.sleep(for: .seconds(seconds))
+                    throw URLError(.timedOut)
+                }
+                defer { group.cancelAll() }
+                guard let response = try await group.next() else { throw URLError(.timedOut) }
+                return response
+            }
+        }
     }
 }

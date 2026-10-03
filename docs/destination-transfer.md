@@ -52,7 +52,8 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   "v": 1,
   "destination": { ...DestinationConfig fields... },
   "credentials": { "accessKeyId": "...", "secretAccessKey": "...", "sessionToken": "..." },
-  "customTemplate": "![{filename}]({url})"
+  "customTemplate": "![{filename}]({url})",
+  "expiresAt": 1791043200
 }
 ```
 
@@ -65,6 +66,13 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
 - `sessionToken` is omitted when unset. `customTemplate` is only sent when
   `destination.outputMode == "custom"` (it is app-level today).
 - `v` inside the JSON greater than 1: "newer version" error.
+- `expiresAt` (optional, integer Unix seconds): when the link stops being
+  accepted. Sealing sets it to the creation time + 3600 (one hour). On import,
+  if it's present and now > `expiresAt` + 300 (five minutes for clocks that are
+  off), refuse with "This transfer link has expired. Make a new one on the other
+  device." Absent `expiresAt` (links from apps before it was added) is accepted.
+  Older apps ignore the field like any unknown one, so the format stays v1. The
+  shared test vectors have no `expiresAt`.
 
 ### Decoding rules (lenient, never crash, never lose other data)
 
@@ -72,6 +80,9 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
 - Required: `destination.id` (valid UUID; normalize to uppercase), `name`, `preset`
   (one of the six known raw values), `endpoint`, `bucket`, `publicBaseURL`,
   `credentials.accessKeyId`, `credentials.secretAccessKey` (non-empty strings).
+  `publicBaseURL` must also be a usable web address: a bare domain counts as
+  `https://`, otherwise the scheme is `http` or `https`, there's a host, and a
+  port (if any) is 1-65535.
   Missing or invalid: "not an Aktar transfer".
 - Defaults when missing: `region` -> preset default region; `objectPathTemplate` ->
   `{year}/{month}/{uuid}.{ext}`; `forcePathStyle` -> preset default; `accountID` -> unset.
@@ -86,7 +97,10 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
 - Share: Settings > Destinations, a destination's menu > Share to Another
   Device. The keys are read from the Keychain; the window shows the QR code,
   the code and Copy Transfer Link (the link only), and closes itself after
-  10 minutes. Every opening makes a new code, salt and nonce. The window is
+  10 minutes. Every opening makes a new code, salt and nonce, and the link
+  expires an hour after it's made. Copy Transfer Link marks the copy as
+  concealed and transient for clipboard managers, and closing the window
+  empties the clipboard if it still holds that link. The window is
   left out of screenshots, screen recordings and screen sharing.
 - Import: Import from Another Device in Settings > Destinations (and its
   empty state), on the Welcome window, or an `aktar://import#...` link, which

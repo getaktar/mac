@@ -224,6 +224,7 @@ final class LocalAPIRouter {
 
         var input = UploadInput(fileURL: fileURL, originalFilename: filename, source: .filePicker)
         if let rawPrefix = request.query["prefix"] {
+            if let problem = Self.problem(withFolder: rawPrefix) { return .error(400, "prefix: \(problem)") }
             let prefix = Self.normalizedFolder(rawPrefix)
             do {
                 input.objectKey = try await availableKey(for: filename, in: prefix, destination: destination)
@@ -319,16 +320,19 @@ final class LocalAPIRouter {
                 guard let key = request.query["key"], !key.isEmpty else {
                     return .error(400, "The key query parameter is required.")
                 }
+                if let problem = Self.problem(withExistingKey: key) { return .error(400, "key: \(problem)") }
                 try await storage.delete(objectKey: key)
                 appState.repository.objectDeleted(key: key, destinationID: destination.id)
                 return .json(200, ["deleted": key])
 
             case ("POST", ["objects", "move"]):
                 let body = try decode(MoveBody.self, from: request)
-                let newKey = body.to.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                let newKey = body.to.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !newKey.isEmpty, newKey != body.from else {
                     return .error(400, "Pick a different name or folder.")
                 }
+                if let problem = Self.problem(withExistingKey: body.from) { return .error(400, "from: \(problem)") }
+                if let problem = Self.problem(withKey: newKey) { return .error(400, "to: \(problem)") }
                 if try await storage.objectExists(key: newKey) {
                     return .error(409, "An object named \u{201C}\(newKey)\u{201D} already exists.")
                 }
@@ -344,7 +348,12 @@ final class LocalAPIRouter {
 
             case ("POST", ["folders"]):
                 let body = try decode(FolderBody.self, from: request)
-                let name = body.name.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                var name = body.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let problem = ObjectKeyGenerator.problem(withUserKey: name, allowsTrailingSlash: true) {
+                    return .error(400, "name: \(problem.errorDescription ?? "")")
+                }
+                if let problem = Self.problem(withFolder: body.prefix ?? "") { return .error(400, "prefix: \(problem)") }
+                while name.hasSuffix("/") { name.removeLast() }
                 guard !name.isEmpty else { return .error(400, "The folder name is required.") }
                 let folder = Self.normalizedFolder(body.prefix ?? "") + name + "/"
                 try await storage.createFolder(prefix: folder)
@@ -352,6 +361,7 @@ final class LocalAPIRouter {
 
             case ("POST", ["links"]):
                 let body = try decode(LinkBody.self, from: request)
+                if let problem = Self.problem(withExistingKey: body.key) { return .error(400, "key: \(problem)") }
                 // SigV4 presigned URLs are capped at seven days.
                 let seconds = min(max(body.expiresIn ?? 3600, 60), 604_800)
                 let url = try await storage.temporaryURL(for: body.key, expiresIn: seconds)
@@ -412,6 +422,31 @@ final class LocalAPIRouter {
             return .error(409, error.errorDescription ?? "")
         }
         return .error(502, (error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
+    }
+
+    /// Why a folder prefix can't be used, or nil. A lone "/" is the bucket
+    /// root, as the Raycast extension sends it.
+    private static func problem(withFolder raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != "/" else { return nil }
+        return ObjectKeyGenerator.problem(withUserKey: trimmed, allowsTrailingSlash: true)?.errorDescription
+    }
+
+    /// Why the key of an object that's already there can't be used, or nil.
+    /// Buckets can hold keys with empty segments or a leading "/", so only
+    /// what could be resolved to another object is refused.
+    private static func problem(withExistingKey key: String) -> String? {
+        if ObjectKeyGenerator.problem(withUserKey: key) == .controlCharacter {
+            return UserKeyProblem.controlCharacter.errorDescription
+        }
+        let segments = key.split(separator: "/", omittingEmptySubsequences: false)
+        return segments.contains { $0 == "." || $0 == ".." } ? UserKeyProblem.dotSegment.errorDescription : nil
+    }
+
+    /// Why a new object key can't be used, or nil.
+    private static func problem(withKey key: String) -> String? {
+        if let problem = ObjectKeyGenerator.problem(withUserKey: key) { return problem.errorDescription }
+        return key.hasSuffix("/") ? "A key can\u{2019}t end with \u{201C}/\u{201D}." : nil
     }
 
     /// "" for the bucket root, otherwise "a/b/" with exactly one trailing slash.
@@ -477,7 +512,7 @@ final class LocalAPIRouter {
             name: object.name,
             size: object.size,
             lastModified: object.lastModified,
-            url: hasPublicURL ? PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: object.key).absoluteString : nil
+            url: hasPublicURL ? PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: object.key)?.absoluteString : nil
         )
     }
 }

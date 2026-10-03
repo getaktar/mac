@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ImageIO
 import PDFKit
 import SwiftData
 import UniformTypeIdentifiers
@@ -551,6 +552,9 @@ struct LibraryView: View {
         if recordsPendingDeletion.count > 1 {
             return String(localized: "The remote files will be removed and their links may stop working. This can\u{2019}t be undone.")
         }
+        if let record = recordsPendingDeletion.first, appState.uploadManager.isSuperseded(record) {
+            return String(localized: "A newer upload has the same name in the bucket, so only this history entry is removed. The file stays.")
+        }
         return String(localized: "The remote file will be removed and its link may stop working. This can\u{2019}t be undone.")
     }
 
@@ -750,6 +754,15 @@ struct RemoteImage<Content: View>: View {
                 phase = .failure
                 return
             }
+            // A photo too large to decode safely isn't previewed.
+            if let source = CGImageSourceCreateWithData(data as CFData, nil),
+               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+               let width = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.intValue,
+               let height = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.intValue,
+               ImagePixelLimit.isTooLarge(width: width, height: height) {
+                phase = .failure
+                return
+            }
             guard let nsImage = NSImage(data: data) else {
                 phase = .failure
                 return
@@ -763,38 +776,102 @@ struct RemoteImage<Content: View>: View {
 
 /// Downloads a remote file's raw bytes for preview (PDF, text, markdown).
 /// The original upload isn't kept locally, so this fetches on demand each
-/// time a non-image detail is viewed, same as `RemoteImage` does.
+/// time a non-image detail is viewed. Files over `maxBytes` aren't
+/// previewed: `knownSize` (history's or the listing's size) turns them away
+/// before anything is downloaded, and the download stops once it gets past
+/// the limit anyway. Nothing is cached on disk, and a redirect to another
+/// host isn't followed.
 enum RemoteFilePhase {
     case loading
     case success(Data)
     case failure
+    case tooLarge
 }
 
 struct RemoteFileLoader<Content: View>: View {
+    static var maxBytes: Int64 { 25 * 1024 * 1024 }
+
     let url: URL?
+    var knownSize: Int64? = nil
     @ViewBuilder let content: (RemoteFilePhase) -> Content
 
     @State private var phase: RemoteFilePhase = .loading
 
     var body: some View {
-        content(phase)
-            .task(id: url) { await load() }
+        Group {
+            if case .tooLarge = phase {
+                VStack(spacing: 8) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.secondary)
+                    Text("Too large to preview (over 25 MB).").font(.caption).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                content(phase)
+            }
+        }
+        .task(id: url) { await load() }
     }
 
     private func load() async {
         phase = .loading
+        if let knownSize, knownSize > Self.maxBytes {
+            phase = .tooLarge
+            return
+        }
         guard let url else { phase = .failure; return }
-        var request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.timeoutInterval = 15
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (bytes, response) = try await PreviewDownload.session.bytes(for: request, delegate: PreviewDownload.SameHostRedirects())
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
                 phase = .failure
                 return
             }
+            if response.expectedContentLength > Self.maxBytes {
+                phase = .tooLarge
+                return
+            }
+            var data = Data()
+            data.reserveCapacity(Int(max(0, min(response.expectedContentLength, Self.maxBytes))))
+            for try await byte in bytes {
+                data.append(byte)
+                if data.count > Self.maxBytes {
+                    phase = .tooLarge
+                    return
+                }
+            }
             phase = .success(data)
         } catch {
             phase = .failure
+        }
+    }
+}
+
+/// The connection previews download through: nothing cached, in memory or
+/// on disk.
+enum PreviewDownload {
+    static let session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForResource = 120
+        return URLSession(configuration: configuration)
+    }()
+
+    /// Follows a redirect only to the same host.
+    final class SameHostRedirects: NSObject, URLSessionTaskDelegate {
+        func urlSession(
+            _ session: URLSession,
+            task: URLSessionTask,
+            willPerformHTTPRedirection response: HTTPURLResponse,
+            newRequest request: URLRequest,
+            completionHandler: @escaping @Sendable (URLRequest?) -> Void
+        ) {
+            let from = task.originalRequest?.url?.host?.lowercased()
+            let to = request.url?.host?.lowercased()
+            completionHandler(from != nil && from == to ? request : nil)
         }
     }
 }
@@ -1132,11 +1209,11 @@ private struct UploadDetailView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
         case .pdf:
-            RemoteFileLoader(url: record.publicURL) { phase in
+            RemoteFileLoader(url: record.publicURL, knownSize: Int64(record.byteSize)) { phase in
                 switch phase {
                 case .success(let data):
                     PDFKitView(data: data)
-                case .failure:
+                case .failure, .tooLarge:
                     brokenPreview
                 case .loading:
                     ProgressView()
@@ -1147,11 +1224,11 @@ private struct UploadDetailView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
         case .text(let markdown):
-            RemoteFileLoader(url: record.publicURL) { phase in
+            RemoteFileLoader(url: record.publicURL, knownSize: Int64(record.byteSize)) { phase in
                 switch phase {
                 case .success(let data):
                     TextFilePreview(data: data, renderMarkdown: markdown)
-                case .failure:
+                case .failure, .tooLarge:
                     brokenPreview
                 case .loading:
                     ProgressView()

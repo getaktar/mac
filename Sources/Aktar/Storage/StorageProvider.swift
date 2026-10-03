@@ -68,6 +68,13 @@ enum StorageError: Error, LocalizedError {
     }
 }
 
+extension StorageError {
+    /// A destination saved before the Public Base URL was checked.
+    static var invalidPublicBaseURL: StorageError {
+        .unknown(String(localized: "This destination\u{2019}s Public Base URL isn\u{2019}t a valid web address. Fix it in Settings > Destinations."))
+    }
+}
+
 protocol StorageProvider {
     func testConnection() async throws -> ConnectionResult
     func upload(

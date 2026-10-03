@@ -9,11 +9,13 @@ extension Notification.Name {
 /// Handles `aktar://` links:
 ///
 ///     aktar://upload-clipboard   upload whatever is on the clipboard (only
-///                                while Aktar is already running)
+///                                while Aktar is already running, and only
+///                                after the user confirms it)
 ///     aktar://library            open the Library window
 ///     aktar://settings           open Settings
 ///     aktar://watch              open Settings > Watched Folders
-///     aktar://watch/pause?minutes=60   pause watching (no minutes: until resumed)
+///     aktar://watch/pause?minutes=60   pause watching after the user confirms
+///                                (no minutes: until resumed; 1 to 525600)
 ///     aktar://watch/resume       resume watching
 ///     aktar://connect?callback=raycast://extensions/<author>/<extension>/<command>
 ///     aktar://import#<data>      open Settings > Destinations to import a
@@ -36,7 +38,7 @@ enum URLSchemeHandler {
         switch url.host?.lowercased() {
         case "upload-clipboard":
             guard !launchedApp else { return }
-            appState.uploadFromClipboard()
+            confirmClipboardUpload(appState: appState)
         case "library":
             NotificationCenter.default.post(name: .aktarOpenWindow, object: "library")
         case "settings":
@@ -61,13 +63,56 @@ enum URLSchemeHandler {
             appState.openSettings(tab: SettingsTab.watchedFolders.rawValue)
         case "pause":
             let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-            let minutes = items.first(where: { $0.name == "minutes" })?.value.flatMap(Int.init)
-            service.pause(minutes: minutes.flatMap { $0 > 0 ? $0 : nil })
+            // A minutes= that isn't a positive whole number: the link is
+            // ignored rather than pausing for some other length.
+            var minutes: Int?
+            if let item = items.first(where: { $0.name == "minutes" }) {
+                guard let valid = WatchPause.minutes(fromQuery: item.value) else { return }
+                minutes = valid
+            }
+            confirmPause(minutes: minutes, service: service)
         case "resume":
             service.resume()
         default:
             break
         }
+    }
+
+    /// Any web page or app can open an aktar:// link, so uploading the
+    /// clipboard that way always asks first, saying what would go where.
+    private static func confirmClipboardUpload(appState: AppState) {
+        guard let destination = appState.destinationStore.defaultDestination,
+              let input = ClipboardService.readFileInput() else { return }
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Upload the clipboard to \u{201C}\(destination.name)\u{201D}?")
+        alert.informativeText = String(localized: "A link asked Aktar to upload what\u{2019}s on your clipboard: \u{201C}\(input.originalFilename)\u{201D}. Only upload it if you opened that link yourself.")
+        alert.addButton(withTitle: String(localized: "Upload"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else {
+            TempFiles.removeIfOwned(input.fileURL)
+            return
+        }
+        appState.uploadManager.upload([input], to: destination)
+    }
+
+    /// Pausing from a link asks first too; resuming doesn't.
+    private static func confirmPause(minutes: Int?, service: WatchService) {
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Pause Watched Folders?")
+        if let minutes {
+            let length = Duration.seconds(minutes * 60).formatted(.units(allowed: [.days, .hours, .minutes], width: .wide, maximumUnitCount: 2))
+            alert.informativeText = String(localized: "A link asked Aktar to stop uploading from watched folders for \(length).")
+        } else {
+            alert.informativeText = String(localized: "A link asked Aktar to stop uploading from watched folders until you resume.")
+        }
+        alert.addButton(withTitle: String(localized: "Pause"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        service.pause(minutes: minutes)
     }
 
     /// Raycast deeplinks are raycast://extensions/<author>/<extension>/<command>.

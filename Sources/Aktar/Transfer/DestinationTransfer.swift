@@ -11,12 +11,15 @@ enum DestinationTransferError: Error, Equatable, LocalizedError {
     case newerVersion
     /// The transfer code didn't decrypt it, or isn't a valid code at all.
     case wrongCode
+    /// Its `expiresAt` has passed (with a few minutes for clocks that are off).
+    case expired
 
     var errorDescription: String? {
         switch self {
         case .notAktarTransfer: return String(localized: "This isn\u{2019}t an Aktar transfer link.")
         case .newerVersion: return String(localized: "This was shared from a newer version of Aktar. Update Aktar and try again.")
         case .wrongCode: return String(localized: "That code doesn\u{2019}t match. Check it and try again.")
+        case .expired: return String(localized: "This transfer link has expired. Make a new one on the other device.")
         }
     }
 }
@@ -40,6 +43,9 @@ enum DestinationTransfer {
         var destination: DestinationConfig
         var credentials: StorageCredentials
         var customTemplate: String?
+        /// When the link stops being accepted, in Unix seconds. Set by
+        /// `seal`; links from apps before it was added don't have one.
+        var expiresAt: Int? = nil
     }
 
     static let formatVersion: UInt8 = 1
@@ -55,6 +61,10 @@ enum DestinationTransfer {
     private static let headerLength = 1 + saltLength + nonceLength
     private static let additionalData = Data("aktar-transfer-v1".utf8)
     private static let defaultObjectPath = "{year}/{month}/{uuid}.{ext}"
+    /// How long a new link is good for, and the leeway for a receiving
+    /// device whose clock is off.
+    static let lifetime: TimeInterval = 3600
+    static let clockSkewAllowance: TimeInterval = 300
 
     // MARK: - Transfer code
 
@@ -136,9 +146,12 @@ enum DestinationTransfer {
     // MARK: - Sealing and opening
 
     /// The link for `payload`, encrypted with `code` (from `generateCode`).
-    /// A fresh salt and nonce every time.
-    static func seal(_ payload: Payload, code: String) throws -> String {
-        try seal(plaintext: encodePayload(payload), code: code, salt: randomBytes(saltLength), nonce: randomBytes(nonceLength))
+    /// A fresh salt and nonce every time. It expires an hour after `now`
+    /// unless the payload says otherwise.
+    static func seal(_ payload: Payload, code: String, now: Date = Date()) throws -> String {
+        var payload = payload
+        if payload.expiresAt == nil { payload.expiresAt = Int(now.timeIntervalSince1970 + lifetime) }
+        return try seal(plaintext: encodePayload(payload), code: code, salt: randomBytes(saltLength), nonce: randomBytes(nonceLength))
     }
 
     static func seal(plaintext: Data, code: String, salt: Data, nonce: Data) throws -> String {
@@ -153,8 +166,9 @@ enum DestinationTransfer {
     }
 
     /// The destination in a scanned or pasted link (or just its base64url
-    /// part), decrypted with what the user typed as the code.
-    static func open(_ input: String, code: String) throws -> Payload {
+    /// part), decrypted with what the user typed as the code. One past its
+    /// `expiresAt` (as of `now`) is refused.
+    static func open(_ input: String, code: String, now: Date = Date()) throws -> Payload {
         let envelope = try envelope(from: input)
         guard let code = normalizeCode(code) else { throw DestinationTransferError.wrongCode }
         let salt = envelope.subdata(in: 1..<(1 + saltLength))
@@ -171,7 +185,12 @@ enum DestinationTransfer {
         } catch {
             throw DestinationTransferError.wrongCode
         }
-        return try decodePayload(plaintext)
+        let payload = try decodePayload(plaintext)
+        if let expiresAt = payload.expiresAt,
+           now.timeIntervalSince1970 > TimeInterval(expiresAt) + clockSkewAllowance {
+            throw DestinationTransferError.expired
+        }
+        return payload
     }
 
     /// The encrypted bytes of a link, checked before any code is asked for,
@@ -260,6 +279,7 @@ enum DestinationTransfer {
         if config.outputMode == .custom, let template = payload.customTemplate {
             root["customTemplate"] = template
         }
+        if let expiresAt = payload.expiresAt { root["expiresAt"] = expiresAt }
         return try JSONSerialization.data(withJSONObject: root, options: [.withoutEscapingSlashes])
     }
 
@@ -279,6 +299,7 @@ enum DestinationTransfer {
               let endpoint = string(object["endpoint"]),
               let bucket = string(object["bucket"]),
               let publicBaseURL = string(object["publicBaseURL"]),
+              PublicURLResolver.isValidBaseURL(publicBaseURL),
               let accessKeyId = string(keys["accessKeyId"]),
               let secretAccessKey = string(keys["secretAccessKey"]) else {
             throw DestinationTransferError.notAktarTransfer
@@ -308,7 +329,12 @@ enum DestinationTransfer {
             secretAccessKey: secretAccessKey,
             sessionToken: string(keys["sessionToken"])
         )
-        return Payload(destination: destination, credentials: credentials, customTemplate: string(root["customTemplate"]))
+        return Payload(
+            destination: destination,
+            credentials: credentials,
+            customTemplate: string(root["customTemplate"]),
+            expiresAt: int(root["expiresAt"])
+        )
     }
 
     /// An unknown format drops the whole setting; a quality or size the

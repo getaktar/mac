@@ -130,7 +130,7 @@ struct IntegrationsSettingsView: View {
             .buttonStyle(.borderless)
             .help(isTokenVisible ? "Hide token" : "Show token")
             Button(didCopyToken ? "Copied" : "Copy") {
-                ClipboardService.copy(service.token)
+                ClipboardService.copySecret(service.token)
                 didCopyToken = true
                 Task {
                     try? await Task.sleep(for: .seconds(1.5))

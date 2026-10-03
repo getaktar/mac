@@ -122,10 +122,11 @@ final class WatchService {
     /// Nothing is uploaded from any folder.
     var isPaused: Bool { manualPause != nil || pausedOnBattery || pausedOnMeteredNetwork }
 
-    /// `minutes` nil pauses until Resume.
+    /// `minutes` nil pauses until Resume; others are kept within a year
+    /// (see `WatchPause`).
     func pause(minutes: Int?) {
         if let minutes {
-            store.setPausedUntil(.until(Date().addingTimeInterval(TimeInterval(minutes) * 60)))
+            store.setPausedUntil(.until(WatchPause.end(minutes: minutes)))
         } else {
             store.setPausedUntil(.forever)
         }
@@ -202,10 +203,12 @@ final class WatchService {
         }
         // A timed pause ends on its own.
         if case .until(let date) = manualPause {
+            // Waited for a day at most at a time, so a far-off date (a
+            // settings file edited by hand) can't overflow the timer.
             resumeTask = Task { [weak self] in
-                try? await Task.sleep(for: .seconds(max(date.timeIntervalSinceNow, 0) + 0.5))
+                try? await Task.sleep(for: .seconds(WatchPause.wait(until: date)))
                 guard !Task.isCancelled else { return }
-                self?.store.setPausedUntil(nil)
+                if date <= Date() { self?.store.setPausedUntil(nil) }
                 self?.sync()
             }
         }

@@ -17,6 +17,8 @@ struct WatchedFolderFormView: View {
     @State private var maxMB: Int?
     @State private var isAddingWebhook = false
     @State private var webhookURL = ""
+    /// Why the last address typed in Add Webhook wasn't added.
+    @State private var webhookError: String?
     @State private var hookStatus: [UUID: HookTestStatus] = [:]
 
     private enum HookTestStatus: Equatable {
@@ -67,7 +69,7 @@ struct WatchedFolderFormView: View {
                 Button("Cancel") { dismiss() }
                 Button("Save") { onSave(currentFolder()) }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(folder.name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(folder.name.trimmingCharacters(in: .whitespaces).isEmpty || hasUnusableWebhook)
             }
             .padding()
         }
@@ -76,12 +78,19 @@ struct WatchedFolderFormView: View {
             TextField("Webhook URL", text: $webhookURL, prompt: Text(verbatim: "https://example.com/hook"))
             Button("Add") {
                 let target = webhookURL.trimmingCharacters(in: .whitespaces)
-                if !target.isEmpty { folder.hooks.append(WatchHook(kind: .webhook, target: target)) }
+                webhookError = nil
+                if !target.isEmpty {
+                    if let problem = Self.webhookProblem(target) {
+                        webhookError = problem
+                    } else {
+                        folder.hooks.append(WatchHook(kind: .webhook, target: target))
+                    }
+                }
                 webhookURL = ""
             }
             Button("Cancel", role: .cancel) { webhookURL = "" }
         } message: {
-            Text("Aktar POSTs a JSON description of each upload to this address.")
+            Text("Aktar POSTs a JSON description of each upload to this address. Use https://, or http:// only for this Mac or your local network.")
         }
     }
 
@@ -284,6 +293,9 @@ struct WatchedFolderFormView: View {
                         Text(verbatim: hook.target)
                             .lineLimit(1)
                             .truncationMode(.middle)
+                        if hook.kind == .webhook, let problem = Self.webhookProblem(hook.target) {
+                            Text(problem).font(.caption).foregroundStyle(.red).lineLimit(2)
+                        }
                         switch hookStatus[hook.id] {
                         case .testing:
                             Text("Testing\u{2026}").font(.caption).foregroundStyle(.secondary)
@@ -322,6 +334,12 @@ struct WatchedFolderFormView: View {
                 }
                 .fixedSize()
             }
+            if let webhookError {
+                Text(webhookError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         } header: {
             Text("Automation")
         } footer: {
@@ -329,6 +347,21 @@ struct WatchedFolderFormView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// Why a webhook address can't be used, or nil when it can.
+    private static func webhookProblem(_ target: String) -> String? {
+        switch WatchHookAddress.check(target) {
+        case .allowed: return nil
+        case .invalid: return WatchHookError.invalidURL.errorDescription
+        case .insecure: return WatchHookError.insecureURL.errorDescription
+        }
+    }
+
+    /// A webhook (kept from before addresses were checked) that would be
+    /// refused: it has to be fixed or removed before saving.
+    private var hasUnusableWebhook: Bool {
+        folder.hooks.contains { $0.kind == .webhook && Self.webhookProblem($0.target) != nil }
     }
 
     // MARK: - Actions

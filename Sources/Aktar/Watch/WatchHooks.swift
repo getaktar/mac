@@ -2,6 +2,7 @@ import AppKit
 
 enum WatchHookError: LocalizedError {
     case invalidURL
+    case insecureURL
     case status(Int)
     case scriptMissing(String)
     case scriptFailed(String)
@@ -11,6 +12,8 @@ enum WatchHookError: LocalizedError {
         switch self {
         case .invalidURL:
             return String(localized: "The webhook address isn't a valid http or https URL.")
+        case .insecureURL:
+            return String(localized: "Use an https:// webhook address. Plain http:// only works for this Mac or your local network.")
         case .status(let code):
             return String(localized: "The webhook answered with HTTP \(String(code)).")
         case .scriptMissing(let name):
@@ -44,8 +47,12 @@ enum WatchHookRunner {
     }
 
     private static func postWebhook(to target: String, payload: WatchHookPayload) async throws {
-        guard let url = URL(string: target.trimmingCharacters(in: .whitespaces)),
-              let scheme = url.scheme?.lowercased(), scheme == "https" || scheme == "http", url.host != nil else {
+        switch WatchHookAddress.check(target) {
+        case .allowed: break
+        case .invalid: throw WatchHookError.invalidURL
+        case .insecure: throw WatchHookError.insecureURL
+        }
+        guard let url = URL(string: target.trimmingCharacters(in: .whitespaces)) else {
             throw WatchHookError.invalidURL
         }
         var request = URLRequest(url: url, timeoutInterval: timeout)
@@ -55,7 +62,9 @@ enum WatchHookRunner {
         request.setValue("Aktar/\(version)", forHTTPHeaderField: "User-Agent")
         request.httpBody = payload.json()
         do {
-            let (_, response) = try await URLSession.shared.data(for: request)
+            // A redirect to another host would get the upload's details
+            // sent on; its 3xx answer counts as a failure instead.
+            let (_, response) = try await URLSession.shared.data(for: request, delegate: SameHostRedirects())
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             guard (200..<300).contains(status) else { throw WatchHookError.status(status) }
         } catch let error as URLError where error.code == .timedOut {
@@ -114,6 +123,24 @@ enum WatchHookRunner {
                 once.resume(WatchHookError.timedOut)
             }
         }
+    }
+}
+
+/// Follows a webhook's redirects only within its own host.
+private final class SameHostRedirects: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping @Sendable (URLRequest?) -> Void
+    ) {
+        guard let original = task.originalRequest?.url, let target = request.url,
+              WatchHookAddress.mayFollowRedirect(from: original, to: target) else {
+            completionHandler(nil)
+            return
+        }
+        completionHandler(request)
     }
 }
 

@@ -39,8 +39,12 @@ extension S3Provider {
 
     /// One PUT streamed from the file. `progress` gets the bytes sent.
     func putObject(fileURL: URL, objectKey: String, contentType: String, progress: @escaping @Sendable (Int64) -> Void) async throws {
+        var headers = ["Content-Type": contentType]
+        if let disposition = ContentTypeResolver.contentDisposition(names: [objectKey, fileURL.lastPathComponent], contentType: contentType) {
+            headers["Content-Disposition"] = disposition
+        }
         try await withRetries {
-            let request = try signedRequest(method: .PUT, key: objectKey, headers: ["Content-Type": contentType])
+            let request = try signedRequest(method: .PUT, key: objectKey, headers: headers)
             let delegate = UploadProgressDelegate(onProgress: progress)
             let (data, response) = try await Self.transferSession.upload(for: request, fromFile: fileURL, delegate: delegate)
             _ = try check(data, response)
@@ -49,9 +53,17 @@ extension S3Provider {
 
     // MARK: - Multipart
 
-    func createMultipartUpload(objectKey: String, contentType: String) async throws -> String {
+    /// `fileName` is the name of the file the parts come from, which counts
+    /// for active content (see `ContentTypeResolver`) like the key does.
+    func createMultipartUpload(objectKey: String, contentType: String, fileName: String) async throws -> String {
+        let disposition = ContentTypeResolver.contentDisposition(names: [objectKey, fileName], contentType: contentType)
         do {
-            let output = try await s3.createMultipartUpload(.init(bucket: config.bucket, contentType: contentType, key: objectKey))
+            let output = try await s3.createMultipartUpload(.init(
+                bucket: config.bucket,
+                contentDisposition: disposition,
+                contentType: contentType,
+                key: objectKey
+            ))
             guard let uploadId = output.uploadId else {
                 throw StorageError.unknown(String(localized: "The provider didn't start the upload."))
             }

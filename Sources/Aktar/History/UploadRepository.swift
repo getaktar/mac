@@ -76,7 +76,9 @@ final class UploadRepository {
             } else {
                 record.expiresAt = nil
             }
-            record.publicURLString = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey).absoluteString
+            if let url = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey) {
+                record.publicURLString = url.absoluteString
+            }
         }
         try? modelContext.save()
     }
@@ -113,7 +115,10 @@ final class UploadRepository {
     /// link can be handed out again: not deleted, and expiring the same
     /// way the new upload would. Both never expire, or both are in the
     /// same `tmp/{N}d/` folder and the earlier one hasn't expired yet.
-    /// Whether the file is still in the bucket is up to the caller.
+    /// Not one whose key something else was uploaded to later (a `{filename}`
+    /// path gives the same key to different files): that link shows the
+    /// newer file now. Whether the file is still in the bucket, unchanged,
+    /// is up to the caller.
     func reusableRecord(destinationID: UUID, contentHash: String, expiryDays: Int?, now: Date = .now) -> UploadRecord? {
         let hash: String? = contentHash
         let descriptor = FetchDescriptor<UploadRecord>(
@@ -123,9 +128,13 @@ final class UploadRepository {
         return ((try? modelContext.fetch(descriptor)) ?? []).first { record in
             if let expiryDays {
                 guard let expiresAt = record.expiresAt, expiresAt > now else { return false }
-                return UploadExpiry.days(forKey: record.objectKey) == expiryDays
+                guard UploadExpiry.days(forKey: record.objectKey) == expiryDays else { return false }
+            } else if record.expiresAt != nil {
+                return false
             }
-            return record.expiresAt == nil
+            return !records(key: record.objectKey, destinationID: destinationID).contains {
+                $0.createdAt > record.createdAt && $0.contentHash != record.contentHash
+            }
         }
     }
 

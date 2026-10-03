@@ -17,6 +17,7 @@ final class ShareViewController: NSViewController {
         super.viewDidLoad()
         let providers = (extensionContext?.inputItems as? [NSExtensionItem] ?? [])
             .flatMap { $0.attachments ?? [] }
+        Self.removeOldCopies()
         Task { @MainActor in
             var urls: [URL] = []
             for provider in providers {
@@ -45,13 +46,44 @@ final class ShareViewController: NSViewController {
         return await withCheckedContinuation { continuation in
             _ = provider.loadDataRepresentation(for: type) { data, _ in
                 guard let data else { return continuation.resume(returning: nil) }
-                let name = (provider.suggestedName ?? "shared-\(Int(Date().timeIntervalSince1970))")
-                var url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+                // A folder of its own per item, so two shares never write
+                // to the same file.
+                let id = UUID().uuidString.lowercased()
+                let directory = copiesFolder.appendingPathComponent(id, isDirectory: true)
+                var name = (provider.suggestedName ?? "shared-\(id.prefix(8))")
+                    .replacingOccurrences(of: "/", with: "-")
+                    .replacingOccurrences(of: ":", with: "-")
+                if name.isEmpty || name == "." || name == ".." { name = "shared-\(id.prefix(8))" }
+                var url = directory.appendingPathComponent(name)
                 if url.pathExtension.isEmpty, let ext = type.preferredFilenameExtension {
                     url.appendPathExtension(ext)
                 }
-                continuation.resume(returning: (try? data.write(to: url)) != nil ? url : nil)
+                do {
+                    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                    try data.write(to: url)
+                    continuation.resume(returning: url)
+                } catch {
+                    continuation.resume(returning: nil)
+                }
             }
+        }
+    }
+
+    /// Copies of shared items that weren't files, in the extension's own
+    /// temporary folder. Aktar only gets to read them, so the extension
+    /// deletes them itself the next time it runs, once they're a day old
+    /// (by then the upload that needed one is long over).
+    private static var copiesFolder: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("AktarShare", isDirectory: true)
+    }
+
+    private static func removeOldCopies() {
+        let manager = FileManager.default
+        let cutoff = Date().addingTimeInterval(-86_400)
+        let folders = (try? manager.contentsOfDirectory(at: copiesFolder, includingPropertiesForKeys: [.creationDateKey])) ?? []
+        for folder in folders {
+            let created = (try? folder.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? .distantPast
+            if created < cutoff { try? manager.removeItem(at: folder) }
         }
     }
 }

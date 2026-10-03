@@ -29,14 +29,43 @@ enum OutputFormatter {
         case .markdown:
             return isImage(filename)
                 ? "![](\(publicURL.absoluteString))"
-                : "[\(filename)](\(publicURL.absoluteString))"
+                : "[\(escapedMarkdown(filename))](\(publicURL.absoluteString))"
         case .html:
             return isImage(filename)
                 ? "<img src=\"\(publicURL.absoluteString)\" alt=\"\">"
-                : "<a href=\"\(publicURL.absoluteString)\">\(filename)</a>"
+                : "<a href=\"\(publicURL.absoluteString)\">\(escapedHTML(filename))</a>"
+        // A custom template is the user's own markup, so nothing in it is
+        // escaped: {filename} goes in exactly as it is.
         case .custom:
             return apply(template: customTemplate, publicURL: publicURL, filename: filename)
         }
+    }
+
+    /// `text` safe inside an HTML element or a quoted attribute.
+    static func escapedHTML(_ text: String) -> String {
+        var escaped = ""
+        for character in text {
+            switch character {
+            case "&": escaped += "&amp;"
+            case "<": escaped += "&lt;"
+            case ">": escaped += "&gt;"
+            case "\"": escaped += "&quot;"
+            case "'": escaped += "&#39;"
+            default: escaped.append(character)
+            }
+        }
+        return escaped
+    }
+
+    /// `text` as Markdown link text that can't end the link early or start
+    /// another one.
+    static func escapedMarkdown(_ text: String) -> String {
+        var escaped = ""
+        for character in text {
+            if "\\[]()".contains(character) { escaped.append("\\") }
+            escaped.append(character)
+        }
+        return escaped
     }
 
     /// Image files still get embed markup (`![]()`, `<img>`); anything else

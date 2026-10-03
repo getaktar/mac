@@ -18,6 +18,8 @@ final class AppState {
     var pendingImportLink: String?
 
     init() {
+        // Before anything could be uploading from them.
+        TempFiles.purgeAtLaunch()
         uploadManager = UploadManager(destinationStore: destinationStore, repository: repository)
         watchService = WatchService(uploadManager: uploadManager, destinationStore: destinationStore)
         NotificationService.requestAuthorizationIfNeeded()
@@ -69,7 +71,10 @@ final class AppState {
     func uploadFromClipboard(rename: Bool = false) {
         guard let input = ClipboardService.readFileInput() else { return }
         let inputs = rename ? RenamePrompt.rename([input]) : [input]
-        guard !inputs.isEmpty else { return }
+        guard !inputs.isEmpty else {
+            TempFiles.removeIfOwned(input.fileURL)
+            return
+        }
         uploadManager.upload(inputs)
     }
 }

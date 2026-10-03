@@ -62,9 +62,8 @@ struct ShareDestinationView: View {
 
     /// Only the link: the code has to travel another way.
     private func copyLink() {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(link, forType: .string)
+        let changeCount = ClipboardService.copySecret(link)
+        ShareDestinationWindowController.shared.linkCopied(link, changeCount: changeCount)
         didCopyLink = true
         Task {
             try? await Task.sleep(for: .seconds(4))
@@ -83,6 +82,13 @@ final class ShareDestinationWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var closeTask: Task<Void, Never>?
     private var sealTask: Task<Void, Never>?
+    /// The link this window copied, cleared from the clipboard when the
+    /// window closes unless something else was copied since.
+    private var copiedLink: (link: String, changeCount: Int)?
+
+    func linkCopied(_ link: String, changeCount: Int) {
+        copiedLink = (link, changeCount)
+    }
 
     /// Reads the keys first; if they're gone, says so instead.
     func show(_ destination: DestinationConfig, customTemplate: String) {
@@ -153,6 +159,10 @@ final class ShareDestinationWindowController: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         closeTask?.cancel()
         closeTask = nil
+        if let copiedLink {
+            ClipboardService.clearIfStillCopied(copiedLink.link, changeCount: copiedLink.changeCount)
+            self.copiedLink = nil
+        }
         // Drops the view, and with it the code and the link.
         window?.contentViewController = nil
     }

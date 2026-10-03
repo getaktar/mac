@@ -464,48 +464,48 @@
         }
       }
     },
-    "Aktar POSTs a JSON description of each upload to this address." : {
+    "Aktar POSTs a JSON description of each upload to this address. Use https://, or http:// only for this Mac or your local network." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktar sendet für jeden Upload eine JSON-Beschreibung per POST an diese Adresse."
+            "value" : "Aktar sendet für jeden Upload eine JSON-Beschreibung per POST an diese Adresse. Verwende https://, oder http:// nur für diesen Mac oder dein lokales Netzwerk."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktar envía (POST) una descripción JSON de cada subida a esta dirección."
+            "value" : "Aktar envía por POST una descripción JSON de cada subida a esta dirección. Usa https://, o http:// solo para este Mac o tu red local."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktar envoie (POST) une description JSON de chaque envoi à cette adresse."
+            "value" : "Aktar envoie par POST une description JSON de chaque envoi à cette adresse. Utilisez https://, ou http:// seulement pour ce Mac ou votre réseau local."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktarはアップロードごとに、その内容をJSONでこのアドレスにPOSTします。"
+            "value" : "Aktarは各アップロードのJSON説明をこのアドレスにPOSTします。https:// を使うか、http:// はこのMacかローカルネットワークの場合のみ使ってください。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Aktar envia (POST) uma descrição em JSON de cada envio para este endereço."
+            "value" : "O Aktar envia por POST uma descrição JSON de cada envio para este endereço. Use https://, ou http:// só para este Mac ou sua rede local."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktar her yüklemenin JSON açıklamasını bu adrese POST eder."
+            "value" : "Aktar her yüklemenin JSON açıklamasını bu adrese POST eder. https:// kullan; http:// yalnızca bu Mac ya da yerel ağın için."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktar 会将每次上传的 JSON 描述 POST 到此地址。"
+            "value" : "Aktar 会将每次上传的 JSON 描述 POST 到此地址。请使用 https://，http:// 仅限这台 Mac 或你的局域网。"
           }
         }
       }
@@ -7736,48 +7736,48 @@
         }
       }
     },
-    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders." : {
+    "Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos and videos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets. Bild-Metadaten gelten für Fotos: „Standort entfernen“ löscht die GPS-Position, „Alle entfernen“ auch Kamera, Datum und weitere Angaben. Ein Ordner wird als eine ZIP-Datei hochgeladen oder Datei für Datei mit seinen Unterordnern."
+            "value" : "Gilt, sobald dieses Ziel ausgewählt ist. Lege für jede Art von Datei ein eigenes Ziel an, etwa Builds, Logs oder Screenshots, jeweils mit eigenem Pfad und eigenen Standards. Ein temporärer Link funktioniert nach der gewählten Zeit nicht mehr und auch bei privaten Buckets. Bild-Metadaten gelten für Fotos und Videos: „Standort entfernen“ löscht die GPS-Position, „Alle entfernen“ auch Kamera, Datum und weitere Angaben. Ein Ordner wird als eine ZIP-Datei hochgeladen oder Datei für Datei mit seinen Unterordnern."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados. Metadatos de imagen se aplica a las fotos: Quitar ubicación elimina la posición GPS y Quitar todo también la cámara, la fecha y otros datos. Una carpeta se sube como un solo archivo ZIP o archivo por archivo con sus subcarpetas."
+            "value" : "Se aplica siempre que eliges este destino. Añade un destino por tipo de archivo, como Builds, Logs o Capturas, cada uno con su propia ruta y valores. Un enlace temporal deja de funcionar pasado el tiempo que elijas y también sirve para buckets privados. Metadatos de imagen se aplica a las fotos y los vídeos: Quitar ubicación elimina la posición GPS y Quitar todo también la cámara, la fecha y otros datos. Una carpeta se sube como un solo archivo ZIP o archivo por archivo con sus subcarpetas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés. Les métadonnées des images concernent les photos : Supprimer la position retire la position GPS, Tout supprimer retire aussi l’appareil, la date et d’autres détails. Un dossier est envoyé sous forme d’un seul fichier ZIP, ou fichier par fichier avec ses sous-dossiers."
+            "value" : "S’applique dès que cette destination est choisie. Ajoutez une destination par type de fichier, comme Builds, Logs ou Captures, chacune avec son propre chemin et ses réglages. Un lien temporaire cesse de fonctionner après le délai choisi et marche aussi avec les buckets privés. Les métadonnées des images concernent les photos et les vidéos : Supprimer la position retire la position GPS, Tout supprimer retire aussi l’appareil, la date et d’autres détails. Un dossier est envoyé sous forme d’un seul fichier ZIP, ou fichier par fichier avec ses sous-dossiers."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。画像のメタデータは写真に適用されます。「位置情報を削除」はGPSの位置を、「すべて削除」はカメラや日時などの情報も削除します。フォルダは1つのZIPファイルとして、またはサブフォルダを保ったままファイルごとにアップロードされます。"
+            "value" : "このアップロード先を選んでいるときに使われます。ビルド、ログ、スクリーンショットなど、ファイルの種類ごとにアップロード先を作れば、それぞれのパスと既定値を持てます。期限付きリンクは選んだ時間が過ぎると使えなくなり、非公開のバケットでも使えます。画像のメタデータは写真とビデオに適用されます。「位置情報を削除」はGPSの位置を、「すべて削除」はカメラや日時などの情報も削除します。フォルダは1つのZIPファイルとして、またはサブフォルダを保ったままファイルごとにアップロードされます。"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados. Metadados da imagem valem para fotos: Remover localização apaga a posição GPS e Remover tudo também apaga a câmera, a data e outros detalhes. Uma pasta é enviada como um único arquivo ZIP ou arquivo por arquivo com as subpastas."
+            "value" : "Aplicado sempre que este destino é escolhido. Adicione um destino por tipo de arquivo, como Builds, Logs ou Capturas, cada um com seu próprio caminho e padrões. Um link temporário para de funcionar após o tempo escolhido e também funciona com buckets privados. Metadados da imagem valem para fotos e vídeos: Remover localização apaga a posição GPS e Remover tudo também apaga a câmera, a data e outros detalhes. Uma pasta é enviada como um único arquivo ZIP ou arquivo por arquivo com as subpastas."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır. Görsel meta verileri fotoğraflar için geçerlidir: Konumu kaldır GPS konumunu siler, Tümünü kaldır kamera, tarih ve diğer bilgileri de siler. Bir klasör tek bir ZIP dosyası olarak ya da alt klasörleriyle birlikte dosya dosya yüklenir."
+            "value" : "Bu hedef seçiliyken uygulanır. Builds, Logs ya da Screenshots gibi her dosya türü için ayrı bir hedef ekleyebilirsin; her biri kendi yolunu ve varsayılanlarını kullanır. Süreli bağlantı seçtiğin süre dolunca çalışmayı bırakır ve gizli bucket'larda da çalışır. Görsel meta verileri fotoğraflar ve videolar için geçerlidir: Konumu kaldır GPS konumunu siler, Tümünü kaldır kamera, tarih ve diğer bilgileri de siler. Bir klasör tek bir ZIP dosyası olarak ya da alt klasörleriyle birlikte dosya dosya yüklenir."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。图片元数据适用于照片：“移除位置信息”会删除 GPS 位置，“全部移除”还会删除相机、日期等其他信息。文件夹会作为一个 ZIP 文件上传，或连同子文件夹逐个文件上传。"
+            "value" : "选中此上传目标时生效。可以为每类文件（如构建、日志或截图）各添加一个上传目标，分别使用自己的路径和默认设置。临时链接会在所选时长后失效，也适用于私有存储桶。图片元数据适用于照片和视频：“移除位置信息”会删除 GPS 位置，“全部移除”还会删除相机、日期等其他信息。文件夹会作为一个 ZIP 文件上传，或连同子文件夹逐个文件上传。"
           }
         }
       }
@@ -23302,6 +23302,742 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已更新“%@”。"
+          }
+        }
+      }
+    },
+    "Enter a file name after the last “/”." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib nach dem letzten „/“ einen Dateinamen ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe un nombre de archivo después de la última «/»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez un nom de fichier après le dernier « / »."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後の「/」の後にファイル名を入力してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite um nome de arquivo depois da última “/”."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son “/” işaretinden sonra bir dosya adı gir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在最后一个“/”后输入文件名。"
+          }
+        }
+      }
+    },
+    "Enter a web address, such as img.example.com or https://img.example.com." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib eine Webadresse ein, etwa img.example.com oder https://img.example.com."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe una dirección web, como img.example.com o https://img.example.com."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez une adresse web, par exemple img.example.com ou https://img.example.com."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "img.example.com や https://img.example.com のようなWebアドレスを入力してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite um endereço web, como img.example.com ou https://img.example.com."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "img.example.com ya da https://img.example.com gibi bir web adresi gir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入网址，例如 img.example.com 或 https://img.example.com。"
+          }
+        }
+      }
+    },
+    "This transfer link has expired. Make a new one on the other device." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Übertragungslink ist abgelaufen. Erstelle auf dem anderen Gerät einen neuen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este enlace de transferencia ha caducado. Crea uno nuevo en el otro dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce lien de transfert a expiré. Créez-en un nouveau sur l’autre appareil."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この転送リンクは期限切れです。もう一方のデバイスで新しいリンクを作成してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este link de transferência expirou. Crie um novo no outro dispositivo."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu aktarım bağlantısının süresi doldu. Diğer cihazda yeni bir tane oluştur."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此传输链接已过期。请在另一台设备上重新生成。"
+          }
+        }
+      }
+    },
+    "A newer upload has the same name in the bucket, so only this history entry is removed. The file stays." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein neuerer Upload hat denselben Namen im Bucket, daher wird nur dieser Verlaufseintrag entfernt. Die Datei bleibt erhalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una subida más reciente tiene el mismo nombre en el bucket, así que solo se quita esta entrada del historial. El archivo se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un envoi plus récent porte le même nom dans le bucket : seule cette entrée de l’historique est supprimée. Le fichier reste."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バケット内で同じ名前のより新しいアップロードがあるため、この履歴項目だけを削除します。ファイルは残ります。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um envio mais recente tem o mesmo nome no bucket, então só esta entrada do histórico é removida. O arquivo continua lá."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket'ta aynı ada sahip daha yeni bir yükleme var, bu yüzden yalnızca bu geçmiş kaydı silinir. Dosya yerinde kalır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储桶中有同名的更新上传，因此只会移除这条历史记录，文件会保留。"
+          }
+        }
+      }
+    },
+    "Too large to preview (over 25 MB)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu groß für eine Vorschau (über 25 MB)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiado grande para la vista previa (más de 25 MB)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop volumineux pour l’aperçu (plus de 25 Mo)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大きすぎるためプレビューできません（25 MB超）。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grande demais para pré-visualizar (mais de 25 MB)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önizleme için çok büyük (25 MB'tan fazla)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文件过大，无法预览（超过 25 MB）。"
+          }
+        }
+      }
+    },
+    "A name or path can’t contain control characters." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Name oder Pfad darf keine Steuerzeichen enthalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nombre o una ruta no puede contener caracteres de control."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nom ou un chemin ne peut pas contenir de caractères de contrôle."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前やパスに制御文字は使えません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um nome ou caminho não pode conter caracteres de controle."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad ya da yol kontrol karakteri içeremez."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称或路径不能包含控制字符。"
+          }
+        }
+      }
+    },
+    "A name or path can’t start with “/”." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Name oder Pfad darf nicht mit „/“ beginnen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nombre o una ruta no puede empezar por «/»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nom ou un chemin ne peut pas commencer par « / »."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前やパスを「/」で始めることはできません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um nome ou caminho não pode começar com “/”."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad ya da yol “/” ile başlayamaz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称或路径不能以“/”开头。"
+          }
+        }
+      }
+    },
+    "A name or path can’t have “.” or “..” as a folder or file name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Name oder Pfad darf „.“ oder „..“ nicht als Ordner- oder Dateinamen enthalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nombre o una ruta no puede usar «.» ni «..» como nombre de carpeta o de archivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nom ou un chemin ne peut pas utiliser « . » ou « .. » comme nom de dossier ou de fichier."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前やパスで「.」や「..」をフォルダ名やファイル名として使うことはできません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um nome ou caminho não pode ter “.” ou “..” como nome de pasta ou arquivo."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad ya da yolda klasör veya dosya adı olarak “.” ya da “..” kullanılamaz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称或路径不能使用“.”或“..”作为文件夹名或文件名。"
+          }
+        }
+      }
+    },
+    "A path can’t have an empty folder name (“//”)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Pfad darf keinen leeren Ordnernamen („//“) enthalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ruta no puede tener un nombre de carpeta vacío («//»)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un chemin ne peut pas contenir de nom de dossier vide (« // »)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスに空のフォルダ名（「//」）は使えません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um caminho não pode ter um nome de pasta vazio (“//”)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolda boş klasör adı (“//”) olamaz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路径中不能有空的文件夹名（“//”）。"
+          }
+        }
+      }
+    },
+    "This destination’s Public Base URL isn’t a valid web address. Fix it in Settings > Destinations." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die öffentliche Basis-URL dieses Ziels ist keine gültige Webadresse. Korrigiere sie unter Einstellungen > Ziele."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La URL base pública de este destino no es una dirección web válida. Corrígela en Ajustes > Destinos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’URL de base publique de cette destination n’est pas une adresse web valide. Corrigez-la dans Réglages > Destinations."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアップロード先の公開ベースURLは有効なWebアドレスではありません。設定 > アップロード先で修正してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A URL base pública deste destino não é um endereço web válido. Corrija em Ajustes > Destinos."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu hedefin Herkese Açık Temel URL'si geçerli bir web adresi değil. Ayarlar > Hedefler'den düzelt."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此上传目标的公开基础 URL 不是有效的网址。请在“设置 > 上传目标”中修正。"
+          }
+        }
+      }
+    },
+    "Upload the clipboard to “%@”?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwischenablage nach „%@“ hochladen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Subir el portapapeles a «%@»?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer le presse-papiers vers « %@ » ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリップボードを「%@」にアップロードしますか?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar a área de transferência para “%@”?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pano “%@” hedefine yüklensin mi?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要将剪贴板内容上传到“%@”吗？"
+          }
+        }
+      }
+    },
+    "A link asked Aktar to upload what’s on your clipboard: “%@”. Only upload it if you opened that link yourself." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Link hat Aktar gebeten, den Inhalt deiner Zwischenablage hochzuladen: „%@“. Lade ihn nur hoch, wenn du den Link selbst geöffnet hast."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un enlace ha pedido a Aktar que suba lo que hay en tu portapapeles: «%@». Súbelo solo si abriste ese enlace tú."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un lien a demandé à Aktar d’envoyer le contenu de votre presse-papiers : « %@ ». Ne l’envoyez que si vous avez ouvert ce lien vous-même."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンクがクリップボードの内容「%@」のアップロードをAktarに求めています。そのリンクを自分で開いた場合のみアップロードしてください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um link pediu ao Aktar para enviar o que está na sua área de transferência: “%@”. Só envie se você mesmo abriu esse link."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir bağlantı, Aktar'dan panondakini yüklemesini istedi: “%@”. Yalnızca bu bağlantıyı kendin açtıysan yükle."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有链接请求 Aktar 上传剪贴板中的内容：“%@”。只有在该链接是你自己打开的情况下才上传。"
+          }
+        }
+      }
+    },
+    "Pause Watched Folders?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überwachte Ordner pausieren?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Pausar las carpetas vigiladas?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettre en pause les dossiers surveillés ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "監視フォルダを一時停止しますか?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar as pastas monitoradas?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzlenen klasörler duraklatılsın mı?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要暂停监视文件夹吗？"
+          }
+        }
+      }
+    },
+    "A link asked Aktar to stop uploading from watched folders for %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Link hat Aktar gebeten, %@ lang nichts aus überwachten Ordnern hochzuladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un enlace ha pedido a Aktar que deje de subir desde las carpetas vigiladas durante %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un lien a demandé à Aktar d’arrêter d’envoyer depuis les dossiers surveillés pendant %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンクが、監視フォルダからのアップロードを%@停止するようAktarに求めています。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um link pediu ao Aktar para parar de enviar das pastas monitoradas por %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir bağlantı, Aktar'dan izlenen klasörlerden yüklemeyi %@ boyunca durdurmasını istedi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有链接请求 Aktar 在 %@ 内停止从监视文件夹上传。"
+          }
+        }
+      }
+    },
+    "A link asked Aktar to stop uploading from watched folders until you resume." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Link hat Aktar gebeten, nichts aus überwachten Ordnern hochzuladen, bis du fortsetzt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un enlace ha pedido a Aktar que deje de subir desde las carpetas vigiladas hasta que lo reanudes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un lien a demandé à Aktar d’arrêter d’envoyer depuis les dossiers surveillés jusqu’à ce que vous repreniez."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンクが、再開するまで監視フォルダからのアップロードを停止するようAktarに求めています。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um link pediu ao Aktar para parar de enviar das pastas monitoradas até você retomar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir bağlantı, Aktar'dan sen devam ettirene kadar izlenen klasörlerden yüklemeyi durdurmasını istedi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有链接请求 Aktar 停止从监视文件夹上传，直到你恢复。"
+          }
+        }
+      }
+    },
+    "Use an https:// webhook address. Plain http:// only works for this Mac or your local network." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende eine https://-Webhook-Adresse. Einfaches http:// funktioniert nur für diesen Mac oder dein lokales Netzwerk."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa una dirección de webhook https://. http:// sin cifrar solo funciona para este Mac o tu red local."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez une adresse de webhook en https://. Le simple http:// ne fonctionne que pour ce Mac ou votre réseau local."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https:// のWebhookアドレスを使ってください。http:// はこのMacかローカルネットワーク内でのみ使えます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use um endereço de webhook https://. http:// simples só funciona para este Mac ou sua rede local."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https:// ile başlayan bir webhook adresi kullan. Düz http:// yalnızca bu Mac ya da yerel ağın için çalışır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请使用 https:// 的 Webhook 地址。普通的 http:// 只能用于这台 Mac 或你的局域网。"
           }
         }
       }

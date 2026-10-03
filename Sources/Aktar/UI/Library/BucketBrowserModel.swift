@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 
@@ -48,6 +49,7 @@ final class BucketBrowserModel {
     @ObservationIgnored private var temporaryURLs: [String: (url: URL, expires: Date)] = [:]
     @ObservationIgnored private var searchIndex: SearchIndex?
     @ObservationIgnored private var appliedQuery = ""
+    @ObservationIgnored private var uploadsTask: Task<Void, Never>?
 
     private struct SearchIndex {
         let prefix: String
@@ -59,6 +61,23 @@ final class BucketBrowserModel {
 
     init(destination: DestinationConfig) {
         self.destination = destination
+        // Listened to here rather than in the view, so a browser that isn't
+        // on screen (History is) still learns about uploads to its bucket
+        // and doesn't show an old listing when it's opened again.
+        let id = destination.id
+        uploadsTask = Task { [weak self] in
+            for await notification in NotificationCenter.default.notifications(named: .aktarUploadSucceeded) {
+                guard notification.object as? UUID == id,
+                      let key = notification.userInfo?["objectKey"] as? String else { continue }
+                let byteSize = notification.userInfo?["byteSize"] as? Int64 ?? 0
+                guard let self else { return }
+                self.uploadFinished(objectKey: key, byteSize: byteSize)
+            }
+        }
+    }
+
+    deinit {
+        uploadsTask?.cancel()
     }
 
     // MARK: - Listing
@@ -255,8 +274,23 @@ final class BucketBrowserModel {
 
     // MARK: - Links
 
-    func publicURL(for key: String) -> URL {
+    /// Nil when the destination's Public Base URL isn't valid.
+    func publicURL(for key: String) -> URL? {
         PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: key)
+    }
+
+    /// Opens the object's public link, or beeps when there's none.
+    func openPublicURL(for key: String) {
+        guard let url = publicURL(for: key) else { return NSSound.beep() }
+        NSWorkspace.shared.open(url)
+    }
+
+    /// Copies one line per key, as `format` makes it from the link, or
+    /// beeps when the links can't be made.
+    func copyPublicURLs(_ keys: [String], format: (URL, String) -> String = { url, _ in url.absoluteString }) {
+        let lines = keys.compactMap { key in publicURL(for: key).map { format($0, key) } }
+        guard !lines.isEmpty, lines.count == keys.count else { return NSSound.beep() }
+        ClipboardService.copy(lines.joined(separator: "\n"))
     }
 
     /// A presigned link. Previews use these too (cached for most of their
@@ -319,7 +353,13 @@ final class BucketBrowserModel {
     }
 
     func createFolder(named rawName: String) async {
-        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        var name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        if let problem = ObjectKeyGenerator.problem(withUserKey: name, allowsTrailingSlash: true) {
+            actionError = problem.errorDescription
+            return
+        }
+        while name.hasSuffix("/") { name.removeLast() }
         guard !name.isEmpty else { return }
         let folder = prefix + name + "/"
         do {
@@ -357,8 +397,16 @@ final class BucketBrowserModel {
     /// Renames or moves an object: `newKey` is a full key, so changing the
     /// folder part moves it. S3 does this as a copy followed by a delete.
     func move(_ object: BucketObject, to rawKey: String, repository: UploadRepository) async {
-        let newKey = rawKey.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let newKey = rawKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !newKey.isEmpty, newKey != object.key else { return }
+        if let problem = ObjectKeyGenerator.problem(withUserKey: newKey) {
+            actionError = problem.errorDescription
+            return
+        }
+        if newKey.hasSuffix("/") {
+            actionError = String(localized: "Enter a file name after the last \u{201C}/\u{201D}.")
+            return
+        }
         busyKeys.insert(object.key)
         defer { busyKeys.remove(object.key) }
         do {

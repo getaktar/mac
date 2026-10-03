@@ -22,6 +22,11 @@ struct MultipartSession: Codable, Sendable, Identifiable {
     /// it's uploaded again.
     let sourcePath: String
     let contentHash: String?
+    /// What a generated key was made from (the path template and the
+    /// name), so a renamed file or a changed template starts over instead
+    /// of finishing under the old key. Nil for sessions from before it was
+    /// saved, which aren't resumed for a generated key.
+    var keyBasis: String?
     var completedParts: [Part]
     let createdAt: Date
 
@@ -37,12 +42,14 @@ struct MultipartFileIdentity: Sendable {
     let size: Int64
     let modifiedAt: Date?
     let contentHash: String?
+    let keyBasis: String?
 
-    init(fileURL: URL, size: Int64, contentHash: String?) {
+    init(fileURL: URL, size: Int64, contentHash: String?, keyBasis: String? = nil) {
         path = fileURL.standardizedFileURL.path
         self.size = size
         modifiedAt = (try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
         self.contentHash = contentHash
+        self.keyBasis = keyBasis
     }
 
     func matches(_ session: MultipartSession) -> Bool {
@@ -154,7 +161,7 @@ enum MultipartUploader {
         }
 
         if session == nil {
-            let uploadId = try await provider.createMultipartUpload(objectKey: objectKey, contentType: contentType)
+            let uploadId = try await provider.createMultipartUpload(objectKey: objectKey, contentType: contentType, fileName: fileURL.lastPathComponent)
             let created = MultipartSession(
                 destinationID: provider.config.id,
                 bucket: provider.config.bucket,
@@ -165,6 +172,7 @@ enum MultipartUploader {
                 fileModifiedAt: identity?.modifiedAt,
                 sourcePath: identity?.path ?? fileURL.standardizedFileURL.path,
                 contentHash: identity?.contentHash,
+                keyBasis: identity?.keyBasis,
                 completedParts: [],
                 createdAt: .now
             )

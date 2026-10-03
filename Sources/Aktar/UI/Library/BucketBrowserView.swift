@@ -42,12 +42,10 @@ struct BucketListView: View {
             }
             .navigationTitle(model.destination.name)
             .toolbar { toolbarContent }
-            .onAppear { model.loadIfNeeded() }
-            .onReceive(NotificationCenter.default.publisher(for: .aktarUploadSucceeded)) { notification in
-                guard notification.object as? UUID == model.destination.id,
-                      let key = notification.userInfo?["objectKey"] as? String else { return }
-                model.uploadFinished(objectKey: key, byteSize: notification.userInfo?["byteSize"] as? Int64 ?? 0)
-            }
+            // Keyed on the model, not onAppear: changing the destination's
+            // settings swaps in a new model under the same view, which then
+            // has to list the bucket too.
+            .task(id: ObjectIdentifier(model)) { model.loadIfNeeded() }
             .alert("New Folder", isPresented: $isCreatingFolder) {
                 TextField("Folder name", text: $newFolderName)
                 Button("Create") {
@@ -102,7 +100,7 @@ struct BucketListView: View {
     private var content: some View {
         if !model.hasLoaded && model.isLoading {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let error = model.loadError, !model.hasLoaded {
+        } else if let error = model.loadError, model.folders.isEmpty, model.objects.isEmpty {
             BucketMessageView(
                 systemImage: "exclamationmark.triangle",
                 title: "Couldn\u{2019}t list this bucket",
@@ -182,7 +180,7 @@ struct BucketListView: View {
             objectMenu(for: Array(keys))
         } primaryAction: { keys in
             guard keys.count == 1, let key = keys.first else { return }
-            NSWorkspace.shared.open(model.publicURL(for: key))
+            model.openPublicURL(for: key)
         }
     }
 
@@ -190,7 +188,7 @@ struct BucketListView: View {
     private func objectMenu(for keys: [String]) -> some View {
         if keys.count > 1 {
             Button("Copy \(keys.count) URLs") {
-                ClipboardService.copy(keys.map { model.publicURL(for: $0).absoluteString }.joined(separator: "\n"))
+                model.copyPublicURLs(keys)
             }
             Divider()
             Button("Delete \(keys.count) Remote Files\u{2026}", role: .destructive) { keysPendingDeletion = keys }
@@ -362,20 +360,20 @@ private struct BucketObjectMenuItems: View {
     let requestDeletion: () -> Void
 
     var body: some View {
-        Button("Copy URL") { ClipboardService.copy(model.publicURL(for: object.key).absoluteString) }
+        Button("Copy URL") { model.copyPublicURLs([object.key]) }
         Button("Copy Markdown") { copy(.markdown) }
         Button("Copy HTML") { copy(.html) }
         TemporaryLinkMenu(model: model, key: object.key)
         Button("Copy Object Key") { ClipboardService.copy(object.key) }
         Divider()
-        Button("Open in Browser") { NSWorkspace.shared.open(model.publicURL(for: object.key)) }
+        Button("Open in Browser") { model.openPublicURL(for: object.key) }
         Divider()
         Button("Rename or Move\u{2026}", action: requestMove)
         Button("Delete Remote File\u{2026}", role: .destructive, action: requestDeletion)
     }
 
     private func copy(_ mode: OutputMode) {
-        ClipboardService.copy(OutputFormatter.format(publicURL: model.publicURL(for: object.key), mode: mode, filename: object.name))
+        model.copyPublicURLs([object.key]) { url, _ in OutputFormatter.format(publicURL: url, mode: mode, filename: object.name) }
     }
 }
 
@@ -694,7 +692,7 @@ private struct BucketObjectDetailView: View {
                 Image(systemName: FileKindIcon.symbolName(for: object.name))
                     .font(.system(size: 44))
                     .foregroundStyle(.secondary)
-                Button("Open in Browser") { NSWorkspace.shared.open(model.publicURL(for: object.key)) }
+                Button("Open in Browser") { model.openPublicURL(for: object.key) }
                     .buttonStyle(.link)
                     .font(.caption)
             }
@@ -708,10 +706,10 @@ private struct BucketObjectDetailView: View {
     private func loadedFile<Content: View>(height: CGFloat, @ViewBuilder content: @escaping (Data) -> Content) -> some View {
         Group {
             if let previewURL {
-                RemoteFileLoader(url: previewURL) { phase in
+                RemoteFileLoader(url: previewURL, knownSize: object.size) { phase in
                     switch phase {
                     case .success(let data): content(data)
-                    case .failure: unavailablePreview
+                    case .failure, .tooLarge: unavailablePreview
                     case .loading: ProgressView()
                     }
                 }
@@ -738,18 +736,18 @@ private struct BucketObjectDetailView: View {
         return VStack(alignment: .leading, spacing: 6) {
             Text("Link").font(.subheadline.bold()).foregroundStyle(.secondary)
             HStack {
-                Text(verbatim: url.absoluteString)
+                Text(verbatim: url?.absoluteString ?? "-")
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
-                    .help(url.absoluteString)
+                    .help(url?.absoluteString ?? "")
                 Spacer(minLength: 8)
                 Button(action: copyURL) {
                     Image(systemName: justCopiedURL ? "checkmark" : "doc.on.doc")
                 }
                 .help("Copy URL")
                 Button {
-                    NSWorkspace.shared.open(url)
+                    model.openPublicURL(for: object.key)
                 } label: {
                     Image(systemName: "arrow.up.forward.square")
                 }
@@ -760,7 +758,7 @@ private struct BucketObjectDetailView: View {
     }
 
     private func copyURL() {
-        ClipboardService.copy(model.publicURL(for: object.key).absoluteString)
+        model.copyPublicURLs([object.key])
         justCopiedURL = true
         Task {
             try? await Task.sleep(for: .seconds(1.5))
@@ -784,12 +782,13 @@ private struct BucketMultiSelectionView: View {
             Text("\(objects.count) items selected").font(.title3.bold())
             HStack {
                 Button("Copy URLs") {
-                    ClipboardService.copy(objects.map { model.publicURL(for: $0.key).absoluteString }.joined(separator: "\n"))
+                    model.copyPublicURLs(objects.map(\.key))
                 }
                 Button("Copy Markdown") {
-                    ClipboardService.copy(objects.map {
-                        OutputFormatter.format(publicURL: model.publicURL(for: $0.key), mode: .markdown, filename: $0.name)
-                    }.joined(separator: "\n"))
+                    let names = Dictionary(objects.map { ($0.key, $0.name) }, uniquingKeysWith: { first, _ in first })
+                    model.copyPublicURLs(objects.map(\.key)) { url, key in
+                        OutputFormatter.format(publicURL: url, mode: .markdown, filename: names[key] ?? key)
+                    }
                 }
                 Button("Delete Remote Files\u{2026}", role: .destructive) { isConfirmingDeletion = true }
             }

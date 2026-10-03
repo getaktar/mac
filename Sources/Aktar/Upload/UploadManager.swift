@@ -146,8 +146,11 @@ final class UploadManager {
         job.state = .cancelled
         if wasRunning {
             job.task?.cancel()
-        } else if let session = job.multipartSession {
-            Self.abort(session, destination: job.destination)
+        } else {
+            if let session = job.multipartSession {
+                Self.abort(session, destination: job.destination)
+            }
+            TempFiles.removeIfOwned(job.input.fileURL)
         }
         job.multipartSession = nil
         if let group = job.input.group { finishGroupIfDone(group, destination: job.destination) }
@@ -206,6 +209,7 @@ final class UploadManager {
     /// local API whose staged file is already gone, so it can't be retried.
     func dismiss(_ job: UploadJob) {
         jobs.removeAll { $0 === job }
+        if !job.isActive { TempFiles.removeIfOwned(job.input.fileURL) }
     }
 
     /// Drops many finished jobs in one pass.
@@ -213,6 +217,7 @@ final class UploadManager {
         guard !finished.isEmpty else { return }
         let ids = Set(finished.map(ObjectIdentifier.init))
         jobs.removeAll { ids.contains(ObjectIdentifier($0)) }
+        for job in finished where !job.isActive { TempFiles.removeIfOwned(job.input.fileURL) }
     }
 
     func retry(_ job: UploadJob) {
@@ -226,7 +231,14 @@ final class UploadManager {
     /// to delete remotely, so the local entry is cleaned up silently. A real
     /// failure from the provider is rethrown so the caller can keep the
     /// record and offer a retry.
+    /// When a newer upload went to the same key (the same name uploaded
+    /// again), the file in the bucket is that one's: only this history
+    /// entry is removed.
     func deleteRemote(_ record: UploadRecord) async throws {
+        if isSuperseded(record) {
+            repository.delete(record)
+            return
+        }
         guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }),
               let credentials = try? KeychainService.load(for: destination.id) else {
             repository.delete(record)
@@ -237,16 +249,49 @@ final class UploadManager {
         repository.delete(record)
     }
 
+    /// Whether history has a newer upload to the same destination and key.
+    func isSuperseded(_ record: UploadRecord) -> Bool {
+        repository.records(key: record.objectKey, destinationID: record.destinationID)
+            .contains { $0.id != record.id && $0.createdAt > record.createdAt }
+    }
+
     /// Clears expiring uploads whose time is up out of history. The bucket's
     /// lifecycle rule has normally deleted the file already; see
     /// `sweep(_:)` for when Aktar deletes it itself. A failure (offline)
     /// leaves the record for the next pass, and a destination that fails
     /// three times is skipped until then.
+    ///
+    /// The flag saying a destination's rules are active is only what Aktar
+    /// last saw, so the bucket's rules are read once per pass for each
+    /// destination first. Rules that are gone turn the flag off and the
+    /// uploads stop expiring (nothing is deleted); rules that can't be read
+    /// leave that destination for the next pass.
     func deleteExpired() async {
         var failures: [UUID: Int] = [:]
+        var rulesChecked: [UUID: Bool] = [:]
         for record in repository.expiredRecords() {
             let destinationID = record.destinationID
             if failures[destinationID, default: 0] >= 3 { continue }
+            guard record.expiresAt != nil else { continue }
+            if let destination = destinationStore.destinations.first(where: { $0.id == destinationID }),
+               ExpiryRuleStore.shared.isActive(destinationID),
+               let credentials = try? KeychainService.load(for: destinationID) {
+                if rulesChecked[destinationID] == nil {
+                    let provider = S3Provider(config: destination, credentials: credentials)
+                    do {
+                        let inPlace = try await provider.expiryRulesInPlace()
+                        rulesChecked[destinationID] = inPlace
+                        if !inPlace {
+                            ExpiryRuleStore.shared.set(destinationID, active: false)
+                            repository.clearExpiry(destinationID: destinationID)
+                        }
+                    } catch {
+                        failures[destinationID] = 3
+                        continue
+                    }
+                }
+                guard rulesChecked[destinationID] == true else { continue }
+            }
             do {
                 try await sweep(record)
             } catch {
@@ -257,7 +302,8 @@ final class UploadManager {
 
     /// What the sweep does with one expired upload. Aktar deletes the file
     /// itself only as a stand-in for the bucket's own rule, so only where
-    /// that rule is known to be in place, and only the upload it recorded:
+    /// that rule is in place (checked by `deleteExpired` in this pass), and
+    /// only the upload it recorded:
     /// - The destination or its keys are gone: nothing to delete from; the
     ///   record goes.
     /// - Its rules aren't active (turned off, or the destination now points
@@ -344,6 +390,10 @@ final class UploadManager {
         job.task = Task { [weak self] in
             guard let self else { return }
             do {
+                // Checked first: there would be no link to copy afterwards.
+                guard PublicURLResolver.isValidBaseURL(destination.publicBaseURL) else {
+                    throw StorageError.invalidPublicBaseURL
+                }
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
                 // A folder (or a package, such as a Keynote document) goes
@@ -355,7 +405,7 @@ final class UploadManager {
                 var zipped: URL?
                 if FolderUpload.isFolder(fileURL) {
                     let folder = fileURL
-                    zipped = try await offMain { try FolderUpload.zip(folder, imageMetadata: policy) }
+                    zipped = try await FolderUpload.zip(folder, imageMetadata: policy)
                     fileURL = zipped ?? fileURL
                 }
                 defer { if let zipped { FolderUpload.removeZip(zipped) } }
@@ -376,11 +426,16 @@ final class UploadManager {
                 }
                 let contentType = ContentTypeResolver.resolve(for: fileURL)
 
-                // Otherwise photos lose their location (or all metadata)
-                // first, on a copy; everything else is uploaded as it is.
+                // Otherwise photos and videos lose their location (or all
+                // metadata) first, on a copy; everything else is uploaded
+                // as it is.
                 let unprocessed = fileURL
-                let stripped = processed != nil ? nil : try await offMain {
-                    try ImageMetadataStripper.strippedCopy(of: unprocessed, policy: policy)
+                let stripped: URL? = if processed != nil {
+                    nil
+                } else if VideoMetadataStripper.isVideo(unprocessed) {
+                    try await VideoMetadataStripper.strippedCopy(of: unprocessed, policy: policy)
+                } else {
+                    try await offMain { try ImageMetadataStripper.strippedCopy(of: unprocessed, policy: policy) }
                 }
                 defer { if let stripped { ImageMetadataStripper.removeCopy(stripped) } }
                 let uploadURL = stripped ?? fileURL
@@ -442,7 +497,8 @@ final class UploadManager {
                 if canReuse, let sha256 = hashes.sha256,
                    let record = repository.reusableRecord(destinationID: destination.id, contentHash: sha256, expiryDays: job.expiryDays),
                    let publicURL = record.publicURL,
-                   (try? await provider.objectExists(key: record.objectKey)) == true {
+                   let info = try? await provider.objectInfo(key: record.objectKey),
+                   DuplicateReuse.isUnchanged(size: info.size, lastModified: info.lastModified, uploadedSize: Int64(record.byteSize), uploadedAt: record.createdAt) {
                     var link = publicURL
                     if let duration = destination.temporaryLink,
                        let signed = try? await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue) {
@@ -452,12 +508,27 @@ final class UploadManager {
                     return
                 }
 
+                // A path without a unique part ({uuid}, {random}, {md5},
+                // {sha256}) can make a key another file already has: it's
+                // numbered ("name 2.png") rather than replacing that file.
+                // A watched folder replacing its own upload so the link
+                // stays sends the exact key instead, and isn't numbered. A
+                // key that may not list the bucket uploads as before.
+                if generatesKey, job.input.folderKey == nil, !ObjectKeyGenerator.hasUniqueToken(template) {
+                    do {
+                        objectKey = try await Self.freeKey(objectKey, provider: provider)
+                    } catch StorageError.accessDenied {
+                        // Keeps the generated key.
+                    }
+                }
+
                 let reporter = ProgressReporter(total: fileSize) { progress in
                     guard case .uploading = job.state else { return }
                     job.state = .uploading(progress: progress)
                 }
                 if fileSize > S3Provider.multipartThreshold {
-                    let identity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256)
+                    let keyBasis = generatesKey ? [template, filename, watch?.subpath ?? ""].joined(separator: "\u{0}") : nil
+                    let identity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256, keyBasis: keyBasis)
                     let session = await self.resumableSession(for: job, destination: destination, identity: identity, objectKey: objectKey)
                     if let session {
                         objectKey = session.objectKey
@@ -481,11 +552,10 @@ final class UploadManager {
                         reporter.update(part: 0, sent: sent)
                     }
                 }
-                let result = UploadResult(
-                    objectKey: objectKey,
-                    publicURL: PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey),
-                    byteSize: Int(fileSize)
-                )
+                guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
+                    throw StorageError.invalidPublicBaseURL
+                }
+                let result = UploadResult(objectKey: objectKey, publicURL: publicURL, byteSize: Int(fileSize))
 
                 // Signing happens locally, so this only fails on a broken
                 // endpoint, where the public URL is the better fallback.
@@ -511,8 +581,10 @@ final class UploadManager {
 
     /// The multipart upload to continue for this file, if one was started
     /// before (in this run or an earlier one). Only one that ends up where
-    /// this upload would: the same key for an exact key, the same "Delete
-    /// after" folder otherwise. One that's too old is aborted.
+    /// this upload would: the same key for an exact key; otherwise a key
+    /// made from the same template and name, in the same "Delete after"
+    /// folder. One that's too old, or that would end up somewhere else, is
+    /// aborted.
     private func resumableSession(for job: UploadJob, destination: DestinationConfig, identity: MultipartFileIdentity, objectKey: String) async -> MultipartSession? {
         let store = MultipartSessionStore.shared
         var found = job.multipartSession
@@ -525,10 +597,22 @@ final class UploadManager {
             job.multipartSession = nil
             return nil
         }
+        let sameTarget: Bool
         if job.input.objectKey != nil || job.input.folderKey != nil {
-            return session.objectKey == objectKey ? session : nil
+            sameTarget = session.objectKey == objectKey
+        } else {
+            sameTarget = session.keyBasis != nil && session.keyBasis == identity.keyBasis
+                && UploadExpiry.days(forKey: session.objectKey) == UploadExpiry.days(forKey: objectKey)
         }
-        return UploadExpiry.days(forKey: session.objectKey) == UploadExpiry.days(forKey: objectKey) ? session : nil
+        guard sameTarget else {
+            // Unless another upload of the same file is sending it now.
+            if !jobs.contains(where: { $0 !== job && $0.multipartSession?.id == session.id }) {
+                Self.abort(session, destination: destination)
+            }
+            job.multipartSession = nil
+            return nil
+        }
+        return session
     }
 
     /// `key`, or "name 2.ext", "name 3.ext"... when it's taken, numbered the
@@ -573,6 +657,7 @@ final class UploadManager {
 
     /// A job that ended without finishing: cancelled.
     private func stopped(job: UploadJob) {
+        TempFiles.removeIfOwned(job.input.fileURL)
         reportWatched(job, .cancelled)
         activeCount -= 1
         drainQueue()
@@ -586,6 +671,7 @@ final class UploadManager {
     /// Nothing was uploaded: the link of `record` is copied, and history
     /// keeps that one entry.
     private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL) {
+        TempFiles.removeIfOwned(job.input.fileURL)
         job.reused = true
         job.state = .succeeded(publicURLString: record.publicURLString)
         if job.input.watch != nil {
@@ -616,6 +702,7 @@ final class UploadManager {
     /// converted photo.
     private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL, filename: String, contentHash: String?) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
+        TempFiles.removeIfOwned(job.input.fileURL)
         var input = job.input
         input.originalFilename = filename
         repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash)
@@ -736,9 +823,11 @@ extension UploadManager {
     /// deleted directly.
     func deleteWatchedUpload(key: String, destinationID: UUID, folderID: UUID) async throws {
         let records = repository.records(key: key, destinationID: destinationID).filter { $0.watchedFolderID == folderID }
-        if let first = records.first {
-            try await deleteRemote(first)
-            for record in records.dropFirst() { repository.delete(record) }
+        // The newest one, so the file goes unless another upload (not from
+        // this folder) replaced it since.
+        if let newest = records.max(by: { $0.createdAt < $1.createdAt }) {
+            try await deleteRemote(newest)
+            for record in records where record.id != newest.id { repository.delete(record) }
             return
         }
         guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else { return }
