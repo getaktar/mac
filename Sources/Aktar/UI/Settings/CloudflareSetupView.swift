@@ -205,8 +205,6 @@ struct CloudflareSetupView: View {
                         .foregroundStyle(.orange)
                 }
             }
-        } header: {
-            Text("Bucket")
         }
 
         Section {
@@ -234,8 +232,6 @@ struct CloudflareSetupView: View {
                     }
                 }
             }
-        } header: {
-            Text("Public Links")
         } footer: {
             Text(publicLink == .devURL
                 ? LocalizedStringKey("Works right away. Cloudflare rate-limits r2.dev addresses, so a domain of your own is better for links you share widely.")
@@ -287,7 +283,9 @@ struct CloudflareSetupView: View {
         }
     }
 
+    /// Only for a new bucket: an existing one was picked from the list.
     private var bucketProblem: String? {
+        guard bucketChoice == .new else { return nil }
         let name = bucketName
         guard !name.isEmpty else { return nil }
         if buckets.contains(name) {
