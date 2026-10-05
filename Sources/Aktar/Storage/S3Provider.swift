@@ -122,6 +122,27 @@ final class S3Provider: StorageProvider, Sendable {
         }
     }
 
+    /// Up to 1000 keys per request. A provider that doesn't take batch
+    /// deletes gets them one by one.
+    func delete(objectKeys: [String]) async throws {
+        var start = 0
+        while start < objectKeys.count {
+            let batch = Array(objectKeys[start..<min(start + 1000, objectKeys.count)])
+            start += batch.count
+            do {
+                let output = try await s3.deleteObjects(.init(
+                    bucket: config.bucket,
+                    delete: .init(objects: batch.map { .init(key: $0) }, quiet: true)
+                ))
+                if let failed = output.errors, !failed.isEmpty {
+                    for key in failed.compactMap(\.key) { try await delete(objectKey: key) }
+                }
+            } catch {
+                for key in batch { try await delete(objectKey: key) }
+            }
+        }
+    }
+
     /// One level under `prefix`: its folders and the objects directly in it.
     func list(prefix: String, continuationToken: String?) async throws -> BucketListing {
         try await list(prefix: prefix, continuationToken: continuationToken, delimiter: "/")

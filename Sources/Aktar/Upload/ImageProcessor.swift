@@ -248,6 +248,12 @@ enum ImageProcessor {
     /// Lossy (or lossless) WebP through libwebp, as ImageIO can only read
     /// it. The color profile and the XMP metadata go in their own chunks.
     private static func writeWebP(_ image: CGImage, to url: URL, quality: Float, lossless: Bool, metadata: Data?) -> Bool {
+        guard let data = encodeWebP(image, quality: quality, lossless: lossless, metadata: metadata) else { return false }
+        return FileManager.default.createFile(atPath: url.path, contents: data)
+    }
+
+    /// The WebP file `writeWebP` writes, in memory.
+    static func encodeWebP(_ image: CGImage, quality: Float, lossless: Bool = false, metadata: Data? = nil) -> Data? {
         // libwebp takes 8-bit RGBA without premultiplied alpha. The pixels
         // stay in the image's own RGB color space, whose profile is
         // embedded; anything else (grayscale, CMYK) becomes sRGB.
@@ -270,7 +276,7 @@ enum ImageProcessor {
             context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
             return true
         }
-        guard drawn else { return false }
+        guard drawn else { return nil }
         if hasAlpha(image) {
             for index in stride(from: 0, to: pixels.count, by: 4) {
                 let alpha = Int(pixels[index + 3])
@@ -287,7 +293,7 @@ enum ImageProcessor {
                 ? WebPEncodeLosslessRGBA(buffer.baseAddress, Int32(width), Int32(height), Int32(bytesPerRow), &encoded)
                 : WebPEncodeRGBA(buffer.baseAddress, Int32(width), Int32(height), Int32(bytesPerRow), quality, &encoded)
         }
-        guard size > 0, let encoded else { return false }
+        guard size > 0, let encoded else { return nil }
         defer { WebPFree(encoded) }
 
         let icc = sourceSpace.flatMap { space -> Data? in
@@ -296,24 +302,24 @@ enum ImageProcessor {
             return space.copyICCData() as Data?
         }
         guard icc != nil || metadata != nil else {
-            return FileManager.default.createFile(atPath: url.path, contents: Data(bytes: encoded, count: size))
+            return Data(bytes: encoded, count: size)
         }
 
-        guard let mux = WebPMuxNew() else { return false }
+        guard let mux = WebPMuxNew() else { return nil }
         defer { WebPMuxDelete(mux) }
         var bitstream = WebPData(bytes: encoded, size: size)
-        guard WebPMuxSetImage(mux, &bitstream, 1) == WEBP_MUX_OK else { return false }
+        guard WebPMuxSetImage(mux, &bitstream, 1) == WEBP_MUX_OK else { return nil }
         func setChunk(_ fourCC: String, _ data: Data) -> Bool {
             data.withUnsafeBytes { raw -> Bool in
                 var chunk = WebPData(bytes: raw.bindMemory(to: UInt8.self).baseAddress, size: data.count)
                 return WebPMuxSetChunk(mux, fourCC, &chunk, 1) == WEBP_MUX_OK
             }
         }
-        if let icc, !setChunk("ICCP", icc) { return false }
-        if let metadata, !setChunk("XMP ", metadata) { return false }
+        if let icc, !setChunk("ICCP", icc) { return nil }
+        if let metadata, !setChunk("XMP ", metadata) { return nil }
         var assembled = WebPData()
-        guard WebPMuxAssemble(mux, &assembled) == WEBP_MUX_OK, let bytes = assembled.bytes else { return false }
+        guard WebPMuxAssemble(mux, &assembled) == WEBP_MUX_OK, let bytes = assembled.bytes else { return nil }
         defer { WebPDataClear(&assembled) }
-        return FileManager.default.createFile(atPath: url.path, contents: Data(bytes: bytes, count: assembled.size))
+        return Data(bytes: bytes, count: assembled.size)
     }
 }

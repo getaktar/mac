@@ -13,6 +13,8 @@ final class DestinationStore {
     private var defaultID: UUID?
 
     private let fileURL: URL
+    /// Told after a saved destination changes, with what it was before.
+    @ObservationIgnored var onUpdate: ((_ old: DestinationConfig, _ new: DestinationConfig) -> Void)?
 
     init() {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -39,15 +41,18 @@ final class DestinationStore {
 
     func update(_ destination: DestinationConfig) {
         guard let index = destinations.firstIndex(where: { $0.id == destination.id }) else { return }
+        let old = destinations[index]
         destinations[index] = destination
         syncDefaultFlags()
         save()
+        onUpdate?(old, destination)
     }
 
     func remove(_ destination: DestinationConfig) {
         destinations.removeAll { $0.id == destination.id }
         try? KeychainService.delete(for: destination.id)
         ExpiryRuleStore.shared.set(destination.id, active: false)
+        RemoteThumbnailLoader.shared.forget(destinationID: destination.id)
         if defaultID == destination.id {
             defaultID = destinations.first?.id
         }

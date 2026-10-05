@@ -106,6 +106,21 @@ enum NotificationService {
         post(content)
     }
 
+    /// Thumbnails left in a bucket after they were turned off or moved
+    /// to another folder, deleted at the user's request.
+    static func notifyThumbnailsDeleted(destinationName: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Deleted the thumbnails of \(destinationName) from the bucket")
+        post(content)
+    }
+
+    static func notifyThumbnailsDeleteFailed(destinationName: String, reason: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Couldn't delete the thumbnails of \(destinationName) from the bucket")
+        content.body = reason
+        post(content)
+    }
+
     static let deleteAskCategory = "aktar.watch.delete-ask"
     static let deleteActionID = "aktar.watch.delete"
     static let keepActionID = "aktar.watch.keep"

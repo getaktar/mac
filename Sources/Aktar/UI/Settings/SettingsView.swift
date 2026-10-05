@@ -132,6 +132,9 @@ private struct GeneralSettingsView: View {
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
     @AppStorage(UploadManager.reuseDuplicatesKey) private var reuseDuplicates = true
     @State private var language = AppLanguage.override
+    /// Nil until measured.
+    @State private var thumbnailUsage: Int64?
+    @State private var isConfirmingThumbnailClear = false
 
     var body: some View {
         SettingsPage(title: "General", subtitle: "Control how the app behaves.") {
@@ -253,7 +256,43 @@ private struct GeneralSettingsView: View {
                     )
                 }
             }
+
+            SettingsSection(title: "Thumbnails") {
+                SettingsCard {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Thumbnails on this Mac")
+                            Group {
+                                if let thumbnailUsage {
+                                    Text(verbatim: ByteCountFormatter.string(fromByteCount: thumbnailUsage, countStyle: .file))
+                                } else {
+                                    Text(verbatim: " ")
+                                }
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Clear\u{2026}") { isConfirmingThumbnailClear = true }
+                            .disabled(thumbnailUsage == 0)
+                    }
+                    .padding(12)
+                }
+            }
+            .confirmationDialog("Clear thumbnails on this Mac?", isPresented: $isConfirmingThumbnailClear) {
+                Button("Clear Thumbnails", role: .destructive) { clearThumbnails() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Thumbnails are made again when they\u{2019}re shown, which can mean downloading files up to 25 MB. Thumbnails saved in buckets aren\u{2019}t affected. To stop making them, turn Thumbnails off for a destination.")
+            }
         }
+        .task { thumbnailUsage = await ThumbnailStore.diskUsage() }
+    }
+
+    private func clearThumbnails() {
+        ThumbnailStore.shared.removeAll()
+        RemoteThumbnailLoader.shared.removeAll()
+        Task { thumbnailUsage = await ThumbnailStore.diskUsage() }
     }
 
     private var launchAtLoginBinding: Binding<Bool> {

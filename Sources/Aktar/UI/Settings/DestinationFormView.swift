@@ -26,6 +26,11 @@ struct DestinationFormView: View {
     @State private var imageFormat: ImageProcessing.Format
     @State private var imageQuality: Int?
     @State private var imageMaxLongEdge: Int?
+    @State private var thumbnailMode: ThumbnailMode
+    @State private var thumbnailPrefix: String
+    /// Saving stopped to ask what happens to the thumbnails already in
+    /// the bucket's old thumbnail folder.
+    @State private var isConfirmingThumbnailCleanup = false
     @State private var testResult: ConnectionResult?
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
@@ -69,6 +74,8 @@ struct DestinationFormView: View {
         _imageFormat = State(initialValue: existing?.imageProcessing?.format ?? .original)
         _imageQuality = State(initialValue: existing?.imageProcessing?.quality)
         _imageMaxLongEdge = State(initialValue: existing?.imageProcessing?.maxLongEdge)
+        _thumbnailMode = State(initialValue: existing?.thumbnailMode ?? .default)
+        _thumbnailPrefix = State(initialValue: ThumbnailKeys.normalizedPrefix(existing?.thumbnailPrefix) ?? ThumbnailKeys.defaultPrefix)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
@@ -170,6 +177,8 @@ struct DestinationFormView: View {
                 uploadDefaultsSection
 
                 imageProcessingSection
+
+                thumbnailsSection
 
                 ConnectionTestSection(result: testResult, error: testError)
             }
@@ -273,6 +282,72 @@ struct DestinationFormView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var thumbnailsSection: some View {
+        Section {
+            Picker("Thumbnails", selection: $thumbnailMode) {
+                ForEach(ThumbnailMode.allCases) { mode in
+                    Text(mode.label).tag(mode)
+                }
+            }
+            if thumbnailMode == .bucket {
+                TextField("Folder", text: $thumbnailPrefix, prompt: Text(verbatim: ThumbnailKeys.defaultPrefix))
+                if let problem = thumbnailPrefixProblem {
+                    Text(problem)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        } header: {
+            Text("Thumbnails")
+        } footer: {
+            Group {
+                switch thumbnailMode {
+                case .off:
+                    Text("No thumbnails are made or downloaded for this destination. History and the bucket view show file icons.")
+                case .local:
+                    Text("Thumbnails of photos, videos, PDFs and documents are made on this Mac and kept only here. Files already in the bucket get one when they\u{2019}re shown, if they\u{2019}re under 25 MB.")
+                case .bucket:
+                    Text("Thumbnails are also saved in your bucket, in this folder, so your other devices can show them. Each one is deleted, moved or expires along with its file. Use a folder only for thumbnails: it\u{2019}s hidden in the bucket view.")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .confirmationDialog(
+            "Delete the thumbnails already in the bucket?",
+            isPresented: $isConfirmingThumbnailCleanup
+        ) {
+            Button("Delete Thumbnails", role: .destructive) { save(thumbnailCleanup: .delete) }
+            Button("Keep Them") { save(thumbnailCleanup: .keep) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Thumbnails saved in \(oldThumbnailPrefix ?? "") stay in the bucket unless you delete them. Your files aren\u{2019}t affected.")
+        }
+    }
+
+    private var thumbnailPrefixProblem: String? {
+        thumbnailMode == .bucket ? ThumbnailKeys.problem(withPrefix: thumbnailPrefix) : nil
+    }
+
+    /// The bucket folder the saved destination keeps thumbnails in, when
+    /// saving would stop using it (thumbnails moved off the bucket, to
+    /// another folder, or to another bucket), and no other destination on
+    /// that bucket still uses it.
+    private var oldThumbnailPrefix: String? {
+        guard let existing, let old = existing.bucketThumbnailPrefix else { return nil }
+        let config = currentConfig()
+        if config.bucketThumbnailPrefix == old, Connection(existing) == Connection(config) { return nil }
+        let othersUseIt = appState.destinationStore.destinations.contains {
+            $0.id != existing.id && DestinationTransfer.uploadsToSamePlace($0, as: existing) && $0.bucketThumbnailPrefix == old
+        }
+        return othersUseIt ? nil : old
+    }
+
+    private enum ThumbnailCleanup {
+        case ask, delete, keep
     }
 
     private var autoDeleteSection: some View {
@@ -462,6 +537,7 @@ struct DestinationFormView: View {
 
     private var canSave: Bool {
         !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
+            && thumbnailPrefixProblem == nil
             && (existing != nil || (!accessKeyId.isEmpty && !secretAccessKey.isEmpty))
     }
 
@@ -483,8 +559,18 @@ struct DestinationFormView: View {
             temporaryLink: temporaryLink,
             imageMetadata: imageMetadata,
             folderUpload: folderUpload,
-            imageProcessing: currentImageProcessing
+            imageProcessing: currentImageProcessing,
+            thumbnails: thumbnailMode,
+            thumbnailPrefix: currentThumbnailPrefix
         )
+    }
+
+    /// Kept while thumbnails aren't in the bucket, so switching back finds
+    /// the same folder; nil for the default one.
+    private var currentThumbnailPrefix: String? {
+        guard ThumbnailKeys.problem(withPrefix: thumbnailPrefix) == nil,
+              let prefix = ThumbnailKeys.normalizedPrefix(thumbnailPrefix) else { return existing?.thumbnailPrefix }
+        return prefix == ThumbnailKeys.defaultPrefix ? nil : prefix
     }
 
     /// The preset decides, except that a saved destination (an imported
@@ -518,7 +604,18 @@ struct DestinationFormView: View {
         }
     }
 
-    private func save() {
+    private func save(thumbnailCleanup: ThumbnailCleanup = .ask) {
+        let oldPrefix = oldThumbnailPrefix
+        if thumbnailCleanup == .ask, oldPrefix != nil {
+            isConfirmingThumbnailCleanup = true
+            return
+        }
+        // Read before saving replaces them: the old folder may be in
+        // another bucket, with other keys.
+        if thumbnailCleanup == .delete, let oldPrefix, let existing,
+           let oldCredentials = try? KeychainService.load(for: existing.id) {
+            BucketThumbnails.deleteFolderInBackground(prefix: oldPrefix, config: existing, credentials: oldCredentials)
+        }
         var credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
         if let existing, accessKeyId.isEmpty, secretAccessKey.isEmpty,
            let existingCredentials = try? KeychainService.load(for: existing.id) {

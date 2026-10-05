@@ -9,6 +9,10 @@ import Observation
 @Observable
 final class BucketBrowserModel {
     let destination: DestinationConfig
+    /// The thumbnail folders in this bucket (see
+    /// `ThumbnailKeys.bucketPrefixes`), asked for each time, since another
+    /// destination on the same bucket can change them.
+    @ObservationIgnored let thumbnailPrefixes: @MainActor () -> [String]
 
     private(set) var prefix = ""
     private(set) var folders: [String] = []
@@ -59,8 +63,9 @@ final class BucketBrowserModel {
         var isComplete = false
     }
 
-    init(destination: DestinationConfig) {
+    init(destination: DestinationConfig, thumbnailPrefixes: @escaping @MainActor () -> [String] = { [] }) {
         self.destination = destination
+        self.thumbnailPrefixes = thumbnailPrefixes
         // Listened to here rather than in the view, so a browser that isn't
         // on screen (History is) still learns about uploads to its bucket
         // and doesn't show an old listing when it's opened again.
@@ -161,8 +166,9 @@ final class BucketBrowserModel {
             do {
                 let listing = try await storage().list(prefix: requestedPrefix, continuationToken: continuationToken)
                 guard !Task.isCancelled, requestedPrefix == prefix else { return }
-                folders += listing.folders
-                objects += listing.objects
+                let hidden = thumbnailPrefixes()
+                folders += listing.folders.filter { !ThumbnailKeys.isHiddenFolder($0, prefixes: hidden) }
+                objects += listing.objects.filter { !ThumbnailKeys.isThumbnail($0.key, prefixes: hidden) }
                 nextContinuationToken = listing.nextContinuationToken
                 hasLoaded = true
             } catch {
@@ -208,14 +214,16 @@ final class BucketBrowserModel {
                 let page = try await storage().listRecursively(prefix: scopePrefix, continuationToken: index.nextContinuationToken)
                 guard !Task.isCancelled, searchIndex?.prefix == scopePrefix,
                       searchIndex?.nextContinuationToken == index.nextContinuationToken else { return }
-                searchIndex?.objects += page.objects
-                searchIndex?.folders.formUnion(page.folders)
-                for object in page.objects {
+                let hidden = thumbnailPrefixes()
+                let objects = page.objects.filter { !ThumbnailKeys.isThumbnail($0.key, prefixes: hidden) }
+                searchIndex?.objects += objects
+                searchIndex?.folders.formUnion(page.folders.filter { !ThumbnailKeys.isHiddenFolder($0, prefixes: hidden) })
+                for object in objects {
                     searchIndex?.folders.formUnion(Self.folders(containing: object.key, under: scopePrefix))
                 }
                 searchIndex?.nextContinuationToken = page.nextContinuationToken
                 searchIndex?.isComplete = page.nextContinuationToken == nil
-                applySearch(query, newObjects: page.objects)
+                applySearch(query, newObjects: objects)
             }
         } catch {
             guard !Task.isCancelled else { return }
@@ -382,7 +390,10 @@ final class BucketBrowserModel {
             busyKeys.insert(key)
             defer { busyKeys.remove(key) }
             do {
-                try await storage().delete(objectKey: key)
+                let storage = try storage()
+                try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes(), provider: storage)
+                try await storage.delete(objectKey: key)
+                RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
                 objects.removeAll { $0.key == key }
                 removeFromSearchIndex(key: key)
                 selection.remove(key)
@@ -407,6 +418,10 @@ final class BucketBrowserModel {
             actionError = String(localized: "Enter a file name after the last \u{201C}/\u{201D}.")
             return
         }
+        if ThumbnailKeys.isThumbnail(newKey, prefixes: thumbnailPrefixes()) {
+            actionError = String(localized: "That folder holds this bucket\u{2019}s thumbnails. Pick another one.")
+            return
+        }
         busyKeys.insert(object.key)
         defer { busyKeys.remove(object.key) }
         do {
@@ -415,8 +430,12 @@ final class BucketBrowserModel {
                 actionError = String(localized: "An object named \u{201C}\(newKey)\u{201D} already exists.")
                 return
             }
+            let prefixes = thumbnailPrefixes()
             try await storage.copy(from: object.key, to: newKey)
+            await BucketThumbnails.copy(from: object.key, to: newKey, prefixes: prefixes, provider: storage)
+            try await BucketThumbnails.delete(for: object.key, prefixes: prefixes, provider: storage)
             try await storage.delete(objectKey: object.key)
+            RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: object.key)
             repository.objectMoved(
                 from: object.key,
                 to: newKey,

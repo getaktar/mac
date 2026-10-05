@@ -19,8 +19,10 @@ final class UploadRepository {
 
     @discardableResult
     /// `uploadedFileURL` is the file that was actually sent when it isn't
-    /// `input.fileURL` itself, such as the ZIP of a folder.
-    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil, uploadedFileURL: URL? = nil, contentHash: String? = nil) -> UploadRecord {
+    /// `input.fileURL` itself, such as the ZIP of a folder. `thumbnail` is
+    /// the one made from it, nil when none could be made (or thumbnails
+    /// are off for the destination).
+    func record(result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int? = nil, uploadedFileURL: URL? = nil, contentHash: String? = nil, thumbnail: Data? = nil) -> UploadRecord {
         let fileURL = uploadedFileURL ?? input.fileURL
         let createdAt = Date.now
         let record = UploadRecord(
@@ -39,14 +41,26 @@ final class UploadRepository {
         )
         modelContext.insert(record)
         try? modelContext.save()
-        ThumbnailCache.store(sourceURL: fileURL, for: record.id)
+        if let thumbnail {
+            ThumbnailStore.shared.store(thumbnail, for: record.id)
+        } else if destination.thumbnailMode != .off {
+            // Nothing could be made from the file itself; downloading it
+            // again later wouldn't do better.
+            ThumbnailStore.shared.markUnavailable(record.id)
+        }
         return record
     }
 
     func delete(_ record: UploadRecord) {
         modelContext.delete(record)
         try? modelContext.save()
-        ThumbnailCache.remove(for: record.id)
+        ThumbnailStore.shared.remove(for: record.id)
+    }
+
+    /// Turning a destination's thumbnails off removes the ones made for it.
+    func removeThumbnails(destinationID: UUID) {
+        let descriptor = FetchDescriptor<UploadRecord>(predicate: #Predicate { $0.destinationID == destinationID })
+        ThumbnailStore.shared.remove(((try? modelContext.fetch(descriptor)) ?? []).map(\.id))
     }
 
     /// Keeps history in step with changes made from the bucket browser: an

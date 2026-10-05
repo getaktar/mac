@@ -569,7 +569,7 @@ private struct RecentRowView: View {
 
     private var thumbnail: some View {
         Group {
-            if let thumb = ThumbnailCache.image(for: record.id) {
+            if let thumb = ThumbnailStore.shared.image(for: record.id) {
                 Image(nsImage: thumb)
                     .resizable()
                     .aspectRatio(contentMode: .fill)

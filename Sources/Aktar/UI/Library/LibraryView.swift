@@ -19,7 +19,7 @@ private enum LibrarySource: Hashable {
 private final class BucketBrowserCache {
     private var models: [UUID: BucketBrowserModel] = [:]
 
-    func model(for destination: DestinationConfig) -> BucketBrowserModel {
+    func model(for destination: DestinationConfig, store: DestinationStore) -> BucketBrowserModel {
         // Which destination is the default doesn't affect the browser, so
         // changing it keeps you in the folder you were in.
         if let model = models[destination.id] {
@@ -27,7 +27,9 @@ private final class BucketBrowserCache {
             current.isDefault = destination.isDefault
             if current == destination { return model }
         }
-        let model = BucketBrowserModel(destination: destination)
+        let model = BucketBrowserModel(destination: destination) { [weak store] in
+            ThumbnailKeys.bucketPrefixes(for: destination, among: store?.destinations ?? [])
+        }
         models[destination.id] = model
         return model
     }
@@ -134,7 +136,7 @@ struct LibraryView: View {
     private var currentBrowser: BucketBrowserModel? {
         guard case .bucket(let id) = source,
               let destination = appState.destinationStore.destinations.first(where: { $0.id == id }) else { return nil }
-        return browserCache.model(for: destination)
+        return browserCache.model(for: destination, store: appState.destinationStore)
     }
 
     // MARK: - History
@@ -698,14 +700,16 @@ private struct NoSearchResultsRow: View {
 
 /// Square, `aspectFit` thumbnail on a faint checkerboard so transparent PNGs
 /// stay legible; falls back to a file-kind glyph (based on the extension)
-/// for non-image files, or images with no cached thumbnail yet.
+/// for files with no thumbnail (yet). One this Mac doesn't have is looked
+/// for once the row shows; see `RemoteThumbnailLoader`.
 private struct LibraryThumbnail: View {
+    @Environment(AppState.self) private var appState
     let record: UploadRecord
     let size: CGFloat
 
     var body: some View {
         ZStack {
-            if let thumb = ThumbnailCache.image(for: record.id) {
+            if let thumb = ThumbnailStore.shared.image(for: record.id) {
                 CheckerboardBackground()
                 Image(nsImage: thumb)
                     .resizable()
@@ -719,6 +723,10 @@ private struct LibraryThumbnail: View {
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size * 0.18))
+        .task(id: record.id) {
+            guard let destination = appState.destinationStore.destinations.first(where: { $0.id == record.destinationID }) else { return }
+            await RemoteThumbnailLoader.shared.loadThumbnail(for: record, destination: destination)
+        }
     }
 }
 
@@ -1161,6 +1169,8 @@ private struct UploadDetailView: View {
         case image
         case pdf
         case text(markdown: Bool)
+        /// A video or audio file AVFoundation can play.
+        case media
         case unsupported
     }
 
@@ -1173,6 +1183,7 @@ private struct UploadDetailView: View {
         if record.mimeType.hasPrefix("text/") || textExtensions.contains(ext) {
             return .text(markdown: false)
         }
+        if MediaPreview.canPlay(filename: record.localFilename) { return .media }
         return .unsupported
     }
 
@@ -1190,7 +1201,7 @@ private struct UploadDetailView: View {
                         case .failure:
                             brokenPreview
                         case .empty:
-                            if let thumb = ThumbnailCache.image(for: record.id) {
+                            if let thumb = ThumbnailStore.shared.image(for: record.id) {
                                 Image(nsImage: thumb)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
@@ -1239,6 +1250,16 @@ private struct UploadDetailView: View {
             .background(Color.secondary.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
+        case .media:
+            MediaPreview(filename: record.localFilename, poster: ThumbnailStore.shared.image(for: record.id)) {
+                // Presigned, so a private bucket plays too.
+                (try? await appState.uploadManager.temporaryURL(for: record, validFor: .hour)) ?? record.publicURL
+            }
+            .id(record.id)
+            .frame(maxWidth: .infinity)
+            .frame(height: 320)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+
         case .unsupported:
             fileKindPreview
                 .frame(maxWidth: .infinity)
@@ -1252,9 +1273,22 @@ private struct UploadDetailView: View {
             if let url = record.publicURL { NSWorkspace.shared.open(url) }
         } label: {
             VStack(spacing: 10) {
-                Image(systemName: FileKindIcon.symbolName(for: record.localFilename))
-                    .font(.system(size: 44))
-                    .foregroundStyle(.secondary)
+                // A video's frame, a document's first page and the like.
+                if let thumb = ThumbnailStore.shared.image(for: record.id) {
+                    // At most half its pixel size (Retina), so it's never
+                    // blurry from being scaled up.
+                    let pixels = thumb.representations.first.map { CGSize(width: $0.pixelsWide, height: $0.pixelsHigh) } ?? thumb.size
+                    Image(nsImage: thumb)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: pixels.width / 2, maxHeight: min(240, pixels.height / 2))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+                } else {
+                    Image(systemName: FileKindIcon.symbolName(for: record.localFilename))
+                        .font(.system(size: 44))
+                        .foregroundStyle(.secondary)
+                }
                 Text("Open in Browser").font(.caption).foregroundStyle(Color.accentColor)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -1469,7 +1503,7 @@ private struct ZoomedPreviewView: View {
                         }
                     }
                 case .empty:
-                    if let thumb = ThumbnailCache.image(for: record.id) {
+                    if let thumb = ThumbnailStore.shared.image(for: record.id) {
                         Image(nsImage: thumb)
                             .resizable()
                             .aspectRatio(contentMode: .fit)

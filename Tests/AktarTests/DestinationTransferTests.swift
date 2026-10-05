@@ -217,7 +217,9 @@ final class DestinationTransferTests: XCTestCase {
             temporaryLink: .day,
             imageMetadata: .keepAll,
             folderUpload: .zip,
-            imageProcessing: ImageProcessing(format: .avif, quality: nil, maxLongEdge: 1280)
+            imageProcessing: ImageProcessing(format: .avif, quality: nil, maxLongEdge: 1280),
+            thumbnails: .bucket,
+            thumbnailPrefix: "previews/"
         )
         let credentials = StorageCredentials(accessKeyId: "id", secretAccessKey: "secret", sessionToken: "session")
         let code = DestinationTransfer.generateCode()
@@ -293,5 +295,29 @@ final class DestinationTransferTests: XCTestCase {
         XCTAssertNil(lenient?.destination.expiryDays)
         XCTAssertEqual(lenient?.destination.forcePathStyle, false)
         XCTAssertEqual(lenient?.destination.imageProcessing, ImageProcessing(format: .webp))
+    }
+
+    func testThumbnailFieldsAreLenient() throws {
+        func decoded(_ thumbnails: Any, _ prefix: Any) throws -> DestinationConfig {
+            let json: [String: Any] = [
+                "v": 1,
+                "destination": [
+                    "id": UUID().uuidString, "name": "A", "preset": "customS3", "endpoint": "https://s3.example.com",
+                    "bucket": "b", "publicBaseURL": "https://files.example.com",
+                    "thumbnails": thumbnails, "thumbnailPrefix": prefix,
+                ],
+                "credentials": ["accessKeyId": "id", "secretAccessKey": "secret"],
+            ]
+            return try DestinationTransfer.decodePayload(JSONSerialization.data(withJSONObject: json)).destination
+        }
+        let valid = try decoded("bucket", "/thumbs")
+        XCTAssertEqual(valid.thumbnails, .bucket)
+        XCTAssertEqual(valid.thumbnailPrefix, "thumbs/")
+        // Unknown values are left unset, never fail the import.
+        let unknown = try decoded("cloud", "tmp/7d/thumbs/")
+        XCTAssertNil(unknown.thumbnails)
+        XCTAssertNil(unknown.thumbnailPrefix)
+        XCTAssertEqual(unknown.thumbnailMode, .local)
+        XCTAssertNil(try decoded(3, "a/../b").thumbnailPrefix)
     }
 }

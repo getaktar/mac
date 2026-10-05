@@ -61,7 +61,8 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   destinations.json: `id` (uppercase UUID string), `name`, `preset`, `accountID`,
   `endpoint`, `region`, `bucket`, `publicBaseURL`, `objectPathTemplate`,
   `forcePathStyle`, `outputMode`, `expiryDays`, `temporaryLink`, `imageMetadata`,
-  `folderUpload`, `imageProcessing` (`{format, quality, maxLongEdge}`).
+  `folderUpload`, `imageProcessing` (`{format, quality, maxLongEdge}`), `thumbnails`
+  (`off` / `local` / `bucket`), `thumbnailPrefix` (see docs/thumbnails.md).
   Optional fields are omitted when unset. `isDefault` is never sent.
 - `sessionToken` is omitted when unset. `customTemplate` is only sent when
   `destination.outputMode == "custom"` (it is app-level today).
@@ -90,6 +91,9 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   not in the allowed set, e.g. temporaryLink not in 300/900/3600/86400/604800) -> unset.
 - `imageProcessing`: if `format` is invalid drop the whole object; invalid
   `quality`/`maxLongEdge` -> null within it (follow each app's existing sanitize rules).
+- `thumbnailPrefix`: normalize (trim, drop leading slashes, one trailing slash);
+  unset when empty or invalid (see docs/thumbnails.md). Older apps ignore both
+  thumbnail fields, which keeps thumbnails on that device only.
 - The `minimal` test vector exercises these rules.
 
 ## On the Mac

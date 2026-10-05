@@ -165,6 +165,11 @@ targets:
       - path: Sources/Aktar/Upload/ContentTypeResolver.swift
       - path: Sources/Aktar/Upload/ContainerMetadata.swift
       - path: Sources/Aktar/Upload/VideoMetadata.swift
+      - path: Sources/Aktar/Upload/ImageProcessor.swift
+      - path: Sources/Aktar/Thumbnails/ThumbnailSettings.swift
+      - path: Sources/Aktar/Thumbnails/ThumbnailGenerator.swift
+    dependencies:
+      - package: libwebp
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getaktar.mac.tests

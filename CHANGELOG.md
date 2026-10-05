@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Thumbnails for videos, PDFs, RAW photos, Office and iWork documents, fonts
+  and more, made with Quick Look the way Finder makes them, in History, the
+  menu bar and the bucket view. Files already in a bucket get one when
+  they're shown (up to 25 MB), and a file's details show its thumbnail when
+  there's no other preview
+- A Thumbnails setting for each destination: Off (nothing is made or
+  downloaded), On This Mac (the default) or In the Bucket, which also saves
+  them to a folder of your choice in the bucket so your other devices can
+  show them. A thumbnail in the bucket is deleted, renamed, moved and expires
+  together with its file, and its folder is hidden in the bucket view.
+  Leaving that mode asks whether to delete the thumbnails already there.
+  Shared with Share to Another Device
+- Videos and audio files play right in a file's details in History and the
+  bucket view, streamed from the bucket (private buckets too) without
+  downloading them first. Nothing loads until you click Play
+- Settings > General shows how much space thumbnails take on this Mac, with
+  Clear to remove them all (they're made again when shown)
+
+### Fixed
+
+- A screenshot pasted from the clipboard gets a thumbnail in History again
+
+### Changed
+
+- Thumbnails are kept next to the history instead of in Caches, so macOS or
+  a cleaner app emptying caches no longer leaves rows with only an icon
+- Thumbnails are sharper (512 pixels instead of 320) yet take about a tenth
+  of the space, as WebP instead of PNG
+
 ## [0.12.1] - 2026-10-04
 
 ### Fixed

@@ -30,9 +30,27 @@ final class AppState {
             Task { @MainActor in self?.uploadFromClipboard(rename: true) }
         }
         startExpirySweep()
+        RemoteThumbnailLoader.shared.repository = repository
+        destinationStore.onUpdate = { [weak self] old, new in
+            self?.destinationUpdated(from: old, to: new)
+        }
         let destinations = destinationStore.destinations
         Task.detached(priority: .utility) {
             await MultipartUploader.cleanUp(destinations: destinations)
+        }
+    }
+
+    /// Thumbnails turned off: the ones made for this destination go, here
+    /// and in the bucket view's cache. Pointed at another bucket: what was
+    /// made from the old one's files no longer applies. (Thumbnails saved
+    /// in the bucket are left there; Settings asks about those.)
+    private func destinationUpdated(from old: DestinationConfig, to new: DestinationConfig) {
+        if new.thumbnailMode == .off, old.thumbnailMode != .off {
+            repository.removeThumbnails(destinationID: new.id)
+        }
+        if new.thumbnailMode == .off || !DestinationTransfer.uploadsToSamePlace(new, as: old) || old.thumbnailMode != new.thumbnailMode
+            || old.bucketThumbnailPrefix != new.bucketThumbnailPrefix {
+            RemoteThumbnailLoader.shared.forget(destinationID: new.id)
         }
     }
 

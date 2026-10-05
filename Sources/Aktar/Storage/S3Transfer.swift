@@ -51,6 +51,57 @@ extension S3Provider {
         }
     }
 
+    /// One small PUT from memory, such as a thumbnail.
+    func putObject(data: Data, objectKey: String, contentType: String) async throws {
+        try await withRetries {
+            let request = try signedRequest(method: .PUT, key: objectKey, headers: ["Content-Type": contentType])
+            let (body, response) = try await Self.transferSession.upload(for: request, from: data)
+            _ = try check(body, response)
+        }
+    }
+
+    /// The object at `key` and when it was last written, or nil when there's
+    /// no such object. For small objects only: the body is read into memory,
+    /// and anything over `maxBytes` is refused.
+    func getObject(key: String, maxBytes: Int) async throws -> (data: Data, lastModified: Date?)? {
+        try await withRetries {
+            let request = try signedRequest(method: .GET, key: key)
+            let (data, response) = try await Self.transferSession.data(for: request)
+            if let http = response as? HTTPURLResponse, http.statusCode == 404 { return nil }
+            let checked = try check(data, response)
+            guard data.count <= maxBytes else { throw StorageError.unknown("The object is too large.") }
+            let lastModified = checked.value(forHTTPHeaderField: "Last-Modified").flatMap(Self.httpDate)
+            return (data, lastModified)
+        }
+    }
+
+    /// Downloads the object at `key` to `destination`, unless it's larger
+    /// than `maxBytes`. False when there's no such object.
+    func download(key: String, to destination: URL, maxBytes: Int64) async throws -> Bool {
+        try await withRetries {
+            let request = try signedRequest(method: .GET, key: key)
+            let (location, response) = try await Self.transferSession.download(for: request)
+            defer { try? FileManager.default.removeItem(at: location) }
+            if let http = response as? HTTPURLResponse, http.statusCode == 404 { return false }
+            _ = try check(Data(), response)
+            guard try Self.fileSize(of: location) <= maxBytes else {
+                throw StorageError.unknown("The object is too large.")
+            }
+            try? FileManager.default.removeItem(at: destination)
+            try FileManager.default.moveItem(at: location, to: destination)
+            return true
+        }
+    }
+
+    /// "Wed, 21 Oct 2026 07:28:00 GMT", as HTTP headers write dates.
+    private static func httpDate(_ string: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "GMT")
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        return formatter.date(from: string)
+    }
+
     // MARK: - Multipart
 
     /// `fileName` is the name of the file the parts come from, which counts

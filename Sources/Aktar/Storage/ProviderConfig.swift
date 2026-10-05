@@ -77,6 +77,12 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// Conversion, recompression and resizing of photos before they're
     /// uploaded here; nil leaves them as they are.
     var imageProcessing: ImageProcessing?
+    /// Where thumbnails of uploads here are kept; nil is
+    /// `ThumbnailMode.default` (on this Mac). See `thumbnailMode`.
+    var thumbnails: ThumbnailMode?
+    /// The bucket folder for `.bucket` thumbnails; nil is
+    /// `ThumbnailKeys.defaultPrefix`. See `bucketThumbnailPrefix`.
+    var thumbnailPrefix: String?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"

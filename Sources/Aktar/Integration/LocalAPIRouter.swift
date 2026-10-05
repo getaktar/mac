@@ -307,13 +307,21 @@ final class LocalAPIRouter {
         } catch {
             return failure(error)
         }
+        let thumbnailPrefixes = appState.uploadManager.thumbnailPrefixes(for: destination)
 
         do {
             switch (request.method, route) {
             case ("GET", ["objects"]):
                 let prefix = Self.normalizedFolder(request.query["prefix"] ?? "")
                 let token = request.query["continuationToken"].flatMap { $0.isEmpty ? nil : $0 }
-                let listing = try await storage.list(prefix: prefix, continuationToken: token)
+                let page = try await storage.list(prefix: prefix, continuationToken: token)
+                // Thumbnail folders are Aktar's own, as in the bucket view.
+                let listing = BucketListing(
+                    prefix: page.prefix,
+                    folders: page.folders.filter { !ThumbnailKeys.isHiddenFolder($0, prefixes: thumbnailPrefixes) },
+                    objects: page.objects.filter { !ThumbnailKeys.isThumbnail($0.key, prefixes: thumbnailPrefixes) },
+                    nextContinuationToken: page.nextContinuationToken
+                )
                 return .json(200, listingDTO(listing, destination: destination))
 
             case ("DELETE", ["objects"]):
@@ -321,7 +329,9 @@ final class LocalAPIRouter {
                     return .error(400, "The key query parameter is required.")
                 }
                 if let problem = Self.problem(withExistingKey: key) { return .error(400, "key: \(problem)") }
+                try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes, provider: storage)
                 try await storage.delete(objectKey: key)
+                RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
                 appState.repository.objectDeleted(key: key, destinationID: destination.id)
                 return .json(200, ["deleted": key])
 
@@ -333,11 +343,17 @@ final class LocalAPIRouter {
                 }
                 if let problem = Self.problem(withExistingKey: body.from) { return .error(400, "from: \(problem)") }
                 if let problem = Self.problem(withKey: newKey) { return .error(400, "to: \(problem)") }
+                if ThumbnailKeys.isThumbnail(newKey, prefixes: thumbnailPrefixes) {
+                    return .error(400, "to: That folder holds this bucket's thumbnails.")
+                }
                 if try await storage.objectExists(key: newKey) {
                     return .error(409, "An object named \u{201C}\(newKey)\u{201D} already exists.")
                 }
                 try await storage.copy(from: body.from, to: newKey)
+                await BucketThumbnails.copy(from: body.from, to: newKey, prefixes: thumbnailPrefixes, provider: storage)
+                try await BucketThumbnails.delete(for: body.from, prefixes: thumbnailPrefixes, provider: storage)
                 try await storage.delete(objectKey: body.from)
+                RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: body.from)
                 appState.repository.objectMoved(
                     from: body.from,
                     to: newKey,

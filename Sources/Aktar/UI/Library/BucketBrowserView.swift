@@ -142,6 +142,7 @@ struct BucketListView: View {
 
             ForEach(model.visibleObjects) { object in
                 ObjectRow(
+                    model: model,
                     object: object,
                     location: model.isSearchActive ? locationText(forKey: object.key) : nil,
                     isBusy: model.busyKeys.contains(object.key)
@@ -476,16 +477,14 @@ private struct FolderRow: View {
 }
 
 private struct ObjectRow: View {
+    let model: BucketBrowserModel
     let object: BucketObject
     var location: String?
     let isBusy: Bool
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: FileKindIcon.symbolName(for: object.name))
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .frame(width: 28)
+            BucketObjectThumbnail(model: model, object: object, size: 32)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: object.name)
                     .lineLimit(1)
@@ -521,6 +520,42 @@ private struct ObjectRow: View {
         let size = ByteCountFormatter.string(fromByteCount: object.size, countStyle: .file)
         guard let date = object.lastModified else { return size }
         return "\(size) \u{00B7} \(date.formatted(date: .abbreviated, time: .shortened))"
+    }
+}
+
+/// A bucket file's thumbnail (see `RemoteThumbnailLoader`), or its file
+/// icon while there's none, and for good when the destination's thumbnails
+/// are off.
+private struct BucketObjectThumbnail: View {
+    let model: BucketBrowserModel
+    let object: BucketObject
+    let size: CGFloat
+    var iconSize: CGFloat?
+
+    @State private var image: NSImage?
+
+    var body: some View {
+        ZStack {
+            if let image {
+                CheckerboardBackground()
+                Image(nsImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } else {
+                Image(systemName: FileKindIcon.symbolName(for: object.name))
+                    .font(iconSize.map { .system(size: $0) } ?? .title3)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: image == nil ? 0 : min(size * 0.18, 8)))
+        .task(id: object) {
+            let loader = RemoteThumbnailLoader.shared
+            image = loader.cachedImage(for: object, destination: model.destination)
+            if image == nil {
+                image = await loader.image(for: object, destination: model.destination, prefixes: model.thumbnailPrefixes())
+            }
+        }
     }
 }
 
@@ -687,11 +722,22 @@ private struct BucketObjectDetailView: View {
             loadedFile(height: 320) { data in TextFilePreview(data: data, renderMarkdown: markdown) }
                 .background(Color.secondary.opacity(0.06))
 
+        case .media:
+            MediaPreview(
+                filename: object.name,
+                poster: RemoteThumbnailLoader.shared.cachedImage(for: object, destination: model.destination)
+            ) {
+                await model.previewURL(for: object.key)
+            }
+            .id(object.key)
+            .frame(maxWidth: .infinity)
+            .frame(height: 320)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+
         case .unsupported:
             VStack(spacing: 10) {
-                Image(systemName: FileKindIcon.symbolName(for: object.name))
-                    .font(.system(size: 44))
-                    .foregroundStyle(.secondary)
+                // A video's frame, a document's first page and the like.
+                BucketObjectThumbnail(model: model, object: object, size: 150, iconSize: 44)
                 Button("Open in Browser") { model.openPublicURL(for: object.key) }
                     .buttonStyle(.link)
                     .font(.caption)
@@ -811,6 +857,8 @@ enum FilePreviewKind {
     case image
     case pdf
     case text(markdown: Bool)
+    /// A video or audio file AVFoundation can play.
+    case media
     case unsupported
 
     init(filename: String) {
@@ -826,6 +874,8 @@ enum FilePreviewKind {
             self = .pdf
         } else if let type = UTType(filenameExtension: ext), type.conforms(to: .text) {
             self = .text(markdown: false)
+        } else if MediaPreview.canPlay(filename: filename) {
+            self = .media
         } else {
             self = .unsupported
         }

@@ -245,7 +245,9 @@ final class UploadManager {
             return
         }
         let provider = S3Provider(config: destination, credentials: credentials)
+        try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
+        RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: record.objectKey)
         repository.delete(record)
     }
 
@@ -326,7 +328,11 @@ final class UploadManager {
             repository.delete(record)
             return
         }
+        // The bucket's rule deletes a thumbnail in the same tmp/ folder
+        // too; this covers a sweep that gets there first.
+        try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
+        RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: record.objectKey)
         repository.delete(record)
     }
 
@@ -508,6 +514,16 @@ final class UploadManager {
                     return
                 }
 
+                // The thumbnail is made while the file goes up, from exactly
+                // what's sent (converted, metadata removed), and waited for
+                // before the job finishes: a watched folder may move or
+                // delete the file as soon as it has, and the copies here are
+                // removed when this task ends.
+                let thumbnailSource = uploadURL
+                let thumbnailTask: Task<GeneratedThumbnail?, Never>? = destination.thumbnailMode == .off || zipped != nil
+                    ? nil
+                    : Task.detached(priority: .utility) { await ThumbnailGenerator.make(from: thumbnailSource) }
+
                 // A path without a unique part ({uuid}, {random}, {md5},
                 // {sha256}) can make a key another file already has: it's
                 // numbered ("name 2.png") rather than replacing that file.
@@ -565,7 +581,9 @@ final class UploadManager {
                     link = signed
                 }
 
-                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256)
+                let thumbnail = await thumbnailTask?.value
+                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
+                await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
             } catch {
                 if case .cancelled = job.state {
                     self.stopped(job: job)
@@ -700,12 +718,12 @@ final class UploadManager {
     /// the destination is set to one. History keeps the public URL.
     /// `filename` is the name the upload goes by, with the extension of a
     /// converted photo.
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL, filename: String, contentHash: String?) {
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL, filename: String, contentHash: String?, thumbnail: Data?) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
         TempFiles.removeIfOwned(job.input.fileURL)
         var input = job.input
         input.originalFilename = filename
-        repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash)
+        repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
@@ -740,6 +758,26 @@ final class UploadManager {
 
         activeCount -= 1
         drainQueue()
+    }
+
+    /// After an upload: its thumbnail goes to the bucket when the
+    /// destination keeps them there. Any other thumbnail at that key (in
+    /// another profile's folder on this bucket, or one that couldn't be
+    /// replaced) belongs to a file that was there before, so it goes.
+    private func updateBucketThumbnails(_ thumbnail: GeneratedThumbnail?, objectKey: String, destination: DestinationConfig, provider: S3Provider) async {
+        var stale = thumbnailPrefixes(for: destination)
+        guard !stale.isEmpty else { return }
+        if let prefix = destination.bucketThumbnailPrefix, let thumbnail, thumbnail.isWebP,
+           (try? await BucketThumbnails.save(thumbnail.data, for: objectKey, prefix: prefix, provider: provider)) != nil {
+            stale.removeAll { $0 == prefix }
+        }
+        try? await BucketThumbnails.delete(for: objectKey, prefixes: stale, provider: provider)
+    }
+
+    /// The thumbnail folders in `destination`'s bucket; see
+    /// `ThumbnailKeys.bucketPrefixes`.
+    func thumbnailPrefixes(for destination: DestinationConfig) -> [String] {
+        ThumbnailKeys.bucketPrefixes(for: destination, among: destinationStore.destinations)
     }
 
     private func format(_ link: URL, filename: String, for destination: DestinationConfig) -> String {
@@ -832,7 +870,9 @@ extension UploadManager {
         }
         guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else { return }
         let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: key)
+        RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
     }
 
     /// Whether history has the object at `key` from anything but this

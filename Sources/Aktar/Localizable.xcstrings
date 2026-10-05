@@ -694,6 +694,144 @@
         }
       }
     },
+    "Clear Thumbnails" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar miniaturas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer les vignettes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイルを消去"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar miniaturas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Resimleri Temizle"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除缩略图"
+          }
+        }
+      }
+    },
+    "Clear thumbnails on this Mac?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder auf diesem Mac löschen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Borrar las miniaturas de este Mac?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer les vignettes de ce Mac ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMac上のサムネイルを消去しますか?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar as miniaturas deste Mac?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Mac'teki küçük resimler temizlensin mi?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除这台 Mac 上的缩略图吗？"
+          }
+        }
+      }
+    },
+    "Clear…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen …"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消去…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temizle…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除…"
+          }
+        }
+      }
+    },
     "Continue" : {
       "localizations" : {
         "de" : {
@@ -740,6 +878,420 @@
         }
       }
     },
+    "Couldn't delete the thumbnails of %@ from the bucket" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder von %@ konnten nicht aus dem Bucket gelöscht werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron eliminar del bucket las miniaturas de %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de supprimer du bucket les vignettes de %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のサムネイルをバケットから削除できませんでした"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível apagar do bucket as miniaturas de %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ küçük resimleri bucket'tan silinemedi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法从存储桶中删除 %@ 的缩略图"
+          }
+        }
+      }
+    },
+    "Delete the thumbnails already in the bucket?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder löschen, die schon im Bucket liegen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar las miniaturas que ya están en el bucket?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les vignettes déjà présentes dans le bucket ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すでにバケットにあるサムネイルを削除しますか?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar as miniaturas que já estão no bucket?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket'taki mevcut küçük resimler silinsin mi?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除存储桶中已有的缩略图吗？"
+          }
+        }
+      }
+    },
+    "Delete Thumbnails" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar miniaturas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les vignettes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイルを削除"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar miniaturas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Resimleri Sil"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除缩略图"
+          }
+        }
+      }
+    },
+    "Deleted the thumbnails of %@ from the bucket" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder von %@ aus dem Bucket gelöscht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se eliminaron del bucket las miniaturas de %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vignettes de %@ supprimées du bucket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のサムネイルをバケットから削除しました"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As miniaturas de %@ foram apagadas do bucket"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ küçük resimleri bucket'tan silindi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已从存储桶中删除 %@ 的缩略图"
+          }
+        }
+      }
+    },
+    "Enter a folder for the thumbnails." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib einen Ordner für die Vorschaubilder ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introduce una carpeta para las miniaturas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez un dossier pour les vignettes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイル用のフォルダを入力してください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite uma pasta para as miniaturas."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük resimler için bir klasör gir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入用于存放缩略图的文件夹。"
+          }
+        }
+      }
+    },
+    "In the Bucket" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Bucket"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el bucket"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans le bucket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バケット内"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No bucket"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket'ta"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在存储桶中"
+          }
+        }
+      }
+    },
+    "Keep Them" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conservarlas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les conserver"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "残す"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalsın"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留"
+          }
+        }
+      }
+    },
+    "No thumbnails are made or downloaded for this destination. History and the bucket view show file icons." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für dieses Ziel werden keine Vorschaubilder erstellt oder geladen. Verlauf und Bucket-Ansicht zeigen Dateisymbole."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se crean ni se descargan miniaturas para este destino. El historial y la vista del bucket muestran iconos de archivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune vignette n’est créée ni téléchargée pour cette destination. L’historique et la vue du bucket affichent des icônes de fichier."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この保存先ではサムネイルを作成もダウンロードもしません。履歴とバケット表示にはファイルアイコンが表示されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma miniatura é criada ou baixada para este destino. O histórico e a visualização do bucket mostram ícones de arquivo."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu hedef için küçük resim oluşturulmaz ve indirilmez. Geçmiş ve bucket görünümü dosya simgelerini gösterir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此目标不会创建或下载缩略图。历史记录和存储桶视图将显示文件图标。"
+          }
+        }
+      }
+    },
+    "On This Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf diesem Mac"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En este Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur ce Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMac"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neste Mac"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Mac'te"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在这台 Mac 上"
+          }
+        }
+      }
+    },
     "Open System Settings" : {
       "localizations" : {
         "de" : {
@@ -782,6 +1334,420 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开系统设置"
+          }
+        }
+      }
+    },
+    "Play" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abspielen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放"
+          }
+        }
+      }
+    },
+    "That folder holds this bucket’s thumbnails. Pick another one." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesem Ordner liegen die Vorschaubilder dieses Buckets. Wähle einen anderen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esa carpeta guarda las miniaturas de este bucket. Elige otra."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce dossier contient les vignettes de ce bucket. Choisissez-en un autre."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このフォルダにはこのバケットのサムネイルが保存されています。別のフォルダを選んでください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essa pasta guarda as miniaturas deste bucket. Escolha outra."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu klasör bu bucket'ın küçük resimlerini tutuyor. Başka bir klasör seç."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该文件夹存放着此存储桶的缩略图。请选择其他文件夹。"
+          }
+        }
+      }
+    },
+    "The thumbnail folder can’t be inside tmp/, where files expire." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ordner für Vorschaubilder darf nicht in tmp/ liegen, wo Dateien ablaufen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de miniaturas no puede estar dentro de tmp/, donde los archivos caducan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dossier des vignettes ne peut pas se trouver dans tmp/, où les fichiers expirent."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイルフォルダは、ファイルが期限切れになる tmp/ の中には置けません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pasta de miniaturas não pode ficar dentro de tmp/, onde os arquivos expiram."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük resim klasörü, dosyaların süresinin dolduğu tmp/ içinde olamaz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩略图文件夹不能位于文件会过期的 tmp/ 中。"
+          }
+        }
+      }
+    },
+    "Thumbnails" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miniaturas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vignettes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイル"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miniaturas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Resimler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩略图"
+          }
+        }
+      }
+    },
+    "Thumbnails are also saved in your bucket, in this folder, so your other devices can show them. Each one is deleted, moved or expires along with its file. Use a folder only for thumbnails: it’s hidden in the bucket view." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder werden zusätzlich in diesem Ordner deines Buckets gespeichert, damit deine anderen Geräte sie anzeigen können. Jedes wird zusammen mit seiner Datei gelöscht, verschoben oder läuft ab. Verwende einen Ordner nur für Vorschaubilder: Er wird in der Bucket-Ansicht ausgeblendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las miniaturas también se guardan en tu bucket, en esta carpeta, para que tus otros dispositivos puedan mostrarlas. Cada una se elimina, se mueve o caduca junto con su archivo. Usa una carpeta solo para miniaturas: queda oculta en la vista del bucket."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vignettes sont aussi enregistrées dans votre bucket, dans ce dossier, pour que vos autres appareils puissent les afficher. Chacune est supprimée, déplacée ou expire avec son fichier. Utilisez un dossier réservé aux vignettes : il est masqué dans la vue du bucket."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイルはバケットのこのフォルダにも保存され、ほかのデバイスでも表示できます。各サムネイルは元のファイルと一緒に削除、移動、期限切れになります。サムネイル専用のフォルダを使ってください。バケット表示では非表示になります。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As miniaturas também são salvas no seu bucket, nesta pasta, para que seus outros dispositivos possam exibi-las. Cada uma é apagada, movida ou expira junto com o arquivo. Use uma pasta só para miniaturas: ela fica oculta na visualização do bucket."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük resimler, diğer cihazların da gösterebilsin diye bucket'ında bu klasöre de kaydedilir. Her biri kendi dosyasıyla birlikte silinir, taşınır veya süresi dolar. Yalnızca küçük resimler için bir klasör kullan: bucket görünümünde gizlenir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩略图也会保存在你的存储桶的此文件夹中，以便你的其他设备显示。每个缩略图都会随其文件一起删除、移动或过期。请使用仅存放缩略图的文件夹：它在存储桶视图中是隐藏的。"
+          }
+        }
+      }
+    },
+    "Thumbnails are made again when they’re shown, which can mean downloading files up to 25 MB. Thumbnails saved in buckets aren’t affected. To stop making them, turn Thumbnails off for a destination." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder werden neu erstellt, sobald sie angezeigt werden. Dafür werden eventuell Dateien bis 25 MB geladen. In Buckets gespeicherte Vorschaubilder bleiben erhalten. Um keine mehr zu erstellen, schalte Vorschaubilder für ein Ziel aus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las miniaturas se vuelven a crear cuando se muestran, lo que puede suponer descargar archivos de hasta 25 MB. Las miniaturas guardadas en buckets no se ven afectadas. Para dejar de crearlas, desactiva Miniaturas en un destino."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vignettes sont recréées lorsqu’elles sont affichées, ce qui peut impliquer de télécharger des fichiers jusqu’à 25 Mo. Les vignettes enregistrées dans les buckets ne sont pas concernées. Pour ne plus en créer, désactivez Vignettes pour une destination."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サムネイルは表示されたときに再作成されます。その際、最大25 MBのファイルをダウンロードすることがあります。バケットに保存されたサムネイルには影響しません。作成を止めるには、保存先のサムネイルをオフにしてください。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As miniaturas são criadas de novo quando exibidas, o que pode exigir baixar arquivos de até 25 MB. As miniaturas salvas em buckets não são afetadas. Para parar de criá-las, desative Miniaturas em um destino."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük resimler gösterildiklerinde yeniden oluşturulur, bunun için 25 MB'a kadar dosyalar indirilebilir. Bucket'larda kayıtlı küçük resimler etkilenmez. Oluşturulmalarını durdurmak için bir hedefte Küçük Resimler'i kapat."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩略图会在显示时重新生成，这可能需要下载最大 25 MB 的文件。保存在存储桶中的缩略图不受影响。若要停止生成，请为目标关闭缩略图。"
+          }
+        }
+      }
+    },
+    "Thumbnails of photos, videos, PDFs and documents are made on this Mac and kept only here. Files already in the bucket get one when they’re shown, if they’re under 25 MB." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder von Fotos, Videos, PDFs und Dokumenten werden auf diesem Mac erstellt und nur hier gespeichert. Dateien, die schon im Bucket liegen, bekommen eines, sobald sie angezeigt werden, wenn sie kleiner als 25 MB sind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las miniaturas de fotos, vídeos, PDF y documentos se crean en este Mac y solo se guardan aquí. Los archivos que ya están en el bucket reciben una al mostrarse, si ocupan menos de 25 MB."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vignettes des photos, vidéos, PDF et documents sont créées sur ce Mac et conservées uniquement ici. Les fichiers déjà présents dans le bucket en reçoivent une lorsqu’ils sont affichés, s’ils font moins de 25 Mo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真、ビデオ、PDF、書類のサムネイルはこのMacで作成され、ここにだけ保存されます。すでにバケットにあるファイルは、25 MB未満なら表示されたときにサムネイルが作成されます。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As miniaturas de fotos, vídeos, PDFs e documentos são criadas neste Mac e guardadas só aqui. Arquivos que já estão no bucket ganham uma quando são exibidos, se tiverem menos de 25 MB."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraf, video, PDF ve belgelerin küçük resimleri bu Mac'te oluşturulur ve yalnızca burada tutulur. Bucket'ta zaten bulunan dosyalar, 25 MB'tan küçüklerse gösterildiklerinde bir küçük resim alır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "照片、视频、PDF 和文稿的缩略图会在这台 Mac 上生成，并只保存在这里。已在存储桶中的文件若小于 25 MB，会在显示时生成缩略图。"
+          }
+        }
+      }
+    },
+    "Thumbnails on this Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschaubilder auf diesem Mac"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miniaturas en este Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vignettes sur ce Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMac上のサムネイル"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miniaturas neste Mac"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Mac'teki küçük resimler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac 上的缩略图"
+          }
+        }
+      }
+    },
+    "Thumbnails saved in %@ stay in the bucket unless you delete them. Your files aren’t affected." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %@ gespeicherte Vorschaubilder bleiben im Bucket, bis du sie löschst. Deine Dateien sind nicht betroffen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las miniaturas guardadas en %@ se quedan en el bucket a menos que las elimines. Tus archivos no se ven afectados."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vignettes enregistrées dans %@ restent dans le bucket tant que vous ne les supprimez pas. Vos fichiers ne sont pas concernés."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ に保存されたサムネイルは、削除しない限りバケットに残ります。ファイル自体には影響しません。"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As miniaturas salvas em %@ continuam no bucket, a menos que você as apague. Seus arquivos não são afetados."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ içine kaydedilen küçük resimler, sen silmedikçe bucket'ta kalır. Dosyaların etkilenmez."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存在 %@ 中的缩略图会保留在存储桶中，除非你删除它们。你的文件不受影响。"
           }
         }
       }

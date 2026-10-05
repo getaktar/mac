@@ -266,6 +266,8 @@ enum DestinationTransfer {
             if let maxLongEdge = processing.maxLongEdge { object["maxLongEdge"] = maxLongEdge }
             destination["imageProcessing"] = object
         }
+        if let thumbnails = config.thumbnails { destination["thumbnails"] = thumbnails.rawValue }
+        if let prefix = config.thumbnailPrefix { destination["thumbnailPrefix"] = prefix }
 
         var credentials: [String: Any] = [
             "accessKeyId": payload.credentials.accessKeyId,
@@ -322,7 +324,11 @@ enum DestinationTransfer {
             temporaryLink: int(object["temporaryLink"]).flatMap { TemporaryLinkDuration(rawValue: Int64($0)) },
             imageMetadata: string(object["imageMetadata"]).flatMap(ImageMetadataPolicy.init(rawValue:)),
             folderUpload: string(object["folderUpload"]).flatMap(FolderUploadMode.init(rawValue:)),
-            imageProcessing: imageProcessing(object["imageProcessing"])
+            imageProcessing: imageProcessing(object["imageProcessing"]),
+            thumbnails: string(object["thumbnails"]).flatMap(ThumbnailMode.init(rawValue:)),
+            thumbnailPrefix: string(object["thumbnailPrefix"]).flatMap {
+                ThumbnailKeys.problem(withPrefix: $0) == nil ? ThumbnailKeys.normalizedPrefix($0) : nil
+            }
         )
         let credentials = StorageCredentials(
             accessKeyId: accessKeyId,
