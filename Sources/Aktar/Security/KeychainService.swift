@@ -5,6 +5,9 @@ struct StorageCredentials: Codable {
     let accessKeyId: String
     let secretAccessKey: String
     let sessionToken: String?
+    /// For clearing Cloudflare's cache when a file is replaced; it only
+    /// needs Zone > Cache Purge. See `CloudflarePurge`.
+    var cloudflareToken: String? = nil
 }
 
 enum KeychainError: Error, LocalizedError {

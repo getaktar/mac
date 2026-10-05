@@ -12,8 +12,10 @@ enum TempFiles {
     static let metadata = "AktarMetadata"
     /// Files downloaded from a bucket to make their thumbnails.
     static let thumbnails = "AktarThumbnails"
+    /// Files handed over by a Shortcuts action.
+    static let intents = "AktarIntents"
 
-    private static let owned = [clipboard, localAPI, zip, processing, metadata, thumbnails]
+    private static let owned = [clipboard, localAPI, zip, processing, metadata, thumbnails, intents]
 
     static func folder(_ name: String) -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent(name, isDirectory: true)

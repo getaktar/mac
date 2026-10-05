@@ -34,6 +34,9 @@ final class AppState {
         destinationStore.onUpdate = { [weak self] old, new in
             self?.destinationUpdated(from: old, to: new)
         }
+        destinationStore.onListChange = { [weak self] in self?.registerDestinationShortcuts() }
+        registerDestinationShortcuts()
+        Self.current = self
         let destinations = destinationStore.destinations
         Task.detached(priority: .utility) {
             await MultipartUploader.cleanUp(destinations: destinations)
@@ -52,6 +55,32 @@ final class AppState {
             || old.bucketThumbnailPrefix != new.bucketThumbnailPrefix {
             RemoteThumbnailLoader.shared.forget(destinationID: new.id)
         }
+    }
+
+    /// The one running app's state, for Shortcuts actions, which macOS runs
+    /// in the app without going through its windows.
+    nonisolated(unsafe) static weak var current: AppState?
+
+    /// Destinations whose shortcut has its handler. A handler is added once
+    /// per destination; a removed destination's shortcut is cleared, so it
+    /// never fires again.
+    @ObservationIgnored private var shortcutDestinations: Set<UUID> = []
+
+    private func registerDestinationShortcuts() {
+        for destination in destinationStore.destinations where !shortcutDestinations.contains(destination.id) {
+            shortcutDestinations.insert(destination.id)
+            let id = destination.id
+            KeyboardShortcuts.onKeyDown(for: .uploadToDestination(id)) { [weak self] in
+                Task { @MainActor in self?.uploadFromClipboard(toDestinationID: id) }
+            }
+        }
+    }
+
+    /// A destination's shortcut: the clipboard goes there, never rerouted.
+    func uploadFromClipboard(toDestinationID id: UUID) {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == id }),
+              let input = ClipboardService.readFileInput() else { return }
+        uploadManager.upload([input], to: destination)
     }
 
     /// Checks for expired uploads at launch and then hourly.

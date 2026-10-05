@@ -12,7 +12,9 @@ final class UploadManager {
     private let maxConcurrent = 3
     /// Folders uploaded with their structure that still have files going:
     /// what's been copied so far, by position in the folder.
-    private var openGroups: [UUID: [Int: (link: URL, filename: String)]] = [:]
+    /// Each link as its destination's "Copy as" formats it: the files of a
+    /// drop can go to different destinations.
+    private var openGroups: [UUID: [Int: String]] = [:]
 
     /// Settings > Output: what's copied after an upload, unless the
     /// destination has its own choice.
@@ -116,8 +118,66 @@ final class UploadManager {
     /// browser, the local API's prefix=) is exactly where the user put it:
     /// it stays, unless that's inside a `tmp/{N}d/` folder the bucket's rules
     /// empty, where it goes after N days like any other file there.
+    ///
+    /// Without a `destination`, each file goes where "Use for" sends it
+    /// (see `DestinationRouting`), with that destination's settings. When a
+    /// drop ends up in several destinations, its links are still copied
+    /// together, in drop order.
     func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil) {
-        guard let destination = destination ?? destinationStore.defaultDestination else { return }
+        if let destination {
+            enqueue(inputs, to: destination, expiryDays: expiryDays)
+            return
+        }
+        var routed = inputs.compactMap { input in routedDestination(for: input).map { (input: input, destination: $0) } }
+        var order: [UUID] = []
+        for entry in routed where !order.contains(entry.destination.id) { order.append(entry.destination.id) }
+        if order.count > 1 {
+            // A folder uploaded with its structure has its own group.
+            let groupable = routed.indices.filter { index in
+                let entry = routed[index]
+                return entry.input.group == nil
+                    && !(FolderUpload.isFolder(entry.input.fileURL) && !entry.input.asZip
+                        && (entry.destination.folderUpload ?? .default) == .keepStructure)
+            }
+            if groupable.count > 1 {
+                let groupID = UUID()
+                openGroups[groupID] = [:]
+                for (position, index) in groupable.enumerated() {
+                    routed[index].input.group = UploadGroup(
+                        id: groupID,
+                        name: String(localized: "Uploads"),
+                        index: position,
+                        count: groupable.count,
+                        isDrop: true
+                    )
+                }
+            }
+        }
+        for id in order {
+            let entries = routed.filter { $0.destination.id == id }
+            enqueue(entries.map(\.input), to: entries[0].destination, expiryDays: expiryDays)
+        }
+    }
+
+    /// Where an upload that doesn't name a destination goes. A folder that
+    /// goes up as a ZIP counts as a .zip file; one uploaded with its
+    /// structure isn't split and goes to the default destination.
+    func routedDestination(for input: UploadInput) -> DestinationConfig? {
+        let defaultDestination = destinationStore.defaultDestination
+        var name = input.originalFilename
+        let isPackage = (try? input.fileURL.resourceValues(forKeys: [.isPackageKey]))?.isPackage == true
+        if FolderUpload.isFolder(input.fileURL), !isPackage {
+            guard input.asZip || (defaultDestination?.folderUpload ?? .default) == .zip else { return defaultDestination }
+            name += ".zip"
+        }
+        return DestinationRouting.destination(
+            forFilename: name,
+            destinations: destinationStore.destinations,
+            defaultID: defaultDestination?.id
+        )
+    }
+
+    private func enqueue(_ inputs: [UploadInput], to destination: DestinationConfig, expiryDays: Int?) {
         let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
         let days = rulesActive ? expiryDays ?? self.expiryDays(for: destination) : 0
         let newJobs = expandingFolders(inputs, for: destination).map { input in
@@ -153,7 +213,7 @@ final class UploadManager {
             TempFiles.removeIfOwned(job.input.fileURL)
         }
         job.multipartSession = nil
-        if let group = job.input.group { finishGroupIfDone(group, destination: job.destination) }
+        if let group = job.input.group { finishGroupIfDone(group) }
         if !wasRunning { reportWatched(job, .cancelled) }
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(3))
@@ -179,7 +239,7 @@ final class UploadManager {
             guard input.objectKey == nil, input.folderKey == nil, FolderUpload.isFolder(input.fileURL) else { return [input] }
             // The folder's own name, or the one it was given before upload.
             let name = input.originalFilename
-            switch destination.folderUpload ?? .default {
+            switch input.asZip ? .zip : destination.folderUpload ?? .default {
             case .zip:
                 var zipped = input
                 zipped.originalFilename = name + ".zip"
@@ -254,7 +314,7 @@ final class UploadManager {
     /// Whether history has a newer upload to the same destination and key.
     func isSuperseded(_ record: UploadRecord) -> Bool {
         repository.records(key: record.objectKey, destinationID: record.destinationID)
-            .contains { $0.id != record.id && $0.createdAt > record.createdAt }
+            .contains { $0.id != record.id && $0.writtenAt > record.writtenAt }
     }
 
     /// Clears expiring uploads whose time is up out of history. The bucket's
@@ -340,7 +400,7 @@ final class UploadManager {
     /// whole seconds, so anything more than a minute after the record was
     /// created is a later upload to the same key.
     private static func uploadedAgain(_ record: UploadRecord, writtenAt: Date) -> Bool {
-        writtenAt > record.createdAt.addingTimeInterval(60)
+        writtenAt > record.writtenAt.addingTimeInterval(60)
     }
 
     /// Installs the bucket's lifecycle rules for a saved destination, which
@@ -421,7 +481,16 @@ final class UploadManager {
                 // the metadata policy applied already.
                 let original = fileURL
                 let originalName = filename
-                let processing = zipped == nil ? destination.imageProcessing : nil
+                // A replace keeps the key, so it keeps the format too: only
+                // recompression and resizing apply.
+                let processing: ImageProcessing? = if zipped != nil {
+                    nil
+                } else if job.input.replacing != nil {
+                    destination.imageProcessing.map { ImageProcessing(format: .original, quality: $0.quality, maxLongEdge: $0.maxLongEdge) }
+                        .flatMap { $0.isOff ? nil : $0 }
+                } else {
+                    destination.imageProcessing
+                }
                 let processed = try await offMain {
                     try ImageProcessor.process(original, filename: originalName, settings: processing, policy: policy)
                 }
@@ -453,7 +522,7 @@ final class UploadManager {
                 let watch = job.input.watch
                 let template = watch?.pathTemplate ?? destination.objectPathTemplate
                 let generatesKey = job.input.objectKey == nil && job.input.folderKey == nil
-                let canReuse = reuseDuplicates && job.input.objectKey == nil && job.input.group == nil && zipped == nil
+                let canReuse = reuseDuplicates && job.input.objectKey == nil && (job.input.group?.isDrop ?? true) && zipped == nil
                 let isCopy = uploadURL != job.input.fileURL
                 let wantsMD5 = generatesKey && ObjectKeyGenerator.usesMD5(template)
                 // A watched folder's file is hashed once: here, in this pass,
@@ -504,7 +573,7 @@ final class UploadManager {
                    let record = repository.reusableRecord(destinationID: destination.id, contentHash: sha256, expiryDays: job.expiryDays),
                    let publicURL = record.publicURL,
                    let info = try? await provider.objectInfo(key: record.objectKey),
-                   DuplicateReuse.isUnchanged(size: info.size, lastModified: info.lastModified, uploadedSize: Int64(record.byteSize), uploadedAt: record.createdAt) {
+                   DuplicateReuse.isUnchanged(size: info.size, lastModified: info.lastModified, uploadedSize: Int64(record.byteSize), uploadedAt: record.writtenAt) {
                     var link = publicURL
                     if let duration = destination.temporaryLink,
                        let signed = try? await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue) {
@@ -584,6 +653,7 @@ final class UploadManager {
                 let thumbnail = await thumbnailTask?.value
                 self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
                 await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
+                await self.afterUpload(job: job, result: result, destination: destination, link: link, filename: filename, credentials: credentials)
             } catch {
                 if case .cancelled = job.state {
                     self.stopped(job: job)
@@ -691,6 +761,7 @@ final class UploadManager {
     private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL) {
         TempFiles.removeIfOwned(job.input.fileURL)
         job.reused = true
+        job.recordID = record.id
         job.state = .succeeded(publicURLString: record.publicURLString)
         if job.input.watch != nil {
             reportWatched(job, .succeeded(WatchUploadSuccess(
@@ -703,6 +774,9 @@ final class UploadManager {
                 filename: record.localFilename,
                 contentHash: job.originalContentHash
             )))
+        } else if let group = job.input.group, openGroups[group.id] != nil {
+            openGroups[group.id]?[group.index] = format(link, filename: record.localFilename, for: destination)
+            finishGroupIfDone(group)
         } else {
             ClipboardService.copy(format(link, filename: record.localFilename, for: destination))
             if showsSuccessNotifications {
@@ -723,7 +797,12 @@ final class UploadManager {
         TempFiles.removeIfOwned(job.input.fileURL)
         var input = job.input
         input.originalFilename = filename
-        repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
+        let record = if let replacing = job.input.replacing {
+            repository.replace(recordID: replacing.recordID, result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
+        } else {
+            repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
+        }
+        job.recordID = record.id
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
@@ -746,12 +825,16 @@ final class UploadManager {
                 contentHash: job.originalContentHash
             )))
         } else if let group = job.input.group, openGroups[group.id] != nil {
-            openGroups[group.id]?[group.index] = (link, filename)
-            finishGroupIfDone(group, destination: destination)
+            openGroups[group.id]?[group.index] = format(link, filename: filename, for: destination)
+            finishGroupIfDone(group)
         } else {
             ClipboardService.copy(format(link, filename: filename, for: destination))
             if showsSuccessNotifications {
-                NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
+                if job.input.replacing != nil {
+                    NotificationService.notifyReplaced(filename: filename)
+                } else {
+                    NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
+                }
             }
             closePanelIfWanted()
         }
@@ -772,6 +855,34 @@ final class UploadManager {
             stale.removeAll { $0 == prefix }
         }
         try? await BucketThumbnails.delete(for: objectKey, prefixes: stale, provider: provider)
+    }
+
+    /// A replace, and a watched folder writing over its own upload so the
+    /// link stays, clear Cloudflare's cache when the destination is set up
+    /// for it. Then an upload made by hand runs the destination's hooks.
+    private func afterUpload(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, filename: String, credentials: StorageCredentials) async {
+        let replaced = job.input.replacing != nil || (job.input.watch != nil && job.input.objectKey != nil)
+        if replaced {
+            RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: result.objectKey)
+            if CloudflarePurge.isSetUp(destination, credentials: credentials),
+               let zone = destination.cloudflareZoneId, let token = credentials.cloudflareToken {
+                do {
+                    try await CloudflarePurge.purge(urls: [result.publicURL], zoneID: zone, token: token)
+                } catch {
+                    let reason = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                    NotificationService.notifyPurgeFailed(filename: filename, reason: reason)
+                }
+            }
+        }
+        guard job.input.watch == nil else { return }
+        DestinationHooks.shared.run(after: .init(
+            fileURL: job.input.fileURL,
+            filename: filename,
+            byteSize: Int64(result.byteSize),
+            objectKey: result.objectKey,
+            link: link.absoluteString,
+            replaced: job.input.replacing != nil
+        ), destination: destination)
     }
 
     /// The thumbnail folders in `destination`'s bucket; see
@@ -804,7 +915,7 @@ final class UploadManager {
     /// links of the ones that made it, one per line and in folder order.
     /// Failed files have their own notifications and can still be retried;
     /// a retry then copies just its own link.
-    private func finishGroupIfDone(_ group: UploadGroup, destination: DestinationConfig) {
+    private func finishGroupIfDone(_ group: UploadGroup) {
         guard let links = openGroups[group.id] else { return }
         let stillGoing = jobs.contains { job in
             guard job.input.group?.id == group.id else { return false }
@@ -816,9 +927,7 @@ final class UploadManager {
         guard !stillGoing else { return }
         openGroups[group.id] = nil
         guard !links.isEmpty else { return }
-        let output = links.keys.sorted().compactMap { links[$0] }
-            .map { format($0.link, filename: $0.filename, for: destination) }
-            .joined(separator: "\n")
+        let output = links.keys.sorted().compactMap { links[$0] }.joined(separator: "\n")
         ClipboardService.copy(output)
         let summary = links.count == group.count
             ? String(localized: "\(group.name) (\(group.count) files)")
@@ -837,7 +946,7 @@ final class UploadManager {
         } else {
             NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
         }
-        if let group = job.input.group { finishGroupIfDone(group, destination: destination) }
+        if let group = job.input.group { finishGroupIfDone(group) }
 
         activeCount -= 1
         drainQueue()
@@ -888,6 +997,110 @@ extension UploadManager {
               let credentials = try? KeychainService.load(for: destination.id) else { return false }
         let provider = S3Provider(config: destination, credentials: credentials)
         return (try? await provider.objectSize(key: key)) == size
+    }
+}
+
+/// How an upload someone waits for (the local API, Shortcuts) ended.
+enum UploadWaitResult {
+    /// `reused`: nothing was uploaded, the same file was already there and
+    /// this is its earlier upload.
+    case succeeded(UploadRecord, reused: Bool)
+    case failed(String)
+    case cancelled
+}
+
+extension UploadManager {
+    /// Queues one upload and waits for it to settle. A folder goes up as one
+    /// ZIP, so there's one upload to wait for. Without a destination, it goes
+    /// where "Use for" sends it. Nil when there's no destination at all.
+    func uploadAndWait(_ input: UploadInput, to destination: DestinationConfig? = nil, expiryDays: Int? = nil) async -> UploadWaitResult? {
+        var input = input
+        input.asZip = true
+        guard destination != nil || routedDestination(for: input) != nil else { return nil }
+        upload([input], to: destination, expiryDays: expiryDays)
+        guard let job = jobs.first(where: { $0.input.fileURL == input.fileURL && $0.input.replacing == input.replacing }) else {
+            return .failed(String(localized: "The upload could not be queued."))
+        }
+        return await settle(job)
+    }
+
+    /// Waits until the job succeeds, fails or is cancelled. One that ended
+    /// without succeeding is dismissed: whoever waited reports it, and its
+    /// staged file may be gone, so it couldn't be retried.
+    private func settle(_ job: UploadJob) async -> UploadWaitResult {
+        while true {
+            switch job.state {
+            case .succeeded:
+                if let id = job.recordID, let record = repository.record(id: id) {
+                    return .succeeded(record, reused: job.reused)
+                }
+                return .failed(String(localized: "The upload finished but its history entry is missing."))
+            case .failed(let message):
+                dismiss(job)
+                return .failed(message)
+            case .cancelled:
+                dismiss(job)
+                return .cancelled
+            case .waiting, .uploading:
+                try? await Task.sleep(for: .milliseconds(150))
+            }
+        }
+    }
+
+    // MARK: - Replace
+
+    /// Writes `fileURL` over the upload, at its key, so its link keeps
+    /// working: the destination's metadata removal and resizing apply, a
+    /// format conversion doesn't (the key keeps its extension). History
+    /// keeps the entry, with the new size and a "Replaced" date; an expiring
+    /// file starts its days again. Then Cloudflare's cache is cleared and
+    /// the destination's hooks run, when it's set up for them.
+    @discardableResult
+    func replace(_ record: UploadRecord, with fileURL: URL) throws -> UploadInput {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) else {
+            throw StorageError.unknown(String(localized: "This upload's destination was removed."))
+        }
+        let input = Self.replaceInput(fileURL: fileURL, key: record.objectKey, recordID: record.id)
+        upload([input], to: destination)
+        return input
+    }
+
+    /// The same for an object in the bucket view. Its newest history entry,
+    /// if it has one, is updated; otherwise the replace is added to history.
+    @discardableResult
+    func replaceObject(key: String, in destination: DestinationConfig, with fileURL: URL) -> UploadInput {
+        let newest = repository.records(key: key, destinationID: destination.id).max { $0.createdAt < $1.createdAt }
+        let input = Self.replaceInput(fileURL: fileURL, key: key, recordID: newest?.id)
+        upload([input], to: destination)
+        return input
+    }
+
+    func replaceAndWait(_ record: UploadRecord, with fileURL: URL) async -> UploadWaitResult {
+        do {
+            let input = try replace(record, with: fileURL)
+            return await settle(input)
+        } catch {
+            return .failed((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
+        }
+    }
+
+    func replaceObjectAndWait(key: String, in destination: DestinationConfig, with fileURL: URL) async -> UploadWaitResult {
+        await settle(replaceObject(key: key, in: destination, with: fileURL))
+    }
+
+    private func settle(_ input: UploadInput) async -> UploadWaitResult {
+        guard let job = jobs.first(where: { $0.input.fileURL == input.fileURL && $0.input.replacing == input.replacing }) else {
+            return .failed(String(localized: "The upload could not be queued."))
+        }
+        return await settle(job)
+    }
+
+    private static func replaceInput(fileURL: URL, key: String, recordID: UUID?) -> UploadInput {
+        var input = UploadInput(fileURL: fileURL, originalFilename: fileURL.lastPathComponent, source: .filePicker)
+        input.objectKey = key
+        input.asZip = true
+        input.replacing = ReplaceTarget(recordID: recordID)
+        return input
     }
 }
 

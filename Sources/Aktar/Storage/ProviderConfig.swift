@@ -83,6 +83,18 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// The bucket folder for `.bucket` thumbnails; nil is
     /// `ThumbnailKeys.defaultPrefix`. See `bucketThumbnailPrefix`.
     var thumbnailPrefix: String?
+    /// The kinds of files and extensions that come here when an upload
+    /// doesn't name a destination; see `DestinationRouting`.
+    var useFor: FileRouting?
+    /// Uploads here are sent with a one-minute cache time, so a replaced
+    /// file shows up everywhere within about a minute.
+    var shortCache: Bool?
+    /// The Cloudflare zone whose cache is cleared for a replaced file; the
+    /// token is in the Keychain with the keys (`StorageCredentials`).
+    var cloudflareZoneId: String?
+    /// Run after each upload and replace here (not for a watched folder's
+    /// files, which run their folder's own).
+    var hooks: [WatchHook]?
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"

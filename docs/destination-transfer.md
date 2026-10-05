@@ -62,9 +62,12 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   `endpoint`, `region`, `bucket`, `publicBaseURL`, `objectPathTemplate`,
   `forcePathStyle`, `outputMode`, `expiryDays`, `temporaryLink`, `imageMetadata`,
   `folderUpload`, `imageProcessing` (`{format, quality, maxLongEdge}`), `thumbnails`
-  (`off` / `local` / `bucket`), `thumbnailPrefix` (see docs/thumbnails.md).
+  (`off` / `local` / `bucket`), `thumbnailPrefix` (see docs/thumbnails.md),
+  `useFor` (`{kinds, extensions}`), `shortCache`, `cloudflareZoneId`, `hooks`
+  (`[{kind, target, enabled}]`; see docs/destination-automation.md).
   Optional fields are omitted when unset. `isDefault` is never sent.
-- `sessionToken` is omitted when unset. `customTemplate` is only sent when
+- `sessionToken` is omitted when unset, and so is `cloudflareToken` (the
+  Cloudflare cache purge token, see docs/destination-automation.md). `customTemplate` is only sent when
   `destination.outputMode == "custom"` (it is app-level today).
 - `v` inside the JSON greater than 1: "newer version" error.
 - `expiresAt` (optional, integer Unix seconds): when the link stops being
@@ -94,6 +97,11 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
 - `thumbnailPrefix`: normalize (trim, drop leading slashes, one trailing slash);
   unset when empty or invalid (see docs/thumbnails.md). Older apps ignore both
   thumbnail fields, which keeps thumbnails on that device only.
+- `useFor`: unknown kinds and invalid extensions are dropped; unset when
+  nothing is left. `shortCache`: only `true` counts. `cloudflareZoneId`:
+  unset unless letters and digits. `hooks`: each entry needs a known `kind`
+  and a `target`; a webhook address the app would refuse, or a script name
+  with a `/`, is dropped. A per-destination keyboard shortcut is never sent.
 - The `minimal` test vector exercises these rules.
 
 ## On the Mac

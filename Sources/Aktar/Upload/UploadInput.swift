@@ -27,6 +27,18 @@ struct UploadInput: Sendable {
     /// rules. Its uploads skip the usual clipboard copy, notification and
     /// closing the panel; the folder decides those.
     var watch: WatchUploadContext? = nil
+    /// A folder always goes up as one ZIP, whatever the destination does
+    /// with folders (one request of the local API, one Shortcuts action).
+    var asZip = false
+    /// Writes over an existing upload or object at `objectKey`, so its link
+    /// keeps working; see `UploadManager.replace`.
+    var replacing: ReplaceTarget? = nil
+}
+
+/// What a replace writes over: the history entry it updates, if there's
+/// one (a bucket object can have none).
+struct ReplaceTarget: Sendable, Hashable {
+    let recordID: UUID?
 }
 
 struct WatchUploadContext: Sendable {
@@ -53,4 +65,8 @@ struct UploadGroup: Sendable, Hashable {
     let name: String
     let index: Int
     let count: Int
+    /// Files of one drop that "Use for" sent to different destinations,
+    /// rather than the files of a folder: their links are still copied
+    /// together, and each can reuse an earlier upload's link.
+    var isDrop = false
 }

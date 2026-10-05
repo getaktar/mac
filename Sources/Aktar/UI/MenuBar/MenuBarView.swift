@@ -256,6 +256,30 @@ struct MenuBarView: View {
 
     // MARK: - Dropzone
 
+    /// Where "Use for" sends files instead of the selected destination, one
+    /// short line per destination ("Images, Videos → Demo"); the full
+    /// sentences are their tooltip.
+    @ViewBuilder
+    private var routingSummary: some View {
+        let store = appState.destinationStore
+        let defaultID = store.defaultDestination?.id
+        let lines = DestinationRouting.summary(destinations: store.destinations, defaultID: defaultID)
+        if !lines.isEmpty {
+            VStack(spacing: 2) {
+                ForEach(lines, id: \.self) { line in
+                    Text(verbatim: line)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.top, 2)
+            .help(DestinationRouting.hints(destinations: store.destinations, defaultID: defaultID).joined(separator: "\n"))
+        }
+    }
+
     private var dropzone: some View {
         VStack(spacing: 10) {
             Image(systemName: isTargeted ? "arrow.down.circle.fill" : "arrow.up.circle")
@@ -273,6 +297,8 @@ struct MenuBarView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+
+                routingSummary
             }
 
             // Kept visible whenever it's on, so a sticky "Delete after"

@@ -1,4 +1,5 @@
 import Foundation
+import KeyboardShortcuts
 import Observation
 
 /// Persists non-secret destination configuration as JSON.
@@ -15,6 +16,8 @@ final class DestinationStore {
     private let fileURL: URL
     /// Told after a saved destination changes, with what it was before.
     @ObservationIgnored var onUpdate: ((_ old: DestinationConfig, _ new: DestinationConfig) -> Void)?
+    /// Told after a destination is added or removed.
+    @ObservationIgnored var onListChange: (() -> Void)?
 
     init() {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -37,6 +40,7 @@ final class DestinationStore {
         destinations.append(destination)
         syncDefaultFlags()
         save()
+        onListChange?()
     }
 
     func update(_ destination: DestinationConfig) {
@@ -53,11 +57,13 @@ final class DestinationStore {
         try? KeychainService.delete(for: destination.id)
         ExpiryRuleStore.shared.set(destination.id, active: false)
         RemoteThumbnailLoader.shared.forget(destinationID: destination.id)
+        KeyboardShortcuts.reset(.uploadToDestination(destination.id))
         if defaultID == destination.id {
             defaultID = destinations.first?.id
         }
         syncDefaultFlags()
         save()
+        onListChange?()
     }
 
     /// A copy under a new ID with the same keys, as a starting point for

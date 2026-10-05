@@ -57,9 +57,18 @@ enum RenamePrompt {
         return ext.isEmpty ? name : name + "." + ext
     }
 
+    /// `name` with `filename`'s extension, the way the dialog renames (for
+    /// Shortcuts' Name). An empty name keeps `filename`.
+    nonisolated static func keepingExtension(_ name: String, of filename: String) -> String {
+        let ext = (filename as NSString).pathExtension
+        let clean = sanitized(name)
+        guard !clean.isEmpty else { return filename }
+        return ext.isEmpty ? clean : clean + "." + ext
+    }
+
     /// No folder separators, and no surrounding whitespace. Empty keeps
     /// the original name.
-    static func sanitized(_ raw: String) -> String {
+    nonisolated static func sanitized(_ raw: String) -> String {
         raw.replacingOccurrences(of: "/", with: "")
             .replacingOccurrences(of: "\\", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)

@@ -13,8 +13,10 @@ import SwiftData
 ///     POST   /v1/uploads/clipboard?destinationId=&expires=
 ///     DELETE /v1/uploads/{id}
 ///     GET    /v1/uploads/{id}/thumbnail?px=&generate=             (PNG; 204 when there's none)
+///     POST   /v1/uploads/{id}/replace?filename=                   (raw file bytes; writes over the upload, the link stays)
 ///     GET    /v1/destinations/{id}/objects?prefix=&continuationToken=
 ///     DELETE /v1/destinations/{id}/objects?key=
+///     PUT    /v1/destinations/{id}/objects?key=&filename=         (raw file bytes; writes over the object, the link stays)
 ///     POST   /v1/destinations/{id}/objects/move                {"from", "to"}
 ///     POST   /v1/destinations/{id}/folders                     {"prefix", "name"}
 ///     POST   /v1/destinations/{id}/links                       {"key", "expiresIn"}
@@ -27,6 +29,9 @@ import SwiftData
 ///     POST   /v1/watched-folders/pause                         {"minutes"} (omitted or null: until resumed)
 ///     POST   /v1/watched-folders/resume
 ///     POST   /v1/watched-folders/{id}                          {"enabled"}
+///
+/// An upload without destinationId goes where the destinations' "Use for"
+/// sends it by file type, or to the default destination.
 @MainActor
 final class LocalAPIRouter {
     static let apiVersion = 1
@@ -55,6 +60,8 @@ final class LocalAPIRouter {
             return await uploadClipboard(request)
         case ("DELETE", 2) where route[0] == "uploads":
             return await deleteUpload(id: route[1])
+        case ("POST", 3) where route[0] == "uploads" && route[2] == "replace":
+            return await replaceUpload(id: route[1], request: request)
         case ("GET", 3) where route[0] == "uploads" && route[2] == "thumbnail":
             return await uploadThumbnail(id: route[1], request: request)
         case ("GET", 1) where route[0] == "watched-folders":
@@ -230,11 +237,16 @@ final class LocalAPIRouter {
     /// the original name (content type comes from the extension) and handed
     /// to the upload manager like any other file.
     private func uploadBody(_ request: HTTPRequest) async -> HTTPResponse {
-        let filename = (request.query["filename"] ?? "").split(separator: "/").last.map(String.init) ?? ""
-        guard !filename.isEmpty, filename != ".", filename != ".." else {
+        guard let filename = Self.filename(request) else {
             return .error(400, "The filename query parameter is required.")
         }
-        guard let destination = destination(id: request.query["destinationId"]) else {
+        // Without a destinationId, "Use for" decides by file type.
+        let named = request.query["destinationId"].flatMap { $0.isEmpty ? nil : $0 }
+        let store = appState.destinationStore
+        let routed = named == nil
+            ? DestinationRouting.destination(forFilename: filename, destinations: store.destinations, defaultID: store.defaultDestination?.id)
+            : nil
+        guard let destination = routed ?? destination(id: named) else {
             return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
         }
         guard let expiryDays = Self.expiryDays(request) else {
@@ -247,21 +259,10 @@ final class LocalAPIRouter {
             return .error(400, "The expires and prefix query parameters can't be combined.")
         }
 
-        let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("AktarLocalAPI", isDirectory: true)
-            .appendingPathComponent("upload-\(UUID().uuidString)", isDirectory: true)
-        let fileURL = directory.appendingPathComponent(filename)
-        defer { try? FileManager.default.removeItem(at: directory) }
-        do {
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            if let bodyFile = request.bodyFile {
-                try FileManager.default.moveItem(at: bodyFile, to: fileURL)
-            } else {
-                try request.body.write(to: fileURL)
-            }
-        } catch {
+        guard let fileURL = Self.stage(request, filename: filename) else {
             return .error(500, "Could not stage the file for upload.")
         }
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
 
         var input = UploadInput(fileURL: fileURL, originalFilename: filename, source: .filePicker)
         if let rawPrefix = request.query["prefix"] {
@@ -277,19 +278,66 @@ final class LocalAPIRouter {
     }
 
     private func uploadClipboard(_ request: HTTPRequest) async -> HTTPResponse {
-        guard let destination = destination(id: request.query["destinationId"]) else {
-            return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
-        }
         guard let expiryDays = Self.expiryDays(request) else {
             return .error(400, Self.invalidExpiryMessage)
-        }
-        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
-            return .error(409, Self.expiryNotSetUpMessage)
         }
         guard let input = ClipboardService.readFileInput() else {
             return .error(422, "The clipboard has no file or image to upload.")
         }
+        // Without a destinationId, "Use for" decides by file type.
+        let named = request.query["destinationId"].flatMap { $0.isEmpty ? nil : $0 }
+        let routed = named == nil ? appState.uploadManager.routedDestination(for: input) : nil
+        guard let destination = routed ?? destination(id: named) else {
+            TempFiles.removeIfOwned(input.fileURL)
+            return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
+        }
+        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
+            TempFiles.removeIfOwned(input.fileURL)
+            return .error(409, Self.expiryNotSetUpMessage)
+        }
         return await run(input, to: destination, expiryDays: expiryDays)
+    }
+
+    /// Writes the request's file over an upload, at its key: the link stays.
+    private func replaceUpload(id: String, request: HTTPRequest) async -> HTTPResponse {
+        guard let uuid = UUID(uuidString: id), let record = record(id: uuid) else {
+            return .error(404, "No upload with that ID.")
+        }
+        let filename = Self.filename(request) ?? record.localFilename
+        guard let fileURL = Self.stage(request, filename: filename) else {
+            return .error(500, "Could not stage the file for upload.")
+        }
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+        return respond(await appState.uploadManager.replaceAndWait(record, with: fileURL), status: 200)
+    }
+
+    /// The file's name from the filename query parameter, without any path.
+    private static func filename(_ request: HTTPRequest) -> String? {
+        let filename = (request.query["filename"] ?? "").split(separator: "/").last.map(String.init) ?? ""
+        guard !filename.isEmpty, filename != ".", filename != ".." else { return nil }
+        return filename
+    }
+
+    /// The sandbox keeps Aktar from reading arbitrary paths, so callers send
+    /// the bytes; they're written out under `filename` in a folder of their
+    /// own, which the caller removes.
+    private static func stage(_ request: HTTPRequest, filename: String) -> URL? {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(TempFiles.localAPI, isDirectory: true)
+            .appendingPathComponent("upload-\(UUID().uuidString)", isDirectory: true)
+        let fileURL = directory.appendingPathComponent(filename)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            if let bodyFile = request.bodyFile {
+                try FileManager.default.moveItem(at: bodyFile, to: fileURL)
+            } else {
+                try request.body.write(to: fileURL)
+            }
+            return fileURL
+        } catch {
+            try? FileManager.default.removeItem(at: directory)
+            return nil
+        }
     }
 
     /// `expires` is in days. Leaving it out keeps the file, whatever the menu
@@ -304,38 +352,29 @@ final class LocalAPIRouter {
     private static let invalidExpiryMessage = "expires must be 0, 1, 7, 14 or 30 (days)."
 
     /// Queues the upload and waits for it to settle, so the caller gets the
-    /// finished history entry (and its links) back in the response.
+    /// finished history entry (and its links) back in the response. One
+    /// request, one upload: a folder (from the clipboard) always goes up as
+    /// a ZIP here, whatever the destination does with folders.
     private func run(_ input: UploadInput, to destination: DestinationConfig, expiryDays: Int) async -> HTTPResponse {
-        let manager = appState.uploadManager
-        // One request, one upload: a folder (from the clipboard) always
-        // goes up as a ZIP here, whatever the destination does with folders.
-        var destination = destination
-        if FolderUpload.isFolder(input.fileURL) { destination.folderUpload = .zip }
-        manager.upload([input], to: destination, expiryDays: expiryDays)
-        guard let job = manager.jobs.first(where: { $0.input.fileURL == input.fileURL }) else {
-            return .error(500, "The upload could not be queued.")
+        guard let result = await appState.uploadManager.uploadAndWait(input, to: destination, expiryDays: expiryDays) else {
+            return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
         }
-        while true {
-            switch job.state {
-            case .succeeded(let publicURLString):
-                guard let record = record(publicURLString: publicURLString, destinationID: destination.id) else {
-                    return .error(500, "The upload finished but its history entry is missing.")
-                }
-                // `reused`: nothing was uploaded, the same file was already
-                // there and this is its earlier upload.
-                return .json(201, ["upload": uploadDTO(record, reused: job.reused)])
-            // The staged copy of the file is deleted once this returns, so
-            // a failed job can't be retried from the panel; remove it and
-            // let the caller (Raycast) show the error instead.
-            case .failed(let message):
-                manager.dismiss(job)
-                return .error(502, message)
-            case .cancelled:
-                manager.dismiss(job)
-                return .error(409, "The upload was cancelled in Aktar.")
-            case .waiting, .uploading:
-                try? await Task.sleep(for: .milliseconds(150))
-            }
+        return respond(result, status: 201)
+    }
+
+    /// The staged copy of the file is deleted once the request returns, so
+    /// a failed job can't be retried from the panel; the caller (Raycast)
+    /// shows the error instead.
+    private func respond(_ result: UploadWaitResult, status: Int) -> HTTPResponse {
+        switch result {
+        case .succeeded(let record, let reused):
+            // `reused`: nothing was uploaded, the same file was already
+            // there and this is its earlier upload.
+            return .json(status, ["upload": uploadDTO(record, reused: reused)])
+        case .failed(let message):
+            return .error(502, message)
+        case .cancelled:
+            return .error(409, "The upload was cancelled in Aktar.")
         }
     }
 
@@ -384,6 +423,22 @@ final class LocalAPIRouter {
                     for: object, destination: destination, prefixes: thumbnailPrefixes, allowDownload: Self.generates(request)
                 )
                 return Self.thumbnailResponse(image, request: request)
+
+            case ("PUT", ["objects"]):
+                guard let key = request.query["key"], !key.isEmpty else {
+                    return .error(400, "The key query parameter is required.")
+                }
+                if let problem = Self.problem(withExistingKey: key) { return .error(400, "key: \(problem)") }
+                if ThumbnailKeys.isThumbnail(key, prefixes: thumbnailPrefixes) {
+                    return .error(400, "key: That folder holds this bucket's thumbnails.")
+                }
+                guard try await storage.objectExists(key: key) else { return .error(404, "No object with that key.") }
+                let filename = Self.filename(request) ?? (key as NSString).lastPathComponent
+                guard let fileURL = Self.stage(request, filename: filename) else {
+                    return .error(500, "Could not stage the file for upload.")
+                }
+                defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+                return respond(await appState.uploadManager.replaceObjectAndWait(key: key, in: destination, with: fileURL), status: 200)
 
             case ("DELETE", ["objects"]):
                 guard let key = request.query["key"], !key.isEmpty else {
@@ -481,15 +536,6 @@ final class LocalAPIRouter {
         return try? appState.repository.modelContext.fetch(descriptor).first
     }
 
-    private func record(publicURLString: String, destinationID: UUID) -> UploadRecord? {
-        var descriptor = FetchDescriptor<UploadRecord>(
-            predicate: #Predicate { $0.publicURLString == publicURLString && $0.destinationID == destinationID },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = 1
-        return try? appState.repository.modelContext.fetch(descriptor).first
-    }
-
     private func decode<T: Decodable>(_ type: T.Type, from request: HTTPRequest) throws -> T {
         try JSONDecoder().decode(type, from: request.body)
     }
@@ -542,7 +588,11 @@ final class LocalAPIRouter {
             providerName: destination.preset.displayName,
             bucket: destination.bucket,
             publicBaseURL: destination.publicBaseURL,
-            isDefault: destination.id == appState.destinationStore.defaultDestination?.id
+            isDefault: destination.id == appState.destinationStore.defaultDestination?.id,
+            useFor: destination.useFor.flatMap { $0.isEmpty ? nil : UseForDTO(kinds: $0.kinds.map(\.rawValue), extensions: $0.extensions) },
+            shortCache: destination.shortCache == true,
+            hasCloudflarePurge: CloudflarePurge.isSetUp(destination, credentials: try? KeychainService.load(for: destination.id)),
+            hooks: (destination.hooks ?? []).filter(\.enabled).count
         )
     }
 
@@ -568,6 +618,7 @@ final class LocalAPIRouter {
             size: record.byteSize,
             createdAt: record.createdAt,
             expiresAt: record.expiresAt,
+            replacedAt: record.replacedAt,
             formats: .init(url: formatted(.url), markdown: formatted(.markdown), html: formatted(.html), custom: formatted(.custom)),
             reused: reused
         )
@@ -683,6 +734,17 @@ private struct DestinationDTO: Encodable {
     let bucket: String
     let publicBaseURL: String
     let isDefault: Bool
+    /// The file types and extensions sent here when no destination is named.
+    let useFor: UseForDTO?
+    let shortCache: Bool
+    let hasCloudflarePurge: Bool
+    /// Enabled After Upload hooks.
+    let hooks: Int
+}
+
+private struct UseForDTO: Encodable {
+    let kinds: [String]
+    let extensions: [String]
 }
 
 private struct UploadDTO: Encodable {
@@ -703,6 +765,8 @@ private struct UploadDTO: Encodable {
     let size: Int
     let createdAt: Date
     let expiresAt: Date?
+    /// When a new file was last written over the upload (Replace File).
+    let replacedAt: Date?
     let formats: Formats
     /// Only in the response to an upload.
     let reused: Bool?

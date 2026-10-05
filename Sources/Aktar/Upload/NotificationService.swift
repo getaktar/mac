@@ -26,6 +26,21 @@ enum NotificationService {
         UNUserNotificationCenter.current().add(request)
     }
 
+    /// A file was written over an upload; its link stays the same.
+    static func notifyReplaced(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.title = filename
+        content.body = String(localized: "Replaced - the link stays the same and is copied")
+        post(content)
+    }
+
+    static func notifyPurgeFailed(filename: String, reason: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "The file was replaced, but Cloudflare\u{2019}s cache couldn\u{2019}t be cleared")
+        content.body = "\(filename): \(reason)"
+        post(content)
+    }
+
     static func notifyUploadFailed(filename: String, reason: String) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Upload failed")

@@ -19,7 +19,7 @@ struct MediaPreview: View {
 
     /// Whether AVFoundation can play this kind of file (MP4, MOV, M4V, MP3,
     /// M4A, WAV and the like, but not MKV or WebM).
-    static func canPlay(filename: String) -> Bool {
+    nonisolated static func canPlay(filename: String) -> Bool {
         let ext = (filename as NSString).pathExtension
         guard !ext.isEmpty, let type = UTType(filenameExtension: ext),
               type.conforms(to: .audiovisualContent) else { return false }

@@ -81,8 +81,12 @@ enum URLSchemeHandler {
     /// Any web page or app can open an aktar:// link, so uploading the
     /// clipboard that way always asks first, saying what would go where.
     private static func confirmClipboardUpload(appState: AppState) {
-        guard let destination = appState.destinationStore.defaultDestination,
-              let input = ClipboardService.readFileInput() else { return }
+        guard let input = ClipboardService.readFileInput() else { return }
+        // Where "Use for" sends it, which the question names.
+        guard let destination = appState.uploadManager.routedDestination(for: input) else {
+            TempFiles.removeIfOwned(input.fileURL)
+            return
+        }
         NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()

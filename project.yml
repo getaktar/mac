@@ -168,6 +168,7 @@ targets:
       - path: Sources/Aktar/Upload/ImageProcessor.swift
       - path: Sources/Aktar/Thumbnails/ThumbnailSettings.swift
       - path: Sources/Aktar/Thumbnails/ThumbnailGenerator.swift
+      - path: Sources/Aktar/Automation/FileRouting.swift
     dependencies:
       - package: libwebp
     settings:

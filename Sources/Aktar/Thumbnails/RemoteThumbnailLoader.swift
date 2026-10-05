@@ -95,8 +95,8 @@ final class RemoteThumbnailLoader {
     /// object is still that upload (not replaced since).
     private func uploadedThumbnail(for object: BucketObject, destinationID: UUID) -> NSImage? {
         guard let records = repository?.records(key: object.key, destinationID: destinationID),
-              let newest = records.max(by: { $0.createdAt < $1.createdAt }) else { return nil }
-        if let written = object.lastModified, written > newest.createdAt.addingTimeInterval(60) { return nil }
+              let newest = records.max(by: { $0.writtenAt < $1.writtenAt }) else { return nil }
+        if let written = object.lastModified, written > newest.writtenAt.addingTimeInterval(60) { return nil }
         return ThumbnailStore.shared.image(for: newest.id)
     }
 
@@ -112,7 +112,7 @@ final class RemoteThumbnailLoader {
               record.remoteDeletedAt == nil, (record.expiresAt ?? .distantFuture) > .now,
               !historyInFlight.contains(id), store.image(for: id) == nil, !store.isUnavailable(id) else { return }
         let newer = repository?.records(key: record.objectKey, destinationID: destination.id)
-            .contains { $0.id != id && $0.createdAt > record.createdAt } ?? false
+            .contains { $0.id != id && $0.writtenAt > record.writtenAt } ?? false
         guard !newer else {
             store.markUnavailable(id)
             return
@@ -122,8 +122,8 @@ final class RemoteThumbnailLoader {
         let objectKey = record.objectKey
         let size = Int64(record.byteSize)
         // The bucket's own thumbnail is written just after the file.
-        let writtenAfter = record.createdAt.addingTimeInterval(-120)
-        let uploadedAt = record.createdAt
+        let writtenAfter = record.writtenAt.addingTimeInterval(-120)
+        let uploadedAt = record.writtenAt
         let outcome = await limited {
             await self.make(objectKey: objectKey, size: size, writtenAfter: writtenAfter, destination: destination, uploadedAt: uploadedAt)
         }

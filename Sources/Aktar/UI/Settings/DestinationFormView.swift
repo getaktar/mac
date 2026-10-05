@@ -1,3 +1,4 @@
+import KeyboardShortcuts
 import SwiftUI
 
 struct DestinationFormView: View {
@@ -27,6 +28,21 @@ struct DestinationFormView: View {
     @State private var imageQuality: Int?
     @State private var imageMaxLongEdge: Int?
     @State private var thumbnailMode: ThumbnailMode
+    @State private var useForKinds: Set<FileRouting.Kind>
+    @State private var useForExtensions: String
+    @State private var shortCache: Bool
+    @State private var cloudflareZoneId: String
+    /// A token typed here; empty keeps the saved one.
+    @State private var cloudflareToken = ""
+    private let hasSavedCloudflareToken: Bool
+    @State private var purgeCheck: PurgeCheck?
+    @State private var hooks: [WatchHook]
+
+    private enum PurgeCheck: Equatable {
+        case checking
+        case passed
+        case failed(String)
+    }
     @State private var thumbnailPrefix: String
     /// Saving stopped to ask what happens to the thumbnails already in
     /// the bucket's old thumbnail folder.
@@ -75,6 +91,12 @@ struct DestinationFormView: View {
         _imageQuality = State(initialValue: existing?.imageProcessing?.quality)
         _imageMaxLongEdge = State(initialValue: existing?.imageProcessing?.maxLongEdge)
         _thumbnailMode = State(initialValue: existing?.thumbnailMode ?? .default)
+        _useForKinds = State(initialValue: Set(existing?.useFor?.kinds ?? []))
+        _useForExtensions = State(initialValue: (existing?.useFor?.extensions ?? []).joined(separator: ", "))
+        _shortCache = State(initialValue: existing?.shortCache ?? false)
+        _cloudflareZoneId = State(initialValue: existing?.cloudflareZoneId ?? "")
+        _hooks = State(initialValue: existing?.hooks ?? [])
+        hasSavedCloudflareToken = existing.flatMap { try? KeychainService.load(for: $0.id).cloudflareToken }.map { !$0.isEmpty } ?? false
         _thumbnailPrefix = State(initialValue: ThumbnailKeys.normalizedPrefix(existing?.thumbnailPrefix) ?? ThumbnailKeys.defaultPrefix)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
         _destinationID = State(initialValue: existing?.id ?? UUID())
@@ -176,9 +198,17 @@ struct DestinationFormView: View {
 
                 uploadDefaultsSection
 
+                useForSection
+
+                shortcutSection
+
                 imageProcessingSection
 
                 thumbnailsSection
+
+                replacingSection
+
+                afterUploadSection
 
                 ConnectionTestSection(result: testResult, error: testError)
             }
@@ -197,7 +227,11 @@ struct DestinationFormView: View {
 
                 Spacer()
 
-                Button("Cancel") { dismiss() }
+                Button("Cancel") {
+                    // A shortcut recorded for a destination that's never saved.
+                    if existing == nil { KeyboardShortcuts.reset(.uploadToDestination(destinationID)) }
+                    dismiss()
+                }
                 Button("Save") { save() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!canSave)
@@ -243,6 +277,128 @@ struct DestinationFormView: View {
             Text("Upload Defaults")
         } footer: {
             Text("Applied whenever this destination is picked. Add one destination per kind of file, such as Builds, Logs or Screenshots, each with its own path and defaults. A temporary link stops working after the time you pick and works for private buckets too. Image metadata applies to photos and videos: Remove location drops the GPS position, Remove all also drops the camera, date and other details. A folder is uploaded as one ZIP file, or file by file with its subfolders.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The file types an upload that doesn't name a destination sends here.
+    private var useForSection: some View {
+        Section {
+            HStack(spacing: 14) {
+                ForEach(FileRouting.Kind.allCases) { kind in
+                    Toggle(kind.label, isOn: Binding(
+                        get: { useForKinds.contains(kind) },
+                        set: { isOn in
+                            if isOn { useForKinds.insert(kind) } else { useForKinds.remove(kind) }
+                        }
+                    ))
+                    .toggleStyle(.checkbox)
+                }
+            }
+            TextField("Extensions", text: $useForExtensions, prompt: Text(verbatim: "dmg, zip"))
+            if let problem = useForProblem {
+                Text(problem)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } header: {
+            Text("Use For")
+        } footer: {
+            Text("When an upload doesn\u{2019}t name a destination (the clipboard shortcut, the menu bar, Finder, Shortcuts, the local API), files of these types come here instead of the default destination. An extension listed here wins over a type.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var useForProblem: String? {
+        let invalid = FileRouting.parseExtensions(useForExtensions).invalid
+        guard !invalid.isEmpty else { return nil }
+        let list = ListFormatter.localizedString(byJoining: invalid.map { "\u{201C}\($0)\u{201D}" })
+        return String(localized: "Not an extension: \(list). Use letters and digits only, such as dmg or mp4.")
+    }
+
+    private var currentUseFor: FileRouting? {
+        let routing = FileRouting(
+            kinds: FileRouting.orderedKinds(Array(useForKinds)),
+            extensions: FileRouting.parseExtensions(useForExtensions).extensions
+        )
+        return routing.isEmpty ? nil : routing
+    }
+
+    private var shortcutSection: some View {
+        Section {
+            KeyboardShortcuts.Recorder("Upload clipboard here", name: .uploadToDestination(destinationID))
+        } header: {
+            Text("Keyboard Shortcut")
+        } footer: {
+            Text("Uploads what\u{2019}s on the clipboard to this destination, whatever \u{201C}Use for\u{201D} says. Kept on this Mac only.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// What helps a file replaced at its key (Replace File, or a watched
+    /// folder keeping the link) show up right away.
+    private var replacingSection: some View {
+        Section {
+            Toggle("Short cache time", isOn: $shortCache)
+            TextField("Cloudflare Zone ID", text: $cloudflareZoneId, prompt: Text("Optional"))
+            HStack {
+                SecureField(
+                    "Cloudflare API Token",
+                    text: $cloudflareToken,
+                    prompt: hasSavedCloudflareToken ? Text("Unchanged") : Text("Optional")
+                )
+                Button("Check") { checkCloudflareToken() }
+                    .disabled(purgeCheck == .checking || (cloudflareToken.isEmpty && !hasSavedCloudflareToken))
+            }
+            switch purgeCheck {
+            case .checking:
+                Text("Checking\u{2026}").font(.caption).foregroundStyle(.secondary)
+            case .passed:
+                Label("Cloudflare accepts this token", systemImage: "checkmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.green)
+            case .failed(let message):
+                Text(message).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
+            case nil:
+                EmptyView()
+            }
+        } header: {
+            Text("Replacing Files")
+        } footer: {
+            Text("Replace File writes a new file at the same key, so its link keeps working. Short cache time sends every upload here with a one-minute cache time, so a replaced file shows up everywhere within about a minute. With a Cloudflare zone ID and an API token that can purge its cache (Zone > Cache Purge), Aktar clears the old version from Cloudflare right away.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func checkCloudflareToken() {
+        let typed = cloudflareToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        let token = typed.isEmpty ? existing.flatMap { try? KeychainService.load(for: $0.id).cloudflareToken } : typed
+        guard let token, !token.isEmpty else { return }
+        purgeCheck = .checking
+        Task {
+            do {
+                try await CloudflarePurge.verify(token: token)
+                purgeCheck = .passed
+            } catch {
+                purgeCheck = .failed((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
+            }
+        }
+    }
+
+    private var afterUploadSection: some View {
+        Section {
+            HookListEditor(hooks: $hooks) { hook in
+                try await DestinationHooks.test(hook, destination: currentConfig())
+            }
+        } header: {
+            Text("After Upload")
+        } footer: {
+            Text("Runs after each upload to this destination and each replace, except a watched folder\u{2019}s files, which run their folder\u{2019}s own Automation. A webhook gets the upload as JSON. A script gets the same JSON on standard input, with the link, the key, the file and the destination as its arguments; put scripts in Aktar\u{2019}s scripts folder (~/Library/Application Scripts/com.getaktar.mac) to pick them here.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -537,7 +693,7 @@ struct DestinationFormView: View {
 
     private var canSave: Bool {
         !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
-            && thumbnailPrefixProblem == nil
+            && thumbnailPrefixProblem == nil && useForProblem == nil && !HookListEditor.hasUnusableWebhook(hooks)
             && (existing != nil || (!accessKeyId.isEmpty && !secretAccessKey.isEmpty))
     }
 
@@ -561,7 +717,12 @@ struct DestinationFormView: View {
             folderUpload: folderUpload,
             imageProcessing: currentImageProcessing,
             thumbnails: thumbnailMode,
-            thumbnailPrefix: currentThumbnailPrefix
+            thumbnailPrefix: currentThumbnailPrefix,
+            useFor: currentUseFor,
+            shortCache: shortCache ? true : nil,
+            cloudflareZoneId: cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? nil : cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines),
+            hooks: hooks.isEmpty ? nil : hooks
         )
     }
 
@@ -622,6 +783,16 @@ struct DestinationFormView: View {
             credentials = existingCredentials
         }
         let config = currentConfig()
+        // The Cloudflare token: a typed one, otherwise the saved one, and
+        // none once the zone ID is cleared.
+        let typedToken = cloudflareToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        if config.cloudflareZoneId == nil {
+            credentials.cloudflareToken = nil
+        } else if !typedToken.isEmpty {
+            credentials.cloudflareToken = typedToken
+        } else if let existing {
+            credentials.cloudflareToken = (try? KeychainService.load(for: existing.id))?.cloudflareToken
+        }
         if checkedExpiryRules, checkedConnection == Connection(config) {
             ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)
         } else if let existing, Connection(existing) == Connection(config), accessKeyId.isEmpty {

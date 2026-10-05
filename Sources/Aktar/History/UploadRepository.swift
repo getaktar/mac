@@ -51,6 +51,42 @@ final class UploadRepository {
         return record
     }
 
+    /// A replace (`UploadManager.replace`): the entry keeps its ID, key and
+    /// link, and gets the new file's size, hash, type and thumbnail, a
+    /// "Replaced" date, and, for an expiring key, a new expiry. Without an
+    /// entry (a bucket object Aktar didn't upload, or one removed from
+    /// history), the replace is added to history.
+    @discardableResult
+    func replace(recordID: UUID?, result: UploadResult, input: UploadInput, destination: DestinationConfig, expiryDays: Int?, uploadedFileURL: URL, contentHash: String?, thumbnail: Data?) -> UploadRecord {
+        let now = Date.now
+        guard let recordID, let record = record(id: recordID) else {
+            let record = self.record(result: result, input: input, destination: destination, expiryDays: expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
+            record.replacedAt = now
+            try? modelContext.save()
+            return record
+        }
+        record.byteSize = result.byteSize
+        record.mimeType = ContentTypeResolver.resolve(for: uploadedFileURL)
+        record.contentHash = contentHash
+        record.replacedAt = now
+        record.remoteDeletedAt = nil
+        record.expiresAt = expiryDays.map { now.addingTimeInterval(TimeInterval($0) * 86_400) }
+        try? modelContext.save()
+        let store = ThumbnailStore.shared
+        if let thumbnail {
+            store.store(thumbnail, for: record.id)
+        } else {
+            store.remove(for: record.id)
+            if destination.thumbnailMode != .off { store.markUnavailable(record.id) }
+        }
+        return record
+    }
+
+    func record(id: UUID) -> UploadRecord? {
+        let descriptor = FetchDescriptor<UploadRecord>(predicate: #Predicate { $0.id == id })
+        return try? modelContext.fetch(descriptor).first
+    }
+
     func delete(_ record: UploadRecord) {
         modelContext.delete(record)
         try? modelContext.save()

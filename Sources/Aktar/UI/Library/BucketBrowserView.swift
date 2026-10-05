@@ -355,6 +355,7 @@ struct BucketListView: View {
 /// Copy, open, rename and delete actions for one object, shared by the
 /// list's context menu and the detail view's toolbar menu.
 private struct BucketObjectMenuItems: View {
+    @Environment(AppState.self) private var appState
     let model: BucketBrowserModel
     let object: BucketObject
     let requestMove: () -> Void
@@ -370,6 +371,9 @@ private struct BucketObjectMenuItems: View {
         Button("Open in Browser") { model.openPublicURL(for: object.key) }
         Divider()
         Button("Rename or Move\u{2026}", action: requestMove)
+        Button("Replace File\u{2026}") {
+            ReplaceFile.replaceObject(key: object.key, in: model.destination, using: appState.uploadManager)
+        }
         Button("Delete Remote File\u{2026}", role: .destructive, action: requestDeletion)
     }
 

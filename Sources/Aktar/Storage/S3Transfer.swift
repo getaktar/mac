@@ -35,11 +35,18 @@ extension S3Provider {
         return (attributes[.size] as? NSNumber)?.int64Value ?? 0
     }
 
+    /// A destination set to `shortCache` sends every file with a one-minute
+    /// cache time, so a replaced file shows up everywhere within a minute.
+    var cacheControl: String? {
+        config.shortCache == true ? "public, max-age=60" : nil
+    }
+
     // MARK: - Single PUT
 
     /// One PUT streamed from the file. `progress` gets the bytes sent.
     func putObject(fileURL: URL, objectKey: String, contentType: String, progress: @escaping @Sendable (Int64) -> Void) async throws {
         var headers = ["Content-Type": contentType]
+        if let cacheControl { headers["Cache-Control"] = cacheControl }
         if let disposition = ContentTypeResolver.contentDisposition(names: [objectKey, fileURL.lastPathComponent], contentType: contentType) {
             headers["Content-Disposition"] = disposition
         }
@@ -54,7 +61,9 @@ extension S3Provider {
     /// One small PUT from memory, such as a thumbnail.
     func putObject(data: Data, objectKey: String, contentType: String) async throws {
         try await withRetries {
-            let request = try signedRequest(method: .PUT, key: objectKey, headers: ["Content-Type": contentType])
+            var headers = ["Content-Type": contentType]
+            if let cacheControl { headers["Cache-Control"] = cacheControl }
+            let request = try signedRequest(method: .PUT, key: objectKey, headers: headers)
             let (body, response) = try await Self.transferSession.upload(for: request, from: data)
             _ = try check(body, response)
         }
@@ -111,6 +120,7 @@ extension S3Provider {
         do {
             let output = try await s3.createMultipartUpload(.init(
                 bucket: config.bucket,
+                cacheControl: cacheControl,
                 contentDisposition: disposition,
                 contentType: contentType,
                 key: objectKey

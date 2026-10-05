@@ -26,7 +26,8 @@ enum WatchHookError: LocalizedError {
     }
 }
 
-/// Runs a watched folder's Automation after an upload. Nothing here holds
+/// Runs a watched folder's Automation, or a destination's After Upload
+/// hooks, after an upload. Nothing here holds
 /// up the upload or the next one; a hook gets 10 seconds.
 ///
 /// A webhook gets the payload POSTed as JSON. A script gets it on standard
@@ -110,7 +111,9 @@ enum WatchHookRunner {
         task.standardInput = input.fileHandleForReading
         task.standardOutput = FileHandle.nullDevice
         task.standardError = FileHandle.nullDevice
-        let arguments = [payload.upload.url, payload.upload.key, payload.file.path, payload.folder.name]
+        // The fourth is the watched folder's name, or the destination's for
+        // an upload made by hand.
+        let arguments = [payload.upload.url, payload.upload.key, payload.file.path, payload.folder?.name ?? payload.destination?.name ?? ""]
 
         // Whichever comes first: the script ending or the time running out.
         // A script that runs longer is left to finish on its own.

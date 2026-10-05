@@ -1599,10 +1599,27 @@ struct WatchHookPayload: Encodable, Sendable {
         let reused: Bool
     }
 
+    struct Destination: Encodable, Sendable {
+        let id: String
+        let name: String
+    }
+
+    /// "upload.succeeded", or "upload.replaced" for a file replaced so its
+    /// link stays (a destination's hooks).
     var event = "upload.succeeded"
-    let folder: Folder
+    /// The watched folder the file came from; left out for a destination's
+    /// hooks, which run for uploads made by hand.
+    var folder: Folder?
+    var destination: Destination?
     let file: File
     let upload: Upload
+
+    init(event: String, destination: Destination, file: File, upload: Upload) {
+        self.event = event
+        self.destination = destination
+        self.file = file
+        self.upload = upload
+    }
 
     init(upload: WatchedFileUpload) {
         folder = Folder(id: upload.folder.id.uuidString, name: upload.folder.name, path: upload.folder.path)

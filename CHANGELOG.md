@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Use For on each destination: pick file types (Images, Videos, Audio,
+  Documents, Archives) and extensions, and files of those types go there
+  when an upload doesn't name a destination (the clipboard shortcut, the
+  menu bar, Finder, the Share menu, Shortcuts, the local API). An extension
+  wins over a type; a tie goes to the default destination. Files of one drop
+  that go to different destinations are still copied together, in order.
+  The panel says where files go
+- A keyboard shortcut for each destination that uploads the clipboard
+  there, whatever Use For says
+- Replace File… in History and the bucket view (and the local API): a new
+  file is written at the same key, so its link keeps working. Metadata
+  removal and resizing apply, a format conversion doesn't. History keeps
+  the entry with a Replaced date, an expiring file starts its days again,
+  and the thumbnail is made again
+- Replacing Files on each destination: a short cache time (one minute) for
+  everything uploaded there, and an optional Cloudflare zone ID and API
+  token that clear a replaced file from Cloudflare's cache right away, also
+  when a watched folder keeps a link by writing over its upload
+- After Upload on each destination: the same webhooks and scripts as a
+  watched folder's Automation, run after each upload made by hand and each
+  replace, with `"event": "upload.replaced"` for a replace
+- Shortcuts actions: Upload File, Upload Clipboard, Replace File and Get
+  Recent Uploads, which return links, with destinations and uploads to pick
+  from. Uploads without a destination follow Use For
+- Local API: `POST /v1/uploads/{id}/replace` and
+  `PUT /v1/destinations/{id}/objects?key=`, and an upload without
+  `destinationId` follows Use For. Destinations report `useFor`,
+  `shortCache`, `hasCloudflarePurge` and their hook count
+- Share to Another Device carries Use For, the short cache setting, the
+  Cloudflare zone and token, and the hooks
+
 ## [0.13.0] - 2026-10-05
 
 ### Added

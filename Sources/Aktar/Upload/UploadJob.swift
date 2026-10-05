@@ -29,6 +29,9 @@ final class UploadJob: Identifiable {
     /// SHA-256 of the file as it is on disk, when the upload hashed the
     /// original bytes (for a watched folder's ledger).
     var originalContentHash: String?
+    /// The history entry the job made or updated (or reused), once it
+    /// has succeeded.
+    var recordID: UUID?
 
     /// Waiting or uploading: its file is still needed.
     var isActive: Bool {

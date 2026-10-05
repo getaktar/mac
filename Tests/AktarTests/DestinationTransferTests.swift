@@ -219,9 +219,13 @@ final class DestinationTransferTests: XCTestCase {
             folderUpload: .zip,
             imageProcessing: ImageProcessing(format: .avif, quality: nil, maxLongEdge: 1280),
             thumbnails: .bucket,
-            thumbnailPrefix: "previews/"
+            thumbnailPrefix: "previews/",
+            useFor: FileRouting(kinds: [.image, .video], extensions: ["dmg"]),
+            shortCache: true,
+            cloudflareZoneId: "abc123",
+            hooks: [WatchHook(kind: .webhook, target: "https://example.com/hook"), WatchHook(kind: .script, target: "notify.sh", enabled: false)]
         )
-        let credentials = StorageCredentials(accessKeyId: "id", secretAccessKey: "secret", sessionToken: "session")
+        let credentials = StorageCredentials(accessKeyId: "id", secretAccessKey: "secret", sessionToken: "session", cloudflareToken: "cf")
         let code = DestinationTransfer.generateCode()
         let link = try DestinationTransfer.seal(.init(destination: destination, credentials: credentials, customTemplate: "<{url}>"), code: code)
         XCTAssertTrue(link.hasPrefix(DestinationTransfer.linkPrefix))
@@ -231,7 +235,16 @@ final class DestinationTransferTests: XCTestCase {
         var expected = destination
         // Never sent: the receiving device has its own default.
         expected.isDefault = false
+        // Hooks get new IDs on the receiving device.
+        expected.hooks = payload.destination.hooks.map { received in
+            zip(received, destination.hooks ?? []).map { new, old in
+                var hook = old
+                hook.id = new.id
+                return hook
+            }
+        }
         XCTAssertEqual(payload.destination, expected)
+        XCTAssertEqual(payload.credentials.cloudflareToken, "cf")
         XCTAssertEqual(payload.credentials.accessKeyId, "id")
         XCTAssertEqual(payload.credentials.secretAccessKey, "secret")
         XCTAssertEqual(payload.credentials.sessionToken, "session")
@@ -319,5 +332,30 @@ final class DestinationTransferTests: XCTestCase {
         XCTAssertNil(unknown.thumbnailPrefix)
         XCTAssertEqual(unknown.thumbnailMode, .local)
         XCTAssertNil(try decoded(3, "a/../b").thumbnailPrefix)
+    }
+
+    func testAutomationFieldsAreLenient() throws {
+        let json: [String: Any] = [
+            "v": 1,
+            "destination": [
+                "id": UUID().uuidString, "name": "A", "preset": "customS3", "endpoint": "https://s3.example.com",
+                "bucket": "b", "publicBaseURL": "https://files.example.com",
+                "useFor": ["kinds": ["video", "nope"], "extensions": ["DMG", "a b"]],
+                "shortCache": "yes",
+                "cloudflareZoneId": "zone/../x",
+                "hooks": [
+                    ["kind": "webhook", "target": "http://example.com/hook"],
+                    ["kind": "script", "target": "../evil.sh"],
+                    ["kind": "carrier-pigeon", "target": "x"],
+                    ["kind": "webhook", "target": "https://example.com/ok"],
+                ],
+            ],
+            "credentials": ["accessKeyId": "id", "secretAccessKey": "secret"],
+        ]
+        let destination = try DestinationTransfer.decodePayload(JSONSerialization.data(withJSONObject: json)).destination
+        XCTAssertEqual(destination.useFor, FileRouting(kinds: [.video], extensions: ["dmg"]))
+        XCTAssertNil(destination.shortCache)
+        XCTAssertNil(destination.cloudflareZoneId)
+        XCTAssertEqual(destination.hooks?.map(\.target), ["https://example.com/ok"])
     }
 }

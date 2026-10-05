@@ -23,6 +23,14 @@ final class UploadRecord: Identifiable {
     /// time; nil for everything uploaded by hand.
     var watchedFolderID: UUID?
     var watchedFolderName: String?
+    /// When a new file was last written over this upload at its key (Replace
+    /// File); nil when it never was. `createdAt` stays the first upload.
+    var replacedAt: Date?
+
+    /// When the bytes in the bucket were written: the last replace, or the
+    /// upload. What's compared with the object's date to tell whether the
+    /// object is still this upload.
+    var writtenAt: Date { replacedAt ?? createdAt }
 
     init(
         id: UUID = UUID(),

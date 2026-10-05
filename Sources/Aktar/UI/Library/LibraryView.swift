@@ -310,6 +310,8 @@ struct LibraryView: View {
             }
             Button("Reveal Details") { selectedIDs = [record.id] }
             Divider()
+            Button("Replace File\u{2026}") { ReplaceFile.replace(record, using: appState.uploadManager) }
+            Divider()
             Button("Delete Remote File\u{2026}", role: .destructive) { recordsPendingDeletion = [record] }
             Button("Remove from History", role: .destructive) {
                 appState.repository.delete(record)
@@ -1372,6 +1374,13 @@ private struct UploadDetailView: View {
                     value: record.createdAt.formatted(date: .abbreviated, time: .shortened),
                     tooltip: record.createdAt.formatted(date: .complete, time: .standard)
                 )
+                if let replacedAt = record.replacedAt {
+                    DetailRow(
+                        label: "Replaced",
+                        value: replacedAt.formatted(date: .abbreviated, time: .shortened),
+                        tooltip: replacedAt.formatted(date: .complete, time: .standard)
+                    )
+                }
                 if let expiresAt = record.expiresAt {
                     DetailRow(
                         label: "Deletes",
@@ -1440,6 +1449,8 @@ private struct UploadDetailView: View {
                 Button("Open in Browser") {
                     if let url = record.publicURL { NSWorkspace.shared.open(url) }
                 }
+                Divider()
+                Button("Replace File\u{2026}") { ReplaceFile.replace(record, using: appState.uploadManager) }
                 Divider()
                 if isDeleting {
                     Label("Deleting\u{2026}", systemImage: "hourglass")

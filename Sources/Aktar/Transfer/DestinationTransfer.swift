@@ -268,6 +268,14 @@ enum DestinationTransfer {
         }
         if let thumbnails = config.thumbnails { destination["thumbnails"] = thumbnails.rawValue }
         if let prefix = config.thumbnailPrefix { destination["thumbnailPrefix"] = prefix }
+        if let routing = config.useFor, !routing.isEmpty {
+            destination["useFor"] = ["kinds": routing.kinds.map(\.rawValue), "extensions": routing.extensions]
+        }
+        if config.shortCache == true { destination["shortCache"] = true }
+        if let zone = config.cloudflareZoneId, !zone.isEmpty { destination["cloudflareZoneId"] = zone }
+        if let hooks = config.hooks, !hooks.isEmpty {
+            destination["hooks"] = hooks.map { ["kind": $0.kind.rawValue, "target": $0.target, "enabled": $0.enabled] as [String: Any] }
+        }
 
         var credentials: [String: Any] = [
             "accessKeyId": payload.credentials.accessKeyId,
@@ -275,6 +283,9 @@ enum DestinationTransfer {
         ]
         if let sessionToken = payload.credentials.sessionToken, !sessionToken.isEmpty {
             credentials["sessionToken"] = sessionToken
+        }
+        if let token = payload.credentials.cloudflareToken, !token.isEmpty {
+            credentials["cloudflareToken"] = token
         }
 
         var root: [String: Any] = ["v": Int(formatVersion), "destination": destination, "credentials": credentials]
@@ -328,12 +339,19 @@ enum DestinationTransfer {
             thumbnails: string(object["thumbnails"]).flatMap(ThumbnailMode.init(rawValue:)),
             thumbnailPrefix: string(object["thumbnailPrefix"]).flatMap {
                 ThumbnailKeys.problem(withPrefix: $0) == nil ? ThumbnailKeys.normalizedPrefix($0) : nil
-            }
+            },
+            useFor: useFor(object["useFor"]),
+            shortCache: bool(object["shortCache"]) == true ? true : nil,
+            cloudflareZoneId: string(object["cloudflareZoneId"]).flatMap { zone in
+                zone.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) } ? zone : nil
+            },
+            hooks: hooks(object["hooks"])
         )
         let credentials = StorageCredentials(
             accessKeyId: accessKeyId,
             secretAccessKey: secretAccessKey,
-            sessionToken: string(keys["sessionToken"])
+            sessionToken: string(keys["sessionToken"]),
+            cloudflareToken: string(keys["cloudflareToken"])
         )
         return Payload(
             destination: destination,
@@ -354,6 +372,31 @@ enum DestinationTransfer {
             maxLongEdge: int(object["maxLongEdge"]).flatMap { ImageProcessing.sizeOptions.contains($0) ? $0 : nil }
         )
         return processing.isOff ? nil : processing
+    }
+
+    /// Unknown kinds and invalid extensions are dropped; nothing left is nil.
+    private static func useFor(_ value: Any?) -> FileRouting? {
+        guard let object = value as? [String: Any] else { return nil }
+        let kinds = (object["kinds"] as? [Any] ?? []).compactMap { ($0 as? String).flatMap(FileRouting.Kind.init(rawValue:)) }
+        let extensions = (object["extensions"] as? [Any] ?? []).compactMap { $0 as? String }
+        let routing = FileRouting(kinds: FileRouting.orderedKinds(kinds), extensions: FileRouting.normalizedExtensions(extensions))
+        return routing.isEmpty ? nil : routing
+    }
+
+    /// Hooks this app could run: an unknown kind, a webhook address that
+    /// would be refused, or a script path is dropped.
+    private static func hooks(_ value: Any?) -> [WatchHook]? {
+        let hooks = (value as? [Any] ?? []).compactMap { item -> WatchHook? in
+            guard let object = item as? [String: Any],
+                  let kind = string(object["kind"]).flatMap(WatchHook.Kind.init(rawValue:)),
+                  let target = string(object["target"]) else { return nil }
+            switch kind {
+            case .webhook: guard WatchHookAddress.check(target) == .allowed else { return nil }
+            case .script: guard !target.contains("/") else { return nil }
+            }
+            return WatchHook(kind: kind, target: target, enabled: bool(object["enabled"]) ?? true)
+        }
+        return hooks.isEmpty ? nil : hooks
     }
 
     // MARK: - JSON values
