@@ -104,6 +104,106 @@
         }
       }
     },
+    "1. Create a token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Token erstellen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Crea un token"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Créer un jeton"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Buat token"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Crea un token"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. トークンを作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. 토큰 생성"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Maak een token aan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Utwórz token"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Crie um token"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Создайте токен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Token oluştur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Створіть токен"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Tạo token"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. 创建令牌"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. 建立權杖"
+          }
+        }
+      }
+    },
     "14 days" : {
       "localizations" : {
         "de" : {
@@ -200,6 +300,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "14 天"
+          }
+        }
+      }
+    },
+    "2. Paste it" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Einfügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Pégalo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Collez-le"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Tempel"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Incollalo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 貼り付ける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 붙여넣기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Plak het"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Wklej go"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Cole-o"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Вставьте его"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Yapıştır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Вставте його"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Dán token"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 粘贴"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 貼上"
           }
         }
       }
@@ -304,6 +504,106 @@
         }
       }
     },
+    "A bucket with this name already exists. Pick it from the list above to use it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Bucket mit diesem Namen existiert bereits. Wähle ihn oben aus der Liste aus, um ihn zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya existe un bucket con este nombre. Elígelo de la lista de arriba para usarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un bucket portant ce nom existe déjà. Choisissez-le dans la liste ci-dessus pour l’utiliser."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket dengan nama ini sudah ada. Pilih dari daftar di atas untuk menggunakannya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esiste già un bucket con questo nome. Sceglilo dall’elenco qui sopra per usarlo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この名前のバケットはすでに存在します。使用するには、上のリストから選択してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 이름의 버킷이 이미 있습니다. 사용하려면 위 목록에서 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er bestaat al een bucket met deze naam. Kies hem in de lijst hierboven om hem te gebruiken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket o tej nazwie już istnieje. Wybierz go z listy powyżej, aby go użyć."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já existe um bucket com este nome. Escolha-o na lista acima para usá-lo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бакет с таким именем уже существует. Выберите его в списке выше, чтобы использовать."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu ada sahip bir bucket zaten var. Kullanmak için yukarıdaki listeden seç."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бакет з такою назвою вже існує. Виберіть його зі списку вище, щоб використовувати."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã có bucket với tên này. Hãy chọn nó trong danh sách ở trên để sử dụng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已存在同名存储桶。请从上方列表中选择它来使用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已有同名的儲存貯體。請從上方列表中選擇它來使用。"
+          }
+        }
+      }
+    },
     "A new name for a single file, keeping its extension." : {
       "localizations" : {
         "de" : {
@@ -404,6 +704,106 @@
         }
       }
     },
+    "API Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-Token"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token de API"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeton d’API"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token API"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token API"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APIトークン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API 토큰"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-token"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token API"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token de API"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-токен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Token"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-токен"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token API"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API 令牌"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API 權杖"
+          }
+        }
+      }
+    },
     "Access needed" : {
       "localizations" : {
         "de" : {
@@ -500,6 +900,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "需要取用權限"
+          }
+        }
+      }
+    },
+    "Account" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konto"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akun"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konto"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аккаунт"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hesap"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tài khoản"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帳號"
           }
         }
       }
@@ -1504,6 +2004,106 @@
         }
       }
     },
+    "Aktar creates the bucket, turns on public links and saves the destination for you. It only needs an API token from your Cloudflare account." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar erstellt den Bucket, aktiviert öffentliche Links und speichert das Ziel für dich. Dafür braucht es nur ein API-Token aus deinem Cloudflare-Konto."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar crea el bucket, activa los enlaces públicos y guarda el destino por ti. Solo necesita un token de API de tu cuenta de Cloudflare."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar crée le bucket, active les liens publics et enregistre la destination pour vous. Il lui suffit d’un jeton d’API de votre compte Cloudflare."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar membuat bucket, mengaktifkan tautan publik, dan menyimpan tujuan untuk Anda. Aktar hanya memerlukan token API dari akun Cloudflare Anda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar crea il bucket, attiva i link pubblici e salva la destinazione per te. Serve solo un token API del tuo account Cloudflare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar がバケットの作成、公開リンクのオン、アップロード先の保存を代わりに行います。必要なのは Cloudflare アカウントの API トークンだけです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar가 버킷을 만들고, 공개 링크를 켜고, 대상을 저장해 줍니다. Cloudflare 계정의 API 토큰만 있으면 됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar maakt de bucket aan, schakelt openbare links in en slaat de bestemming voor je op. Het heeft alleen een API-token van je Cloudflare-account nodig."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar tworzy bucket, włącza linki publiczne i zapisuje miejsce docelowe za Ciebie. Potrzebuje tylko tokenu API z Twojego konta Cloudflare."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Aktar cria o bucket, ativa os links públicos e salva o destino para você. Ele só precisa de um token de API da sua conta do Cloudflare."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar создает бакет, включает публичные ссылки и сохраняет место назначения за вас. Для этого нужен только API-токен из вашего аккаунта Cloudflare."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar bucket'ı oluşturur, genel bağlantıları açar ve hedefi senin için kaydeder. Tek ihtiyacı Cloudflare hesabından bir API token'ı."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar створює бакет, вмикає публічні посилання та зберігає ціль за вас. Потрібен лише API-токен з вашого облікового запису Cloudflare."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar tạo bucket, bật liên kết công khai và lưu đích giúp bạn. Aktar chỉ cần một token API từ tài khoản Cloudflare của bạn."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 会为你创建存储桶、开启公开链接并保存上传目标。它只需要你 Cloudflare 账户中的一个 API 令牌。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 會為你建立儲存貯體、開啟公開連結並儲存目的地。它只需要你 Cloudflare 帳號中的一個 API 權杖。"
+          }
+        }
+      }
+    },
     "Aktar isn’t ready yet. Try again in a moment." : {
       "localizations" : {
         "de" : {
@@ -2404,6 +3004,106 @@
         }
       }
     },
+    "Back" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atrás"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kembali"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indietro"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "뒤로"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wstecz"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quay lại"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        }
+      }
+    },
     "Check" : {
       "localizations" : {
         "de" : {
@@ -3104,6 +3804,106 @@
         }
       }
     },
+    "Cloudflare adds the DNS record and certificate. It can take a few minutes before links work." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare fügt den DNS-Eintrag und das Zertifikat hinzu. Es kann ein paar Minuten dauern, bis die Links funktionieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare añade el registro DNS y el certificado. Los enlaces pueden tardar unos minutos en funcionar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare ajoute l’enregistrement DNS et le certificat. Les liens peuvent mettre quelques minutes à fonctionner."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare menambahkan catatan DNS dan sertifikat. Tautan mungkin baru berfungsi setelah beberapa menit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare aggiunge il record DNS e il certificato. Possono servire alcuni minuti prima che i link funzionino."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare が DNS レコードと証明書を追加します。リンクが使えるようになるまで数分かかることがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare가 DNS 레코드와 인증서를 추가합니다. 링크가 작동하기까지 몇 분 걸릴 수 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare voegt het DNS-record en het certificaat toe. Het kan een paar minuten duren voordat links werken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare dodaje rekord DNS i certyfikat. Może minąć kilka minut, zanim linki zaczną działać."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Cloudflare adiciona o registro DNS e o certificado. Pode levar alguns minutos até os links funcionarem."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare добавляет DNS-запись и сертификат. Ссылки могут заработать через несколько минут."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare DNS kaydını ve sertifikayı ekler. Bağlantıların çalışmaya başlaması birkaç dakika sürebilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare додає DNS-запис і сертифікат. Посилання можуть запрацювати лише за кілька хвилин."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare thêm bản ghi DNS và chứng chỉ. Có thể mất vài phút để các liên kết hoạt động."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare 会添加 DNS 记录和证书。链接可能需要几分钟才能生效。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare 會新增 DNS 記錄和憑證。連結可能需要幾分鐘才會生效。"
+          }
+        }
+      }
+    },
     "Cloudflare didn’t answer. %@" : {
       "localizations" : {
         "de" : {
@@ -3200,6 +4000,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cloudflare 沒有回應。%@"
+          }
+        }
+      }
+    },
+    "Cloudflare didn’t return the bucket’s r2.dev address." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare hat die r2.dev-Adresse des Buckets nicht zurückgegeben."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare no devolvió la dirección r2.dev del bucket."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare n’a pas renvoyé l’adresse r2.dev du bucket."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare tidak mengembalikan alamat r2.dev untuk bucket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare non ha restituito l’indirizzo r2.dev del bucket."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare からバケットの r2.dev アドレスが返されませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare가 버킷의 r2.dev 주소를 반환하지 않았습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare heeft het r2.dev-adres van de bucket niet teruggegeven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare nie zwrócił adresu r2.dev bucketu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Cloudflare não retornou o endereço r2.dev do bucket."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare не вернул адрес r2.dev для бакета."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare bucket'ın r2.dev adresini döndürmedi."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare не повернув адресу r2.dev для бакета."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare không trả về địa chỉ r2.dev của bucket."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare 未返回存储桶的 r2.dev 地址。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare 未傳回儲存貯體的 r2.dev 位址。"
           }
         }
       }
@@ -3804,6 +4704,106 @@
         }
       }
     },
+    "Create the bucket" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket erstellen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear el bucket"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer le bucket"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat bucket"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea il bucket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バケットを作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버킷 생성"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De bucket aanmaken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utwórz bucket"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar o bucket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать бакет"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket'ı oluştur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створити бакет"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tạo bucket"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建存储桶"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立儲存貯體"
+          }
+        }
+      }
+    },
     "Delete After" : {
       "localizations" : {
         "de" : {
@@ -4204,6 +5204,106 @@
         }
       }
     },
+    "Destination Name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zielname"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del destino"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la destination"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nama Tujuan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome destinazione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード先の名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대상 이름"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naam van bestemming"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nazwa miejsca docelowego"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do destino"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название места назначения"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef Adı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назва цілі"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên đích"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传目标名称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目的地名稱"
+          }
+        }
+      }
+    },
     "Documents" : {
       "localizations" : {
         "de" : {
@@ -4300,6 +5400,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "文件"
+          }
+        }
+      }
+    },
+    "Domain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domain"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dominio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domaine"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domain"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dominio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ドメイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도메인"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domein"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domena"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domínio"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alan Adı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домен"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên miền"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "域名"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "網域"
           }
         }
       }
@@ -4604,6 +5804,106 @@
         }
       }
     },
+    "Free up to 10 GB, set up in a minute" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis 10 GB kostenlos, in einer Minute eingerichtet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratis hasta 10 GB, configurado en un minuto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratuit jusqu’à 10 Go, configuré en une minute"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratis hingga 10 GB, siap dalam satu menit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratis fino a 10 GB, configurato in un minuto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 GB まで無料、1分で設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10GB까지 무료, 1분이면 설정 완료"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratis tot 10 GB, in een minuut ingesteld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bezpłatnie do 10 GB, konfiguracja w minutę"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grátis até 10 GB, configurado em um minuto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бесплатно до 10 ГБ, настройка за минуту"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 GB'a kadar ücretsiz, bir dakikada kurulur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безкоштовно до 10 ГБ, налаштування за хвилину"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miễn phí đến 10 GB, thiết lập trong một phút"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 10 GB 免费，一分钟即可设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 10 GB 免費，一分鐘即可設定"
+          }
+        }
+      }
+    },
     "Get Recent Uploads" : {
       "localizations" : {
         "de" : {
@@ -4700,6 +6000,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取得最近的上傳項目"
+          }
+        }
+      }
+    },
+    "If the public link check failed, the domain is probably still being set up. Try Test Connection again in a few minutes from Edit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn die Prüfung des öffentlichen Links fehlgeschlagen ist, wird die Domain wahrscheinlich noch eingerichtet. Wähle in ein paar Minuten unter „Bearbeiten“ erneut „Verbindung testen“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si falló la comprobación del enlace público, probablemente el dominio aún se está configurando. Vuelve a pulsar Probar conexión en unos minutos desde Editar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si la vérification du lien public a échoué, le domaine est probablement encore en cours de configuration. Relancez Tester la connexion dans quelques minutes depuis Modifier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jika pemeriksaan tautan publik gagal, domain kemungkinan masih disiapkan. Coba Uji Koneksi lagi beberapa menit lagi dari Edit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se la verifica del link pubblico non è riuscita, il dominio è probabilmente ancora in fase di configurazione. Riprova Verifica connessione tra qualche minuto da Modifica."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開リンクの確認に失敗した場合は、ドメインがまだ設定中の可能性があります。数分後に「編集」から「接続をテスト」をもう一度実行してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공개 링크 확인에 실패했다면 도메인이 아직 설정 중일 수 있습니다. 몇 분 후 편집에서 연결 테스트를 다시 실행하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als de controle van de openbare link is mislukt, wordt het domein waarschijnlijk nog ingesteld. Voer over een paar minuten via Wijzig opnieuw Test verbinding uit."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeśli sprawdzenie linku publicznego nie powiodło się, domena prawdopodobnie jest jeszcze konfigurowana. Za kilka minut ponów Testuj połączenie w opcji Edytuj."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se a verificação do link público falhou, o domínio provavelmente ainda está sendo configurado. Tente Testar conexão de novo em alguns minutos, em Editar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если проверка публичной ссылки не прошла, домен, вероятно, еще настраивается. Через несколько минут снова нажмите «Проверить подключение» в разделе «Изменить»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bağlantı denetimi başarısız olduysa alan adı muhtemelen hâlâ kuruluyor. Birkaç dakika sonra Düzenle bölümünden Bağlantıyı Test Et'i tekrar dene."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо перевірка публічного посилання не вдалася, домен, імовірно, ще налаштовується. Через кілька хвилин знову виконайте «Перевірити з’єднання» в розділі «Редагувати»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nếu kiểm tra liên kết công khai không thành công, có thể tên miền vẫn đang được thiết lập. Hãy thử Kiểm tra kết nối lại sau vài phút từ mục Sửa."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果公开链接检查失败，可能是域名仍在设置中。请几分钟后在“编辑”中再次点按“测试连接”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果公開連結檢查失敗，可能是網域仍在設定中。請幾分鐘後在「編輯」中再次點按「測試連線」。"
           }
         }
       }
@@ -5104,6 +6504,306 @@
         }
       }
     },
+    "Links will look like https://%@/2026/10/photo.jpg" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links sehen so aus: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los enlaces tendrán este aspecto: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les liens ressembleront à ceci : https://%@/2026/10/photo.jpg"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tautan akan terlihat seperti https://%@/2026/10/photo.jpg"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I link avranno questo aspetto: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンクは次のようになります: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "링크는 다음과 같은 모양입니다: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links zien er zo uit: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linki będą wyglądać tak: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os links ficarão assim: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ссылки будут выглядеть так: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantılar şöyle görünecek: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посилання матимуть такий вигляд: https://%@/2026/10/photo.jpg"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liên kết sẽ có dạng https://%@/2026/10/photo.jpg"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "链接将类似于 https://%@/2026/10/photo.jpg"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連結會像這樣：https://%@/2026/10/photo.jpg"
+          }
+        }
+      }
+    },
+    "My Domain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Domain"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi dominio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon domaine"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domain Saya"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il mio dominio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分のドメイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 도메인"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijn domein"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moja domena"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu domínio"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мой домен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alan Adım"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мій домен"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên miền của tôi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的域名"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的網域"
+          }
+        }
+      }
+    },
+    "New Bucket" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Bucket"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo bucket"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau bucket"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket Baru"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo bucket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいバケット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 버킷"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieuwe bucket"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowy bucket"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo bucket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый бакет"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Bucket"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новий бакет"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucket mới"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建存储桶"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增儲存貯體"
+          }
+        }
+      }
+    },
     "No destination to upload to. Add one in Aktar’s Settings." : {
       "localizations" : {
         "de" : {
@@ -5200,6 +6900,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有可上傳的目的地。請在 Aktar 的設定中加入一個。"
+          }
+        }
+      }
+    },
+    "No domain on this Cloudflare account. Add one to Cloudflare first, or use the r2.dev address." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Cloudflare-Konto hat keine Domain. Füge zuerst eine bei Cloudflare hinzu oder nutze die r2.dev-Adresse."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta cuenta de Cloudflare no tiene ningún dominio. Añade uno a Cloudflare primero, o usa la dirección r2.dev."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun domaine sur ce compte Cloudflare. Ajoutez-en un à Cloudflare d’abord, ou utilisez l’adresse r2.dev."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak ada domain di akun Cloudflare ini. Tambahkan satu ke Cloudflare terlebih dahulu, atau gunakan alamat r2.dev."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun dominio in questo account Cloudflare. Aggiungine prima uno a Cloudflare, oppure usa l’indirizzo r2.dev."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この Cloudflare アカウントにはドメインがありません。先に Cloudflare に追加するか、r2.dev アドレスを使用してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Cloudflare 계정에는 도메인이 없습니다. 먼저 Cloudflare에 도메인을 추가하거나 r2.dev 주소를 사용하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen domein in dit Cloudflare-account. Voeg er eerst een toe aan Cloudflare of gebruik het r2.dev-adres."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To konto Cloudflare nie ma żadnej domeny. Najpierw dodaj domenę do Cloudflare lub użyj adresu r2.dev."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não há domínio nesta conta do Cloudflare. Adicione um ao Cloudflare primeiro ou use o endereço r2.dev."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом аккаунте Cloudflare нет доменов. Сначала добавьте домен в Cloudflare или используйте адрес r2.dev."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Cloudflare hesabında alan adı yok. Önce Cloudflare'e bir tane ekle ya da r2.dev adresini kullan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цьому обліковому записі Cloudflare немає доменів. Спершу додайте домен до Cloudflare або скористайтеся адресою r2.dev."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tài khoản Cloudflare này không có tên miền nào. Hãy thêm một tên miền vào Cloudflare trước, hoặc dùng địa chỉ r2.dev."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 Cloudflare 账户中没有域名。请先将域名添加到 Cloudflare，或使用 r2.dev 地址。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 Cloudflare 帳號中沒有網域。請先將網域加入 Cloudflare，或使用 r2.dev 位址。"
           }
         }
       }
@@ -5604,6 +7404,106 @@
         }
       }
     },
+    "Open Cloudflare" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Cloudflare"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir Cloudflare"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buka Cloudflare"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Cloudflare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare を開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare 열기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Cloudflare"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otwórz Cloudflare"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir o Cloudflare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть Cloudflare"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare'i Aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити Cloudflare"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở Cloudflare"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 Cloudflare"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟 Cloudflare"
+          }
+        }
+      }
+    },
     "Open System Settings" : {
       "localizations" : {
         "de" : {
@@ -5804,6 +7704,106 @@
         }
       }
     },
+    "Paste the token here" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token hier einfügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pega el token aquí"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collez le jeton ici"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempel token di sini"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla qui il token"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここにトークンを貼り付け"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여기에 토큰 붙여넣기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plak het token hier"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wklej token tutaj"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o token aqui"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставьте токен сюда"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token'ı buraya yapıştır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставте токен сюди"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dán token vào đây"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此粘贴令牌"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此貼上權杖"
+          }
+        }
+      }
+    },
     "Play" : {
       "localizations" : {
         "de" : {
@@ -5900,6 +7900,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "播放"
+          }
+        }
+      }
+    },
+    "Public Links" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentliche Links"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enlaces públicos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liens publics"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tautan Publik"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link pubblici"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開リンク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공개 링크"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openbare links"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linki publiczne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links públicos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публичные ссылки"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel Bağlantılar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публічні посилання"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liên kết công khai"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开链接"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開連結"
           }
         }
       }
@@ -7004,6 +9104,306 @@
         }
       }
     },
+    "Save and test the destination" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel speichern und testen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar y probar el destino"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer et tester la destination"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simpan dan uji tujuan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva e verifica la destinazione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード先を保存してテスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대상 저장 및 테스트"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestemming opslaan en testen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapisz i przetestuj miejsce docelowe"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar e testar o destino"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить и проверить место назначения"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedefi kaydet ve test et"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зберегти та перевірити ціль"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lưu và kiểm tra đích"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存并测试上传目标"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存並測試目的地"
+          }
+        }
+      }
+    },
+    "Set Up Cloudflare R2" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 einrichten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar Cloudflare R2"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurer Cloudflare R2"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atur Cloudflare R2"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura Cloudflare R2"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 を設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 설정"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 instellen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skonfiguruj Cloudflare R2"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar o Cloudflare R2"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настроить Cloudflare R2"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2'yi Kur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Налаштувати Cloudflare R2"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thiết lập Cloudflare R2"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置 Cloudflare R2"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定 Cloudflare R2"
+          }
+        }
+      }
+    },
+    "Set Up Cloudflare R2…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 einrichten…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar Cloudflare R2…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurer Cloudflare R2…"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atur Cloudflare R2…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura Cloudflare R2…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 を設定…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 설정…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2 instellen…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skonfiguruj Cloudflare R2…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar o Cloudflare R2…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настроить Cloudflare R2…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudflare R2'yi Kur…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Налаштувати Cloudflare R2…"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thiết lập Cloudflare R2…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置 Cloudflare R2…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定 Cloudflare R2…"
+          }
+        }
+      }
+    },
     "Short cache time" : {
       "localizations" : {
         "de" : {
@@ -7100,6 +9500,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "短快取時間"
+          }
+        }
+      }
+    },
+    "Subdomain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdomain"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdominio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-domaine"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdomain"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sottodominio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サブドメイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서브도메인"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdomein"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdomena"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subdomínio"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поддомен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alt Alan Adı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Піддомен"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên miền phụ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "子域名"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "子網域"
           }
         }
       }
@@ -7804,6 +10304,106 @@
         }
       }
     },
+    "The permissions are already filled in (R2 Storage: Edit, Zone: Read). Scroll down, select Continue to summary, then Create Token, and copy the token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Berechtigungen sind bereits ausgefüllt (R2 Storage: Edit, Zone: Read). Scrolle nach unten, wähle „Continue to summary“, dann „Create Token“ und kopiere das Token."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los permisos ya están rellenados (R2 Storage: Edit, Zone: Read). Desplázate hacia abajo, selecciona “Continue to summary”, luego “Create Token” y copia el token."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les autorisations sont déjà renseignées (R2 Storage: Edit, Zone: Read). Faites défiler vers le bas, sélectionnez « Continue to summary », puis « Create Token », et copiez le jeton."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izin sudah terisi (R2 Storage: Edit, Zone: Read). Gulir ke bawah, pilih “Continue to summary”, lalu “Create Token”, dan salin token."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I permessi sono già compilati (R2 Storage: Edit, Zone: Read). Scorri verso il basso, seleziona “Continue to summary”, poi “Create Token” e copia il token."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限はすでに入力されています (R2 Storage: Edit, Zone: Read)。下にスクロールして「Continue to summary」、続いて「Create Token」を選び、トークンをコピーします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "권한이 이미 입력되어 있습니다(R2 Storage: Edit, Zone: Read). 아래로 스크롤하여 “Continue to summary”, “Create Token”을 차례로 선택한 다음 토큰을 복사하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De machtigingen zijn al ingevuld (R2 Storage: Edit, Zone: Read). Scrol omlaag, kies ‘Continue to summary’, dan ‘Create Token’ en kopieer het token."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uprawnienia są już wypełnione (R2 Storage: Edit, Zone: Read). Przewiń w dół, wybierz „Continue to summary”, potem „Create Token” i skopiuj token."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As permissões já estão preenchidas (R2 Storage: Edit, Zone: Read). Role para baixo, selecione “Continue to summary”, depois “Create Token” e copie o token."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешения уже заполнены (R2 Storage: Edit, Zone: Read). Прокрутите вниз, выберите «Continue to summary», затем «Create Token» и скопируйте токен."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzinler zaten dolduruldu (R2 Storage: Edit, Zone: Read). Aşağı kaydır, “Continue to summary” seçeneğini, ardından “Create Token” seçeneğini seç ve token'ı kopyala."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволи вже заповнено (R2 Storage: Edit, Zone: Read). Прокрутіть вниз, виберіть «Continue to summary», потім «Create Token» і скопіюйте токен."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Các quyền đã được điền sẵn (R2 Storage: Edit, Zone: Read). Cuộn xuống, chọn “Continue to summary”, rồi “Create Token” và sao chép token."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "权限已预先填好 (R2 Storage: Edit, Zone: Read)。向下滚动，选择“Continue to summary”，再选择“Create Token”，然后复制令牌。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "權限已預先填好（R2 Storage: Edit, Zone: Read）。向下捲動，選擇「Continue to summary」，再選擇「Create Token」，然後拷貝權杖。"
+          }
+        }
+      }
+    },
     "The thumbnail folder can’t be inside tmp/, where files expire." : {
       "localizations" : {
         "de" : {
@@ -7900,6 +10500,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "縮圖資料夾不能位於檔案會過期的 tmp/ 中。"
+          }
+        }
+      }
+    },
+    "The token isn’t stored. Aktar keeps only the storage keys made from it, in your Keychain." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Token wird nicht gespeichert. Aktar behält nur die daraus erzeugten Speicherschlüssel, in deinem Schlüsselbund."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El token no se guarda. Aktar solo conserva las claves de almacenamiento creadas a partir de él, en tu llavero."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le jeton n’est pas conservé. Aktar ne garde que les clés de stockage créées à partir de celui-ci, dans votre trousseau."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token tidak disimpan. Aktar hanya menyimpan kunci penyimpanan yang dibuat darinya, di Rantai Kunci Anda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il token non viene salvato. Aktar conserva solo le chiavi di archiviazione create a partire da esso, nel tuo Portachiavi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トークンは保存されません。Aktar が保持するのは、そこから作成されたストレージキーだけで、キーチェーンに保存されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "토큰은 저장되지 않습니다. Aktar는 토큰으로 만든 스토리지 키만 키체인에 보관합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het token wordt niet opgeslagen. Aktar bewaart alleen de opslagsleutels die ermee zijn gemaakt, in je sleutelhanger."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token nie jest zapisywany. Aktar przechowuje w pęku kluczy tylko klucze magazynu utworzone na jego podstawie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O token não é armazenado. O Aktar guarda apenas as chaves de armazenamento criadas a partir dele, no seu Porta-Chaves."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Токен не сохраняется. Aktar хранит только созданные с его помощью ключи хранилища, в вашей Связке ключей."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token saklanmaz. Aktar yalnızca bu token'dan üretilen depolama anahtarlarını Anahtar Zinciri'nde tutar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Токен не зберігається. Aktar зберігає лише створені з нього ключі сховища, у вашій Зв’язці ключів."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token không được lưu. Aktar chỉ giữ lại các khóa lưu trữ được tạo từ token, trong Chuỗi khóa của bạn."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "令牌不会被保存。Aktar 只会把由它生成的存储密钥保存在你的钥匙串中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "權杖不會被儲存。Aktar 只會把由它產生的儲存金鑰保存在你的鑰匙圈中。"
           }
         }
       }
@@ -8300,6 +11000,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上傳已在 Aktar 中取消。"
+          }
+        }
+      }
+    },
+    "This token can’t see any Cloudflare account. Create it with the button above, for all accounts." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Token kann kein Cloudflare-Konto sehen. Erstelle es mit der Schaltfläche oben, für alle Konten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este token no puede ver ninguna cuenta de Cloudflare. Créalo con el botón de arriba, para todas las cuentas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce jeton ne voit aucun compte Cloudflare. Créez-le avec le bouton ci-dessus, pour tous les comptes."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token ini tidak dapat melihat akun Cloudflare mana pun. Buat dengan tombol di atas, untuk semua akun."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo token non vede nessun account Cloudflare. Crealo con il pulsante qui sopra, per tutti gli account."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このトークンからはどの Cloudflare アカウントも見えません。上のボタンで、すべてのアカウントを対象にして作成してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 토큰으로는 Cloudflare 계정을 볼 수 없습니다. 위의 버튼으로 모든 계정에 대해 토큰을 만드세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit token kan geen Cloudflare-account zien. Maak het aan met de knop hierboven, voor alle accounts."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten token nie widzi żadnego konta Cloudflare. Utwórz go przyciskiem powyżej, dla wszystkich kont."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este token não consegue ver nenhuma conta do Cloudflare. Crie-o com o botão acima, para todas as contas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот токен не видит ни одного аккаунта Cloudflare. Создайте его с помощью кнопки выше, для всех аккаунтов."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu token hiçbir Cloudflare hesabını göremiyor. Yukarıdaki düğmeyle tüm hesaplar için oluştur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей токен не бачить жодного облікового запису Cloudflare. Створіть його за допомогою кнопки вище, для всіх облікових записів."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token này không thấy tài khoản Cloudflare nào. Hãy tạo bằng nút ở trên, cho tất cả tài khoản."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此令牌看不到任何 Cloudflare 账户。请使用上方的按钮创建，并选择所有账户。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此權杖看不到任何 Cloudflare 帳號。請使用上方的按鈕建立，並選擇所有帳號。"
+          }
+        }
+      }
+    },
+    "This token isn’t active. Create a new one with the button above." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Token ist nicht aktiv. Erstelle mit der Schaltfläche oben ein neues."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este token no está activo. Crea uno nuevo con el botón de arriba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce jeton n’est pas actif. Créez-en un nouveau avec le bouton ci-dessus."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token ini tidak aktif. Buat yang baru dengan tombol di atas."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo token non è attivo. Creane uno nuovo con il pulsante qui sopra."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このトークンは有効ではありません。上のボタンで新しいトークンを作成してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 토큰은 활성 상태가 아닙니다. 위의 버튼으로 새 토큰을 만드세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit token is niet actief. Maak met de knop hierboven een nieuw token aan."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten token nie jest aktywny. Utwórz nowy za pomocą przycisku powyżej."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este token não está ativo. Crie um novo com o botão acima."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот токен не активен. Создайте новый с помощью кнопки выше."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu token etkin değil. Yukarıdaki düğmeyle yeni bir tane oluştur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей токен не активний. Створіть новий за допомогою кнопки вище."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token này không hoạt động. Hãy tạo token mới bằng nút ở trên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此令牌未启用。请使用上方的按钮创建新令牌。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此權杖未啟用。請使用上方的按鈕建立新的權杖。"
           }
         }
       }
@@ -8904,6 +11804,106 @@
         }
       }
     },
+    "Turn on public links" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentliche Links aktivieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar enlaces públicos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer les liens publics"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktifkan tautan publik"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attiva i link pubblici"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公開リンクをオンにする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공개 링크 켜기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Openbare links inschakelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Włącz linki publiczne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar links públicos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить публичные ссылки"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bağlantıları aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкнути публічні посилання"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật liên kết công khai"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启公开链接"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟公開連結"
+          }
+        }
+      }
+    },
     "Upload Clipboard" : {
       "localizations" : {
         "de" : {
@@ -9504,6 +12504,106 @@
         }
       }
     },
+    "Use 3 to 63 lowercase letters, numbers and hyphens, starting and ending with a letter or number." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende 3 bis 63 Kleinbuchstaben, Ziffern und Bindestriche, mit einem Buchstaben oder einer Ziffer am Anfang und am Ende."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa de 3 a 63 letras minúsculas, números y guiones, empezando y terminando con una letra o un número."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez de 3 à 63 lettres minuscules, chiffres et tirets, en commençant et en terminant par une lettre ou un chiffre."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gunakan 3 sampai 63 huruf kecil, angka, dan tanda hubung, diawali dan diakhiri dengan huruf atau angka."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa da 3 a 63 lettere minuscole, numeri e trattini, iniziando e terminando con una lettera o un numero."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小文字の英字、数字、ハイフンを3〜63文字で指定し、先頭と末尾は英字か数字にしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소문자, 숫자, 하이픈을 3자에서 63자까지 사용하고, 시작과 끝은 문자나 숫자여야 합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik 3 tot 63 kleine letters, cijfers en koppeltekens, beginnend en eindigend met een letter of cijfer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Użyj od 3 do 63 małych liter, cyfr i myślników, zaczynając i kończąc literą lub cyfrą."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use de 3 a 63 letras minúsculas, números e hifens, começando e terminando com uma letra ou número."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используйте от 3 до 63 строчных букв, цифр и дефисов; начинаться и заканчиваться имя должно буквой или цифрой."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 ile 63 arasında küçük harf, rakam ve tire kullan; harf veya rakamla başlayıp bitmeli."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовуйте від 3 до 63 малих літер, цифр і дефісів; назва має починатися й закінчуватися літерою або цифрою."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng từ 3 đến 63 chữ thường, chữ số và dấu gạch ngang, bắt đầu và kết thúc bằng chữ cái hoặc chữ số."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请使用 3 到 63 个小写字母、数字和连字符，并以字母或数字开头和结尾。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請使用 3 到 63 個小寫字母、數字和連字號，並以字母或數字開頭和結尾。"
+          }
+        }
+      }
+    },
     "Use For" : {
       "localizations" : {
         "de" : {
@@ -9704,6 +12804,106 @@
         }
       }
     },
+    "Works right away. Cloudflare rate-limits r2.dev addresses, so a domain of your own is better for links you share widely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funktioniert sofort. Cloudflare begrenzt die Rate bei r2.dev-Adressen, daher ist eine eigene Domain besser für Links, die du breit teilst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciona al instante. Cloudflare limita la tasa de las direcciones r2.dev, así que un dominio propio es mejor para enlaces que compartes mucho."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonctionne tout de suite. Cloudflare limite le débit des adresses r2.dev, donc un domaine à vous convient mieux aux liens très partagés."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langsung berfungsi. Cloudflare membatasi laju alamat r2.dev, jadi domain milik sendiri lebih baik untuk tautan yang dibagikan secara luas."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funziona subito. Cloudflare limita la frequenza delle richieste agli indirizzi r2.dev, quindi un dominio tuo è meglio per i link che condividi ampiamente."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すぐに使えます。Cloudflare は r2.dev アドレスにレート制限をかけているため、広く共有するリンクには自分のドメインをおすすめします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "바로 작동합니다. Cloudflare는 r2.dev 주소에 요청 제한을 두므로, 널리 공유할 링크에는 직접 소유한 도메인이 더 좋습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werkt meteen. Cloudflare past rate limiting toe op r2.dev-adressen, dus een eigen domein is beter voor links die je breed deelt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Działa od razu. Cloudflare ogranicza liczbę żądań do adresów r2.dev, więc dla linków udostępnianych szeroko lepsza jest własna domena."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciona na hora. O Cloudflare limita a taxa de requisições dos endereços r2.dev, então um domínio próprio é melhor para links compartilhados amplamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Работает сразу. Cloudflare ограничивает частоту запросов к адресам r2.dev, поэтому для ссылок, которыми вы делитесь широко, лучше использовать собственный домен."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hemen çalışır. Cloudflare r2.dev adreslerine istek sınırı uygular, bu yüzden geniş kitlelerle paylaştığın bağlantılar için kendi alan adın daha iyidir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Працює одразу. Cloudflare обмежує частоту запитів до адрес r2.dev, тому для посилань, якими ви ділитеся широко, краще мати власний домен."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoạt động ngay. Cloudflare giới hạn tốc độ truy cập các địa chỉ r2.dev, nên tên miền riêng sẽ tốt hơn cho các liên kết bạn chia sẻ rộng rãi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可立即使用。Cloudflare 会对 r2.dev 地址限流，因此对于要广泛分享的链接，使用自己的域名更好。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可立即使用。Cloudflare 會對 r2.dev 位址限流，因此對於要廣泛分享的連結，使用自己的網域會更好。"
+          }
+        }
+      }
+    },
     "Writes a new file over an upload, so its link keeps working, and returns the link." : {
       "localizations" : {
         "de" : {
@@ -9800,6 +13000,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "以新檔案覆寫一個上傳項目，讓其連結仍可使用，並傳回該連結。"
+          }
+        }
+      }
+    },
+    "r2.dev Address" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev-Adresse"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dirección r2.dev"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse r2.dev"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alamat r2.dev"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indirizzo r2.dev"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev アドレス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev 주소"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev-adres"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres r2.dev"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endereço r2.dev"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адрес r2.dev"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev Adresi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адреса r2.dev"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Địa chỉ r2.dev"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev 地址"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r2.dev 位址"
           }
         }
       }

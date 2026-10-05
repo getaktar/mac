@@ -313,6 +313,8 @@ private struct DestinationsSettingsView: View {
     /// with a stale, empty one.
     private enum FormTarget: Identifiable {
         case add
+        /// "Set Up Cloudflare R2", which makes the bucket and keys itself.
+        case cloudflare
         case edit(DestinationConfig)
         /// "Import from Another Device", with a link from aktar://import.
         case importing(String?)
@@ -320,6 +322,7 @@ private struct DestinationsSettingsView: View {
         var id: String {
             switch self {
             case .add: return "add"
+            case .cloudflare: return "cloudflare"
             case .edit(let destination): return destination.id.uuidString
             case .importing(let link): return "import" + (link ?? "")
             }
@@ -366,6 +369,7 @@ private struct DestinationsSettingsView: View {
                     } label: {
                         Label("Add Destination", systemImage: "plus")
                     }
+                    Button("Set Up Cloudflare R2\u{2026}") { formTarget = .cloudflare }
                     Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
                 }
                 .buttonStyle(.bordered)
@@ -374,6 +378,8 @@ private struct DestinationsSettingsView: View {
         .sheet(item: $formTarget) { target in
             if case .importing(let link) = target {
                 ImportDestinationView(initialLink: link) { formTarget = nil }
+            } else if case .cloudflare = target {
+                CloudflareSetupView { formTarget = nil }
             } else {
                 DestinationFormView(existing: target.destination) { config, credentials in
                     if target.destination != nil {
@@ -408,12 +414,17 @@ private struct DestinationsSettingsView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                formTarget = .add
+                formTarget = .cloudflare
             } label: {
-                Text("Add Destination")
+                Text("Set Up Cloudflare R2\u{2026}")
             }
             .buttonStyle(.borderedProminent)
             .padding(.top, 4)
+            Text("Free up to 10 GB, set up in a minute")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Button("Add Destination") { formTarget = .add }
+                .buttonStyle(.bordered)
             Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
                 .buttonStyle(.bordered)
         }
