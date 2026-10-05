@@ -42,10 +42,40 @@
             "value" : "Aktar utilise la caméra pour scanner le code QR d’une destination partagée depuis votre autre appareil."
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar menggunakan kamera untuk memindai kode QR tujuan yang dibagikan dari perangkat Anda yang lain."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar usa la fotocamera per scansionare il codice QR di una destinazione condivisa dall’altro tuo dispositivo."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktarは、もう一方のデバイスから共有された保存先のQRコードを読み取るためにカメラを使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar는 다른 기기에서 공유된 대상의 QR 코드를 스캔하기 위해 카메라를 사용합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar gebruikt de camera om de QR-code te scannen van een bestemming die vanaf je andere apparaat wordt gedeeld."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar używa kamery do skanowania kodu QR miejsca docelowego udostępnionego z innego urządzenia."
           }
         },
         "pt-BR" : {
@@ -54,16 +84,40 @@
             "value" : "O Aktar usa a câmera para escanear o QR code de um destino compartilhado do seu outro dispositivo."
           }
         },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar использует камеру для сканирования QR-кода места назначения, отправленного с другого вашего устройства."
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktar, diğer cihazından paylaşılan bir hedefin QR kodunu taramak için kamerayı kullanır."
           }
         },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar використовує камеру, щоб сканувати QR-код цілі, якою ви поділилися з іншого пристрою."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar dùng camera để quét mã QR của một đích được chia sẻ từ thiết bị khác của bạn."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktar 使用相机扫描从你的另一台设备共享的目标二维码。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 會使用相機掃描從你另一部裝置分享的目的地 QR Code。"
           }
         }
       }

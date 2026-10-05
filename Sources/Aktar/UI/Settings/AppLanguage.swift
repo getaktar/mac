@@ -18,6 +18,15 @@ enum AppLanguage {
         ("pt-BR", "Português (Brasil)"),
         ("ja", "日本語"),
         ("zh-Hans", "简体中文"),
+        ("zh-Hant", "繁體中文"),
+        ("ko", "한국어"),
+        ("it", "Italiano"),
+        ("nl", "Nederlands"),
+        ("pl", "Polski"),
+        ("ru", "Русский"),
+        ("uk", "Українська"),
+        ("id", "Bahasa Indonesia"),
+        ("vi", "Tiếng Việt"),
     ]
 
     private static let key = "AppleLanguages"

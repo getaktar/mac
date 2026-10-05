@@ -28,7 +28,9 @@ enum AppInfo {
     static var website: URL {
         let sitePrefixes = [
             "tr": "tr", "de": "de", "fr": "fr", "es": "es",
-            "pt-BR": "pt-br", "ja": "ja", "zh-Hans": "zh",
+            "pt-BR": "pt-br", "ja": "ja", "zh-Hans": "zh", "zh-Hant": "zh-hant",
+            "ko": "ko", "it": "it", "nl": "nl", "pl": "pl", "ru": "ru", "uk": "uk",
+            "id": "id", "vi": "vi",
         ]
         let language = Bundle.main.preferredLocalizations.first ?? "en"
         guard let prefix = sitePrefixes[language] else { return URL(string: "https://getaktar.com/")! }
