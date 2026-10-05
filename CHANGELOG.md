@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-05
+
 ### Added
 
 - Use For on each destination: pick file types (Images, Videos, Audio,
@@ -15,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   menu bar, Finder, the Share menu, Shortcuts, the local API). An extension
   wins over a type; a tie goes to the default destination. Files of one drop
   that go to different destinations are still copied together, in order.
-  The panel says where files go
+  The drop area lists where files go
 - A keyboard shortcut for each destination that uploads the clipboard
   there, whatever Use For says
 - Replace File… in History and the bucket view (and the local API): a new
