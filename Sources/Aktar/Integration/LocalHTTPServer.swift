@@ -28,6 +28,8 @@ struct HTTPResponse: Sendable {
     static func error(_ status: Int, _ message: String) -> HTTPResponse {
         json(status, ["error": message])
     }
+
+    static let noContent = HTTPResponse(status: 204, body: Data())
 }
 
 /// A deliberately tiny HTTP/1.1 server for the local API: loopback only,

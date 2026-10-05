@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SwiftData
 
@@ -11,11 +12,17 @@ import SwiftData
 ///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=     (raw file bytes; "reused" in the reply)
 ///     POST   /v1/uploads/clipboard?destinationId=&expires=
 ///     DELETE /v1/uploads/{id}
+///     GET    /v1/uploads/{id}/thumbnail?px=&generate=             (PNG; 204 when there's none)
 ///     GET    /v1/destinations/{id}/objects?prefix=&continuationToken=
 ///     DELETE /v1/destinations/{id}/objects?key=
 ///     POST   /v1/destinations/{id}/objects/move                {"from", "to"}
 ///     POST   /v1/destinations/{id}/folders                     {"prefix", "name"}
 ///     POST   /v1/destinations/{id}/links                       {"key", "expiresIn"}
+///     GET    /v1/destinations/{id}/thumbnail?key=&objectSize=&lastModified=&px=&generate=  (PNG; 204 when there's none)
+///
+/// A thumbnail that doesn't exist yet is made, which can mean downloading
+/// the file (up to 25 MB); `generate=0` only returns one that's at hand, for
+/// asking about many files at once.
 ///     GET    /v1/watched-folders
 ///     POST   /v1/watched-folders/pause                         {"minutes"} (omitted or null: until resumed)
 ///     POST   /v1/watched-folders/resume
@@ -48,6 +55,8 @@ final class LocalAPIRouter {
             return await uploadClipboard(request)
         case ("DELETE", 2) where route[0] == "uploads":
             return await deleteUpload(id: route[1])
+        case ("GET", 3) where route[0] == "uploads" && route[2] == "thumbnail":
+            return await uploadThumbnail(id: route[1], request: request)
         case ("GET", 1) where route[0] == "watched-folders":
             return .json(200, watchedFoldersDTO())
         case ("POST", 2) where route == ["watched-folders", "pause"]:
@@ -113,6 +122,38 @@ final class LocalAPIRouter {
         } catch {
             return failure(error)
         }
+    }
+
+    // MARK: - Thumbnails
+
+    /// The thumbnail of an upload, as the app shows it (made or fetched now
+    /// if it has none yet), unless thumbnails are off for its destination.
+    private func uploadThumbnail(id: String, request: HTTPRequest) async -> HTTPResponse {
+        guard let uuid = UUID(uuidString: id), let record = record(id: uuid) else {
+            return .error(404, "No upload with that ID.")
+        }
+        let destination = destination(id: record.destinationID.uuidString)
+        if destination?.thumbnailMode == .off { return .noContent }
+        if ThumbnailStore.shared.image(for: uuid) == nil, let destination, Self.generates(request) {
+            await RemoteThumbnailLoader.shared.loadThumbnail(for: record, destination: destination)
+        }
+        return Self.thumbnailResponse(ThumbnailStore.shared.image(for: uuid), request: request)
+    }
+
+    private static func generates(_ request: HTTPRequest) -> Bool {
+        !["0", "false"].contains(request.query["generate"] ?? "")
+    }
+
+    /// PNG (any image viewer and Raycast can show it), its longest side at
+    /// most `px` (default 128, up to 512) pixels; 204 for no thumbnail.
+    private static func thumbnailResponse(_ image: NSImage?, request: HTTPRequest) -> HTTPResponse {
+        let px = min(max(Int(request.query["px"] ?? "") ?? 128, 16), ThumbnailGenerator.maxPixelSize)
+        guard let cgImage = image?.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let resized = ImageProcessor.resize(cgImage, longestSide: px),
+              let png = NSBitmapImageRep(cgImage: resized).representation(using: .png, properties: [:]) else {
+            return .noContent
+        }
+        return HTTPResponse(status: 200, body: png, contentType: "image/png")
     }
 
     // MARK: - Watched folders
@@ -323,6 +364,26 @@ final class LocalAPIRouter {
                     nextContinuationToken: page.nextContinuationToken
                 )
                 return .json(200, listingDTO(listing, destination: destination))
+
+            case ("GET", ["thumbnail"]):
+                guard let key = request.query["key"], !key.isEmpty else {
+                    return .error(400, "The key query parameter is required.")
+                }
+                if let problem = Self.problem(withExistingKey: key) { return .error(400, "key: \(problem)") }
+                guard destination.thumbnailMode != .off else { return .noContent }
+                // The listing gives both; without them the bucket is asked.
+                var object: BucketObject
+                if let size = request.query["objectSize"].flatMap(Int64.init) {
+                    let modified = request.query["lastModified"].flatMap { try? Date($0, strategy: .iso8601) }
+                    object = BucketObject(key: key, size: size, lastModified: modified)
+                } else {
+                    guard let info = try await storage.objectInfo(key: key) else { return .error(404, "No object with that key.") }
+                    object = BucketObject(key: key, size: info.size, lastModified: info.lastModified)
+                }
+                let image = await RemoteThumbnailLoader.shared.image(
+                    for: object, destination: destination, prefixes: thumbnailPrefixes, allowDownload: Self.generates(request)
+                )
+                return Self.thumbnailResponse(image, request: request)
 
             case ("DELETE", ["objects"]):
                 guard let key = request.query["key"], !key.isEmpty else {

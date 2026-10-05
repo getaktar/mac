@@ -54,12 +54,15 @@ final class RemoteThumbnailLoader {
         return memory.object(forKey: memoryKey(destination.id, object) as NSString)
     }
 
-    func image(for object: BucketObject, destination: DestinationConfig, prefixes: [String]) async -> NSImage? {
+    /// `allowDownload` false: only what's at hand (this Mac's, the cache,
+    /// the bucket's own thumbnail), never the file itself, for callers that
+    /// ask for many at once (the local API's list icons).
+    func image(for object: BucketObject, destination: DestinationConfig, prefixes: [String], allowDownload: Bool = true) async -> NSImage? {
         guard destination.thumbnailMode != .off, !object.key.hasSuffix("/"),
               !ThumbnailKeys.isThumbnail(object.key, prefixes: prefixes) else { return nil }
         let key = memoryKey(destination.id, object)
         if let image = memory.object(forKey: key as NSString) { return image }
-        if let task = inFlight[key] { return await task.value }
+        if allowDownload, let task = inFlight[key] { return await task.value }
 
         let task = Task<NSImage?, Never> {
             let file = cacheFile(destinationID: destination.id, object: object)
@@ -68,7 +71,7 @@ final class RemoteThumbnailLoader {
             if let image = uploadedThumbnail(for: object, destinationID: destination.id) { return image }
 
             let outcome = await limited {
-                await self.make(objectKey: object.key, size: object.size, writtenAfter: object.lastModified, destination: destination)
+                await self.make(objectKey: object.key, size: object.size, writtenAfter: object.lastModified, destination: destination, allowDownload: allowDownload)
             }
             switch outcome {
             case .made(let data):
@@ -81,9 +84,9 @@ final class RemoteThumbnailLoader {
                 return nil
             }
         }
-        inFlight[key] = task
+        if allowDownload { inFlight[key] = task }
         let image = await task.value
-        inFlight[key] = nil
+        if allowDownload { inFlight[key] = nil }
         if let image { memory.setObject(image, forKey: key as NSString) }
         return image
     }
@@ -143,7 +146,7 @@ final class RemoteThumbnailLoader {
 
     /// `uploadedAt`: for a history entry, the file must still be that
     /// upload, or the thumbnail would show another file.
-    private func make(objectKey: String, size: Int64, writtenAfter: Date?, destination: DestinationConfig, uploadedAt: Date? = nil) async -> Outcome {
+    private func make(objectKey: String, size: Int64, writtenAfter: Date?, destination: DestinationConfig, uploadedAt: Date? = nil, allowDownload: Bool = true) async -> Outcome {
         guard let provider = provider(for: destination) else { return .failed }
         let prefix = destination.bucketThumbnailPrefix
         if let prefix, let data = await BucketThumbnails.fetch(for: objectKey, prefix: prefix, writtenAfter: writtenAfter, provider: provider),
@@ -152,6 +155,8 @@ final class RemoteThumbnailLoader {
         }
 
         let name = (objectKey as NSString).lastPathComponent
+        // Not known to be unavailable: left for a caller that may download.
+        guard allowDownload else { return .failed }
         guard size <= Self.maxSourceBytes, ThumbnailGenerator.canHaveThumbnail(filename: name) else { return .unavailable }
         if let uploadedAt {
             do {
