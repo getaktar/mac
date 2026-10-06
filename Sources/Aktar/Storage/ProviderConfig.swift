@@ -95,6 +95,9 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// Run after each upload and replace here (not for a watched folder's
     /// files, which run their folder's own).
     var hooks: [WatchHook]?
+    /// The link shortener uploads here go through; nil is off. Its token
+    /// is in the Keychain with the keys (`StorageCredentials`).
+    var shortLinks: ShortLinkSettings?
 
     /// The path template of a new destination. Saved ones keep theirs.
     static let defaultObjectPathTemplate = "{year}/{month}/{short}.{ext}"

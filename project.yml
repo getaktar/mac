@@ -33,6 +33,10 @@ targets:
     platform: macOS
     sources:
       - path: Sources/Aktar
+      # The short link provider definitions, bundled straight from the docs
+      # so there's one copy; see ShortLinkProviders.
+      - path: docs/short-link-providers.json
+        buildPhase: resources
     dependencies:
       - package: Soto
         product: SotoS3
@@ -138,10 +142,10 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         MACOSX_DEPLOYMENT_TARGET: "14.0"
 
-  # Unit tests for the Watched Folders engine and the destination transfer
-  # format. They're built from those sources and the models they use (they
-  # don't need the app around them), so the tests run without launching
-  # Aktar.
+  # Unit tests for the Watched Folders engine, the destination transfer
+  # format and the short link engine. They're built from those sources and
+  # the models they use (they don't need the app around them), so the tests
+  # run without launching Aktar.
   AktarTests:
     type: bundle.unit-test
     platform: macOS
@@ -171,6 +175,13 @@ targets:
       - path: Sources/Aktar/Thumbnails/ThumbnailSettings.swift
       - path: Sources/Aktar/Thumbnails/ThumbnailGenerator.swift
       - path: Sources/Aktar/Automation/FileRouting.swift
+      - path: Sources/Aktar/ShortLinks/ShortLinkDefinition.swift
+      - path: Sources/Aktar/ShortLinks/ShortLinkEngine.swift
+      - path: Sources/Aktar/ShortLinks/ShortLinkRules.swift
+      - path: Sources/Aktar/History/ShortLink.swift
+      - path: Sources/Aktar/History/UploadRecord.swift
+      - path: docs/short-link-providers.json
+        buildPhase: resources
     dependencies:
       - package: libwebp
     settings:

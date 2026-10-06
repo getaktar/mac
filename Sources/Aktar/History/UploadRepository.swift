@@ -7,7 +7,9 @@ final class UploadRepository {
     let modelContext: ModelContext
 
     init() {
-        let schema = Schema([UploadRecord.self])
+        // ShortLink is a model of its own, not a relationship, so adding
+        // it is a lightweight migration of the existing store.
+        let schema = Schema([UploadRecord.self, ShortLink.self])
         let configuration = ModelConfiguration(schema: schema)
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [configuration])

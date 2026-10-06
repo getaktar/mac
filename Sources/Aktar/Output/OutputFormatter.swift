@@ -17,12 +17,18 @@ enum OutputMode: String, Codable, CaseIterable, Identifiable {
 }
 
 enum OutputFormatter {
+    /// `publicURL` is the upload's own link (public or temporary). With a
+    /// `shortURL`, that's what URL, Markdown, HTML and a custom template's
+    /// {url} use; a custom template also has {shortUrl} (the short link,
+    /// or the long one without it) and {longUrl}.
     static func format(
-        publicURL: URL,
+        publicURL longURL: URL,
+        shortURL: URL? = nil,
         mode: OutputMode,
         filename: String,
         customTemplate: String = "![{filename}]({url})"
     ) -> String {
+        let publicURL = shortURL ?? longURL
         switch mode {
         case .url:
             return publicURL.absoluteString
@@ -37,7 +43,7 @@ enum OutputFormatter {
         // A custom template is the user's own markup, so nothing in it is
         // escaped: {filename} goes in exactly as it is.
         case .custom:
-            return apply(template: customTemplate, publicURL: publicURL, filename: filename)
+            return apply(template: customTemplate, publicURL: publicURL, longURL: longURL, filename: filename)
         }
     }
 
@@ -87,11 +93,13 @@ enum OutputFormatter {
             .joined(separator: "\n")
     }
 
-    private static func apply(template: String, publicURL: URL, filename: String) -> String {
+    private static func apply(template: String, publicURL: URL, longURL: URL, filename: String) -> String {
         let name = (filename as NSString).deletingPathExtension
         let ext = (filename as NSString).pathExtension
         return template
             .replacingOccurrences(of: "{url}", with: publicURL.absoluteString)
+            .replacingOccurrences(of: "{shortUrl}", with: publicURL.absoluteString)
+            .replacingOccurrences(of: "{longUrl}", with: longURL.absoluteString)
             .replacingOccurrences(of: "{filename}", with: filename)
             .replacingOccurrences(of: "{name}", with: name)
             .replacingOccurrences(of: "{ext}", with: ext)

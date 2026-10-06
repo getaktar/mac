@@ -8,6 +8,9 @@ struct StorageCredentials: Codable {
     /// For clearing Cloudflare's cache when a file is replaced; it only
     /// needs Zone > Cache Purge. See `CloudflarePurge`.
     var cloudflareToken: String? = nil
+    /// The API key, signature or token of the destination's link
+    /// shortener (`DestinationConfig.shortLinks`).
+    var shortLinkToken: String? = nil
 }
 
 enum KeychainError: Error, LocalizedError {
