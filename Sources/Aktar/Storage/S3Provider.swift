@@ -482,14 +482,22 @@ final class S3Provider: StorageProvider, Sendable {
 private struct OverallTimeout: AWSMiddlewareProtocol {
     let seconds: TimeInterval
 
+    /// The next handler and its arguments, handed to the task group's
+    /// child task (older Swift compilers refuse capturing them directly).
+    private struct NextCall: @unchecked Sendable {
+        let next: AWSMiddlewareNextHandler
+        let request: AWSHTTPRequest
+        let context: AWSMiddlewareContext
+    }
+
     func handle(_ request: AWSHTTPRequest, context: AWSMiddlewareContext, next: AWSMiddlewareNextHandler) async throws -> AWSHTTPResponse {
         let seconds = seconds
         // The group waits for both tasks before it returns, so `next` is
         // done with by then; it's only called once, from one task.
         return try await withoutActuallyEscaping(next) { next in
-            nonisolated(unsafe) let next = next
+            let call = NextCall(next: next, request: request, context: context)
             return try await withThrowingTaskGroup(of: AWSHTTPResponse.self) { group in
-                group.addTask { try await next(request, context) }
+                group.addTask { try await call.next(call.request, call.context) }
                 group.addTask {
                     try await Task.sleep(for: .seconds(seconds))
                     throw URLError(.timedOut)
