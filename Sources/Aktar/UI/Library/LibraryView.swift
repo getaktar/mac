@@ -314,7 +314,7 @@ struct LibraryView: View {
             Divider()
             Button("Delete Remote File\u{2026}", role: .destructive) { recordsPendingDeletion = [record] }
             Button("Remove from History", role: .destructive) {
-                appState.repository.delete(record)
+                appState.uploadManager.removeFromHistory(record)
                 selectedIDs.remove(record.id)
             }
         }
@@ -351,7 +351,7 @@ struct LibraryView: View {
                 requestRemoteDeletion: { recordsPendingDeletion = [record] },
                 retryDeletion: { Task { await deleteRemote([record]) } },
                 removeFromHistory: {
-                    appState.repository.delete(record)
+                    appState.uploadManager.removeFromHistory(record)
                     selectedIDs.remove(record.id)
                 }
             )

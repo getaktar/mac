@@ -18,6 +18,8 @@ final class DestinationHooks {
         let objectKey: String
         let link: String
         var replaced = false
+        /// The upload's short link, if it has one.
+        var shortUrl: String? = nil
     }
 
     func run(after upload: Upload, destination: DestinationConfig) {
@@ -53,7 +55,7 @@ final class DestinationHooks {
             event: upload.replaced ? "upload.replaced" : "upload.succeeded",
             destination: .init(id: destination.id.uuidString, name: destination.name),
             file: .init(path: upload.fileURL.path, name: upload.filename, size: upload.byteSize),
-            upload: .init(key: upload.objectKey, url: upload.link, destinationID: destination.id.uuidString, reused: false)
+            upload: .init(key: upload.objectKey, url: upload.link, destinationID: destination.id.uuidString, reused: false, shortUrl: upload.shortUrl)
         )
     }
 

@@ -255,6 +255,43 @@ final class DestinationTransferTests: XCTestCase {
         XCTAssertNotEqual(again, link)
     }
 
+    func testShortLinksTravel() throws {
+        var destination = try DestinationTransfer.open(fullURL, code: code).destination
+        var custom = ShortLinkProviders.customTemplate
+        custom.create.path = "https://api.example.com/shorten"
+        destination.shortLinks = ShortLinkSettings(providerId: "custom", custom: custom, onlyLongerThan: 30, allowInsecureHTTP: true)
+        let credentials = StorageCredentials(accessKeyId: "id", secretAccessKey: "secret", sessionToken: nil, shortLinkToken: "short-secret")
+        let plaintext = try DestinationTransfer.encodePayload(.init(destination: destination, credentials: credentials, customTemplate: nil))
+        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: plaintext) as? [String: Any])
+        XCTAssertEqual((root["credentials"] as? [String: Any])?["shortLinkToken"] as? String, "short-secret")
+        let sent = try XCTUnwrap((root["destination"] as? [String: Any])?["shortLinks"] as? [String: Any])
+        XCTAssertEqual(sent["providerId"] as? String, "custom")
+        XCTAssertEqual(sent["onlyLongerThan"] as? Int, 30)
+        // The token is never in the settings.
+        XCTAssertFalse(String(decoding: try JSONSerialization.data(withJSONObject: sent), as: UTF8.self).contains("short-secret"))
+
+        let payload = try DestinationTransfer.decodePayload(plaintext)
+        XCTAssertEqual(payload.destination.shortLinks, destination.shortLinks)
+        XCTAssertEqual(payload.credentials.shortLinkToken, "short-secret")
+
+        // A provider this app doesn't know leaves short links off, and its
+        // token isn't kept; the rest of the destination imports.
+        var unknown = root
+        var object = try XCTUnwrap(root["destination"] as? [String: Any])
+        object["shortLinks"] = ["providerId": "bitly-next", "onlyLongerThan": "x"]
+        unknown["destination"] = object
+        let lenient = try DestinationTransfer.decodePayload(JSONSerialization.data(withJSONObject: unknown))
+        XCTAssertNil(lenient.destination.shortLinks)
+        XCTAssertNil(lenient.credentials.shortLinkToken)
+        XCTAssertEqual(lenient.destination.name, destination.name)
+
+        // No short links: neither field is sent.
+        destination.shortLinks = nil
+        let without = try XCTUnwrap(JSONSerialization.jsonObject(with: DestinationTransfer.encodePayload(.init(destination: destination, credentials: credentials, customTemplate: nil))) as? [String: Any])
+        XCTAssertNil((without["destination"] as? [String: Any])?["shortLinks"])
+        XCTAssertNil((without["credentials"] as? [String: Any])?["shortLinkToken"])
+    }
+
     func testCustomTemplateOnlySentForCustomOutput() throws {
         let destination = try DestinationTransfer.open(fullURL, code: code).destination
         let credentials = StorageCredentials(accessKeyId: "id", secretAccessKey: "secret", sessionToken: nil)

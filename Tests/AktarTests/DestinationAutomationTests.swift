@@ -77,6 +77,19 @@ final class DestinationAutomationTests: XCTestCase {
         XCTAssertEqual(object["event"] as? String, "upload.replaced")
         XCTAssertNil(object["folder"])
         XCTAssertEqual((object["destination"] as? [String: Any])?["name"] as? String, "Builds")
+        // No short link: null, written out.
+        let upload = try XCTUnwrap(object["upload"] as? [String: Any])
+        XCTAssertTrue(upload["shortUrl"] is NSNull)
+
+        let shortened = WatchHookPayload(
+            event: "upload.succeeded",
+            destination: .init(id: "D", name: "Builds"),
+            file: .init(path: "/tmp/a.png", name: "a.png", size: 3),
+            upload: .init(key: "a.png", url: "https://x/a.png", destinationID: "D", reused: false, shortUrl: "https://s.example.com/A1")
+        )
+        let shortObject = try XCTUnwrap(JSONSerialization.jsonObject(with: shortened.json()) as? [String: Any])
+        XCTAssertEqual((shortObject["upload"] as? [String: Any])?["shortUrl"] as? String, "https://s.example.com/A1")
+        XCTAssertEqual((shortObject["upload"] as? [String: Any])?["url"] as? String, "https://x/a.png")
     }
 
     private static func destination(_ name: String) -> DestinationConfig {

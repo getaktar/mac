@@ -25,7 +25,8 @@ struct WatchUploadRequest: Sendable {
 struct WatchUploadSuccess: Sendable, Equatable {
     var objectKey: String
     var publicURL: String
-    /// What's shared: the public URL or a temporary link.
+    /// What's shared: the public URL or a temporary link (the short link,
+    /// when there is one, is `shortUrl`).
     var link: String
     /// The same file was already uploaded, and its link was reused.
     var reused: Bool
@@ -36,6 +37,8 @@ struct WatchUploadSuccess: Sendable, Equatable {
     /// SHA-256 of the file as it is on disk, when the upload computed it
     /// from the original bytes (not a converted or cleaned copy).
     var contentHash: String?
+    /// The upload's short link, which is copied instead of `link`.
+    var shortUrl: String? = nil
 }
 
 enum WatchUploadOutcome: Sendable, Equatable {
@@ -1597,6 +1600,19 @@ struct WatchHookPayload: Encodable, Sendable {
         let url: String
         let destinationID: String
         let reused: Bool
+        /// The upload's short link; null (written out) when it has none.
+        var shortUrl: String? = nil
+
+        private enum CodingKeys: String, CodingKey { case key, url, destinationID, reused, shortUrl }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(key, forKey: .key)
+            try c.encode(url, forKey: .url)
+            try c.encode(destinationID, forKey: .destinationID)
+            try c.encode(reused, forKey: .reused)
+            try c.encode(shortUrl, forKey: .shortUrl)
+        }
     }
 
     struct Destination: Encodable, Sendable {
@@ -1628,7 +1644,8 @@ struct WatchHookPayload: Encodable, Sendable {
             key: upload.success.objectKey,
             url: upload.success.link,
             destinationID: upload.success.destinationID.uuidString,
-            reused: upload.success.reused
+            reused: upload.success.reused,
+            shortUrl: upload.success.shortUrl
         )
     }
 

@@ -595,7 +595,7 @@ extension WatchService: WatchEngineDelegate {
         if folder.clipboard == .copyLink, !batch.uploads.isEmpty {
             let links = batch.uploads.compactMap { upload -> String? in
                 guard let url = URL(string: upload.success.link) else { return nil }
-                return uploadManager.formatted(url, filename: upload.success.filename, destinationID: upload.success.destinationID)
+                return uploadManager.formatted(url, shortURL: upload.success.shortUrl.flatMap(URL.init(string:)), filename: upload.success.filename, destinationID: upload.success.destinationID)
             }
             ClipboardService.copy(links.joined(separator: "\n"))
         }

@@ -146,8 +146,15 @@ scripting, regex, chained requests or computed headers.
 Request = { "method", "path", "query": {k: template}, "headers": {k: template},
             "body": JSON template | null, "bodyType": "json" | "form" | null,
             "errorPath": "path" | null,
-            "successStatuses": [409] }                     // optional: non-2xx statuses that still succeed
+            "successStatuses": [409],                      // optional: non-2xx statuses that still succeed
+            "successPath": "success", "successValue": true } // optional: a 2xx answer succeeds only with this value there
 ```
+
+`successPath` is for providers that answer 200 to a failure (Short.io's
+delete: `{"success": false, "error": "..."}`). With it, a request succeeds
+only when the status is 2xx (or in `successStatuses`) and the JSON value at
+`successPath` equals `successValue` (`true` when omitted); a missing value
+is a failure. The message then comes from `errorPath` as usual.
 
 Templates may use `{url}`, `{id}`, `{domain}`, `{expiresAt}` (ISO 8601),
 `{expiresAtUnix}`, `{expiresInSeconds}`, `{expiresInMinutes}`, `{token}`.
@@ -186,8 +193,9 @@ and Short.io APIs). Behavior worth knowing:
   provider's message is shown.
 - **Short.io:** stats at `https://statistics.short.io/statistics/link/{id}?period=total`
   (`totalClicks`; the id format needs a live check). Error field differs by
-  endpoint (`message` on create/update, `error` on delete). `expiresAt`
-  accepts ISO or milliseconds; expiry is plan-dependent (402).
+  endpoint (`message` on create/update, `error` on delete). Delete can
+  answer 200 with `"success": false`, so it has `"successPath": "success"`.
+  `expiresAt` accepts ISO or milliseconds; expiry is plan-dependent (402).
 
 Anything marked "verify" is checked against the provider's current docs or
 source before it ships; if a capability can't be verified it is set to false
@@ -197,21 +205,47 @@ rather than guessed.
 
 - Custom HTTP: a form for the create request (method, URL, headers, query,
   JSON or form body with `{url}`), the response path for the short URL and
-  optionally the id, an optional delete request, and a Test button that
-  shortens `https://getaktar.com/` and shows the result.
+  optionally the id, an optional delete request (path and method: DELETE,
+  GET or POST), and a Test button that shortens `https://getaktar.com/` and
+  shows the result. When a delete request is defined, Test deletes that
+  link again and says whether it worked. The create request's headers go
+  along on the delete request only when it goes to the same host (or is a
+  relative path).
 - `.sxcu` import: ShareX custom uploaders with `DestinationType` containing
-  `URLShortener`. Map `RequestMethod`, `RequestURL`, `Parameters`, `Headers`,
-  `Body` (`JSON`, `FormURLEncoded`, `None`), `Data`/`Arguments` (`{input}` →
-  `{url}`), `URL` (`{json:path}` or legacy `$json:path$` → response path).
-  Unsupported features (regex, `{response}` transforms, file form fields,
-  chained calls) refuse the import with a clear message instead of guessing.
+  `URLShortener`. Map `RequestMethod` (or the older `RequestType`; POST,
+  GET, PUT, PATCH), `RequestURL` (its query becomes parameters),
+  `Parameters`, `Headers`, `Body` (`JSON`, `FormURLEncoded`, `None`; with
+  `None`, older files' `Arguments` go in the query), `Data`/`Arguments`
+  (`{input}` or legacy `$input$` → `{url}`), `URL` (`{json:path}` or legacy
+  `$json:path$` → `shortUrlPath`; JSONPath `$.a[0].b` reads as `a.0.b`),
+  `ErrorMessage` (`{json:path}` → `errorPath`). `DeletionURL` is imported
+  when it's a fixed http(s) URL with exactly one `{json:path}` after the
+  host: that path becomes `idPath`, the URL the delete path with `{id}`,
+  sent as GET (ShareX opens it in a browser) without the headers. Any
+  other deletion URL (for example one taken whole from the answer) is
+  skipped and the consent screen says links can't be deleted from Aktar.
+  Refused with a clear message instead of guessing: other destination
+  types, `RegexList`, `{response}` and other answer transforms, a URL put
+  together around a value, `FileFormName`, multipart/XML/binary bodies,
+  and any other ShareX syntax function in the request (`{filename}`,
+  `{random}`, `{select}`, `{prompt}`, `{inputbox}`, `{header}`, `{base64}`,
+  `{json}` in a request ...). Braces or dollar signs that aren't ShareX
+  functions are kept as text.
 - **Import is a consent screen**, not a silent import:
   "This configuration will send your API token to **short.example.com**."
   plus method, full endpoint and which headers/parameters carry secrets.
   Values that look like secrets in headers/parameters/body are moved into
-  `shortLinkToken` and the definition references `{token}`.
+  `shortLinkToken` and the definition references `{token}`. A value is a
+  secret when its name contains token, secret, signature, password,
+  passwd, auth, or key (not keyword), or when it starts with `Bearer `,
+  `Basic `, `Token ` or `Bot ` (the scheme stays: `Bearer {token}`). The
+  same secret in several places is one token; two different secrets refuse
+  the import (one token per destination). Nothing changes until the user
+  confirms, and the destination still has to be saved.
 - `http://` endpoints are refused by default; allowing one needs an explicit
-  "Allow insecure HTTP" choice with a warning.
+  "Allow insecure HTTP" choice with a warning. A `.sxcu` with an http://
+  request URL is refused until that toggle is on (the toggle shows after
+  the first refusal).
 - Secrets never appear in logs, history, notifications or error messages.
 
 ### Short link records
@@ -285,16 +319,51 @@ older ones are listed in the upload's details and can be deleted.
   than", "Also shorten temporary links" (only with expiration support), and
   for hosted providers the note "This service sees every link you shorten
   and every click."
-- Local API: upload DTO gets `shortUrl` (active, or null); `POST
-  /v1/uploads/{id}/short-link` creates one (or returns the active one);
-  `GET /v1/uploads/{id}/short-link` returns it with stats when available.
+- Local API: upload DTO gets `shortUrl` (active, or null, always present)
+  and its `formats` use it; an upload response whose short link couldn't be
+  made has `shortLinkError` (the upload itself succeeded).
+  `POST /v1/uploads?short=1|0` and `POST /v1/uploads/clipboard?short=1|0`
+  override the destination for that upload: `1` makes one whatever
+  `onlyLongerThan` says (409 when the destination has no shortener; the
+  temporary-link rule still applies), `0` makes none.
+  `POST /v1/uploads/{id}/short-link` creates one (201) or returns the active
+  one (200): `{"shortLink": ShortLink, "upload": Upload}`; 404 for an
+  unknown upload, 409 when the destination is gone or has no shortener, 502
+  with the provider's message when creating fails.
+  `GET /v1/uploads/{id}/short-link` returns `{"shortLink": ShortLink | null}`,
+  with stats refreshed when they're older than five minutes.
+  `ShortLink = {id, shortUrl, targetUrl, provider, providerName, status,
+  createdAt, expiresAt, clicks, lastClickAt}` (nulls written out).
+  `POST /v1/destinations/{id}/objects/move` applies rule 7 without asking:
+  links are updated when the provider can; otherwise the move goes ahead
+  and they're marked orphaned. The reply adds `shortLinkStatus`: `none`,
+  `updated`, `orphaned`, or `notUpdated` (an update failed, so the original
+  object was kept and the link still works). `DELETE
+  /v1/destinations/{id}/objects` cleans up short links like the bucket view.
 - CLI: `aktar upload --short` / `--no-short` (overrides the destination
   setting for this run), `shortUrl` in `--json`, `-f` formats use the short
   link; `aktar history --json` includes `shortUrl`.
 - MCP: `upload_file`, `upload_clipboard`, `search_uploads` results include
   `shortUrl`.
 - Raycast: show and copy the short link (separate PR).
-- Webhooks: `shortUrl` in the payload (null when none).
+- Webhooks and scripts (a destination's hooks and a watched folder's):
+  `upload.shortUrl` in the payload, null when none (`upload.url` stays the
+  original link). See docs/destination-automation.md.
 - Share to Another Device: carries `shortLinks` and `shortLinkToken`.
+  Field names, for Windows and mobile to match:
+  - `destination.shortLinks`: the `DestinationConfig.shortLinks` object as
+    above, same keys as destinations.json: `providerId`, `endpoint`,
+    `domain`, `custom` (a whole definition: `id`, `name`, `kind`,
+    `baseUrl`, `needsDomain`, `auth`, `create`, `delete`, `update`,
+    `stats`, `test`, `capabilities`, with the request fields of the
+    schema), `onlyLongerThan`, `shortenTemporaryLinks`,
+    `allowInsecureHTTP`. Omitted when off.
+  - `credentials.shortLinkToken`: string, omitted when unset or when
+    `shortLinks` is off.
+  - Decoding: unknown keys are ignored; settings whose provider the app
+    doesn't know (or a `custom` provider without a readable definition)
+    are dropped, short links stay off, and the token is not kept. The rest
+    of the destination imports as usual. Apps that don't know short links
+    ignore both fields.
 
 All new strings in 17 languages.

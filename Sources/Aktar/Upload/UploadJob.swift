@@ -32,6 +32,9 @@ final class UploadJob: Identifiable {
     /// The history entry the job made or updated (or reused), once it
     /// has succeeded.
     var recordID: UUID?
+    /// Why its short link couldn't be made (the original link was copied
+    /// instead), for whoever waits for the upload.
+    var shortLinkError: String?
 
     /// Waiting or uploading: its file is still needed.
     var isActive: Bool {

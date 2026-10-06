@@ -64,10 +64,13 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   `folderUpload`, `imageProcessing` (`{format, quality, maxLongEdge}`), `thumbnails`
   (`off` / `local` / `bucket`), `thumbnailPrefix` (see docs/thumbnails.md),
   `useFor` (`{kinds, extensions}`), `shortCache`, `cloudflareZoneId`, `hooks`
-  (`[{kind, target, enabled}]`; see docs/destination-automation.md).
+  (`[{kind, target, enabled}]`; see docs/destination-automation.md),
+  `shortLinks` (the short link settings object; see docs/short-links.md).
   Optional fields are omitted when unset. `isDefault` is never sent.
 - `sessionToken` is omitted when unset, and so is `cloudflareToken` (the
-  Cloudflare cache purge token, see docs/destination-automation.md). `customTemplate` is only sent when
+  Cloudflare cache purge token, see docs/destination-automation.md), and
+  `shortLinkToken` (the link shortener's API key; also omitted when
+  `shortLinks` is unset). `customTemplate` is only sent when
   `destination.outputMode == "custom"` (it is app-level today).
 - `v` inside the JSON greater than 1: "newer version" error.
 - `expiresAt` (optional, integer Unix seconds): when the link stops being
@@ -102,6 +105,9 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   unset unless letters and digits. `hooks`: each entry needs a known `kind`
   and a `target`; a webhook address the app would refuse, or a script name
   with a `/`, is dropped. A per-destination keyboard shortcut is never sent.
+  `shortLinks`: unset unless it decodes and names a provider the app knows
+  (or `custom` with a readable `custom` definition); `shortLinkToken` is
+  only kept along with it.
 - The `minimal` test vector exercises these rules.
 
 ## On the Mac

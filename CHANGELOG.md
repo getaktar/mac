@@ -45,6 +45,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shortener can (and keeps the old file if that fails); otherwise it
   warns first. A reused duplicate reuses its short link, and Replace File
   keeps it
+- Import ShareX Configuration (.sxcu) in the Short Links section reads a
+  ShareX custom URL shortener into a custom HTTP request. It first shows
+  where your token will be sent (host, method, endpoint, and which
+  headers or parameters carry it); secrets found in the file are moved to
+  the Keychain. Configurations that use regular expressions, `{response}`,
+  file fields, `{select}`, `{prompt}` or other ShareX syntax are refused
+  with the reason, and http:// needs "Allow insecure HTTP"
+- Testing a custom HTTP shortener with a delete request deletes the test
+  link again, and says whether that worked. A custom delete request can
+  use DELETE, GET or POST
+- Local API: uploads have `shortUrl` (null without one) and their formats
+  use it; `short=1` or `short=0` on an upload overrides the destination
+  for that upload; `GET` and `POST /v1/uploads/{id}/short-link` read
+  (with clicks) or create an upload's short link; moving an object
+  reports `shortLinkStatus`
+- Webhooks and scripts after an upload get `upload.shortUrl` (null
+  without one), also for watched folders
+- Share to Another Device carries the destination's short link settings
+  and token
+
+### Fixed
+
+- A Short.io delete that answers 200 with `"success": false` counts as a
+  failed cleanup ("may still exist") instead of a deleted link
+- Remove from History also removes that upload's short link records from
+  Aktar (the short links themselves are left alone)
+- Deleting an object through the local API cleans up its uploads' short
+  links, like the bucket view does
 
 ## [0.16.0] - 2026-10-06
 

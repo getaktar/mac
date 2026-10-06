@@ -9,15 +9,17 @@ import SwiftData
 ///     GET    /v1/status
 ///     GET    /v1/destinations
 ///     GET    /v1/uploads?query=&destinationId=&limit=
-///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=     (raw file bytes; "reused" in the reply)
-///     POST   /v1/uploads/clipboard?destinationId=&expires=
+///     POST   /v1/uploads?filename=&destinationId=&prefix=&expires=&short=     (raw file bytes; "reused" in the reply)
+///     POST   /v1/uploads/clipboard?destinationId=&expires=&short=
 ///     DELETE /v1/uploads/{id}
+///     GET    /v1/uploads/{id}/short-link                          (the active short link with its stats, or null)
+///     POST   /v1/uploads/{id}/short-link                          (makes one, or returns the active one: 201 / 200)
 ///     GET    /v1/uploads/{id}/thumbnail?px=&generate=             (PNG; 204 when there's none)
 ///     POST   /v1/uploads/{id}/replace?filename=                   (raw file bytes; writes over the upload, the link stays)
 ///     GET    /v1/destinations/{id}/objects?prefix=&continuationToken=
 ///     DELETE /v1/destinations/{id}/objects?key=
 ///     PUT    /v1/destinations/{id}/objects?key=&filename=         (raw file bytes; writes over the object, the link stays)
-///     POST   /v1/destinations/{id}/objects/move                {"from", "to"}
+///     POST   /v1/destinations/{id}/objects/move                {"from", "to"} ("shortLinkStatus" in the reply)
 ///     POST   /v1/destinations/{id}/folders                     {"prefix", "name"}
 ///     POST   /v1/destinations/{id}/links                       {"key", "expiresIn"}
 ///     GET    /v1/destinations/{id}/thumbnail?key=&objectSize=&lastModified=&px=&generate=  (PNG; 204 when there's none)
@@ -32,6 +34,17 @@ import SwiftData
 ///
 /// An upload without destinationId goes where the destinations' "Use for"
 /// sends it by file type, or to the default destination.
+///
+/// Short links (docs/short-links.md): every upload has `shortUrl`, its
+/// active short link or null, and its `formats` use it. `short=1` makes one
+/// for this upload whatever the destination's length rule (409 when the
+/// destination has no shortener), `short=0` makes none; left out, the
+/// destination decides. When making one fails the upload still succeeds,
+/// with the reason in `shortLinkError`. A move can't ask first the way the
+/// bucket view does: links whose provider can't change their target are
+/// moved anyway and marked orphaned, and `shortLinkStatus` says what
+/// happened ("none", "updated", "orphaned", or "notUpdated" when an update
+/// failed and the original file was kept so the link still works).
 @MainActor
 final class LocalAPIRouter {
     static let apiVersion = 1
@@ -60,6 +73,10 @@ final class LocalAPIRouter {
             return await uploadClipboard(request)
         case ("DELETE", 2) where route[0] == "uploads":
             return await deleteUpload(id: route[1])
+        case ("GET", 3) where route[0] == "uploads" && route[2] == "short-link":
+            return await shortLink(id: route[1])
+        case ("POST", 3) where route[0] == "uploads" && route[2] == "short-link":
+            return await createShortLink(id: route[1])
         case ("POST", 3) where route[0] == "uploads" && route[2] == "replace":
             return await replaceUpload(id: route[1], request: request)
         case ("GET", 3) where route[0] == "uploads" && route[2] == "thumbnail":
@@ -129,6 +146,60 @@ final class LocalAPIRouter {
         } catch {
             return failure(error)
         }
+    }
+
+    // MARK: - Short links
+
+    /// The upload's active short link, with clicks when its provider has
+    /// them (fetched at most every few minutes), or null.
+    private func shortLink(id: String) async -> HTTPResponse {
+        guard let uuid = UUID(uuidString: id), record(id: uuid) != nil else {
+            return .error(404, "No upload with that ID.")
+        }
+        let service = appState.uploadManager.shortLinks
+        guard let active = service.active(for: uuid) else { return .json(200, ShortLinkReply(shortLink: nil)) }
+        await service.refreshStats(active)
+        return .json(200, ShortLinkReply(shortLink: ShortLinkDTO(active)))
+    }
+
+    /// Makes a short link for the upload, or returns its active one.
+    private func createShortLink(id: String) async -> HTTPResponse {
+        guard let uuid = UUID(uuidString: id), let record = record(id: uuid) else {
+            return .error(404, "No upload with that ID.")
+        }
+        let manager = appState.uploadManager
+        if let active = manager.shortLinks.active(for: uuid) {
+            return .json(200, ShortLinkCreatedDTO(shortLink: ShortLinkDTO(active), upload: uploadDTO(record)))
+        }
+        guard let destination = destination(id: record.destinationID.uuidString), destination.id == record.destinationID else {
+            return .error(409, "This upload's destination was removed.")
+        }
+        guard destination.shortLinks?.definition != nil else {
+            return .error(409, ShortLinkError.notConfigured.localizedDescription)
+        }
+        do {
+            let created = try await manager.createShortLink(for: record)
+            return .json(201, ShortLinkCreatedDTO(shortLink: ShortLinkDTO(created), upload: uploadDTO(record)))
+        } catch {
+            return failure(error)
+        }
+    }
+
+    /// `short=1` / `short=0`: nil when left out; the error response for
+    /// anything else.
+    private static func shortOverride(_ request: HTTPRequest) -> (value: Bool?, problem: HTTPResponse?) {
+        switch request.query["short"]?.lowercased() {
+        case nil, "": return (nil, nil)
+        case "1", "true": return (true, nil)
+        case "0", "false": return (false, nil)
+        default: return (nil, .error(400, "short must be 1 or 0."))
+        }
+    }
+
+    /// A forced short link needs a shortener to make it with.
+    private static func checkShortLinks(_ short: Bool?, destination: DestinationConfig) -> HTTPResponse? {
+        guard short == true, destination.shortLinks?.definition == nil else { return nil }
+        return .error(409, ShortLinkError.notConfigured.localizedDescription)
     }
 
     // MARK: - Thumbnails
@@ -258,6 +329,9 @@ final class LocalAPIRouter {
         if expiryDays > 0, request.query["prefix"] != nil {
             return .error(400, "The expires and prefix query parameters can't be combined.")
         }
+        let (short, shortProblem) = Self.shortOverride(request)
+        if let shortProblem { return shortProblem }
+        if let problem = Self.checkShortLinks(short, destination: destination) { return problem }
 
         guard let fileURL = Self.stage(request, filename: filename) else {
             return .error(500, "Could not stage the file for upload.")
@@ -265,6 +339,7 @@ final class LocalAPIRouter {
         defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
 
         var input = UploadInput(fileURL: fileURL, originalFilename: filename, source: .filePicker)
+        input.shortLink = short
         if let rawPrefix = request.query["prefix"] {
             if let problem = Self.problem(withFolder: rawPrefix) { return .error(400, "prefix: \(problem)") }
             let prefix = Self.normalizedFolder(rawPrefix)
@@ -281,9 +356,12 @@ final class LocalAPIRouter {
         guard let expiryDays = Self.expiryDays(request) else {
             return .error(400, Self.invalidExpiryMessage)
         }
-        guard let input = ClipboardService.readFileInput() else {
+        let (short, shortProblem) = Self.shortOverride(request)
+        if let shortProblem { return shortProblem }
+        guard var input = ClipboardService.readFileInput() else {
             return .error(422, "The clipboard has no file or image to upload.")
         }
+        input.shortLink = short
         // Without a destinationId, "Use for" decides by file type.
         let named = request.query["destinationId"].flatMap { $0.isEmpty ? nil : $0 }
         let routed = named == nil ? appState.uploadManager.routedDestination(for: input) : nil
@@ -294,6 +372,10 @@ final class LocalAPIRouter {
         if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
             TempFiles.removeIfOwned(input.fileURL)
             return .error(409, Self.expiryNotSetUpMessage)
+        }
+        if let problem = Self.checkShortLinks(short, destination: destination) {
+            TempFiles.removeIfOwned(input.fileURL)
+            return problem
         }
         return await run(input, to: destination, expiryDays: expiryDays)
     }
@@ -367,10 +449,10 @@ final class LocalAPIRouter {
     /// shows the error instead.
     private func respond(_ result: UploadWaitResult, status: Int) -> HTTPResponse {
         switch result {
-        case .succeeded(let record, let reused):
+        case .succeeded(let record, let reused, let shortLinkError):
             // `reused`: nothing was uploaded, the same file was already
             // there and this is its earlier upload.
-            return .json(status, ["upload": uploadDTO(record, reused: reused)])
+            return .json(status, ["upload": uploadDTO(record, reused: reused, shortLinkError: shortLinkError)])
         case .failed(let message):
             return .error(502, message)
         case .cancelled:
@@ -448,6 +530,9 @@ final class LocalAPIRouter {
                 try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes, provider: storage)
                 try await storage.delete(objectKey: key)
                 RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
+                for record in appState.repository.records(key: key, destinationID: destination.id) {
+                    appState.uploadManager.shortLinks.cleanUpAfterFileDeleted(uploadID: record.id, destination: destination, filename: record.localFilename)
+                }
                 appState.repository.objectDeleted(key: key, destinationID: destination.id)
                 return .json(200, ["deleted": key])
 
@@ -465,18 +550,40 @@ final class LocalAPIRouter {
                 if try await storage.objectExists(key: newKey) {
                     return .error(409, "An object named \u{201C}\(newKey)\u{201D} already exists.")
                 }
+                // The bucket view's rule 7, without the question: links
+                // that can follow are updated between the copy and the
+                // delete, the others are orphaned.
+                let shortLinks = appState.uploadManager.shortLinks
+                let records = appState.repository.records(key: body.from, destinationID: destination.id)
+                let plan = shortLinks.movePlan(key: body.from, destination: destination, records: records)
                 try await storage.copy(from: body.from, to: newKey)
                 await BucketThumbnails.copy(from: body.from, to: newKey, prefixes: thumbnailPrefixes, provider: storage)
-                try await BucketThumbnails.delete(for: body.from, prefixes: thumbnailPrefixes, provider: storage)
-                try await storage.delete(objectKey: body.from)
-                RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: body.from)
+                var shortLinkStatus = "none"
+                if plan == .update, let newURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey) {
+                    let updated = await shortLinks.updateTargets(of: records, to: newURL, destination: destination)
+                    shortLinkStatus = updated ? "updated" : "notUpdated"
+                }
+                // A link that couldn't be updated still points at the old
+                // object, so that stays.
+                if shortLinkStatus != "notUpdated" {
+                    try await BucketThumbnails.delete(for: body.from, prefixes: thumbnailPrefixes, provider: storage)
+                    try await storage.delete(objectKey: body.from)
+                    RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: body.from)
+                }
+                if plan == .warn {
+                    shortLinks.orphanLinks(of: records)
+                    shortLinkStatus = "orphaned"
+                }
                 appState.repository.objectMoved(
                     from: body.from,
                     to: newKey,
                     destination: destination,
                     rulesActive: ExpiryRuleStore.shared.isActive(destination.id)
                 )
-                return .json(200, objectDTO(BucketObject(key: newKey, size: 0, lastModified: .now), destination: destination))
+                return .json(200, MovedDTO(
+                    object: objectDTO(BucketObject(key: newKey, size: 0, lastModified: .now), destination: destination),
+                    shortLinkStatus: shortLinkStatus
+                ))
 
             case ("POST", ["folders"]):
                 let body = try decode(FolderBody.self, from: request)
@@ -600,12 +707,12 @@ final class LocalAPIRouter {
         uploadDTO(record, reused: nil)
     }
 
-    private func uploadDTO(_ record: UploadRecord, reused: Bool?) -> UploadDTO {
+    /// The formats use the upload's active short link, as copying does.
+    private func uploadDTO(_ record: UploadRecord, reused: Bool?, shortLinkError: String? = nil) -> UploadDTO {
         let url = record.publicURL
         let manager = appState.uploadManager
         func formatted(_ mode: OutputMode) -> String {
-            guard let url else { return record.publicURLString }
-            return OutputFormatter.format(publicURL: url, mode: mode, filename: record.localFilename, customTemplate: manager.customTemplate)
+            manager.formattedLink(for: record, mode: mode)
         }
         return UploadDTO(
             id: record.id.uuidString,
@@ -620,7 +727,9 @@ final class LocalAPIRouter {
             expiresAt: record.expiresAt,
             replacedAt: record.replacedAt,
             formats: .init(url: formatted(.url), markdown: formatted(.markdown), html: formatted(.html), custom: formatted(.custom)),
-            reused: reused
+            shortUrl: manager.shortLinks.active(for: record.id)?.shortUrl,
+            reused: reused,
+            shortLinkError: shortLinkError
         )
     }
 
@@ -768,8 +877,111 @@ private struct UploadDTO: Encodable {
     /// When a new file was last written over the upload (Replace File).
     let replacedAt: Date?
     let formats: Formats
+    /// The active short link; null (written out) when there's none.
+    let shortUrl: String?
     /// Only in the response to an upload.
     let reused: Bool?
+    /// Only in the response to an upload whose short link couldn't be made.
+    let shortLinkError: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, filename, objectKey, url, destinationId, destinationName, mimeType, size, createdAt, expiresAt, replacedAt
+        case formats, shortUrl, reused, shortLinkError
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(filename, forKey: .filename)
+        try c.encode(objectKey, forKey: .objectKey)
+        try c.encode(url, forKey: .url)
+        try c.encode(destinationId, forKey: .destinationId)
+        try c.encode(destinationName, forKey: .destinationName)
+        try c.encode(mimeType, forKey: .mimeType)
+        try c.encode(size, forKey: .size)
+        try c.encode(createdAt, forKey: .createdAt)
+        try c.encodeIfPresent(expiresAt, forKey: .expiresAt)
+        try c.encodeIfPresent(replacedAt, forKey: .replacedAt)
+        try c.encode(formats, forKey: .formats)
+        try c.encode(shortUrl, forKey: .shortUrl)
+        try c.encodeIfPresent(reused, forKey: .reused)
+        try c.encodeIfPresent(shortLinkError, forKey: .shortLinkError)
+    }
+}
+
+/// A short link, with nulls written out.
+private struct ShortLinkDTO: Encodable {
+    let id: String
+    let shortUrl: String
+    let targetUrl: String
+    let provider: String
+    let providerName: String
+    let status: String
+    let createdAt: Date
+    let expiresAt: Date?
+    let clicks: Int?
+    let lastClickAt: Date?
+
+    init(_ link: ShortLink) {
+        id = link.id.uuidString
+        shortUrl = link.shortUrl
+        targetUrl = link.targetUrl
+        provider = link.provider
+        providerName = link.providerName
+        status = link.displayStatus.rawValue
+        createdAt = link.createdAt
+        expiresAt = link.expiresAt
+        clicks = link.clicks
+        lastClickAt = link.lastClickAt
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, shortUrl, targetUrl, provider, providerName, status, createdAt, expiresAt, clicks, lastClickAt
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(shortUrl, forKey: .shortUrl)
+        try c.encode(targetUrl, forKey: .targetUrl)
+        try c.encode(provider, forKey: .provider)
+        try c.encode(providerName, forKey: .providerName)
+        try c.encode(status, forKey: .status)
+        try c.encode(createdAt, forKey: .createdAt)
+        try c.encode(expiresAt, forKey: .expiresAt)
+        try c.encode(clicks, forKey: .clicks)
+        try c.encode(lastClickAt, forKey: .lastClickAt)
+    }
+}
+
+private struct ShortLinkReply: Encodable {
+    let shortLink: ShortLinkDTO?
+
+    private enum CodingKeys: String, CodingKey { case shortLink }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(shortLink, forKey: .shortLink)
+    }
+}
+
+private struct ShortLinkCreatedDTO: Encodable {
+    let shortLink: ShortLinkDTO
+    let upload: UploadDTO
+}
+
+/// The moved object's fields, and what happened to its short links.
+private struct MovedDTO: Encodable {
+    let object: ObjectDTO
+    let shortLinkStatus: String
+
+    private enum CodingKeys: String, CodingKey { case shortLinkStatus }
+
+    func encode(to encoder: Encoder) throws {
+        try object.encode(to: encoder)
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(shortLinkStatus, forKey: .shortLinkStatus)
+    }
 }
 
 private struct ListingDTO: Encodable {

@@ -281,7 +281,7 @@ enum AktarIntentSupport {
     /// destination is set to one, otherwise the public URL.
     static func link(_ result: UploadWaitResult?, manager: UploadManager) async throws -> URL {
         switch result {
-        case .succeeded(let record, _):
+        case .succeeded(let record, _, _):
             guard let link = await manager.shareLink(for: record) else {
                 throw AktarIntentError(String(localized: "The upload finished but its link isn\u{2019}t valid."))
             }

@@ -191,6 +191,14 @@ final class ShortLinkService {
         }
     }
 
+    /// Remove from History: the upload's short links are forgotten here
+    /// too. Nothing is deleted at the provider; the file stays, and so do
+    /// its links.
+    func forget(uploadID: UUID) {
+        for link in links(for: uploadID) { modelContext.delete(link) }
+        try? modelContext.save()
+    }
+
     // MARK: - Moving
 
     /// What moving the object at `key` would mean for its uploads' short

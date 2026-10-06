@@ -33,6 +33,10 @@ struct UploadInput: Sendable {
     /// Writes over an existing upload or object at `objectKey`, so its link
     /// keeps working; see `UploadManager.replace`.
     var replacing: ReplaceTarget? = nil
+    /// Overrides the destination's Short Links for this upload (the local
+    /// API's `short=1` / `short=0`): true makes one whatever the length,
+    /// false makes none. Nil follows the destination.
+    var shortLink: Bool? = nil
 }
 
 /// What a replace writes over: the history entry it updates, if there's

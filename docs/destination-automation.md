@@ -125,7 +125,9 @@ own Automation), after a replace, and not for reused duplicate links.
   `"upload.succeeded"` or `"upload.replaced"`, a new `destination`
   object (`{"id", "name"}`), and no `folder` object for manual uploads.
   A script's fourth argument is the destination's name instead of the
-  folder's.
+  folder's. `upload.shortUrl` is the upload's short link, written out as
+  null when it has none (docs/short-links.md); `upload.url` stays the
+  original link. Watched folders' payloads have it too.
 - A failing hook is reported once per destination per minute and never fails
   the upload.
 
@@ -159,6 +161,6 @@ own Automation), after a replace, and not for reused duplicate links.
 
 New optional destination fields: `useFor`, `shortCache`, `cloudflareZoneId`,
 `hooks` (webhooks only are applied on mobile; scripts are kept but shown as
-"script, runs on Mac and Windows"). New optional credential field:
-`cloudflareToken`. Shortcuts are never transferred. Decoding stays lenient:
+"script, runs on Mac and Windows"), and `shortLinks` (docs/short-links.md).
+New optional credential fields: `cloudflareToken`, `shortLinkToken`. Shortcuts are never transferred. Decoding stays lenient:
 invalid parts are dropped, never failing the import.

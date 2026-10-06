@@ -276,6 +276,12 @@ enum DestinationTransfer {
         if let hooks = config.hooks, !hooks.isEmpty {
             destination["hooks"] = hooks.map { ["kind": $0.kind.rawValue, "target": $0.target, "enabled": $0.enabled] as [String: Any] }
         }
+        // The same JSON as destinations.json; see docs/short-links.md.
+        if let shortLinks = config.shortLinks,
+           let data = try? JSONEncoder().encode(shortLinks),
+           let object = try? JSONSerialization.jsonObject(with: data) {
+            destination["shortLinks"] = object
+        }
 
         var credentials: [String: Any] = [
             "accessKeyId": payload.credentials.accessKeyId,
@@ -286,6 +292,9 @@ enum DestinationTransfer {
         }
         if let token = payload.credentials.cloudflareToken, !token.isEmpty {
             credentials["cloudflareToken"] = token
+        }
+        if let token = payload.credentials.shortLinkToken, !token.isEmpty, config.shortLinks != nil {
+            credentials["shortLinkToken"] = token
         }
 
         var root: [String: Any] = ["v": Int(formatVersion), "destination": destination, "credentials": credentials]
@@ -345,13 +354,15 @@ enum DestinationTransfer {
             cloudflareZoneId: string(object["cloudflareZoneId"]).flatMap { zone in
                 zone.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) } ? zone : nil
             },
-            hooks: hooks(object["hooks"])
+            hooks: hooks(object["hooks"]),
+            shortLinks: shortLinks(object["shortLinks"])
         )
         let credentials = StorageCredentials(
             accessKeyId: accessKeyId,
             secretAccessKey: secretAccessKey,
             sessionToken: string(keys["sessionToken"]),
-            cloudflareToken: string(keys["cloudflareToken"])
+            cloudflareToken: string(keys["cloudflareToken"]),
+            shortLinkToken: destination.shortLinks == nil ? nil : string(keys["shortLinkToken"])
         )
         return Payload(
             destination: destination,
@@ -397,6 +408,16 @@ enum DestinationTransfer {
             return WatchHook(kind: kind, target: target, enabled: bool(object["enabled"]) ?? true)
         }
         return hooks.isEmpty ? nil : hooks
+    }
+
+    /// Settings this app can use: a provider it knows, or a custom
+    /// definition it can read. Anything else leaves short links off.
+    private static func shortLinks(_ value: Any?) -> ShortLinkSettings? {
+        guard let object = value as? [String: Any],
+              let data = try? JSONSerialization.data(withJSONObject: object),
+              let settings = try? JSONDecoder().decode(ShortLinkSettings.self, from: data),
+              settings.definition != nil else { return nil }
+        return settings
     }
 
     // MARK: - JSON values
