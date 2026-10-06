@@ -24,6 +24,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A destination whose links use a domain of your own and whose path has
   no `{short}` suggests Clean URLs in its form, with an example on that
   domain; the note can be dismissed for each destination
+- Short links with your own shortener: a destination's new Short Links
+  section picks Shlink, YOURLS, Kutt, Dub, Short.io or a custom HTTP
+  request, with its address, domain and API key (kept in the Keychain),
+  a Test button, "Only shorten links longer than" and "Also shorten
+  temporary links" (for shorteners that can expire links; the short link
+  expires with the temporary link). After an upload the short link is
+  what's copied (URL, Markdown, HTML, and `{url}`, `{shortUrl}` and
+  `{longUrl}` in a custom template) and what the QR code shows; an
+  expiring upload's short link expires with it. If it can't be created
+  the original link is copied and a notification offers Retry. http://
+  addresses need "Allow insecure HTTP". Hosted shorteners are marked as
+  seeing every link and click (docs/short-links.md)
+- History shows an upload's short link with its clicks and last click,
+  and offers Copy Short Link, Copy Original Link, Create Short Link and
+  Delete Short Link; earlier short links are listed with their status
+- Deleting a file deletes its short links too; one that can't be deleted
+  is marked "may still exist" and you're told. Renaming or moving a file
+  in the bucket view points its short link at the new path when the
+  shortener can (and keeps the old file if that fails); otherwise it
+  warns first. A reused duplicate reuses its short link, and Replace File
+  keeps it
 
 ## [0.16.0] - 2026-10-06
 

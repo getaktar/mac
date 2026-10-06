@@ -37,6 +37,9 @@ struct DestinationFormView: View {
     private let hasSavedCloudflareToken: Bool
     @State private var purgeCheck: PurgeCheck?
     @State private var hooks: [WatchHook]
+    @State private var shortLinks: ShortLinkFormState
+    /// The provider of the short link token saved for this destination.
+    private let savedShortLinkProvider: String?
     /// The note suggesting {short} for a domain of the user's own was
     /// closed for this destination.
     @State private var cleanURLSuggestionDismissed: Bool
@@ -99,6 +102,9 @@ struct DestinationFormView: View {
         _shortCache = State(initialValue: existing?.shortCache ?? false)
         _cloudflareZoneId = State(initialValue: existing?.cloudflareZoneId ?? "")
         _hooks = State(initialValue: existing?.hooks ?? [])
+        _shortLinks = State(initialValue: ShortLinkFormState(existing?.shortLinks))
+        let hasShortLinkToken = existing.flatMap { try? KeychainService.load(for: $0.id).shortLinkToken }.map { !$0.isEmpty } ?? false
+        savedShortLinkProvider = hasShortLinkToken ? existing?.shortLinks?.providerId : nil
         hasSavedCloudflareToken = existing.flatMap { try? KeychainService.load(for: $0.id).cloudflareToken }.map { !$0.isEmpty } ?? false
         _thumbnailPrefix = State(initialValue: ThumbnailKeys.normalizedPrefix(existing?.thumbnailPrefix) ?? ThumbnailKeys.defaultPrefix)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
@@ -230,6 +236,10 @@ struct DestinationFormView: View {
                 thumbnailsSection
 
                 replacingSection
+
+                ShortLinksFormSection(state: $shortLinks, savedTokenProvider: savedShortLinkProvider) {
+                    existing.flatMap { try? KeychainService.load(for: $0.id).shortLinkToken }
+                }
 
                 afterUploadSection
 
@@ -755,6 +765,7 @@ struct DestinationFormView: View {
     private var canSave: Bool {
         !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
             && thumbnailPrefixProblem == nil && useForProblem == nil && !HookListEditor.hasUnusableWebhook(hooks)
+            && shortLinks.problem(hasSavedToken: savedShortLinkProvider != nil && savedShortLinkProvider == shortLinks.providerId) == nil
             && (existing != nil || (!accessKeyId.isEmpty && !secretAccessKey.isEmpty))
     }
 
@@ -783,7 +794,8 @@ struct DestinationFormView: View {
             shortCache: shortCache ? true : nil,
             cloudflareZoneId: cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 ? nil : cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines),
-            hooks: hooks.isEmpty ? nil : hooks
+            hooks: hooks.isEmpty ? nil : hooks,
+            shortLinks: shortLinks.settings()
         )
     }
 
@@ -853,6 +865,18 @@ struct DestinationFormView: View {
             credentials.cloudflareToken = typedToken
         } else if let existing {
             credentials.cloudflareToken = (try? KeychainService.load(for: existing.id))?.cloudflareToken
+        }
+        // The short link token: a typed one, otherwise the saved one while
+        // the provider stays the same, and none with short links off.
+        let typedShortLinkToken = shortLinks.token.trimmingCharacters(in: .whitespacesAndNewlines)
+        if config.shortLinks == nil {
+            credentials.shortLinkToken = nil
+        } else if !typedShortLinkToken.isEmpty {
+            credentials.shortLinkToken = typedShortLinkToken
+        } else if let existing, savedShortLinkProvider == config.shortLinks?.providerId {
+            credentials.shortLinkToken = (try? KeychainService.load(for: existing.id))?.shortLinkToken
+        } else {
+            credentials.shortLinkToken = nil
         }
         if checkedExpiryRules, checkedConnection == Connection(config) {
             ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)

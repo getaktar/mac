@@ -385,7 +385,7 @@ final class BucketBrowserModel {
         }
     }
 
-    func delete(_ keys: [String], repository: UploadRepository) async {
+    func delete(_ keys: [String], repository: UploadRepository, shortLinks: ShortLinkService) async {
         for key in keys {
             busyKeys.insert(key)
             defer { busyKeys.remove(key) }
@@ -394,6 +394,9 @@ final class BucketBrowserModel {
                 try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes(), provider: storage)
                 try await storage.delete(objectKey: key)
                 RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
+                for record in repository.records(key: key, destinationID: destination.id) {
+                    shortLinks.cleanUpAfterFileDeleted(uploadID: record.id, destination: destination, filename: record.localFilename)
+                }
                 objects.removeAll { $0.key == key }
                 removeFromSearchIndex(key: key)
                 selection.remove(key)
@@ -405,9 +408,19 @@ final class BucketBrowserModel {
         }
     }
 
+    /// What moving `object` means for the short links of its uploads; the
+    /// view warns first for `.warn`.
+    func shortLinkMovePlan(for object: BucketObject, repository: UploadRepository, shortLinks: ShortLinkService) -> ShortLinkRules.MovePlan {
+        shortLinks.movePlan(key: object.key, destination: destination, records: repository.records(key: object.key, destinationID: destination.id))
+    }
+
     /// Renames or moves an object: `newKey` is a full key, so changing the
     /// folder part moves it. S3 does this as a copy followed by a delete.
-    func move(_ object: BucketObject, to rawKey: String, repository: UploadRepository) async {
+    /// Short links of its uploads (rule 7) are pointed at the new key in
+    /// between when the provider can; if that fails, the old object stays
+    /// so they keep working. A provider that can't was warned about, and
+    /// its links are marked orphaned.
+    func move(_ object: BucketObject, to rawKey: String, repository: UploadRepository, shortLinks: ShortLinkService) async {
         let newKey = rawKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !newKey.isEmpty, newKey != object.key else { return }
         if let problem = ObjectKeyGenerator.problem(withUserKey: newKey) {
@@ -431,22 +444,35 @@ final class BucketBrowserModel {
                 return
             }
             let prefixes = thumbnailPrefixes()
+            let records = repository.records(key: object.key, destinationID: destination.id)
+            let plan = shortLinks.movePlan(key: object.key, destination: destination, records: records)
             try await storage.copy(from: object.key, to: newKey)
             await BucketThumbnails.copy(from: object.key, to: newKey, prefixes: prefixes, provider: storage)
-            try await BucketThumbnails.delete(for: object.key, prefixes: prefixes, provider: storage)
-            try await storage.delete(objectKey: object.key)
-            RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: object.key)
+            var keepsOld = false
+            if plan == .update, let newURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey) {
+                keepsOld = !(await shortLinks.updateTargets(of: records, to: newURL, destination: destination))
+            }
+            if !keepsOld {
+                try await BucketThumbnails.delete(for: object.key, prefixes: prefixes, provider: storage)
+                try await storage.delete(objectKey: object.key)
+                RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: object.key)
+            }
+            if plan == .warn { shortLinks.orphanLinks(of: records) }
             repository.objectMoved(
                 from: object.key,
                 to: newKey,
                 destination: destination,
                 rulesActive: ExpiryRuleStore.shared.isActive(destination.id)
             )
-            temporaryURLs[object.key] = nil
-            objects.removeAll { $0.key == object.key }
-            removeFromSearchIndex(key: object.key)
             addToSearchIndex(BucketObject(key: newKey, size: object.size, lastModified: .now))
-            selection.remove(object.key)
+            if keepsOld {
+                actionError = String(localized: "The file was copied to \u{201C}\(newKey)\u{201D}, but its short link couldn\u{2019}t be updated, so the original file was kept where it was. The short link may still point there.")
+            } else {
+                temporaryURLs[object.key] = nil
+                objects.removeAll { $0.key == object.key }
+                removeFromSearchIndex(key: object.key)
+                selection.remove(object.key)
+            }
             if Self.parent(ofKey: newKey) == prefix {
                 objects.append(BucketObject(key: newKey, size: object.size, lastModified: .now))
                 objects.sort { $0.key < $1.key }

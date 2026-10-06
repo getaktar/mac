@@ -136,18 +136,53 @@ enum NotificationService {
         post(content)
     }
 
+    // MARK: - Short links
+
+    static let shortLinkFailedCategory = "aktar.short-link.failed"
+    static let retryShortLinkActionID = "aktar.short-link.retry"
+    static let uploadIDKey = "uploadID"
+
+    /// Rule 3: the short link couldn't be made, so the original link was
+    /// copied. Retry makes one and copies it.
+    static func notifyShortLinkFailed(filename: String, reason: String, uploadID: UUID) {
+        let content = UNMutableNotificationContent()
+        content.title = filename
+        content.subtitle = String(localized: "Short link couldn't be created. The original link was copied instead.")
+        content.body = reason
+        content.categoryIdentifier = shortLinkFailedCategory
+        content.userInfo = [uploadIDKey: uploadID.uuidString]
+        post(content)
+    }
+
+    static func notifyShortLinkCopied(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.title = filename
+        content.body = String(localized: "Short link created and copied")
+        post(content)
+    }
+
+    /// Rule 5: the file is gone, a short link to it may not be.
+    static func notifyShortLinkCleanupFailed(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "File deleted \u{2713} / Short link cleanup failed \u{26A0}")
+        content.body = String(localized: "\(filename): the short link may still exist.")
+        post(content)
+    }
+
     static let deleteAskCategory = "aktar.watch.delete-ask"
     static let deleteActionID = "aktar.watch.delete"
     static let keepActionID = "aktar.watch.keep"
     static let folderIDKey = "folderID"
 
     /// Delete from Bucket and Keep Uploaded Files on a delete ask, which
-    /// answer it in the background.
+    /// answer it in the background, and Retry on a failed short link.
     static func registerCategories() {
         let delete = UNNotificationAction(identifier: deleteActionID, title: String(localized: "Delete from Bucket"), options: [.destructive])
         let keep = UNNotificationAction(identifier: keepActionID, title: String(localized: "Keep Uploaded Files"), options: [])
         let category = UNNotificationCategory(identifier: deleteAskCategory, actions: [delete, keep], intentIdentifiers: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
+        let retry = UNNotificationAction(identifier: retryShortLinkActionID, title: String(localized: "Retry"), options: [])
+        let shortLink = UNNotificationCategory(identifier: shortLinkFailedCategory, actions: [retry], intentIdentifiers: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category, shortLink])
     }
 
     /// Asks whether the uploads of files deleted from a watched folder go

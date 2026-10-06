@@ -53,10 +53,13 @@ final class UploadManager {
 
     private let destinationStore: DestinationStore
     private let repository: UploadRepository
+    /// Short links for uploads; see docs/short-links.md.
+    let shortLinks: ShortLinkService
 
     init(destinationStore: DestinationStore, repository: UploadRepository) {
         self.destinationStore = destinationStore
         self.repository = repository
+        shortLinks = ShortLinkService(destinationStore: destinationStore, modelContext: repository.modelContext)
     }
 
     /// The "Delete after" choice that actually applies to `destination`:
@@ -100,10 +103,12 @@ final class UploadManager {
         return try await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue)
     }
 
-    /// The link copying an upload would give now: a fresh temporary link
-    /// when its destination is set to them, otherwise the public URL
-    /// (also when the destination is gone or signing fails).
+    /// The link copying an upload would give now: its active short link,
+    /// a fresh temporary link when its destination is set to them,
+    /// otherwise the public URL (also when the destination is gone or
+    /// signing fails).
     func shareLink(for record: UploadRecord) async -> URL? {
+        if let short = shortLinks.active(for: record.id)?.url { return short }
         if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }),
            let duration = destination.temporaryLink,
            let url = try? await temporaryURL(for: record, validFor: duration) {
@@ -308,6 +313,8 @@ final class UploadManager {
         try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
         RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: record.objectKey)
+        // The file is gone; its short links follow in the background.
+        shortLinks.cleanUpAfterFileDeleted(uploadID: record.id, destination: destination, filename: record.localFilename)
         repository.delete(record)
     }
 
@@ -354,8 +361,10 @@ final class UploadManager {
                 }
                 guard rulesChecked[destinationID] == true else { continue }
             }
+            let uploadID = record.id
             do {
                 try await sweep(record)
+                shortLinks.markExpired(uploadID: uploadID)
             } catch {
                 failures[destinationID, default: 0] += 1
             }
@@ -575,11 +584,18 @@ final class UploadManager {
                    let info = try? await provider.objectInfo(key: record.objectKey),
                    DuplicateReuse.isUnchanged(size: info.size, lastModified: info.lastModified, uploadedSize: Int64(record.byteSize), uploadedAt: record.writtenAt) {
                     var link = publicURL
+                    var temporaryExpiresAt: Date?
                     if let duration = destination.temporaryLink,
                        let signed = try? await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue) {
                         link = signed
+                        temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
                     }
-                    self.finishReused(job: job, record: record, destination: destination, link: link)
+                    // The earlier upload's active short link is reused
+                    // (rule 9); one for a fresh temporary link is new.
+                    let shortening: ShortLinkService.Attempt = temporaryExpiresAt == nil && self.shortLinks.active(for: record.id) != nil
+                        ? .skipped
+                        : await self.shortLinks.shorten(link, destination: destination, temporaryExpiresAt: temporaryExpiresAt, uploadExpiresAt: record.expiresAt, isFolderFile: false)
+                    self.finishReused(job: job, record: record, destination: destination, link: link, shortening: shortening)
                     return
                 }
 
@@ -691,13 +707,29 @@ final class UploadManager {
                 // Signing happens locally, so this only fails on a broken
                 // endpoint, where the public URL is the better fallback.
                 var link = result.publicURL
+                var temporaryExpiresAt: Date?
                 if let duration = destination.temporaryLink,
                    let signed = try? await provider.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
                     link = signed
+                    temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
                 }
 
+                // The short link is made before anything is copied. A
+                // replace keeps the key, so its short link stays as it is
+                // (rule 8); a file of a folder uploaded with its structure
+                // isn't shortened on its own (rule 11).
+                let shortening: ShortLinkService.Attempt = job.input.replacing != nil
+                    ? .skipped
+                    : await self.shortLinks.shorten(
+                        link,
+                        destination: destination,
+                        temporaryExpiresAt: temporaryExpiresAt,
+                        uploadExpiresAt: job.expiryDays.map { Date.now.addingTimeInterval(TimeInterval($0) * 86_400) },
+                        isFolderFile: job.input.group.map { !$0.isDrop } ?? false
+                    )
+
                 let thumbnail = await thumbnailTask?.value
-                self.finish(job: job, result: result, destination: destination, link: link, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
+                self.finish(job: job, result: result, destination: destination, link: link, shortening: shortening, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
                 await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
                 await self.afterUpload(job: job, result: result, destination: destination, link: link, filename: filename, credentials: credentials)
             } catch {
@@ -804,16 +836,20 @@ final class UploadManager {
 
     /// Nothing was uploaded: the link of `record` is copied, and history
     /// keeps that one entry.
-    private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL) {
+    private func finishReused(job: UploadJob, record: UploadRecord, destination: DestinationConfig, link: URL, shortening: ShortLinkService.Attempt) {
         TempFiles.removeIfOwned(job.input.fileURL)
         job.reused = true
         job.recordID = record.id
         job.state = .succeeded(publicURLString: record.publicURLString)
+        let (shortURL, shortFailure) = shortLink(shortening, recordID: record.id, link: link, publicURL: record.publicURL)
+        if let shortFailure {
+            NotificationService.notifyShortLinkFailed(filename: record.localFilename, reason: shortFailure, uploadID: record.id)
+        }
         if job.input.watch != nil {
             reportWatched(job, .succeeded(WatchUploadSuccess(
                 objectKey: record.objectKey,
                 publicURL: record.publicURLString,
-                link: link.absoluteString,
+                link: (shortURL ?? link).absoluteString,
                 reused: true,
                 byteSize: Int64(record.byteSize),
                 destinationID: destination.id,
@@ -821,11 +857,11 @@ final class UploadManager {
                 contentHash: job.originalContentHash
             )))
         } else if let group = job.input.group, openGroups[group.id] != nil {
-            openGroups[group.id]?[group.index] = format(link, filename: record.localFilename, for: destination)
+            openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: record.localFilename, for: destination)
             finishGroupIfDone(group)
         } else {
-            ClipboardService.copy(format(link, filename: record.localFilename, for: destination))
-            if showsSuccessNotifications {
+            ClipboardService.copy(format(link, shortURL: shortURL, filename: record.localFilename, for: destination))
+            if showsSuccessNotifications, shortFailure == nil {
                 NotificationService.notifyUploadReused(filename: record.localFilename)
             }
             closePanelIfWanted()
@@ -835,10 +871,10 @@ final class UploadManager {
     }
 
     /// `link` is what's copied: the public URL, or a temporary link when
-    /// the destination is set to one. History keeps the public URL.
-    /// `filename` is the name the upload goes by, with the extension of a
-    /// converted photo.
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, uploadedFileURL: URL, filename: String, contentHash: String?, thumbnail: Data?) {
+    /// the destination is set to one, unless `shortening` made a short
+    /// link for it. History keeps the public URL. `filename` is the name
+    /// the upload goes by, with the extension of a converted photo.
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, shortening: ShortLinkService.Attempt, uploadedFileURL: URL, filename: String, contentHash: String?, thumbnail: Data?) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
         TempFiles.removeIfOwned(job.input.fileURL)
         var input = job.input
@@ -849,6 +885,10 @@ final class UploadManager {
             repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
         }
         job.recordID = record.id
+        let (shortURL, shortFailure) = shortLink(shortening, recordID: record.id, link: link, publicURL: result.publicURL)
+        if let shortFailure {
+            NotificationService.notifyShortLinkFailed(filename: filename, reason: shortFailure, uploadID: record.id)
+        }
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
@@ -863,7 +903,7 @@ final class UploadManager {
             reportWatched(job, .succeeded(WatchUploadSuccess(
                 objectKey: result.objectKey,
                 publicURL: result.publicURL.absoluteString,
-                link: link.absoluteString,
+                link: (shortURL ?? link).absoluteString,
                 reused: false,
                 byteSize: Int64(result.byteSize),
                 destinationID: destination.id,
@@ -871,11 +911,11 @@ final class UploadManager {
                 contentHash: job.originalContentHash
             )))
         } else if let group = job.input.group, openGroups[group.id] != nil {
-            openGroups[group.id]?[group.index] = format(link, filename: filename, for: destination)
+            openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: filename, for: destination)
             finishGroupIfDone(group)
         } else {
-            ClipboardService.copy(format(link, filename: filename, for: destination))
-            if showsSuccessNotifications {
+            ClipboardService.copy(format(link, shortURL: shortURL, filename: filename, for: destination))
+            if showsSuccessNotifications, shortFailure == nil {
                 if job.input.replacing != nil {
                     NotificationService.notifyReplaced(filename: filename)
                 } else {
@@ -937,8 +977,63 @@ final class UploadManager {
         ThumbnailKeys.bucketPrefixes(for: destination, among: destinationStore.destinations)
     }
 
-    private func format(_ link: URL, filename: String, for destination: DestinationConfig) -> String {
-        OutputFormatter.format(publicURL: link, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
+    private func format(_ link: URL, shortURL: URL? = nil, filename: String, for destination: DestinationConfig) -> String {
+        OutputFormatter.format(publicURL: link, shortURL: shortURL, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
+    }
+
+    /// The short link to copy for an upload, from what `shorten` did: the
+    /// one it made (now stored), or, when it skipped and `link` is the
+    /// public URL, the upload's active one (a replace, a reused link).
+    /// The failure message when it couldn't be made.
+    private func shortLink(_ shortening: ShortLinkService.Attempt, recordID: UUID, link: URL, publicURL: URL?) -> (URL?, String?) {
+        switch shortening {
+        case .created(let pending):
+            return (shortLinks.store(pending, uploadID: recordID).url, nil)
+        case .failed(let message):
+            return (nil, message)
+        case .skipped:
+            guard link == publicURL else { return (nil, nil) }
+            return (shortLinks.active(for: recordID)?.url, nil)
+        }
+    }
+
+    /// Retry on a failed short link's notification, and Create Short Link:
+    /// makes one for the upload and copies it as its destination's "Copy
+    /// as" says. Failing again says so again.
+    func retryShortLink(uploadID: UUID) async {
+        guard let record = repository.record(id: uploadID) else { return }
+        let filename = record.localFilename
+        do {
+            let short = try await createShortLink(for: record)
+            guard let shortURL = short.url, let longURL = URL(string: short.targetUrl) ?? record.publicURL else { return }
+            if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) {
+                ClipboardService.copy(format(longURL, shortURL: shortURL, filename: filename, for: destination))
+            } else {
+                ClipboardService.copy(shortURL.absoluteString)
+            }
+            NotificationService.notifyShortLinkCopied(filename: filename)
+        } catch {
+            let reason = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            NotificationService.notifyShortLinkFailed(filename: filename, reason: reason, uploadID: uploadID)
+        }
+    }
+
+    /// Create Short Link in the Library.
+    func createShortLink(for record: UploadRecord) async throws -> ShortLink {
+        try await shortLinks.createShortLink(for: record) { [weak self] duration in
+            guard let self else { throw CancellationError() }
+            return try await self.temporaryURL(for: record, validFor: duration)
+        }
+    }
+
+    /// `record`'s link as the destination's "Copy as" says, with its short
+    /// link when it has one (or `mode` instead of the destination's).
+    func formattedLink(for record: UploadRecord, mode: OutputMode? = nil) -> String {
+        guard let url = record.publicURL else { return record.publicURLString }
+        let short = shortLinks.active(for: record.id)?.url
+        let destination = destinationStore.destinations.first { $0.id == record.destinationID }
+        let mode = mode ?? destination.map(outputMode(for:)) ?? outputMode
+        return OutputFormatter.format(publicURL: url, shortURL: short, mode: mode, filename: record.localFilename, customTemplate: customTemplate)
     }
 
     /// `link` as the destination's "Copy as" formats it, for copying the

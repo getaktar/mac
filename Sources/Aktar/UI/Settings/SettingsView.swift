@@ -532,7 +532,7 @@ private struct OutputSettingsView: View {
                             Text("Template").font(.caption).foregroundStyle(.secondary)
                             TextField("Template", text: $manager.customTemplate)
                                 .textFieldStyle(.roundedBorder)
-                            Text("Available variables: {url} {filename} {name} {ext}")
+                            Text("Available variables: {url} {shortUrl} {longUrl} {filename} {name} {ext}")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

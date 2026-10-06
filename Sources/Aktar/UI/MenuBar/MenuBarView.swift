@@ -550,13 +550,13 @@ private struct RecentRowView: View {
 
             Spacer()
 
-            Button("Copy") { ClipboardService.copy(record.publicURLString) }
+            Button("Copy") { ClipboardService.copy(appState.uploadManager.shortLinks.active(for: record.id)?.shortUrl ?? record.publicURLString) }
                 .font(.caption2)
                 .buttonStyle(.bordered)
                 .controlSize(.mini)
 
             Menu {
-                Button("Copy URL") { ClipboardService.copy(record.publicURLString) }
+                RecordShortLinkMenuItems(record: record)
                 Button("Copy Markdown") { copy(mode: .markdown) }
                 Button("Copy HTML") { copy(mode: .html) }
                 RecordTemporaryLinkMenu(record: record)
@@ -589,8 +589,7 @@ private struct RecentRowView: View {
     }
 
     private func copy(mode: OutputMode) {
-        let url = record.publicURL ?? URL(string: record.publicURLString)!
-        ClipboardService.copy(OutputFormatter.format(publicURL: url, mode: mode, filename: record.localFilename))
+        ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: mode))
     }
 
     private var thumbnail: some View {

@@ -667,15 +667,23 @@ extension WatchService: WatchEngineDelegate {
     }
 }
 
-/// The actions on a delete ask, which answer it without opening Aktar.
-/// Also lets Aktar's notifications show while one of its windows is in
-/// front.
+/// The actions on a delete ask, which answer it without opening Aktar, and
+/// Retry on a failed short link. Also lets Aktar's notifications show while
+/// one of its windows is in front.
 final class WatchNotificationActions: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     /// Set once at launch, before any notification can be answered.
     @MainActor weak var service: WatchService?
+    /// Retry on a failed short link, with the upload's ID.
+    @MainActor var retryShortLink: ((UUID) -> Void)?
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let action = response.actionIdentifier
+        if action == NotificationService.retryShortLinkActionID {
+            guard let raw = response.notification.request.content.userInfo[NotificationService.uploadIDKey] as? String,
+                  let uploadID = UUID(uuidString: raw) else { return }
+            await MainActor.run { retryShortLink?(uploadID) }
+            return
+        }
         guard let raw = response.notification.request.content.userInfo[NotificationService.folderIDKey] as? String,
               let folderID = UUID(uuidString: raw) else { return }
         await MainActor.run {

@@ -20,6 +20,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // the app reaches it.
         UNUserNotificationCenter.current().delegate = appState.watchService.notificationActions
         appState.watchService.notificationActions.service = appState.watchService
+        appState.watchService.notificationActions.retryShortLink = { [weak appState] uploadID in
+            guard let manager = appState?.uploadManager else { return }
+            Task { await manager.retryShortLink(uploadID: uploadID) }
+        }
         NotificationService.registerCategories()
         // Handle aktar:// links ourselves. Left to SwiftUI, a URL open would
         // bring up one of the app's windows instead of just running the action.

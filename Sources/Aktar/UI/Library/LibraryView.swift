@@ -297,9 +297,9 @@ struct LibraryView: View {
                 recordsPendingDeletion = targets
             }
         } else {
-            Button("Copy URL") { ClipboardService.copy(record.publicURLString) }
-            Button("Copy Markdown") { ClipboardService.copy(markdown(for: record)) }
-            Button("Copy HTML") { ClipboardService.copy(html(for: record)) }
+            RecordShortLinkMenuItems(record: record)
+            Button("Copy Markdown") { ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: .markdown)) }
+            Button("Copy HTML") { ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: .html)) }
             RecordTemporaryLinkMenu(record: record)
             Button("Show QR Code") {
                 QRCodeWindowController.shared.show(for: record, uploadManager: appState.uploadManager)
@@ -329,14 +329,9 @@ struct LibraryView: View {
     }
 
     private func markdown(for record: UploadRecord) -> String {
-        let url = record.publicURL ?? URL(string: record.publicURLString)!
-        return OutputFormatter.format(publicURL: url, mode: .markdown, filename: record.localFilename)
+        appState.uploadManager.formattedLink(for: record, mode: .markdown)
     }
 
-    private func html(for record: UploadRecord) -> String {
-        let url = record.publicURL ?? URL(string: record.publicURLString)!
-        return OutputFormatter.format(publicURL: url, mode: .html, filename: record.localFilename)
-    }
 
     // MARK: - Detail
 
@@ -1149,6 +1144,7 @@ private struct UploadDetailView: View {
                     deletionErrorBanner(deletionError)
                 }
                 linkSection
+                ShortLinkSection(record: record)
                 detailsSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1410,36 +1406,19 @@ private struct UploadDetailView: View {
                 Label(justCopiedURL ? LocalizedStringKey("Copied") : LocalizedStringKey("Copy URL"), systemImage: justCopiedURL ? "checkmark" : "doc.on.doc")
             }
             Menu {
+                // With the short link when the upload has one.
                 Menu("Copy As") {
                     Button("Markdown") {
-                        ClipboardService.copy(
-                            OutputFormatter.format(
-                                publicURL: record.publicURL ?? URL(string: record.publicURLString)!,
-                                mode: .markdown,
-                                filename: record.localFilename
-                            )
-                        )
+                        ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: .markdown))
                     }
                     Button("HTML") {
-                        ClipboardService.copy(
-                            OutputFormatter.format(
-                                publicURL: record.publicURL ?? URL(string: record.publicURLString)!,
-                                mode: .html,
-                                filename: record.localFilename
-                            )
-                        )
+                        ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: .html))
                     }
                     Button("Custom") {
-                        ClipboardService.copy(
-                            OutputFormatter.format(
-                                publicURL: record.publicURL ?? URL(string: record.publicURLString)!,
-                                mode: .custom,
-                                filename: record.localFilename,
-                                customTemplate: appState.uploadManager.customTemplate
-                            )
-                        )
+                        ClipboardService.copy(appState.uploadManager.formattedLink(for: record, mode: .custom))
                     }
                 }
+                RecordShortLinkMenuItems(record: record)
                 Button("Copy Object Key") { ClipboardService.copy(record.objectKey) }
                 RecordTemporaryLinkMenu(record: record)
                 Button("Show QR Code") {

@@ -19,6 +19,7 @@ struct BucketListView: View {
     @State private var objectBeingMoved: BucketObject?
     @State private var moveTarget = ""
     @State private var keysPendingDeletion: [String] = []
+    @State private var pendingMove: PendingMove?
 
     var body: some View {
         content
@@ -61,8 +62,7 @@ struct BucketListView: View {
                 TextField("Path", text: $moveTarget)
                 Button("Save") {
                     guard let object = objectBeingMoved else { return }
-                    let target = moveTarget
-                    Task { await model.move(object, to: target, repository: appState.repository) }
+                    requestMove(PendingMove(object: object, target: moveTarget), model: model, appState: appState) { pendingMove = $0 }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
@@ -79,12 +79,15 @@ struct BucketListView: View {
                 ) {
                     let keys = keysPendingDeletion
                     keysPendingDeletion = []
-                    Task { await model.delete(keys, repository: appState.repository) }
+                    Task { await model.delete(keys, repository: appState.repository, shortLinks: appState.uploadManager.shortLinks) }
                 }
             } message: {
                 Text(keysPendingDeletion.count > 1
                     ? String(localized: "The remote files will be removed and their links may stop working. This can\u{2019}t be undone.")
                     : String(localized: "The remote file will be removed and its link may stop working. This can\u{2019}t be undone."))
+            }
+            .shortLinkMoveWarning($pendingMove) { move in
+                Task { await model.move(move.object, to: move.target, repository: appState.repository, shortLinks: appState.uploadManager.shortLinks) }
             }
             .alert(
                 "Something went wrong",
@@ -620,6 +623,7 @@ private struct BucketObjectDetailView: View {
     @State private var isConfirmingDeletion = false
     @State private var isMoving = false
     @State private var moveTarget = ""
+    @State private var pendingMove: PendingMove?
 
     var body: some View {
         ScrollView {
@@ -679,7 +683,7 @@ private struct BucketObjectDetailView: View {
         ) {
             Button("Cancel", role: .cancel) {}
             Button("Delete Remote File", role: .destructive) {
-                Task { await model.delete([object.key], repository: appState.repository) }
+                Task { await model.delete([object.key], repository: appState.repository, shortLinks: appState.uploadManager.shortLinks) }
             }
         } message: {
             Text("The remote file will be removed and its link may stop working. This can\u{2019}t be undone.")
@@ -687,12 +691,14 @@ private struct BucketObjectDetailView: View {
         .alert("Rename or Move", isPresented: $isMoving) {
             TextField("Path", text: $moveTarget)
             Button("Save") {
-                let target = moveTarget
-                Task { await model.move(object, to: target, repository: appState.repository) }
+                requestMove(PendingMove(object: object, target: moveTarget), model: model, appState: appState) { pendingMove = $0 }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Change the name, or the folder part of the path to move it.")
+        }
+        .shortLinkMoveWarning($pendingMove) { move in
+            Task { await model.move(move.object, to: move.target, repository: appState.repository, shortLinks: appState.uploadManager.shortLinks) }
         }
     }
 
@@ -848,10 +854,46 @@ private struct BucketMultiSelectionView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete Remote Files", role: .destructive) {
                 let keys = objects.map(\.key)
-                Task { await model.delete(keys, repository: appState.repository) }
+                Task { await model.delete(keys, repository: appState.repository, shortLinks: appState.uploadManager.shortLinks) }
             }
         } message: {
             Text("The remote files will be removed and their links may stop working. This can\u{2019}t be undone.")
+        }
+    }
+}
+
+// MARK: - Moving files with short links
+
+/// A rename or move waiting for the user to confirm it, because a short
+/// link to the file can't follow it (rule 7 in docs/short-links.md).
+private struct PendingMove {
+    let object: BucketObject
+    let target: String
+}
+
+/// Moves right away, or asks first through `ask` when the file's short
+/// links can't be pointed at its new place.
+@MainActor
+private func requestMove(_ move: PendingMove, model: BucketBrowserModel, appState: AppState, ask: (PendingMove) -> Void) {
+    let shortLinks = appState.uploadManager.shortLinks
+    if model.shortLinkMovePlan(for: move.object, repository: appState.repository, shortLinks: shortLinks) == .warn {
+        ask(move)
+    } else {
+        Task { await model.move(move.object, to: move.target, repository: appState.repository, shortLinks: shortLinks) }
+    }
+}
+
+private extension View {
+    func shortLinkMoveWarning(_ pending: Binding<PendingMove?>, perform: @escaping (PendingMove) -> Void) -> some View {
+        alert(
+            "Move this file?",
+            isPresented: Binding(get: { pending.wrappedValue != nil }, set: { if !$0 { pending.wrappedValue = nil } }),
+            presenting: pending.wrappedValue
+        ) { move in
+            Button("Move Anyway", role: .destructive) { perform(move) }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("This short-link provider cannot update existing destinations. Moving this file may invalidate its short link.")
         }
     }
 }
