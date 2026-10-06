@@ -130,7 +130,10 @@ enum MultipartUploader {
     /// `session` continues an earlier upload of the same file; its key is
     /// expected to be `objectKey`. `identity` is saved with a new session
     /// so it can be found again. `onSession` gets the session in use, for
-    /// Retry and Cancel.
+    /// Retry and Cancel. `ifNoneMatch` completes it only when the key isn't
+    /// taken yet (see `ShortKeys`); when it is, the upload is aborted and
+    /// `StorageError.alreadyExists` thrown, as its parts can't move to
+    /// another key.
     static func upload(
         provider: S3Provider,
         fileURL: URL,
@@ -140,6 +143,7 @@ enum MultipartUploader {
         session existing: MultipartSession?,
         identity: MultipartFileIdentity?,
         reporter: ProgressReporter,
+        ifNoneMatch: Bool = false,
         onSession: @escaping @MainActor (MultipartSession) -> Void = { _ in }
     ) async throws {
         let store = MultipartSessionStore.shared
@@ -228,7 +232,7 @@ enum MultipartUploader {
                     _ = addNext()
                 }
             }
-            try await provider.completeMultipartUpload(objectKey: key, uploadId: uploadId, parts: done)
+            try await provider.completeMultipartUpload(objectKey: key, uploadId: uploadId, parts: done, ifNoneMatch: ifNoneMatch)
             await store.remove(sessionID)
         } catch {
             if error is CancellationError || Task.isCancelled {
@@ -238,6 +242,11 @@ enum MultipartUploader {
                     await store.remove(sessionID)
                 }
                 throw CancellationError()
+            }
+            if case StorageError.alreadyExists = error {
+                await provider.abortMultipartUpload(objectKey: key, uploadId: uploadId)
+                await store.remove(sessionID)
+                throw error
             }
             if case MultipartUploadError.noSuchUpload = error {
                 await store.remove(sessionID)

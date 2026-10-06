@@ -33,6 +33,22 @@ enum PublicURLResolver {
         return true
     }
 
+    /// The host of `baseURL` when it's a domain of the user's own, not one
+    /// the provider made: the endpoint's host (or a bucket under it),
+    /// r2.dev, or an S3, Backblaze or DigitalOcean bucket host. Nil
+    /// otherwise.
+    static func ownDomainHost(baseURL: String, endpoint: String) -> String? {
+        guard isValidBaseURL(baseURL),
+              let host = URLComponents(string: normalizedBase(baseURL))?.host?.lowercased() else { return nil }
+        let providerDomains = ["r2.dev", "amazonaws.com", "backblazeb2.com", "digitaloceanspaces.com"]
+        var providerHosts = providerDomains
+        if let endpointHost = URLComponents(string: normalizedBase(endpoint))?.host?.lowercased(), !endpointHost.isEmpty {
+            providerHosts.append(endpointHost)
+        }
+        if providerHosts.contains(where: { host == $0 || host.hasSuffix("." + $0) }) { return nil }
+        return host
+    }
+
     /// Users commonly enter a bare domain (e.g. "img.example.com") in
     /// Settings without a scheme. Assume HTTPS in that case, since a
     /// schemeless URL can't actually be loaded by URLSession or opened by

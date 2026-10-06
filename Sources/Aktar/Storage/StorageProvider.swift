@@ -48,6 +48,10 @@ enum StorageError: Error, LocalizedError {
     case accessDenied
     case lifecycleNotAllowed
     case network(String)
+    /// A conditional write found the key taken; see `ShortKeys`.
+    case alreadyExists
+    /// Every {short} key tried was taken; see `ShortKeys`.
+    case noFreeShortKey
     case unknown(String)
 
     var errorDescription: String? {
@@ -62,6 +66,10 @@ enum StorageError: Error, LocalizedError {
             return String(localized: "This key can't change the bucket's lifecycle rules.")
         case .network(let message):
             return String(localized: "Upload interrupted. \(message)")
+        case .alreadyExists:
+            return String(localized: "A file with this name is already in the bucket.")
+        case .noFreeShortKey:
+            return String(localized: "Couldn\u{2019}t find an unused short name for this file after \(ShortKeys.maxAttempts) tries. Nothing was overwritten. Try again.")
         case .unknown(let message):
             return message
         }

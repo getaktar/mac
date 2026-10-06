@@ -125,7 +125,7 @@ struct WatchedFolderFormView: View {
         } footer: {
             VStack(alignment: .leading, spacing: 2) {
                 if customPath {
-                    Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext} {md5} {sha256} {folder} {subpath}")
+                    Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}")
                     Text(verbatim: "{folder}: ") + Text("the watched folder\u{2019}s name")
                     Text(verbatim: "{subpath}: ") + Text("the subfolders the file is in, when the folder structure is kept")
                 }

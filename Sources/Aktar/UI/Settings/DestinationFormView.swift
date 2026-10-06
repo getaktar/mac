@@ -37,6 +37,9 @@ struct DestinationFormView: View {
     private let hasSavedCloudflareToken: Bool
     @State private var purgeCheck: PurgeCheck?
     @State private var hooks: [WatchHook]
+    /// The note suggesting {short} for a domain of the user's own was
+    /// closed for this destination.
+    @State private var cleanURLSuggestionDismissed: Bool
 
     private enum PurgeCheck: Equatable {
         case checking
@@ -82,7 +85,7 @@ struct DestinationFormView: View {
         _region = State(initialValue: existing?.region ?? ProviderPreset.cloudflareR2.defaultRegion)
         _bucket = State(initialValue: existing?.bucket ?? "")
         _publicBaseURL = State(initialValue: existing?.publicBaseURL ?? "")
-        _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? "{year}/{month}/{uuid}.{ext}")
+        _objectPathTemplate = State(initialValue: existing?.objectPathTemplate ?? DestinationConfig.defaultObjectPathTemplate)
         _outputMode = State(initialValue: existing?.outputMode)
         _temporaryLink = State(initialValue: existing?.temporaryLink)
         _imageMetadata = State(initialValue: existing?.imageMetadata ?? .default)
@@ -99,7 +102,9 @@ struct DestinationFormView: View {
         hasSavedCloudflareToken = existing.flatMap { try? KeychainService.load(for: $0.id).cloudflareToken }.map { !$0.isEmpty } ?? false
         _thumbnailPrefix = State(initialValue: ThumbnailKeys.normalizedPrefix(existing?.thumbnailPrefix) ?? ThumbnailKeys.defaultPrefix)
         _expiryDays = State(initialValue: existing?.expiryDays ?? UserDefaults.standard.integer(forKey: UploadExpiry.defaultsKey))
-        _destinationID = State(initialValue: existing?.id ?? UUID())
+        let id = existing?.id ?? UUID()
+        _destinationID = State(initialValue: id)
+        _cleanURLSuggestionDismissed = State(initialValue: UserDefaults.standard.bool(forKey: Self.cleanURLSuggestionKey(id)))
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
         _expiryRulesActive = State(initialValue: initialExpiryRulesActive)
     }
@@ -180,15 +185,33 @@ struct DestinationFormView: View {
                 }
 
                 Section {
-                    TextField("Object Path", text: $objectPathTemplate)
+                    LabeledContent("Object Path") {
+                        HStack(spacing: 6) {
+                            TextField("Object Path", text: $objectPathTemplate)
+                                .labelsHidden()
+                            Menu("Presets") {
+                                Button("Clean URL (Recommended)") { objectPathTemplate = DestinationConfig.cleanURLTemplate }
+                                Button("Short with Date") { objectPathTemplate = DestinationConfig.defaultObjectPathTemplate }
+                                Button("Original File Name") { objectPathTemplate = "{filename}.{ext}" }
+                            }
+                            .menuStyle(.borderlessButton)
+                            .fixedSize()
+                        }
+                    }
+                    if let host = cleanURLSuggestionHost {
+                        cleanURLSuggestion(host: host)
+                    }
                 } header: {
                     Text("Object Path")
                 } footer: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {ext} {md5} {sha256} {folder} {subpath}")
+                        Text("Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}")
+                        Text(verbatim: "{short}: ") + Text("a random 7-character code, such as A7kdP2x")
                         Text(verbatim: "{md5}: ") + Text("MD5 of the file's contents")
                         Text(verbatim: "{sha256}: ") + Text("SHA-256 of the file's contents")
                         Text(verbatim: "{folder} {subpath}: ") + Text("the watched folder\u{2019}s name and the subfolders a file is in, for uploads from Watched Folders")
+                        Text("{short} makes links shorter, not private. For private sharing, keep the bucket private and copy temporary links.")
+                            .padding(.top, 2)
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -239,6 +262,44 @@ struct DestinationFormView: View {
             .padding()
         }
         .frame(width: 520, height: 580)
+    }
+
+    /// The public links' host when it's a domain of the user's own and the
+    /// path has no {short} yet, so a note can suggest it; nil otherwise.
+    private var cleanURLSuggestionHost: String? {
+        guard !cleanURLSuggestionDismissed, !ObjectKeyGenerator.usesShortCode(objectPathTemplate) else { return nil }
+        return PublicURLResolver.ownDomainHost(baseURL: publicBaseURL, endpoint: endpoint)
+    }
+
+    private func cleanURLSuggestion(host: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "link")
+                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Make your links cleaner.")
+                    .fontWeight(.semibold)
+                Text("Use {short} to create links like \(host + "/A7kdP2x.png").")
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Use Clean URL") { objectPathTemplate = DestinationConfig.cleanURLTemplate }
+                    .controlSize(.small)
+            }
+            Spacer(minLength: 0)
+            Button {
+                cleanURLSuggestionDismissed = true
+                UserDefaults.standard.set(true, forKey: Self.cleanURLSuggestionKey(destinationID))
+            } label: {
+                Image(systemName: "xmark")
+            }
+            .buttonStyle(.borderless)
+            .help("Dismiss")
+            .accessibilityLabel(Text("Dismiss"))
+        }
+        .font(.callout)
+    }
+
+    private static func cleanURLSuggestionKey(_ id: UUID) -> String {
+        "cleanURLSuggestionDismissed.\(id.uuidString)"
     }
 
     /// What makes a destination an upload profile: pick it in the menu bar

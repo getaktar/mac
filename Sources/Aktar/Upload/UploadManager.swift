@@ -593,8 +593,8 @@ final class UploadManager {
                     ? nil
                     : Task.detached(priority: .utility) { await ThumbnailGenerator.make(from: thumbnailSource) }
 
-                // A path without a unique part ({uuid}, {random}, {md5},
-                // {sha256}) can make a key another file already has: it's
+                // A path without a unique part ({uuid}, {random}, {short},
+                // {md5}, {sha256}) can make a key another file already has: it's
                 // numbered ("name 2.png") rather than replacing that file.
                 // A watched folder replacing its own upload so the link
                 // stays sends the exact key instead, and isn't numbered. A
@@ -607,35 +607,81 @@ final class UploadManager {
                     }
                 }
 
-                let reporter = ProgressReporter(total: fileSize) { progress in
-                    guard case .uploading = job.state else { return }
-                    job.state = .uploading(progress: progress)
+                // Sends the file to `key`, only if the key is new when
+                // `onlyIfNew`. Each try counts its progress from the start.
+                @MainActor func send(to key: String, onlyIfNew: Bool, session: MultipartSession?, identity: MultipartFileIdentity?) async throws {
+                    let reporter = ProgressReporter(total: fileSize) { progress in
+                        guard case .uploading = job.state else { return }
+                        job.state = .uploading(progress: progress)
+                    }
+                    if fileSize > S3Provider.multipartThreshold {
+                        try await MultipartUploader.upload(
+                            provider: provider,
+                            fileURL: uploadURL,
+                            fileSize: fileSize,
+                            objectKey: key,
+                            contentType: contentType,
+                            session: session,
+                            identity: identity,
+                            reporter: reporter,
+                            ifNoneMatch: onlyIfNew
+                        ) { session in
+                            job.multipartSession = session
+                        }
+                        job.multipartSession = nil
+                    } else {
+                        try await provider.putObject(fileURL: uploadURL, objectKey: key, contentType: contentType, ifNoneMatch: onlyIfNew) { sent in
+                            reporter.update(part: 0, sent: sent)
+                        }
+                    }
                 }
+
+                var session: MultipartSession?
+                var identity: MultipartFileIdentity?
                 if fileSize > S3Provider.multipartThreshold {
                     let keyBasis = generatesKey ? [template, filename, watch?.subpath ?? ""].joined(separator: "\u{0}") : nil
-                    let identity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256, keyBasis: keyBasis)
-                    let session = await self.resumableSession(for: job, destination: destination, identity: identity, objectKey: objectKey)
+                    let fileIdentity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256, keyBasis: keyBasis)
+                    identity = fileIdentity
+                    session = await self.resumableSession(for: job, destination: destination, identity: fileIdentity, objectKey: objectKey)
                     if let session {
                         objectKey = session.objectKey
                         job.resuming = true
                     }
-                    try await MultipartUploader.upload(
-                        provider: provider,
-                        fileURL: uploadURL,
-                        fileSize: fileSize,
-                        objectKey: objectKey,
-                        contentType: contentType,
-                        session: session,
-                        identity: identity,
-                        reporter: reporter
-                    ) { session in
-                        job.multipartSession = session
-                    }
-                    job.multipartSession = nil
+                }
+                if generatesKey, job.input.folderKey == nil, ObjectKeyGenerator.usesShortCode(template) {
+                    // A key with {short} never replaces a file that has it
+                    // already: a taken one is made again with a new code. A
+                    // resumed multipart upload keeps its key unless that
+                    // one is taken.
+                    objectKey = try await ShortKeys.write(
+                        firstKey: objectKey,
+                        conditional: ShortKeys.usesConditionalWrites(destination.preset),
+                        newKey: {
+                            UploadExpiry.key(
+                                Self.generatedKey(template: template, filename: filename, hashes: hashes, watch: watch),
+                                days: job.expiryDays
+                            )
+                        },
+                        exists: { try await provider.objectExists(key: $0) },
+                        write: { key, onlyIfNew in
+                            if let resumed = session, resumed.objectKey != key {
+                                Self.abort(resumed, destination: destination)
+                                job.multipartSession = nil
+                                job.resuming = false
+                                session = nil
+                            }
+                            do {
+                                try await send(to: key, onlyIfNew: onlyIfNew, session: session, identity: identity)
+                            } catch StorageError.alreadyExists {
+                                // MultipartUploader aborted it.
+                                job.multipartSession = nil
+                                session = nil
+                                throw StorageError.alreadyExists
+                            }
+                        }
+                    )
                 } else {
-                    try await provider.putObject(fileURL: uploadURL, objectKey: objectKey, contentType: contentType) { sent in
-                        reporter.update(part: 0, sent: sent)
-                    }
+                    try await send(to: objectKey, onlyIfNew: false, session: session, identity: identity)
                 }
                 guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
                     throw StorageError.invalidPublicBaseURL

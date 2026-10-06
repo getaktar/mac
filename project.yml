@@ -149,6 +149,8 @@ targets:
       - path: Tests/AktarTests
       - path: Sources/Aktar/Watch/Engine
       - path: Sources/Aktar/Upload/ObjectKeyGenerator.swift
+      - path: Sources/Aktar/Upload/ShortKeys.swift
+      - path: Sources/Aktar/Storage/StorageProvider.swift
       - path: Sources/Aktar/Upload/ContentHasher.swift
       - path: Sources/Aktar/Transfer/DestinationTransfer.swift
       - path: Sources/Aktar/Storage/ProviderConfig.swift

@@ -458,6 +458,10 @@ final class S3Provider: StorageProvider, Sendable {
 
     static func mapError(_ error: Error, bucket: String) -> StorageError {
         let description = String(describing: error).lowercased()
+        if (error as? AWSErrorType)?.context?.responseCode == .preconditionFailed
+            || description.contains("preconditionfailed") || description.contains("conditionalrequestconflict") {
+            return .alreadyExists
+        }
         if description.contains("nosuchbucket") {
             return .bucketNotFound(bucket)
         }

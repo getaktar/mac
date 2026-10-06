@@ -381,7 +381,10 @@ struct CloudflareSetupView: View {
 
                 current = .save
                 progress[.save] = .running
-                save(account: account, bucket: bucket, baseURL: baseURL, credentials: CloudflareSetup.credentials(tokenID: tokenID, token: token))
+                // Links on a domain of the user's own get the shortest
+                // paths.
+                let template = link == .domain ? DestinationConfig.cleanURLTemplate : DestinationConfig.defaultObjectPathTemplate
+                save(account: account, bucket: bucket, baseURL: baseURL, template: template, credentials: CloudflareSetup.credentials(tokenID: tokenID, token: token))
             } catch {
                 progress[current] = .failed
                 setupError = message(for: error)
@@ -389,7 +392,7 @@ struct CloudflareSetupView: View {
         }
     }
 
-    private func save(account: String, bucket: String, baseURL: String, credentials: StorageCredentials) {
+    private func save(account: String, bucket: String, baseURL: String, template: String, credentials: StorageCredentials) {
         let config = DestinationConfig(
             name: name.trimmingCharacters(in: .whitespaces),
             preset: .cloudflareR2,
@@ -398,7 +401,7 @@ struct CloudflareSetupView: View {
             region: ProviderPreset.cloudflareR2.defaultRegion,
             bucket: bucket,
             publicBaseURL: baseURL,
-            objectPathTemplate: "{year}/{month}/{uuid}.{ext}",
+            objectPathTemplate: template,
             forcePathStyle: ProviderPreset.cloudflareR2.defaultForcePathStyle,
             isDefault: false
         )

@@ -604,6 +604,106 @@
         }
       }
     },
+    "A file with this name is already in the bucket." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Datei mit diesem Namen ist bereits im Bucket."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya hay un archivo con este nombre en el bucket."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un fichier portant ce nom se trouve déjà dans le bucket."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File dengan nama ini sudah ada di bucket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nel bucket c’è già un file con questo nome."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この名前のファイルはすでにバケットにあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 이름의 파일이 이미 버킷에 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er staat al een bestand met deze naam in de bucket."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plik o tej nazwie jest już w buckecie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já existe um arquivo com este nome no bucket."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл с таким именем уже есть в бакете."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu ada sahip bir dosya bucket'ta zaten var."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл із такою назвою вже є в бакеті."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã có một tệp có tên này trong bucket."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储桶中已有同名文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存貯體中已有同名檔案。"
+          }
+        }
+      }
+    },
     "A new name for a single file, keeping its extension." : {
       "localizations" : {
         "de" : {
@@ -3304,6 +3404,106 @@
         }
       }
     },
+    "Clean URL (Recommended)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saubere URL (empfohlen)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL limpia (recomendado)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL épurée (recommandé)"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL Ringkas (Disarankan)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL pulito (consigliato)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリーンな URL（推奨）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "깔끔한 URL(권장)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schone URL (aanbevolen)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Czysty URL (zalecane)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL limpa (recomendado)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чистый URL (рекомендуется)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temiz URL (Önerilen)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чиста URL-адреса (рекомендовано)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL gọn (Khuyên dùng)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "简洁 URL（推荐）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "簡潔 URL（建議）"
+          }
+        }
+      }
+    },
     "Clear Thumbnails" : {
       "localizations" : {
         "de" : {
@@ -4504,6 +4704,106 @@
         }
       }
     },
+    "Couldn’t find an unused short name for this file after %lld tries. Nothing was overwritten. Try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach %lld Versuchen wurde kein freier Kurzname für diese Datei gefunden. Nichts wurde überschrieben. Versuche es noch einmal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró un nombre corto libre para este archivo tras %lld intentos. No se sobrescribió nada. Inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun nom court libre n’a été trouvé pour ce fichier après %lld essais. Rien n’a été écrasé. Réessayez."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak ada nama pendek yang belum dipakai untuk file ini setelah %lld kali mencoba. Tidak ada yang ditimpa. Coba lagi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun nome breve libero trovato per questo file dopo %lld tentativi. Non è stato sovrascritto nulla. Riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 回試しましたが、このファイルに使える短い名前が見つかりませんでした。何も上書きされていません。もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld번 시도했지만 이 파일에 사용할 수 있는 짧은 이름을 찾지 못했습니다. 덮어쓴 파일은 없습니다. 다시 시도하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na %lld pogingen is er geen vrije korte naam voor dit bestand gevonden. Er is niets overschreven. Probeer het opnieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po %lld próbach nie znaleziono wolnej krótkiej nazwy dla tego pliku. Nic nie zostało nadpisane. Spróbuj ponownie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi encontrado um nome curto livre para este arquivo após %lld tentativas. Nada foi substituído. Tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подобрать свободное короткое имя для этого файла за %lld попыток. Ничего не перезаписано. Попробуйте ещё раз."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld denemede bu dosya için kullanılmayan bir kısa ad bulunamadı. Hiçbir şeyin üzerine yazılmadı. Tekrar dene."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося знайти вільну коротку назву для цього файлу за %lld спроб. Нічого не перезаписано. Спробуйте ще раз."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tìm được tên ngắn chưa dùng cho tệp này sau %lld lần thử. Không có gì bị ghi đè. Hãy thử lại."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尝试 %lld 次后仍未找到可用的短名称。没有覆盖任何文件。请重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "嘗試 %lld 次後仍找不到可用的短名稱。沒有覆寫任何檔案。請再試一次。"
+          }
+        }
+      }
+    },
     "Couldn’t replace the file" : {
       "localizations" : {
         "de" : {
@@ -5300,6 +5600,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目的地名稱"
+          }
+        }
+      }
+    },
+    "Dismiss" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausblenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutup"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignora"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluiten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamknij"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dispensar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховати"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bỏ qua"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉"
           }
         }
       }
@@ -6604,6 +7004,106 @@
         }
       }
     },
+    "Make your links cleaner." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mach deine Links sauberer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz tus enlaces más limpios."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendez vos liens plus épurés."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat tautan Anda lebih ringkas."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendi i tuoi link più puliti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンクをもっとすっきりさせましょう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "링크를 더 깔끔하게 만드십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maak je links schoner."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uprość swoje linki."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixe seus links mais limpos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сделайте ссылки чище."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantılarını sadeleştir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зробіть посилання чистішими."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Làm liên kết của bạn gọn hơn."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让链接更简洁。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "讓連結更簡潔。"
+          }
+        }
+      }
+    },
     "My Domain" : {
       "localizations" : {
         "de" : {
@@ -7704,6 +8204,106 @@
         }
       }
     },
+    "Original File Name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ursprünglicher Dateiname"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre de archivo original"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de fichier d’origine"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nama File Asli"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome file originale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元のファイル名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원래 파일 이름"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oorspronkelijke bestandsnaam"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oryginalna nazwa pliku"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome original do arquivo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Исходное имя файла"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinal Dosya Adı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оригінальна назва файлу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên tệp gốc"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原始文件名"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原始檔案名稱"
+          }
+        }
+      }
+    },
     "Paste the token here" : {
       "localizations" : {
         "de" : {
@@ -7900,6 +8500,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "播放"
+          }
+        }
+      }
+    },
+    "Presets" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorlagen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preajustes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préréglages"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preset"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preimpostazioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프리셋"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voorinstellingen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustawienia gotowe"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Predefinições"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблоны"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hazır Ayarlar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблони"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mẫu có sẵn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預設組合"
           }
         }
       }
@@ -9500,6 +10200,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "短快取時間"
+          }
+        }
+      }
+    },
+    "Short with Date" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurz mit Datum"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corta con fecha"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Court avec date"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pendek dengan Tanggal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breve con data"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短い名前と日付"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "짧은 이름과 날짜"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort met datum"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Krótka z datą"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curta com data"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Короткий с датой"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarihli Kısa"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коротка з датою"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ngắn kèm ngày"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短名称加日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短名稱加日期"
           }
         }
       }
@@ -12604,6 +13404,106 @@
         }
       }
     },
+    "Use Clean URL" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saubere URL verwenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar URL limpia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser l’URL épurée"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gunakan URL Ringkas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa URL pulito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリーンな URL を使用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "깔끔한 URL 사용"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schone URL gebruiken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Użyj czystego URL"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar URL limpa"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовать чистый URL"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temiz URL Kullan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використати чисту URL-адресу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng URL gọn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用简洁 URL"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用簡潔 URL"
+          }
+        }
+      }
+    },
     "Use For" : {
       "localizations" : {
         "de" : {
@@ -12700,6 +13600,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "用於"
+          }
+        }
+      }
+    },
+    "Use {short} to create links like %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit {short} entstehen Links wie %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa {short} para crear enlaces como %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez {short} pour créer des liens comme %@."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gunakan {short} untuk membuat tautan seperti %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa {short} per creare link come %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} を使うと %@ のようなリンクになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short}를 사용하면 %@ 같은 링크를 만들 수 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik {short} voor links zoals %@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Użyj {short}, aby tworzyć linki takie jak %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use {short} para criar links como %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используйте {short}, чтобы получать ссылки вида %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gibi bağlantılar için {short} kullan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовуйте {short}, щоб отримувати посилання на зразок %@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng {short} để tạo liên kết như %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 {short} 可生成类似 %@ 的链接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 {short} 可產生類似 %@ 的連結。"
+          }
+        }
+      }
+    },
+    "Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variablen: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variables: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variables : {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabel: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabili: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変数: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "변수: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabelen: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmienne: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variáveis: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переменные: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişkenler: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Змінні: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biến: {year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "变量：{year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "變數：{year} {month} {day} {date} {time} {filename} {uuid} {random} {short} {ext} {md5} {sha256} {folder} {subpath}"
           }
         }
       }
@@ -13004,6 +14104,106 @@
         }
       }
     },
+    "a random 7-character code, such as A7kdP2x" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ein zufälliger Code aus 7 Zeichen, etwa A7kdP2x"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un código aleatorio de 7 caracteres, como A7kdP2x"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un code aléatoire de 7 caractères, comme A7kdP2x"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kode acak 7 karakter, misalnya A7kdP2x"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un codice casuale di 7 caratteri, come A7kdP2x"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランダムな 7 文字のコード（例: A7kdP2x）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "무작위 7자 코드(예: A7kdP2x)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "een willekeurige code van 7 tekens, zoals A7kdP2x"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "losowy kod z 7 znaków, np. A7kdP2x"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "um código aleatório de 7 caracteres, como A7kdP2x"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "случайный код из 7 символов, например A7kdP2x"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A7kdP2x gibi 7 karakterlik rastgele bir kod"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "випадковий код із 7 символів, наприклад A7kdP2x"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mã ngẫu nhiên gồm 7 ký tự, ví dụ A7kdP2x"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "随机的 7 位代码，例如 A7kdP2x"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隨機的 7 字元代碼，例如 A7kdP2x"
+          }
+        }
+      }
+    },
     "r2.dev Address" : {
       "localizations" : {
         "de" : {
@@ -13100,6 +14300,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "r2.dev 位址"
+          }
+        }
+      }
+    },
+    "{short} makes links shorter, not private. For private sharing, keep the bucket private and copy temporary links." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} macht Links kürzer, nicht privat. Für privates Teilen lass den Bucket privat und kopiere temporäre Links."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} hace los enlaces más cortos, no privados. Para compartir en privado, mantén el bucket privado y copia enlaces temporales."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} raccourcit les liens, sans les rendre privés. Pour partager en privé, gardez le bucket privé et copiez des liens temporaires."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} membuat tautan lebih pendek, bukan pribadi. Untuk berbagi secara pribadi, biarkan bucket tetap pribadi dan salin tautan sementara."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} rende i link più brevi, non privati. Per condividere in privato, mantieni il bucket privato e copia link temporanei."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} はリンクを短くしますが、非公開にはしません。非公開で共有するには、バケットを非公開のままにして期限付きリンクをコピーしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short}는 링크를 짧게 만들 뿐 비공개로 만들지 않습니다. 비공개로 공유하려면 버킷을 비공개로 유지하고 임시 링크를 복사하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} maakt links korter, niet privé. Om privé te delen houd je de bucket privé en kopieer je tijdelijke links."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} skraca linki, ale nie czyni ich prywatnymi. Aby udostępniać prywatnie, pozostaw bucket prywatny i kopiuj linki tymczasowe."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} deixa os links mais curtos, não privados. Para compartilhar de forma privada, mantenha o bucket privado e copie links temporários."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} делает ссылки короче, но не приватными. Чтобы делиться приватно, оставьте бакет приватным и копируйте временные ссылки."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} bağlantıları kısaltır, gizli yapmaz. Gizli paylaşım için bucket'ı gizli tut ve süreli bağlantıları kopyala."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} робить посилання коротшими, але не приватними. Щоб ділитися приватно, залиште бакет приватним і копіюйте тимчасові посилання."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} làm liên kết ngắn hơn, không làm chúng riêng tư. Để chia sẻ riêng tư, hãy giữ bucket ở chế độ riêng tư và sao chép liên kết tạm thời."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} 只会让链接更短，不会让它们变得私密。如需私密分享，请保持存储桶私有并复制临时链接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{short} 只會讓連結更短，不會讓它們變得私密。如需私密分享，請保持儲存貯體私人並拷貝暫時連結。"
           }
         }
       }

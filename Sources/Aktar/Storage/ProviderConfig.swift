@@ -96,6 +96,11 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// files, which run their folder's own).
     var hooks: [WatchHook]?
 
+    /// The path template of a new destination. Saved ones keep theirs.
+    static let defaultObjectPathTemplate = "{year}/{month}/{short}.{ext}"
+    /// The shortest links: just the code, on the bucket's own domain.
+    static let cleanURLTemplate = "{short}.{ext}"
+
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"
     }

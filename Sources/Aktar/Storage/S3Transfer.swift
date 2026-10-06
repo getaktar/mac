@@ -44,9 +44,12 @@ extension S3Provider {
     // MARK: - Single PUT
 
     /// One PUT streamed from the file. `progress` gets the bytes sent.
-    func putObject(fileURL: URL, objectKey: String, contentType: String, progress: @escaping @Sendable (Int64) -> Void) async throws {
+    /// `ifNoneMatch` only writes a key that isn't taken yet, and throws
+    /// `StorageError.alreadyExists` otherwise; see `ShortKeys`.
+    func putObject(fileURL: URL, objectKey: String, contentType: String, ifNoneMatch: Bool = false, progress: @escaping @Sendable (Int64) -> Void) async throws {
         var headers = ["Content-Type": contentType]
         if let cacheControl { headers["Cache-Control"] = cacheControl }
+        if ifNoneMatch { headers["If-None-Match"] = "*" }
         if let disposition = ContentTypeResolver.contentDisposition(names: [objectKey, fileURL.lastPathComponent], contentType: contentType) {
             headers["Content-Disposition"] = disposition
         }
@@ -187,11 +190,13 @@ extension S3Provider {
         }
     }
 
-    func completeMultipartUpload(objectKey: String, uploadId: String, parts: [Int: String]) async throws {
+    /// `ifNoneMatch` as for `putObject`.
+    func completeMultipartUpload(objectKey: String, uploadId: String, parts: [Int: String], ifNoneMatch: Bool = false) async throws {
         let completed = parts.keys.sorted().map { S3.CompletedPart(eTag: parts[$0], partNumber: $0) }
         do {
             _ = try await s3.completeMultipartUpload(.init(
                 bucket: config.bucket,
+                ifNoneMatch: ifNoneMatch ? "*" : nil,
                 key: objectKey,
                 multipartUpload: .init(parts: completed),
                 uploadId: uploadId
@@ -276,6 +281,10 @@ extension S3Provider {
             throw TransientFailure(message: message ?? code ?? "HTTP \(http.statusCode)")
         }
         switch (http.statusCode, code) {
+        // A conditional write whose key is taken, or one that raced another
+        // conditional write of the same key (S3's 409).
+        case (412, _), (_, "PreconditionFailed"), (_, "ConditionalRequestConflict"):
+            throw StorageError.alreadyExists
         case (_, "NoSuchUpload"):
             throw MultipartUploadError.noSuchUpload
         case (_, "NoSuchBucket"):

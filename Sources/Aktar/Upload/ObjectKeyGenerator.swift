@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 enum ObjectKeyGenerator {
     /// `hashes` fills {md5} and {sha256}; see `ContentHasher`. Left empty,
@@ -6,13 +7,15 @@ enum ObjectKeyGenerator {
     /// {subpath} for a file from a watched folder (its name, and the
     /// subfolders it's in); they're empty for every other upload. Empty
     /// segments collapse, so "{folder}/{filename}" is just the name then.
+    /// `shortCode` fills {short}; see `ShortCode`.
     static func generate(
         template: String,
         originalFilename: String,
         date: Date = .now,
         hashes: ContentHashes = ContentHashes(),
         folder: String = "",
-        subpath: String = ""
+        subpath: String = "",
+        shortCode: () -> String = { ShortCode.make() }
     ) -> String {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents([.year, .month, .day], from: date)
@@ -33,6 +36,7 @@ enum ObjectKeyGenerator {
         let nameWithoutExt = sanitizedFilename((originalFilename as NSString).deletingPathExtension)
         let uuid = UUID().uuidString.lowercased()
         let random = String(UUID().uuidString.prefix(8)).lowercased()
+        let short = usesShortCode(template) ? shortCode() : ""
 
         let replacements: [(String, String)] = [
             ("{year}", year),
@@ -43,6 +47,7 @@ enum ObjectKeyGenerator {
             ("{filename}", nameWithoutExt),
             ("{uuid}", uuid),
             ("{random}", random),
+            ("{short}", short),
             ("{ext}", ext),
             ("{md5}", hashes.md5 ?? ""),
             ("{sha256}", hashes.sha256 ?? ""),
@@ -77,11 +82,16 @@ enum ObjectKeyGenerator {
     }
 
     /// Whether every key `template` makes is new: it has a random part
-    /// ({uuid}, {random}) or one that only repeats for the same contents
-    /// ({md5}, {sha256}). Otherwise a key it makes can be taken already.
+    /// ({uuid}, {random}, {short}) or one that only repeats for the same
+    /// contents ({md5}, {sha256}). Otherwise a key it makes can be taken
+    /// already.
     static func hasUniqueToken(_ template: String) -> Bool {
-        ["{uuid}", "{random}", "{md5}", "{sha256}"].contains { template.contains($0) }
+        ["{uuid}", "{random}", "{short}", "{md5}", "{sha256}"].contains { template.contains($0) }
     }
+
+    /// Keys with {short} are checked before they're written; see
+    /// `ShortKeys`.
+    static func usesShortCode(_ template: String) -> Bool { template.contains("{short}") }
 
     /// Why a key, prefix, folder name or move target the user typed can't
     /// be used, or nil when it can. `.` and `..` segments (which some
@@ -102,6 +112,32 @@ enum ObjectKeyGenerator {
     /// when used.
     static func usesMD5(_ template: String) -> Bool { template.contains("{md5}") }
     static func usesSHA256(_ template: String) -> Bool { template.contains("{sha256}") }
+}
+
+/// The {short} code: 7 characters of 0-9, A-Z and a-z (62^7, about 3.5
+/// trillion), from the system's secure random generator. Bytes of 248 and
+/// up are drawn again, so `value % 62` favors no character.
+enum ShortCode {
+    static let length = 7
+    static let alphabet = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
+    /// `randomBytes` gives that many random bytes; tests pass their own.
+    static func make(randomBytes: (Int) -> [UInt8] = systemRandomBytes) -> String {
+        var code = ""
+        while code.count < length {
+            for byte in randomBytes(length) where byte < 248 && code.count < length {
+                code.append(alphabet[Int(byte) % alphabet.count])
+            }
+        }
+        return code
+    }
+
+    static func systemRandomBytes(_ count: Int) -> [UInt8] {
+        var bytes = [UInt8](repeating: 0, count: count)
+        let status = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
+        precondition(status == errSecSuccess, "SecRandomCopyBytes failed: \(status)")
+        return bytes
+    }
 }
 
 enum UserKeyProblem: Error, Equatable, LocalizedError {

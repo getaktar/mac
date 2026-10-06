@@ -51,7 +51,9 @@ code on every platform. One pasted token keeps all of it.
      the result says so.
 5. **Save.** A normal R2 destination: endpoint
    `https://{account}.r2.cloudflarestorage.com`, region `auto`, path
-   template `{year}/{month}/{uuid}.{ext}`, auto-delete rules not yet
+   template `{short}.{ext}` with a domain of the account and
+   `{year}/{month}/{short}.{ext}` with r2.dev (see short-links.md),
+   auto-delete rules not yet
    checked. S3 keys: access key ID = token `id`, secret = lowercase hex
    SHA-256 of the token value. Only these go to the Keychain / Credential
    Manager / secure store; the token itself is not kept.
