@@ -58,19 +58,29 @@ enum ThumbnailGenerator {
         return encode(image)
     }
 
+    /// Quick Look's generator and request aren't Sendable, but both are
+    /// safe to use from any thread; this lets the timeout task cancel the
+    /// request (older Swift compilers refuse the plain captures).
+    private struct QuickLookJob: @unchecked Sendable {
+        let generator: QLThumbnailGenerator
+        let request: QLThumbnailGenerator.Request
+    }
+
     private static func quickLookThumbnail(_ url: URL) async -> GeneratedThumbnail? {
         let size = CGSize(width: maxPixelSize, height: maxPixelSize)
         // Only a real thumbnail: `.icon` would hand back the file's icon.
-        nonisolated(unsafe) let request = QLThumbnailGenerator.Request(fileAt: url, size: size, scale: 1, representationTypes: .thumbnail)
-        nonisolated(unsafe) let generator = QLThumbnailGenerator.shared
+        let job = QuickLookJob(
+            generator: QLThumbnailGenerator.shared,
+            request: QLThumbnailGenerator.Request(fileAt: url, size: size, scale: 1, representationTypes: .thumbnail)
+        )
         let finished = OSAllocatedUnfairLock(initialState: false)
         let timeoutTask = Task {
             try await Task.sleep(for: timeout)
-            if !finished.withLock({ $0 }) { generator.cancel(request) }
+            if !finished.withLock({ $0 }) { job.generator.cancel(job.request) }
         }
         defer { timeoutTask.cancel() }
         return await withCheckedContinuation { continuation in
-            generator.generateBestRepresentation(for: request) { representation, _ in
+            job.generator.generateBestRepresentation(for: job.request) { representation, _ in
                 finished.withLock { $0 = true }
                 continuation.resume(returning: representation.flatMap { encode($0.cgImage) })
             }
