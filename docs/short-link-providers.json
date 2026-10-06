@@ -115,6 +115,7 @@
         "body": { "url": "{url}" },
         "bodyType": "form",
         "errorPath": "message",
+        "successStatuses": [409],
         "shortUrlPath": "shorturl",
         "idPath": "url.keyword"
       },

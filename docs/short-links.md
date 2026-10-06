@@ -145,7 +145,8 @@ scripting, regex, chained requests or computed headers.
 }
 Request = { "method", "path", "query": {k: template}, "headers": {k: template},
             "body": JSON template | null, "bodyType": "json" | "form" | null,
-            "errorPath": "path" | null }
+            "errorPath": "path" | null,
+            "successStatuses": [409] }                     // optional: non-2xx statuses that still succeed
 ```
 
 Templates may use `{url}`, `{id}`, `{domain}`, `{expiresAt}` (ISO 8601),
@@ -172,7 +173,7 @@ and Short.io APIs). Behavior worth knowing:
   failure (`orphaned`), not an error for the user's delete.
 - **YOURLS:** `format=json` on every call (the default is XML). Create is a
   POST form; an existing URL returns 409 with the existing short link, which
-  counts as success. No delete, update, expiry or last click in core. A
+  counts as success (`"successStatuses": [409]` on its create request). No delete, update, expiry or last click in core. A
   public install accepts any signature, so Test can't catch a wrong key.
 - **Kutt:** `expire_in` is an `ms` string ("30 minutes"), at least 1 minute.
   Stats via `GET /api/v2/links/{id}/stats` (`visit_count`); no last click.
