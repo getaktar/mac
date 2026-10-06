@@ -309,8 +309,12 @@ enum ShortLinkResponse {
         return sql.date(from: string)
     }
 
-    static func isSuccess(status: Int, request: ShortLinkRequest) -> Bool {
-        (200..<300).contains(status) || (request.successStatuses ?? []).contains(status)
+    /// A 2xx status or one of `successStatuses`, and, when the request has
+    /// a `successPath`, `successValue` (or `true`) there.
+    static func isSuccess(status: Int, json: Any? = nil, request: ShortLinkRequest) -> Bool {
+        guard (200..<300).contains(status) || (request.successStatuses ?? []).contains(status) else { return false }
+        guard let path = request.successPath, !path.isEmpty else { return true }
+        return (request.successValue ?? .bool(true)).matches(value(at: path, in: json))
     }
 
     /// The provider's message at the request's `errorPath`, with the token
@@ -333,6 +337,21 @@ struct CreatedShortLink: Equatable, Sendable {
     /// The provider's id or code, for delete, update and stats; nil when
     /// the definition doesn't say where it is.
     var providerId: String?
+}
+
+/// What Test did: nothing to show for a read-only test, otherwise the
+/// short link it made and whether that was deleted again.
+struct ShortLinkTestResult: Equatable, Sendable {
+    enum Cleanup: Equatable, Sendable {
+        /// Nothing to delete with (no delete request), or nothing made.
+        case none
+        case deleted
+        /// The message, without the token.
+        case failed(String)
+    }
+
+    var created: CreatedShortLink?
+    var cleanup: Cleanup
 }
 
 struct ShortLinkStats: Equatable, Sendable {
@@ -409,13 +428,27 @@ struct ShortLinkEngine: ShortLinkOperations {
 
     /// The Test button: the definition's read-only request. A custom
     /// definition has none, so it shortens https://getaktar.com/ and gives
-    /// back the short link.
-    func test() async throws -> CreatedShortLink? {
+    /// back the short link, then deletes it again when it has a delete
+    /// request (which tests that too).
+    func test() async throws -> ShortLinkTestResult {
         if let request = definition.test {
             _ = try await perform(request, values: [:])
-            return nil
+            return ShortLinkTestResult(created: nil, cleanup: .none)
         }
-        return try await create(url: "https://getaktar.com/", expiresAt: nil)
+        let created = try await create(url: "https://getaktar.com/", expiresAt: nil)
+        guard definition.delete != nil, definition.capabilities.delete else {
+            return ShortLinkTestResult(created: created, cleanup: .none)
+        }
+        guard let id = created.providerId else {
+            return ShortLinkTestResult(created: created, cleanup: .failed(ShortLinkError.missingValue(ShortLinkPlaceholder.id.rawValue).localizedDescription))
+        }
+        do {
+            try await delete(ShortLinkTarget(providerId: id, domain: settings.trimmedDomain))
+            return ShortLinkTestResult(created: created, cleanup: .deleted)
+        } catch {
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            return ShortLinkTestResult(created: created, cleanup: .failed(ShortLinkResponse.redact(message, token: token)))
+        }
     }
 
     private func values(for target: ShortLinkTarget) -> [ShortLinkPlaceholder: String] {
@@ -437,7 +470,7 @@ struct ShortLinkEngine: ShortLinkOperations {
             throw ShortLinkError.network(ShortLinkResponse.redact(error.localizedDescription, token: token))
         }
         let json = data.isEmpty ? nil : try? JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])
-        guard ShortLinkResponse.isSuccess(status: response.statusCode, request: request) else {
+        guard ShortLinkResponse.isSuccess(status: response.statusCode, json: json, request: request) else {
             throw ShortLinkResponse.error(status: response.statusCode, json: json, request: request, token: token)
         }
         return json

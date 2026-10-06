@@ -178,6 +178,7 @@ targets:
       - path: Sources/Aktar/ShortLinks/ShortLinkDefinition.swift
       - path: Sources/Aktar/ShortLinks/ShortLinkEngine.swift
       - path: Sources/Aktar/ShortLinks/ShortLinkRules.swift
+      - path: Sources/Aktar/ShortLinks/ShareXImport.swift
       - path: Sources/Aktar/History/ShortLink.swift
       - path: Sources/Aktar/History/UploadRecord.swift
       - path: docs/short-link-providers.json

@@ -69,12 +69,19 @@ struct ShortLinkRequest: Codable, Hashable, Sendable {
     /// Statuses outside 200-299 that still mean success, such as YOURLS's
     /// 409 for a URL it has already shortened, which comes with that link.
     var successStatuses: [Int]?
+    /// A field of the answer that says whether it worked, for providers
+    /// that answer 200 to a failure (Short.io's delete answers
+    /// `{"success": false, "error": ...}`). With it, the request succeeds
+    /// only when the value there equals `successValue` (`true` when that's
+    /// left out).
+    var successPath: String?
+    var successValue: JSONValue?
     var shortUrlPath: String?
     var idPath: String?
     var clicksPath: String?
     var lastClickPath: String?
 
-    init(method: String, path: String, query: [String: String]? = nil, headers: [String: String]? = nil, body: JSONValue? = nil, bodyType: BodyType? = nil, errorPath: String? = nil, successStatuses: [Int]? = nil, shortUrlPath: String? = nil, idPath: String? = nil, clicksPath: String? = nil, lastClickPath: String? = nil) {
+    init(method: String, path: String, query: [String: String]? = nil, headers: [String: String]? = nil, body: JSONValue? = nil, bodyType: BodyType? = nil, errorPath: String? = nil, successStatuses: [Int]? = nil, successPath: String? = nil, successValue: JSONValue? = nil, shortUrlPath: String? = nil, idPath: String? = nil, clicksPath: String? = nil, lastClickPath: String? = nil) {
         self.method = method
         self.path = path
         self.query = query
@@ -83,6 +90,8 @@ struct ShortLinkRequest: Codable, Hashable, Sendable {
         self.bodyType = bodyType
         self.errorPath = errorPath
         self.successStatuses = successStatuses
+        self.successPath = successPath
+        self.successValue = successValue
         self.shortUrlPath = shortUrlPath
         self.idPath = idPath
         self.clicksPath = clicksPath
@@ -195,6 +204,23 @@ enum JSONValue: Codable, Hashable, Sendable {
         }
     }
 
+    /// Whether `value`, as `JSONSerialization` reads it, is this value.
+    func matches(_ value: Any?) -> Bool {
+        switch (self, value) {
+        case (.null, nil), (.null, is NSNull): return true
+        case (.bool(let expected), let number as NSNumber):
+            return CFGetTypeID(number) == CFBooleanGetTypeID() && number.boolValue == expected
+        case (.number(let expected), let number as NSNumber):
+            return CFGetTypeID(number) != CFBooleanGetTypeID() && number.doubleValue == expected
+        case (.string(let expected), let string as String): return string == expected
+        case (.array(let expected), let array as [Any]):
+            return expected.count == array.count && zip(expected, array).allSatisfy { $0.matches($1) }
+        case (.object(let expected), let object as [String: Any]):
+            return expected.count == object.count && expected.allSatisfy { $0.value.matches(object[$0.key]) }
+        default: return false
+        }
+    }
+
     /// As `JSONSerialization` objects; whole numbers stay integers.
     var foundationObject: Any {
         switch self {
@@ -271,6 +297,8 @@ struct ShortLinkSettings: Codable, Hashable, Sendable {
 /// `short-link-providers.json`.
 enum ShortLinkProviders {
     static let customID = "custom"
+    /// The methods a custom create request can use.
+    static let customMethods = ["POST", "GET", "PUT", "PATCH"]
 
     private struct File: Decodable {
         let schemaVersion: Int

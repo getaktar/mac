@@ -1,4 +1,6 @@
+import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// What the destination form's "Short Links" section edits. The token is
 /// only what's typed here; empty keeps the saved one (for the same
@@ -22,8 +24,10 @@ struct ShortLinkFormState: Equatable {
     var customShortUrlPath = ""
     var customIdPath = ""
     var customDeletePath = ""
+    var customDeleteMethod = "DELETE"
 
-    static let methods = ["POST", "GET", "PUT", "PATCH"]
+    static let methods = ShortLinkProviders.customMethods
+    static let deleteMethods = ["DELETE", "GET", "POST"]
 
     init(_ settings: ShortLinkSettings?) {
         guard let settings else {
@@ -52,6 +56,19 @@ struct ShortLinkFormState: Equatable {
         customShortUrlPath = create.shortUrlPath ?? ""
         customIdPath = create.idPath ?? ""
         customDeletePath = definition.delete?.path ?? ""
+        customDeleteMethod = definition.delete?.method.uppercased() ?? "DELETE"
+        if let query = definition.delete?.query, !query.isEmpty {
+            customDeletePath += "?" + query.keys.sorted().map { "\($0)=\(query[$0] ?? "")" }.joined(separator: "&")
+        }
+    }
+
+    /// A ShareX configuration the user agreed to: the custom definition and
+    /// its token, ready to save. http:// was already refused unless allowed.
+    mutating func apply(_ imported: ShareXImport) {
+        providerId = ShortLinkProviders.customID
+        endpoint = ""
+        loadCustom(imported.definition)
+        token = imported.token ?? ""
     }
 
     var isCustom: Bool { providerId == ShortLinkProviders.customID }
@@ -113,9 +130,26 @@ struct ShortLinkFormState: Equatable {
                 shortUrlPath: shortUrlPath,
                 idPath: idPath.isEmpty ? nil : idPath
             ),
-            delete: deletePath.isEmpty ? nil : ShortLinkRequest(method: "DELETE", path: deletePath, headers: headers.isEmpty ? nil : headers),
+            delete: deletePath.isEmpty ? nil : ShortLinkRequest(
+                method: customDeleteMethod,
+                path: deletePath,
+                headers: headers.isEmpty || !Self.sameHost(deletePath, path) ? nil : headers
+            ),
             capabilities: ShortLinkProviders.customCapabilities(canDelete: !deletePath.isEmpty && !idPath.isEmpty)
         )
+    }
+
+    /// The headers (and the token in them) go to the delete request only
+    /// when it's sent where the create request is: a relative path, or a
+    /// URL on the same host.
+    static func sameHost(_ deletePath: String, _ createPath: String) -> Bool {
+        func host(_ path: String) -> String? {
+            guard path.lowercased().hasPrefix("http://") || path.lowercased().hasPrefix("https://") else { return nil }
+            let rest = path.drop { $0 != "/" }.dropFirst(2)
+            return String(rest.prefix { $0 != "/" && $0 != "?" && $0 != "#" }).lowercased()
+        }
+        guard let deleteHost = host(deletePath) else { return true }
+        return deleteHost == host(createPath)
     }
 
     /// The settings to save; nil when Off.
@@ -183,10 +217,16 @@ struct ShortLinksFormSection: View {
     let savedToken: () -> String?
 
     @State private var test: TestState?
+    /// A ShareX configuration waiting for the user's consent.
+    @State private var pendingImport: ShareXImport?
+    @State private var importError: String?
+    /// The last import was refused for http://, so the toggle that allows
+    /// it is shown.
+    @State private var importNeedsInsecureHTTP = false
 
     private enum TestState: Equatable {
         case testing
-        case passed(String?)
+        case passed(ShortLinkTestResult)
         case failed(String)
     }
 
@@ -206,11 +246,49 @@ struct ShortLinksFormSection: View {
             .onChange(of: state.providerId) { test = nil }
             if state.providerId != nil {
                 fields
+            } else if importNeedsInsecureHTTP {
+                insecureToggle
             }
+            Button("Import ShareX Configuration (.sxcu)\u{2026}") { chooseShareXFile() }
         } header: {
             Text("Short Links")
         } footer: {
             footer
+        }
+        .sheet(item: $pendingImport) { imported in
+            ShareXConsentView(imported: imported) {
+                state.apply(imported)
+                importNeedsInsecureHTTP = false
+                test = nil
+                pendingImport = nil
+            } cancel: {
+                pendingImport = nil
+            }
+        }
+        .alert("Couldn\u{2019}t Import the Configuration", isPresented: Binding(
+            get: { importError != nil },
+            set: { if !$0 { importError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importError ?? "")
+        }
+    }
+
+    /// Reads a .sxcu file and asks before anything changes.
+    private func chooseShareXFile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: "sxcu"), .json].compactMap { $0 }
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.message = String(localized: "Choose a ShareX custom uploader for a URL shortener.")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            let data = try Data(contentsOf: url, options: .mappedIfSafe)
+            pendingImport = try ShareXImport.parse(data, allowInsecureHTTP: state.allowInsecureHTTP)
+        } catch {
+            if error as? ShareXImportError == .insecure { importNeedsInsecureHTTP = true }
+            importError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 
@@ -220,12 +298,8 @@ struct ShortLinksFormSection: View {
         if definition?.usesEndpoint ?? state.isCustom {
             TextField("Address", text: $state.endpoint, prompt: Text(verbatim: "https://s.example.com"))
         }
-        if state.usesHTTP {
-            Toggle("Allow insecure HTTP", isOn: $state.allowInsecureHTTP)
-            Text("Links and your API key are sent unencrypted over http://. Use this only on a network you trust, such as your own computer.")
-                .font(.caption)
-                .foregroundStyle(.orange)
-                .fixedSize(horizontal: false, vertical: true)
+        if state.usesHTTP || importNeedsInsecureHTTP {
+            insecureToggle
         }
         if let definition, definition.needsDomain || definition.capabilities.customDomain {
             TextField("Domain", text: $state.domain, prompt: definition.needsDomain ? Text(verbatim: "short.example.com") : Text("Optional"))
@@ -267,6 +341,15 @@ struct ShortLinksFormSection: View {
     }
 
     @ViewBuilder
+    private var insecureToggle: some View {
+        Toggle("Allow insecure HTTP", isOn: $state.allowInsecureHTTP)
+        Text("Links and your API key are sent unencrypted over http://. Use this only on a network you trust, such as your own computer.")
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
     private var customFields: some View {
         Picker("Method", selection: $state.customMethod) {
             ForEach(ShortLinkFormState.methods, id: \.self) { Text(verbatim: $0).tag($0) }
@@ -289,6 +372,11 @@ struct ShortLinksFormSection: View {
         TextField("Short link in the answer", text: $state.customShortUrlPath, prompt: Text(verbatim: "data.shortUrl"))
         TextField("ID in the answer", text: $state.customIdPath, prompt: Text("Optional"))
         TextField("Delete path", text: $state.customDeletePath, prompt: Text(verbatim: "/api/links/{id}"))
+        if !state.customDeletePath.trimmingCharacters(in: .whitespaces).isEmpty {
+            Picker("Delete method", selection: $state.customDeleteMethod) {
+                ForEach(ShortLinkFormState.deleteMethods, id: \.self) { Text(verbatim: $0).tag($0) }
+            }
+        }
     }
 
     @ViewBuilder
@@ -296,15 +384,27 @@ struct ShortLinksFormSection: View {
         switch test {
         case .testing:
             ProgressView().controlSize(.small)
-        case .passed(let shortUrl):
-            if let shortUrl {
-                Label {
-                    Text("Created \(shortUrl)").textSelection(.enabled)
-                } icon: {
-                    Image(systemName: "checkmark.circle.fill")
+        case .passed(let result):
+            if let shortUrl = result.created?.shortUrl {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label {
+                        Text("Created \(shortUrl)").textSelection(.enabled)
+                    } icon: {
+                        Image(systemName: "checkmark.circle.fill")
+                    }
+                    .foregroundStyle(.green)
+                    switch result.cleanup {
+                    case .deleted:
+                        Text("Deleted it again with the delete request.").foregroundStyle(.secondary)
+                    case .failed(let message):
+                        Text("Deleting it again failed: \(message)")
+                            .foregroundStyle(.orange)
+                            .fixedSize(horizontal: false, vertical: true)
+                    case .none:
+                        EmptyView()
+                    }
                 }
                 .font(.caption)
-                .foregroundStyle(.green)
             } else {
                 Label("The shortener accepts this key", systemImage: "checkmark.circle.fill")
                     .font(.caption)
@@ -350,11 +450,93 @@ struct ShortLinksFormSection: View {
         test = .testing
         Task {
             do {
-                let created = try await engine.test()
-                test = .passed(created?.shortUrl)
+                test = .passed(try await engine.test())
             } catch {
                 test = .failed(ShortLinkService.message(for: error, token: token))
             }
+        }
+    }
+}
+
+extension ShareXImport: Identifiable {
+    var id: String { endpoint + (token ?? "") }
+}
+
+/// Importing a ShareX configuration is a consent screen: where the token
+/// and the links go, and in which headers or parameters, before anything
+/// is filled in.
+struct ShareXConsentView: View {
+    let imported: ShareXImport
+    let confirm: () -> Void
+    let cancel: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Import ShareX Configuration").font(.headline)
+            if let name = imported.name {
+                Text(verbatim: name).foregroundStyle(.secondary)
+            }
+            if imported.token != nil {
+                Text("This configuration will send your API token to **\(imported.host)**.")
+            } else {
+                Text("This configuration will send your links to **\(imported.host)**.")
+            }
+            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 8, verticalSpacing: 6) {
+                GridRow {
+                    Text("Method").foregroundStyle(.secondary)
+                    Text(verbatim: imported.method).font(.system(.body, design: .monospaced))
+                }
+                GridRow {
+                    Text("Endpoint").foregroundStyle(.secondary)
+                    Text(verbatim: imported.endpoint)
+                        .font(.system(.body, design: .monospaced))
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if !imported.secretLocations.isEmpty {
+                    GridRow {
+                        Text("Token sent in").foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(imported.secretLocations, id: \.self) { location in
+                                Text(Self.describe(location))
+                            }
+                        }
+                    }
+                }
+            }
+            if imported.token != nil {
+                Text("The token is kept in your Keychain with this destination\u{2019}s keys, not in its settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if imported.usesHTTP {
+                Text("Links and your API key are sent unencrypted over http://. Use this only on a network you trust, such as your own computer.")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+            if imported.deletionSkipped {
+                Text("Its deletion URL isn\u{2019}t a simple request, so short links made with it can\u{2019}t be deleted from Aktar.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel, action: cancel)
+                    .keyboardShortcut(.cancelAction)
+                Button("Import", action: confirm)
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(20)
+        .frame(width: 460)
+    }
+
+    static func describe(_ location: ShareXImport.SecretLocation) -> String {
+        switch location {
+        case .header(let name): return String(localized: "Header \(name)")
+        case .query(let name): return String(localized: "Query parameter \(name)")
+        case .body(let name): return String(localized: "Body field \(name)")
         }
     }
 }

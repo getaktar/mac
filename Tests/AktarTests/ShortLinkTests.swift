@@ -245,6 +245,59 @@ final class ShortLinkTests: XCTestCase {
         }
     }
 
+    func testSuccessPathFailsA200() async throws {
+        let shortio = try Self.definition("shortio")
+        XCTAssertEqual(shortio.delete?.successPath, "success")
+        XCTAssertEqual(shortio.delete?.successValue, .bool(true))
+        let transport = FakeTransport()
+        let engine = ShortLinkEngine(definition: shortio, settings: ShortLinkSettings(providerId: "shortio", domain: "short.gy"), token: "sk", transport: transport)
+        transport.respond(200, #"{"success":false,"error":"Link not found"}"#)
+        do {
+            try await engine.delete(ShortLinkTarget(providerId: "lnk_1"))
+            XCTFail("Expected an error")
+        } catch {
+            XCTAssertEqual(error as? ShortLinkError, .rejected(status: 200, message: "Link not found"))
+        }
+        // Lifecycle: the cleanup failed, so the link may still exist.
+        let link = Self.snapshot(provider: "shortio")
+        let statuses = await ShortLinkLifecycle.deleteAll([link], operations: engine)
+        XCTAssertEqual(statuses[link.id], .orphaned)
+        transport.respond(200, #"{"success":true,"idString":"lnk_1"}"#)
+        try await engine.delete(ShortLinkTarget(providerId: "lnk_1"))
+        // A 200 without the field fails too.
+        transport.respond(200, "")
+        await XCTAssertThrowsErrorAsync(try await engine.delete(ShortLinkTarget(providerId: "lnk_1")))
+
+        XCTAssertTrue(JSONValue.bool(true).matches(NSNumber(value: true)))
+        XCTAssertFalse(JSONValue.bool(true).matches(NSNumber(value: 1)))
+        XCTAssertTrue(JSONValue.string("ok").matches("ok"))
+        XCTAssertTrue(JSONValue.number(1).matches(NSNumber(value: 1)))
+    }
+
+    func testCustomTestDeletesItsLink() async throws {
+        var custom = ShortLinkProviders.customTemplate
+        custom.create.path = "https://api.example.com/shorten"
+        custom.create.idPath = "id"
+        custom.delete = ShortLinkRequest(method: "DELETE", path: "/links/{id}", headers: ["Authorization": "Bearer {token}"])
+        custom.capabilities = ShortLinkProviders.customCapabilities(canDelete: true)
+        let transport = FakeTransport()
+        let engine = ShortLinkEngine(definition: custom, settings: ShortLinkSettings(providerId: "custom", endpoint: "https://api.example.com", custom: custom), token: "t0k", transport: transport)
+        transport.respond(200, #"{"shortUrl":"https://s.example.com/x1","id":"x1"}"#)
+        let result = try await engine.test()
+        XCTAssertEqual(result.created?.shortUrl, "https://s.example.com/x1")
+        XCTAssertEqual(result.cleanup, .deleted)
+        XCTAssertEqual(transport.requests.last?.httpMethod, "DELETE")
+        XCTAssertEqual(transport.requests.last?.url?.absoluteString, "https://api.example.com/links/x1")
+
+        // Without a delete request nothing more is sent.
+        let plain = ShortLinkEngine(definition: ShortLinkProviders.customTemplate, settings: ShortLinkSettings(providerId: "custom", endpoint: "https://api.example.com"), token: "t0k", transport: transport)
+        transport.respond(200, #"{"shortUrl":"https://s.example.com/x2"}"#)
+        let count = transport.requests.count
+        let plainResult = try await plain.test()
+        XCTAssertEqual(plainResult.cleanup, .none)
+        XCTAssertEqual(transport.requests.count, count + 1)
+    }
+
     func testEngineStats() async throws {
         let transport = FakeTransport()
         let engine = ShortLinkEngine(definition: try Self.definition("yourls"), settings: ShortLinkSettings(providerId: "yourls", endpoint: "https://sho.rt"), token: "sig", transport: transport)
@@ -435,7 +488,7 @@ final class ShortLinkTests: XCTestCase {
             token: key
         )
         let tested = try await engine.test()
-        XCTAssertNil(tested)
+        XCTAssertNil(tested.created)
         let target = "https://getaktar.com/?aktar-test=\(UUID().uuidString)"
         let created = try await engine.create(url: target, expiresAt: Date().addingTimeInterval(7 * 86_400))
         let id = try XCTUnwrap(created.providerId)
@@ -549,4 +602,11 @@ private final class NoRedirects: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
         nil
     }
+}
+
+func XCTAssertThrowsErrorAsync(_ expression: @autoclosure () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+    do {
+        try await expression()
+        XCTFail("Expected an error", file: file, line: line)
+    } catch {}
 }

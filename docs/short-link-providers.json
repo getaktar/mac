@@ -397,7 +397,9 @@
         "headers": {},
         "body": null,
         "bodyType": null,
-        "errorPath": "error"
+        "errorPath": "error",
+        "successPath": "success",
+        "successValue": true
       },
       "update": {
         "method": "POST",
@@ -436,7 +438,7 @@
         "customDomain": true,
         "stats": { "clicks": true, "lastClick": false }
       },
-      "notes": "Secret API key sent raw in the Authorization header (no 'Bearer'). 'domain' (hostname) is required on create; 404 if the domain is not in the organization. expiresAt accepts an ISO string or epoch milliseconds (not seconds). allowDuplicates defaults to false, in which case an existing link for the same originalURL is returned instead of a new one; true keeps one link per upload so deleting it never removes a shared link. Use idString (lnk_..._...); the numeric 'id' is deprecated and removed for new accounts. Error bodies differ per endpoint: create/update use 'message', delete and /api/domains use 'error'; delete can also return 200 with success false and 'error'. Expiration and some link features are plan dependent (402 Payment required). Stats use the separate Statistics API host (https://statistics.short.io/statistics, same Authorization header); period=total gives all-time totalClicks (humanClicks excludes bots). The docs type linkId as a string without an example; idString is assumed because numeric ids no longer exist for new users, so confirm with a live key before release. Statistics retention/availability may depend on the plan. Last click needs POST /domain/{domainId}/last_clicks with the numeric domain id, which no placeholder provides, so lastClick is false. Rate limits: create 50/s, update and delete 20/s.",
+      "notes": "Secret API key sent raw in the Authorization header (no 'Bearer'). 'domain' (hostname) is required on create; 404 if the domain is not in the organization. expiresAt accepts an ISO string or epoch milliseconds (not seconds). allowDuplicates defaults to false, in which case an existing link for the same originalURL is returned instead of a new one; true keeps one link per upload so deleting it never removes a shared link. Use idString (lnk_..._...); the numeric 'id' is deprecated and removed for new accounts. Error bodies differ per endpoint: create/update use 'message', delete and /api/domains use 'error'; delete can also return 200 with success false and 'error', so its delete request has successPath 'success' (successValue true): a 200 without success true is a failure. Expiration and some link features are plan dependent (402 Payment required). Stats use the separate Statistics API host (https://statistics.short.io/statistics, same Authorization header); period=total gives all-time totalClicks (humanClicks excludes bots). The docs type linkId as a string without an example; idString is assumed because numeric ids no longer exist for new users, so confirm with a live key before release. Statistics retention/availability may depend on the plan. Last click needs POST /domain/{domainId}/last_clicks with the numeric domain id, which no placeholder provides, so lastClick is false. Rate limits: create 50/s, update and delete 20/s.",
       "examples": {
         "create": {
           "request": {
