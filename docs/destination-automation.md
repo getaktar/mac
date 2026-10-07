@@ -120,7 +120,11 @@ own Automation), after a replace, and not for reused duplicate links.
   networks), no redirects to another host. Every platform.
 - Script: Mac (Application Scripts folder) and Windows (scripts folder), with
   the JSON on stdin and link, key, file, destination as arguments. Not on
-  mobile.
+  mobile. The arguments are untrusted text: a file name (anyone who can put
+  a file in a watched folder chooses it) can contain spaces, quotes, `$`,
+  `;` or start with `-`. Quote them (`"$3"`), put `--` before them when
+  passing them on to another command, and never hand them to `eval`,
+  `sh -c` or the like.
 - Payload: the watched-folder payload (same field names), with `event`
   `"upload.succeeded"` or `"upload.replaced"`, a new `destination`
   object (`{"id", "name"}`), and no `folder` object for manual uploads.
