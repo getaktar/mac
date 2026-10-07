@@ -181,6 +181,9 @@ targets:
       - path: Sources/Aktar/ShortLinks/ShareXImport.swift
       - path: Sources/Aktar/History/ShortLink.swift
       - path: Sources/Aktar/History/UploadRecord.swift
+      - path: Sources/Aktar/Upload/TempFiles.swift
+      - path: Sources/Aktar/Integration/LocalHTTPServer.swift
+      - path: Sources/Aktar/Integration/RaycastApp.swift
       - path: docs/short-link-providers.json
         buildPhase: resources
     dependencies:

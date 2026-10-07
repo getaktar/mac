@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- When another app asks Aktar to upload files through the Services menu
+  ("Upload with Aktar") or the Share menu, Aktar now asks first, naming the
+  files and the destination they'd go to. Uploads you start from Finder
+  aren't asked about
+- Connecting Raycast only hands over the local API token when the app that
+  opens Raycast links is Raycast itself, signed by Raycast. Otherwise
+  nothing is shared and Aktar says why
+- Importing a destination from another device now shows where its files and
+  links go before anything is saved: the storage and link hosts, the
+  short link service, each webhook and script, its "Use for" rules and its
+  output template. Webhooks and scripts come in turned off, and "Use for"
+  rules and the template are left out, unless you keep them there. This
+  also applies when updating a destination you already have
+- The local API answers `GET /v1/hello` without the token, with a proof
+  that only Aktar (which knows the token) can make, so Raycast and the CLI
+  can check they're talking to Aktar before sending the token
+- The local API refuses request bodies larger than 5 TB or larger than the
+  free disk space (keeping 2 GB free), and more than 32 connections at once
+- Files handed over by a Shortcuts action can no longer be written outside
+  Aktar's temporary folder, whatever their name
+- A watched folder's file is only uploaded, moved to Trash or moved to
+  "Uploaded" while it's still the same file Aktar checked: a file or link
+  swapped in at its path is left alone (and an upload of it is tried again
+  later). An "Uploaded" that is a link to another folder is never used
+- XSLT stylesheets (.xsl, .xslt), .shtml pages and web archives (.mht,
+  .mhtml) are uploaded with "Content-Disposition: attachment" like HTML, so
+  opening their link downloads them instead of running them on your
+  bucket's domain
+- Thumbnails of bucket files are made from a download with a safe file
+  name, whatever the file's key
+
 ## [0.17.0] - 2026-10-07
 
 ### Added
