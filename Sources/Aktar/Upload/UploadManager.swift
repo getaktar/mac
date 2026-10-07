@@ -483,6 +483,11 @@ final class UploadManager {
                 // way as below.
                 let policy = destination.imageMetadata ?? .default
                 var fileURL = job.input.fileURL
+                // A watched folder's file is read only while it's still the
+                // file the watcher checked.
+                if let watch = job.input.watch, !watch.isStillWatchedFile(at: fileURL) {
+                    throw WatchedFileChangedError()
+                }
                 var filename = job.input.originalFilename
                 var zipped: URL?
                 if FolderUpload.isFolder(fileURL) {
@@ -1114,7 +1119,7 @@ extension UploadManager {
     /// the provider busy (`S3Transfer` reports both as `.network`).
     nonisolated static func isTransient(_ error: Error) -> Bool {
         if case StorageError.network = error { return true }
-        if error is URLError { return true }
+        if error is URLError || error is WatchedFileChangedError { return true }
         let description = String(describing: error).lowercased()
         return description.contains("timed out") || description.contains("network connection")
             || description.contains("internalerror") || description.contains("serviceunavailable")

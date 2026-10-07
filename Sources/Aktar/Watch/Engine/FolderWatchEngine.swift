@@ -20,6 +20,9 @@ struct WatchUploadRequest: Sendable {
     /// The folder reacts to changes, so the ledger needs the file's hash:
     /// the upload computes it in the pass it makes anyway.
     var wantsContentHash = false
+    /// The inode the watcher checked; the upload only reads the file while
+    /// it's still that one.
+    var fileID: UInt64? = nil
 }
 
 struct WatchUploadSuccess: Sendable, Equatable {
@@ -1101,7 +1104,8 @@ final class FolderWatchEngine {
             subpath: WatchKeys.subpath(relativePath: file.relativePath, mode: folder.subfolders),
             overwriteKey: overwrite,
             sha256: file.sha256,
-            wantsContentHash: folder.modified != .ignore
+            wantsContentHash: folder.modified != .ignore,
+            fileID: file.facts.fileID
         )
     }
 
@@ -1195,9 +1199,11 @@ final class FolderWatchEngine {
     }
 
     private func apply(_ action: AfterUploadAction, to fileURL: URL, file: ReadyFile, success: WatchUploadSuccess) async {
-        guard let current = FileInspector.facts(at: fileURL),
+        guard let current = FileInspector.facts(at: fileURL), !current.isSymlink,
+              current.fileID == file.facts.fileID,
               current.size == file.facts.size, current.modified == file.facts.modified else {
-            // Changed (or gone) since it was uploaded: leave it alone.
+            // Changed, replaced (or gone) since it was uploaded: leave it
+            // alone.
             return
         }
         switch action {
@@ -1223,6 +1229,10 @@ final class FolderWatchEngine {
                     try FileManager.default.trashItem(at: fileURL, resultingItemURL: nil)
                 } else {
                     let folderURL = root.appendingPathComponent(WatchFileRules.uploadedFolderName, isDirectory: true)
+                    // Never into a link to some other folder.
+                    if case .file(let existing) = FileInspector.inspect(folderURL), existing.isSymlink || existing.isRegularFile {
+                        throw WatchFileActionError.uploadedFolderNotAFolder
+                    }
                     try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
                     let target = WatchFileActions.freeName(for: fileURL.lastPathComponent, in: folderURL)
                     let targetPath = WatchFileRules.uploadedFolderName + "/" + target.lastPathComponent
@@ -1556,6 +1566,18 @@ final class FolderWatchEngine {
 }
 
 /// What "After upload" does to the original.
+enum WatchFileActionError: Error, LocalizedError {
+    /// "Uploaded" is a link (or a file), not a folder of its own.
+    case uploadedFolderNotAFolder
+
+    var errorDescription: String? {
+        switch self {
+        case .uploadedFolderNotAFolder:
+            return String(localized: "\u{201C}Uploaded\u{201D} in this folder is a link or a file, not a folder, so nothing is moved into it.")
+        }
+    }
+}
+
 enum WatchFileActions {
     static let tagName = "Aktar"
 

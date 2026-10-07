@@ -534,7 +534,8 @@ extension WatchService: WatchUploading {
                     subpath: request.subpath,
                     keepStructure: folder.subfolders == .keepStructure,
                     sha256: request.sha256,
-                    wantsContentHash: request.wantsContentHash
+                    wantsContentHash: request.wantsContentHash,
+                    fileID: request.fileID
                 )
                 return input
             }

@@ -62,6 +62,25 @@ struct WatchUploadContext: Sendable {
     /// The folder reacts to changes: the upload hashes the file in the pass
     /// it makes anyway, for the ledger.
     var wantsContentHash = false
+    /// The inode the watcher checked. Something else at the path since (a
+    /// symlink swapped in, say) isn't read.
+    var fileID: UInt64? = nil
+
+    /// Whether the file at `url` is still the regular file the watcher
+    /// checked, not a link or another file put in its place.
+    func isStillWatchedFile(at url: URL) -> Bool {
+        guard let fileID else { return true }
+        guard let facts = FileInspector.facts(at: url) else { return false }
+        return facts.isRegularFile && !facts.isSymlink && facts.fileID == fileID
+    }
+}
+
+/// A watched folder's file was replaced between the check and the upload;
+/// it's checked again on the next try.
+struct WatchedFileChangedError: Error, LocalizedError {
+    var errorDescription: String? {
+        String(localized: "The file changed before it could be uploaded. Aktar will try again.")
+    }
 }
 
 struct UploadGroup: Sendable, Hashable {

@@ -751,4 +751,53 @@ final class FolderWatchEngineTests: XCTestCase {
         XCTAssertEqual(upload["reused"] as? Bool, false)
         XCTAssertEqual((json["folder"] as? [String: Any])?["name"] as? String, "Shots")
     }
+
+    // MARK: - Swapped files and links
+
+    func testSymlinkedUploadedFolderIsNotUsed() async throws {
+        let elsewhere = root.deletingLastPathComponent().appendingPathComponent("AktarWatchElsewhere-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: elsewhere, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: elsewhere) }
+        try FileManager.default.createSymbolicLink(at: root.appendingPathComponent("Uploaded"), withDestinationURL: elsewhere)
+        let engine = makeEngine { $0.afterUpload = .moveToUploaded }
+        engine.start()
+        try write("report.pdf")
+        await waitUntil { !self.recorder.errors.isEmpty }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent("report.pdf").path))
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: elsewhere.path), [])
+    }
+
+    func testFileReplacedBeforeTrashIsKept() async throws {
+        uploader.autoComplete = false
+        let engine = makeEngine { $0.afterUpload = .trash }
+        let stamp = Date(timeIntervalSince1970: 1_700_000_000)
+        try write("photo.png", "original")
+        let file = root.appendingPathComponent("photo.png")
+        try FileManager.default.setAttributes([.modificationDate: stamp], ofItemAtPath: file.path)
+        engine.start()
+        await waitUntil { self.uploader.requests.count == 1 }
+        let request = try XCTUnwrap(uploader.requests.first)
+        XCTAssertNotNil(request.fileID)
+        XCTAssertEqual(request.fileID, FileInspector.facts(at: file)?.fileID)
+
+        // Another file of the same size and date takes its place.
+        let swap = root.deletingLastPathComponent().appendingPathComponent("swap-\(UUID().uuidString)")
+        try Data("replaced".utf8).write(to: swap)
+        try FileManager.default.setAttributes([.modificationDate: stamp], ofItemAtPath: swap.path)
+        _ = try FileManager.default.replaceItemAt(file, withItemAt: swap)
+        XCTAssertNotEqual(FileInspector.facts(at: file)?.fileID, request.fileID)
+
+        engine.uploadFinished(requestID: request.id, outcome: .succeeded(WatchUploadSuccess(
+            objectKey: "uploads/photo.png",
+            publicURL: "https://cdn.example.com/photo.png",
+            link: "https://cdn.example.com/photo.png",
+            reused: false,
+            byteSize: 8,
+            destinationID: UUID(),
+            filename: "photo.png"
+        )))
+        await waitUntil { self.recorder.uploads.count == 1 }
+        await settle(0.5)
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "replaced")
+    }
 }
