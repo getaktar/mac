@@ -57,6 +57,13 @@ If you turn on Settings > Integrations > Allow local connections (off by
 default, and what the Raycast extension uses), Aktar also listens on
 `127.0.0.1` for requests carrying a random token that is kept in the Keychain.
 It never accepts connections from other machines or from web pages.
+Before sending the token, a companion can check that it's really talking to
+Aktar: `GET /v1/hello?nonce=<16 to 128 characters of A-Z, a-z, 0-9, - or _>`
+needs no token and answers `{"app": "Aktar", "proof": "<hex>"}`, where the
+proof is the lowercase hex HMAC-SHA256 of `aktar-hello-v1:<nonce>` keyed with
+the token (an invalid or missing nonce gets 400). When an app other
+than Finder asks Aktar to upload files (through the Services menu or the
+Share menu), Aktar asks you first.
 A watched folder's webhooks, if you add any, send each upload's link and
 file name to the address you give.
 See [SECURITY.md](SECURITY.md) for the disclosure policy.

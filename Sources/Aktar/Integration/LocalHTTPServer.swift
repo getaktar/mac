@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Network
 
@@ -37,6 +38,12 @@ struct HTTPResponse: Sendable {
 /// encoding), and every request must carry the bearer token. Callers are
 /// local tools like the Raycast extension, never browsers, so any request
 /// with an `Origin` header is refused outright.
+///
+/// The one request without the token is `GET /v1/hello?nonce=<nonce>`,
+/// which lets a client check that this really is Aktar before it sends the
+/// token to the port: the answer is
+/// `{"app": "Aktar", "proof": hex(HMAC-SHA256(token, "aktar-hello-v1:" + nonce))}`,
+/// which only something that knows the token can make.
 final class LocalHTTPServer: @unchecked Sendable {
     typealias Handler = @Sendable (HTTPRequest) async -> HTTPResponse
 
@@ -51,6 +58,18 @@ final class LocalHTTPServer: @unchecked Sendable {
     private let handler: Handler
     private let queue = DispatchQueue(label: "com.getaktar.mac.local-api")
     private var listener: NWListener?
+    /// Open connections and the bodies they're writing to disk; only
+    /// touched on `queue`.
+    private var openConnections = 0
+    private var reservedBodyBytes: Int64 = 0
+
+    /// More connections than any companion opens at once; the rest are
+    /// closed right away.
+    static let maxConnections = 32
+    /// The largest object S3 takes.
+    static let maxBodySize: Int64 = 5 * 1024 * 1024 * 1024 * 1024
+    /// What a streamed body must leave free on the disk.
+    static let minimumFreeSpace: Int64 = 2 * 1024 * 1024 * 1024
 
     init(port: UInt16, token: String, handler: @escaping Handler) {
         self.port = port
@@ -80,10 +99,11 @@ final class LocalHTTPServer: @unchecked Sendable {
             }
         }
         listener.newConnectionHandler = { [weak self] connection in
-            guard let self else {
+            guard let self, self.openConnections < Self.maxConnections else {
                 connection.cancel()
                 return
             }
+            self.openConnections += 1
             HTTPConnection(connection: connection, server: self).start()
         }
         self.listener = listener
@@ -99,8 +119,27 @@ final class LocalHTTPServer: @unchecked Sendable {
     fileprivate var connectionQueue: DispatchQueue { queue }
     fileprivate var requestHandler: Handler { handler }
 
+    fileprivate func connectionClosed() {
+        openConnections -= 1
+    }
+
+    /// Room on the disk for a body of `bytes` that's streamed to a file,
+    /// counting the bodies other connections are still receiving.
+    fileprivate func reserveBody(_ bytes: Int64, in folder: URL) -> Bool {
+        let free = (try? folder.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
+            .volumeAvailableCapacityForImportantUsage
+        if let free, bytes + reservedBodyBytes > free - Self.minimumFreeSpace { return false }
+        reservedBodyBytes += bytes
+        return true
+    }
+
+    fileprivate func releaseBody(_ bytes: Int64) {
+        reservedBodyBytes -= bytes
+    }
+
     /// Checked as soon as the headers arrive, before any body is read, so an
-    /// unauthorized upload is refused without buffering it first.
+    /// unauthorized upload is refused without buffering it first. Also
+    /// answers `/v1/hello`, which needs no token.
     fileprivate func rejection(for head: RequestHead) -> HTTPResponse? {
         if head.headers["origin"] != nil {
             return .error(403, "Browser requests are not allowed.")
@@ -108,6 +147,9 @@ final class LocalHTTPServer: @unchecked Sendable {
         let allowedHosts = ["127.0.0.1:\(port)", "localhost:\(port)"]
         guard let host = head.headers["host"]?.lowercased(), allowedHosts.contains(host) else {
             return .error(403, "Unexpected Host header.")
+        }
+        if head.path == "/v1/hello" {
+            return Self.hello(method: head.method, nonce: head.query["nonce"], token: token)
         }
         guard let authorization = head.headers["authorization"],
               authorization.hasPrefix("Bearer "),
@@ -117,7 +159,37 @@ final class LocalHTTPServer: @unchecked Sendable {
         if head.headers["transfer-encoding"] != nil {
             return .error(411, "Send a Content-Length instead of a chunked body.")
         }
+        if Int64(head.contentLength) > Self.maxBodySize {
+            return .error(413, "The request body is too large.")
+        }
         return nil
+    }
+
+    /// The answer to `/v1/hello`: proof that this server knows `token`,
+    /// for a nonce the client picked, and nothing else.
+    static func hello(method: String, nonce: String?, token: String) -> HTTPResponse {
+        guard method == "GET" else { return .error(405, "Method not allowed.") }
+        guard let nonce, isValidHelloNonce(nonce) else {
+            return .error(400, "Send a nonce of 16 to 128 letters, digits, \"-\" or \"_\".")
+        }
+        return .json(200, ["app": "Aktar", "proof": helloProof(nonce: nonce, token: token)])
+    }
+
+    static func isValidHelloNonce(_ nonce: String) -> Bool {
+        (16...128).contains(nonce.utf8.count) && nonce.utf8.allSatisfy { byte in
+            (byte >= 0x30 && byte <= 0x39) || (byte >= 0x41 && byte <= 0x5A) || (byte >= 0x61 && byte <= 0x7A)
+                || byte == UInt8(ascii: "-") || byte == UInt8(ascii: "_")
+        }
+    }
+
+    /// Lowercase hex of HMAC-SHA256 keyed with the token's UTF-8 bytes,
+    /// over "aktar-hello-v1:" + nonce.
+    static func helloProof(nonce: String, token: String) -> String {
+        let code = HMAC<SHA256>.authenticationCode(
+            for: Data("aktar-hello-v1:\(nonce)".utf8),
+            using: SymmetricKey(data: Data(token.utf8))
+        )
+        return code.map { String(format: "%02x", $0) }.joined()
     }
 
     private static func constantTimeEquals(_ lhs: String, _ rhs: String) -> Bool {
@@ -192,6 +264,7 @@ private final class HTTPConnection: @unchecked Sendable {
     private var bodyFile: URL?
     private var bodyHandle: FileHandle?
     private var bodyReceived = 0
+    private var reservedBytes: Int64 = 0
     private var hasResponded = false
     private var isFinished = false
 
@@ -246,16 +319,23 @@ private final class HTTPConnection: @unchecked Sendable {
         let rest = buffer[range.upperBound...]
         buffer = Data()
         if parsed.contentLength > Self.maxInMemoryBody {
-            openBodyFile()
+            openBodyFile(length: Int64(parsed.contentLength))
+            guard !hasResponded else { return }
         }
         appendBody(Data(rest))
     }
 
-    private func openBodyFile() {
+    private func openBodyFile(length: Int64) {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("AktarLocalAPI", isDirectory: true)
             .appendingPathComponent(UUID().uuidString)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        // A body that would fill the disk is refused before it's written.
+        guard server.reserveBody(length, in: url.deletingLastPathComponent()) else {
+            respond(.error(413, "There isn\u{2019}t enough free disk space for this request body."))
+            return
+        }
+        reservedBytes = length
         FileManager.default.createFile(atPath: url.path, contents: nil)
         bodyFile = url
         bodyHandle = try? FileHandle(forWritingTo: url)
@@ -320,6 +400,9 @@ private final class HTTPConnection: @unchecked Sendable {
         isFinished = true
         try? bodyHandle?.close()
         if let bodyFile { try? FileManager.default.removeItem(at: bodyFile) }
+        server.releaseBody(reservedBytes)
+        reservedBytes = 0
+        server.connectionClosed()
         connection.cancel()
     }
 
@@ -335,6 +418,7 @@ private final class HTTPConnection: @unchecked Sendable {
         case 405: return "Method Not Allowed"
         case 409: return "Conflict"
         case 411: return "Length Required"
+        case 413: return "Content Too Large"
         case 422: return "Unprocessable Content"
         case 431: return "Request Header Fields Too Large"
         case 502: return "Bad Gateway"
