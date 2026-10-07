@@ -2,9 +2,11 @@ import AppKit
 import SwiftUI
 
 /// "Import from Another Device": a transfer link, scanned with the camera
-/// or pasted, and the transfer code shown on the other device. The
-/// destination it carries is saved right away, then Test Connection runs by
-/// itself and its result is shown, with Edit for anything to change.
+/// or pasted, and the transfer code shown on the other device. Where the
+/// destination it carries sends files and links is shown for review first
+/// (its webhooks, scripts, "Use for" rules and template only come along if
+/// they're kept there), then it's saved, Test Connection runs by itself and
+/// its result is shown, with Edit for anything to change.
 struct ImportDestinationView: View {
     /// A link from aktar://import, already filled in.
     var initialLink: String?
@@ -27,6 +29,9 @@ struct ImportDestinationView: View {
     /// Why the test couldn't reach the bucket at all.
     @State private var testError: String?
     @State private var isTesting = false
+    @State private var keepHooks = false
+    @State private var keepUseFor = false
+    @State private var keepTemplate = false
 
     init(initialLink: String? = nil, onImported: @escaping () -> Void) {
         self.initialLink = initialLink
@@ -35,6 +40,8 @@ struct ImportDestinationView: View {
 
     private enum Step {
         case link
+        /// Opened: what it brings, before it's saved.
+        case review(DestinationTransfer.Payload, existing: DestinationConfig?)
         /// Saved: the test and its result.
         case saved(DestinationConfig, updated: Bool)
         /// Edit, the usual form for the saved destination.
@@ -45,6 +52,8 @@ struct ImportDestinationView: View {
         switch step {
         case .link:
             linkAndCode
+        case .review(let payload, let existing):
+            review(payload, existing: existing)
         case .saved(let config, let updated):
             savedResult(config, updated: updated)
         case .editing(let config):
@@ -219,7 +228,7 @@ struct ImportDestinationView: View {
     /// both under a new ID and a "Copy" name.
     private func resolveDuplicate(_ payload: DestinationTransfer.Payload) {
         guard let existing = appState.destinationStore.destinations.first(where: { $0.id == payload.destination.id }) else {
-            save(payload, updating: nil)
+            startReview(payload, updating: nil)
             return
         }
         let alert = NSAlert()
@@ -232,18 +241,124 @@ struct ImportDestinationView: View {
         alert.addButton(withTitle: String(localized: "Cancel"))
         switch alert.runModal() {
         case .alertFirstButtonReturn:
-            save(payload, updating: existing)
+            startReview(payload, updating: existing)
         case .alertSecondButtonReturn:
             var payload = payload
             payload.destination.id = UUID()
             payload.destination.name = String(localized: "\(payload.destination.name) Copy")
-            save(payload, updating: nil)
+            startReview(payload, updating: nil)
         default:
             break
         }
     }
 
-    /// Saves the destination as it came, keys included, then tests it. A
+    private func startReview(_ payload: DestinationTransfer.Payload, updating existing: DestinationConfig?) {
+        keepHooks = false
+        keepUseFor = false
+        keepTemplate = false
+        step = .review(payload, existing: existing)
+    }
+
+    /// The template is app-wide here, so it's only taken over while this
+    /// Mac still has the default one.
+    private func templateApplies(_ payload: DestinationTransfer.Payload) -> Bool {
+        payload.customTemplate != nil && appState.uploadManager.customTemplate == UploadManager.defaultCustomTemplate
+    }
+
+    private func review(_ payload: DestinationTransfer.Payload, existing: DestinationConfig?) -> some View {
+        let config = payload.destination
+        let hookCount = config.hooks?.count ?? 0
+        return VStack(spacing: 0) {
+            Text("Review Before Importing")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+
+            Divider()
+
+            Form {
+                Section {
+                    LabeledContent("Name", value: config.name)
+                    LabeledContent("Storage", value: "\(payload.endpointHost) \u{00B7} \(config.bucket)")
+                    LabeledContent("Links", value: payload.publicHost)
+                    if let shortLinkHost = payload.shortLinkHost {
+                        LabeledContent("Short Links", value: shortLinkHost)
+                    }
+                } header: {
+                    Text("Where Files and Links Go")
+                } footer: {
+                    Text("Only import this if you trust where the link came from.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if hookCount > 0 {
+                    Section {
+                        ForEach(Array(payload.webhookHosts.enumerated()), id: \.offset) { _, host in
+                            Label(host, systemImage: "network")
+                        }
+                        ForEach(Array(payload.scriptNames.enumerated()), id: \.offset) { _, name in
+                            Label(name, systemImage: "terminal")
+                        }
+                        Toggle("Keep webhooks and scripts (\(hookCount))", isOn: $keepHooks)
+                    } header: {
+                        Text("After Upload")
+                    } footer: {
+                        Text("Webhooks receive each upload\u{2019}s link and file name, and scripts run on this Mac. Left off, they\u{2019}re imported turned off.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if let routing = config.useFor, !routing.isEmpty {
+                    Section {
+                        Text(verbatim: ListFormatter.localizedString(byJoining: routing.kinds.map(\.label) + routing.extensions.map { "." + $0 }))
+                        Toggle("Keep \u{201C}Use for\u{201D} rules", isOn: $keepUseFor)
+                    } header: {
+                        Text("Use For")
+                    } footer: {
+                        Text("These files would go to this destination instead of your default one.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if templateApplies(payload), let template = payload.customTemplate {
+                    Section {
+                        Text(verbatim: template)
+                            .font(.body.monospaced())
+                            .textSelection(.enabled)
+                        Toggle("Use this output template", isOn: $keepTemplate)
+                    } header: {
+                        Text("Output Template")
+                    } footer: {
+                        Text("What Aktar copies after an upload.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .formStyle(.grouped)
+
+            Divider()
+
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }
+                Button(existing == nil ? String(localized: "Import") : String(localized: "Update Existing")) {
+                    save(
+                        payload.reviewed(keepHooks: keepHooks, keepUseFor: keepUseFor, keepTemplate: keepTemplate && templateApplies(payload)),
+                        updating: existing
+                    )
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding()
+        }
+        .frame(width: 460, height: 560)
+    }
+
+    /// Saves the destination as reviewed, keys included, then tests it. A
     /// failed test leaves it saved; Edit is there to fix it.
     private func save(_ payload: DestinationTransfer.Payload, updating existing: DestinationConfig?) {
         let store = appState.destinationStore
@@ -262,8 +377,8 @@ struct ImportDestinationView: View {
             // `add` makes it the default when it's the first one here.
             store.add(config)
         }
-        // The template is app-wide here, so it's only taken over while this
-        // Mac still has the default one.
+        // Only when it was kept in the review, which offers it only while
+        // this Mac still has the default one.
         let manager = appState.uploadManager
         if let template = payload.customTemplate, manager.customTemplate == UploadManager.defaultCustomTemplate {
             manager.customTemplate = template

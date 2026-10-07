@@ -126,10 +126,16 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   link, then type the code; the field formats it as `XXXX-XXXX-XXXX` while
   it's typed or pasted. If the destination is already there, choose Update
   Existing or Add as Copy (with a warning when the imported endpoint or
-  bucket differs from the existing one's). There's no form to check: the
-  destination is saved right away, keys in the Keychain, the first one
-  becomes the default, and an imported `customTemplate` is only taken over
-  while the Mac still has the default template. The same window then says it
+  bucket differs from the existing one's). Before anything is saved, a review
+  lists where files and links go: the endpoint host and bucket, the public
+  URL host, the short-link provider's host, each webhook host and script
+  name, the "Use for" rules and the output template. Someone else made the
+  link, so webhooks and scripts are imported turned off, and "Use for" and
+  the template are left out, unless the user switches on "Keep webhooks and
+  scripts (N)", "Keep “Use for” rules" or "Use this output template" there
+  (the template is only offered while the Mac still has the default one).
+  Import (or Update Existing) then saves the destination, keys in the
+  Keychain, and the first one becomes the default. The same window then says it
   was added or updated, runs Test Connection by itself and shows the result,
   with Edit (the usual Edit Destination form) and Done. A failed test leaves
   the destination saved. Update Existing keeps auto-delete as it was while

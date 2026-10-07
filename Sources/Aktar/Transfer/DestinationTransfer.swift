@@ -491,3 +491,53 @@ enum DestinationTransfer {
         return Data(base64Encoded: base64)
     }
 }
+
+// MARK: - Import review
+
+/// What an imported destination brings that decides where files and links
+/// go, listed before it's saved. Someone else made the link, so its
+/// webhooks and scripts come in turned off, and its "Use for" rules and
+/// output template are left out, unless the user keeps them.
+extension DestinationTransfer.Payload {
+    /// Where uploads are stored.
+    var endpointHost: String { Self.host(destination.endpoint) }
+    /// Where links point.
+    var publicHost: String { Self.host(destination.publicBaseURL) }
+
+    /// The shortener every link is sent to, when short links are on.
+    var shortLinkHost: String? {
+        guard let settings = destination.shortLinks, let definition = settings.definition else { return nil }
+        guard let base = try? ShortLinkRequestBuilder.baseURL(definition: definition, settings: settings) else {
+            return definition.name
+        }
+        return Self.host(base)
+    }
+
+    var webhookHosts: [String] {
+        (destination.hooks ?? []).filter { $0.kind == .webhook }.map { Self.host($0.target) }
+    }
+
+    var scriptNames: [String] {
+        (destination.hooks ?? []).filter { $0.kind == .script }.map(\.target)
+    }
+
+    /// As saved: the hooks kept (each still on or off as it came) or all
+    /// turned off, and "Use for" and the template kept or dropped.
+    func reviewed(keepHooks: Bool, keepUseFor: Bool, keepTemplate: Bool) -> Self {
+        var payload = self
+        if !keepHooks {
+            payload.destination.hooks = destination.hooks?.map { hook in
+                var hook = hook
+                hook.enabled = false
+                return hook
+            }
+        }
+        if !keepUseFor { payload.destination.useFor = nil }
+        if !keepTemplate { payload.customTemplate = nil }
+        return payload
+    }
+
+    private static func host(_ address: String) -> String {
+        URL(string: address)?.host ?? address
+    }
+}
