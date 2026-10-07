@@ -210,6 +210,20 @@ final class SecurityAuditTests: XCTestCase {
         XCTAssertEqual(kept.destination.useFor, FileRouting(kinds: [.image], extensions: ["pdf"]))
         XCTAssertEqual(kept.customTemplate, payload.customTemplate)
     }
+
+    func testUpdatingKeepsTheExistingHooksAndRoutingUnlessKept() throws {
+        let payload = try importedPayload()
+        var existing = payload.destination
+        existing.hooks = [payload.destination.hooks![0]]
+        existing.useFor = FileRouting(kinds: [.video], extensions: [])
+        let declined = payload.reviewed(keepHooks: false, keepUseFor: false, keepTemplate: false, updating: existing)
+        XCTAssertEqual(declined.destination.hooks, existing.hooks)
+        XCTAssertEqual(declined.destination.useFor, existing.useFor)
+
+        let kept = payload.reviewed(keepHooks: true, keepUseFor: true, keepTemplate: false, updating: existing)
+        XCTAssertEqual(kept.destination.hooks, payload.destination.hooks)
+        XCTAssertEqual(kept.destination.useFor, payload.destination.useFor)
+    }
 }
 
 private final class ReadyFlag: @unchecked Sendable {

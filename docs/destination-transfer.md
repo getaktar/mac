@@ -134,6 +134,8 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   the template are left out, unless the user switches on "Keep webhooks and
   scripts (N)", "Keep “Use for” rules" or "Use this output template" there
   (the template is only offered while the Mac still has the default one).
+  With Update Existing, what isn't kept stays as the destination here had
+  it: its own webhooks, scripts and "Use for" rules are not removed.
   Import (or Update Existing) then saves the destination, keys in the
   Keychain, and the first one becomes the default. The same window then says it
   was added or updated, runs Test Connection by itself and shows the result,

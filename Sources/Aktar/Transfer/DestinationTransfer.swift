@@ -522,17 +522,23 @@ extension DestinationTransfer.Payload {
     }
 
     /// As saved: the hooks kept (each still on or off as it came) or all
-    /// turned off, and "Use for" and the template kept or dropped.
-    func reviewed(keepHooks: Bool, keepUseFor: Bool, keepTemplate: Bool) -> Self {
+    /// turned off, and "Use for" and the template kept or dropped. When it
+    /// updates a destination that's already here, what isn't kept stays as
+    /// that destination had it instead.
+    func reviewed(keepHooks: Bool, keepUseFor: Bool, keepTemplate: Bool, updating existing: DestinationConfig? = nil) -> Self {
         var payload = self
         if !keepHooks {
-            payload.destination.hooks = destination.hooks?.map { hook in
-                var hook = hook
-                hook.enabled = false
-                return hook
+            if let existing {
+                payload.destination.hooks = existing.hooks
+            } else {
+                payload.destination.hooks = destination.hooks?.map { hook in
+                    var hook = hook
+                    hook.enabled = false
+                    return hook
+                }
             }
         }
-        if !keepUseFor { payload.destination.useFor = nil }
+        if !keepUseFor { payload.destination.useFor = existing?.useFor }
         if !keepTemplate { payload.customTemplate = nil }
         return payload
     }

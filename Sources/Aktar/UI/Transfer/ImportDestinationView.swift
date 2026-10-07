@@ -347,7 +347,12 @@ struct ImportDestinationView: View {
                 Button("Cancel") { dismiss() }
                 Button(existing == nil ? String(localized: "Import") : String(localized: "Update Existing")) {
                     save(
-                        payload.reviewed(keepHooks: keepHooks, keepUseFor: keepUseFor, keepTemplate: keepTemplate && templateApplies(payload)),
+                        payload.reviewed(
+                            keepHooks: keepHooks,
+                            keepUseFor: keepUseFor,
+                            keepTemplate: keepTemplate && templateApplies(payload),
+                            updating: existing
+                        ),
                         updating: existing
                     )
                 }

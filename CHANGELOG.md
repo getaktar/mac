@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   links go before anything is saved: the storage and link hosts, the
   short link service, each webhook and script, its "Use for" rules and its
   output template. Webhooks and scripts come in turned off, and "Use for"
-  rules and the template are left out, unless you keep them there. This
-  also applies when updating a destination you already have
+  rules and the template are left out, unless you keep them there. When
+  updating a destination you already have, its own webhooks, scripts and
+  "Use for" rules stay as they were unless you keep the imported ones
 - The local API answers `GET /v1/hello` without the token, with a proof
   that only Aktar (which knows the token) can make, so Raycast and the CLI
   can check they're talking to Aktar before sending the token
