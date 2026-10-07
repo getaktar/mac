@@ -132,7 +132,7 @@ struct UploadFileIntent: AppIntent {
             if files.count == 1, let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
                 filename = RenamePrompt.keepingExtension(name, of: filename)
             }
-            let url = folder.appendingPathComponent("\(index)", isDirectory: true).appendingPathComponent(file.filename)
+            let url = try AktarIntentSupport.stagedFile(named: file.filename, in: folder.appendingPathComponent("\(index)", isDirectory: true))
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             try file.data.write(to: url)
             let input = UploadInput(fileURL: url, originalFilename: filename, source: .filePicker)
@@ -196,7 +196,7 @@ struct ReplaceFileIntent: AppIntent {
         }
         let folder = try AktarIntentSupport.stagingFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let url = folder.appendingPathComponent(file.filename)
+        let url = try AktarIntentSupport.stagedFile(named: file.filename, in: folder)
         try file.data.write(to: url)
         return .result(value: try await AktarIntentSupport.link(manager.replaceAndWait(record, with: url), manager: manager))
     }
@@ -275,6 +275,15 @@ enum AktarIntentSupport {
     /// caller (and at the next launch if it isn't).
     static func stagingFolder() throws -> URL {
         try TempFiles.newFolder(in: TempFiles.intents)
+    }
+
+    /// The file's name comes from the shortcut, so it's reduced to one
+    /// safe name inside `folder`.
+    static func stagedFile(named name: String, in folder: URL) throws -> URL {
+        guard let url = TempFiles.fileURL(named: name, in: folder) else {
+            throw AktarIntentError(String(localized: "The file\u{2019}s name can\u{2019}t be used."))
+        }
+        return url
     }
 
     /// The link copying the upload gives: a temporary link when its

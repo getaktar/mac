@@ -28,6 +28,17 @@ enum TempFiles {
         return directory
     }
 
+    /// Where a file whose name comes from elsewhere (a Shortcuts action's
+    /// file) is written inside `folder`: one safe path segment, so a name
+    /// such as "../../x" can't put it anywhere else. Nil when it would still
+    /// end up outside `folder`.
+    static func fileURL(named name: String, in folder: URL) -> URL? {
+        let safe = ObjectKeyGenerator.sanitizedFilename((name as NSString).lastPathComponent)
+        let url = folder.appendingPathComponent(safe)
+        guard url.standardizedFileURL.path.hasPrefix(folder.standardizedFileURL.path + "/") else { return nil }
+        return url
+    }
+
     /// Empties Aktar's temporary folders. Only called at launch, before any
     /// upload or request could be using them.
     static func purgeAtLaunch() {
