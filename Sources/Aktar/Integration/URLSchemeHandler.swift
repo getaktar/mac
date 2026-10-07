@@ -26,7 +26,9 @@ extension Notification.Name {
 /// the local API is turned on and its port and token are handed back to
 /// the callback as Raycast launch context. Only `raycast://extensions/…`
 /// callbacks into the official extension (`merttopuz/aktar`) are accepted,
-/// so a link from a web page or another extension can't collect the token.
+/// so a link from a web page or another extension can't collect the token,
+/// and only when the app that opens raycast:// links is Raycast itself,
+/// signed by Raycast, so another app that claims the scheme can't either.
 @MainActor
 enum URLSchemeHandler {
     /// `launchedApp` is true when this link is what started Aktar. A web
@@ -136,9 +138,20 @@ enum URLSchemeHandler {
               var callback = URLComponents(string: rawCallback),
               callback.scheme?.lowercased() == "raycast",
               callback.host?.lowercased() == "extensions",
-              isAllowedExtensionPath(callback.path) else { return }
+              isAllowedExtensionPath(callback.path),
+              let probe = callback.url else { return }
 
         NSApp.activate(ignoringOtherApps: true)
+        // Checked before anything is turned on: the token only ever goes
+        // to Raycast.
+        guard RaycastApp.handler(opening: probe) != nil else {
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = String(localized: "Couldn\u{2019}t connect Raycast")
+            alert.informativeText = String(localized: "The app that opens Raycast links on this Mac isn\u{2019}t Raycast, so Aktar didn\u{2019}t share its API token. Install Raycast from raycast.com and try again.")
+            alert.runModal()
+            return
+        }
         let alert = NSAlert()
         alert.messageText = String(localized: "Connect Raycast to Aktar?")
         alert.informativeText = String(localized: """
@@ -158,8 +171,9 @@ enum URLSchemeHandler {
         var query = (callback.queryItems ?? []).filter { $0.name != "launchContext" }
         query.append(URLQueryItem(name: "launchContext", value: json))
         callback.queryItems = query
-        if let target = callback.url {
-            NSWorkspace.shared.open(target)
-        }
+        // Opened with the app checked just now, by its URL, so a handler
+        // that changes in between doesn't get the link.
+        guard let target = callback.url, let raycast = RaycastApp.handler(opening: target) else { return }
+        NSWorkspace.shared.open([target], withApplicationAt: raycast, configuration: NSWorkspace.OpenConfiguration())
     }
 }
