@@ -173,7 +173,8 @@ final class RemoteThumbnailLoader {
             return .failed
         }
         defer { try? FileManager.default.removeItem(at: folder) }
-        let file = folder.appendingPathComponent(name)
+        // A key's last part is anyone's choice: one safe name inside the folder.
+        let file = folder.appendingPathComponent(ObjectKeyGenerator.sanitizedFilename(name))
         do {
             guard try await provider.download(key: objectKey, to: file, maxBytes: Self.maxSourceBytes) else { return .unavailable }
         } catch {

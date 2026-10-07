@@ -10,10 +10,14 @@ enum ContentTypeResolver {
     }
 
     /// Files a browser would run as a page or a script when the link is
-    /// opened: HTML, SVG, XML and JavaScript.
-    static let activeExtensions: Set<String> = ["html", "htm", "xhtml", "xht", "svg", "svgz", "xml", "js", "mjs"]
+    /// opened: HTML (also server-side include and web archive pages), SVG,
+    /// XML with its XSLT stylesheets, and JavaScript.
+    static let activeExtensions: Set<String> = [
+        "html", "htm", "shtml", "xhtml", "xht", "mht", "mhtml", "svg", "svgz", "xml", "xsl", "xslt", "js", "mjs",
+    ]
     static let activeContentTypes: Set<String> = [
         "text/html", "application/xhtml+xml", "image/svg+xml", "text/xml", "application/xml",
+        "text/xsl", "application/xslt+xml", "multipart/related", "application/x-mimearchive",
         "text/javascript", "application/javascript",
     ]
 
