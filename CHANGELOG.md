@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.1] - 2026-10-14
+
+### Fixed
+
+- On MinIO, a bucket folder with a few hundred files or more couldn't be
+  listed (the error said "limit"), which also broke bucket-wide search and
+  clearing thumbnail folders. Aktar now asks for listings uncompressed
+- On MinIO, an interrupted upload of a large file couldn't be resumed, and
+  every retry of the same file failed until the unfinished upload was a
+  week old. Resuming works now, and an unfinished upload whose parts can't
+  be read starts over instead of failing
+
 ## [0.18.0] - 2026-10-08
 
 ### Security

@@ -141,23 +141,31 @@ extension S3Provider {
 
     /// The parts the provider already has, by part number. Throws
     /// `MultipartUploadError.noSuchUpload` when the upload was completed,
-    /// aborted or expired meanwhile.
+    /// aborted or expired meanwhile. Read with URLSession rather than Soto:
+    /// MinIO answers with an empty `<ChecksumAlgorithm/>`, which Soto can't
+    /// decode, so an interrupted upload could never be resumed there.
     func uploadedParts(objectKey: String, uploadId: String) async throws -> [Int: UploadedPart] {
         var parts: [Int: UploadedPart] = [:]
         var marker: String?
-        do {
-            repeat {
-                let output = try await s3.listParts(.init(bucket: config.bucket, key: objectKey, partNumberMarker: marker, uploadId: uploadId))
-                for part in output.parts ?? [] {
-                    guard let number = part.partNumber, let eTag = part.eTag else { continue }
-                    parts[number] = UploadedPart(eTag: eTag, size: part.size ?? 0)
-                }
-                marker = output.isTruncated == true ? output.nextPartNumberMarker : nil
-            } while marker != nil
-        } catch {
-            if String(describing: error).lowercased().contains("nosuchupload") { throw MultipartUploadError.noSuchUpload }
-            throw Self.mapError(error, bucket: config.bucket)
-        }
+        repeat {
+            var query = [("uploadId", uploadId)]
+            if let marker { query.append(("part-number-marker", marker)) }
+            let page = try await withRetries {
+                let request = try signedRequest(method: .GET, key: objectKey, query: query)
+                let (data, response) = try await Self.transferSession.data(for: request)
+                _ = try check(data, response)
+                return ListPartsXML.page(data)
+            }
+            // A list that can't be read can't be resumed from: the upload
+            // starts over, like one the provider no longer has.
+            guard let page else {
+                await abortMultipartUpload(objectKey: objectKey, uploadId: uploadId)
+                throw MultipartUploadError.noSuchUpload
+            }
+            parts.merge(page.parts) { _, new in new }
+            // A marker that doesn't move on would ask for the same page forever.
+            marker = page.isTruncated && page.nextMarker != marker ? page.nextMarker : nil
+        } while marker != nil
         return parts
     }
 
@@ -351,6 +359,75 @@ extension S3Provider {
 struct UploadedPart: Sendable, Equatable {
     let eTag: String
     let size: Int64
+}
+
+/// A ListParts reply: the parts on one page, and where the next starts.
+/// Elements Aktar doesn't use, empty or not, are skipped, so a provider
+/// that writes them its own way doesn't stop a resume.
+enum ListPartsXML {
+    struct Page: Equatable {
+        var parts: [Int: UploadedPart] = [:]
+        var isTruncated = false
+        var nextMarker: String?
+    }
+
+    /// Nil when `data` isn't a ListPartsResult.
+    static func page(_ data: Data) -> Page? {
+        let reader = Reader()
+        let parser = XMLParser(data: data)
+        parser.delegate = reader
+        guard parser.parse(), reader.isListPartsResult else { return nil }
+        return reader.page
+    }
+
+    private final class Reader: NSObject, XMLParserDelegate {
+        var page = Page()
+        var isListPartsResult = false
+        private var path: [String] = []
+        private var text = ""
+        private var number: Int?
+        private var eTag: String?
+        private var size: Int64?
+
+        func parser(_ parser: XMLParser, didStartElement name: String, namespaceURI: String?, qualifiedName: String?, attributes: [String: String] = [:]) {
+            if path.isEmpty { isListPartsResult = name == "ListPartsResult" }
+            path.append(name)
+            text = ""
+            if path == ["ListPartsResult", "Part"] {
+                number = nil
+                eTag = nil
+                size = nil
+            }
+        }
+
+        func parser(_ parser: XMLParser, foundCharacters string: String) {
+            text += string
+        }
+
+        func parser(_ parser: XMLParser, didEndElement name: String, namespaceURI: String?, qualifiedName: String?) {
+            let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            switch path {
+            case ["ListPartsResult", "IsTruncated"]:
+                page.isTruncated = value.lowercased() == "true"
+            case ["ListPartsResult", "NextPartNumberMarker"]:
+                page.nextMarker = value.isEmpty ? nil : value
+            case ["ListPartsResult", "Part", "PartNumber"]:
+                number = Int(value)
+            case ["ListPartsResult", "Part", "ETag"]:
+                eTag = value
+            case ["ListPartsResult", "Part", "Size"]:
+                size = Int64(value)
+            case ["ListPartsResult", "Part"]:
+                if let number, let eTag, !eTag.isEmpty {
+                    page.parts[number] = UploadedPart(eTag: eTag, size: size ?? 0)
+                }
+            default:
+                break
+            }
+            path.removeLast()
+            text = ""
+        }
+    }
 }
 
 enum MultipartUploadError: Error {

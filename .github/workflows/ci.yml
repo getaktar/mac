@@ -26,12 +26,14 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build
+      # Builds the app and runs the unit tests (AktarTests).
+      - name: Build and test
         run: |
-          xcodebuild build \
+          xcodebuild test \
             -project Aktar.xcodeproj \
             -scheme Aktar \
             -configuration Debug \
+            -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 

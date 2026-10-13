@@ -1,3 +1,4 @@
+import AsyncHTTPClient
 import Foundation
 import CryptoKit
 import NIOHTTP1
@@ -21,7 +22,8 @@ final class S3Provider: StorageProvider, Sendable {
                 accessKeyId: credentials.accessKeyId,
                 secretAccessKey: credentials.secretAccessKey,
                 sessionToken: credentials.sessionToken
-            )
+            ),
+            httpClient: Self.httpClient
         )
         // Soto defaults to path-style addressing, which is what most
         // S3-compatible providers (MinIO, R2, B2, Spaces) expect. Virtual
@@ -421,6 +423,19 @@ final class S3Provider: StorageProvider, Sendable {
 
     /// The most any request that carries no file bytes may take in all.
     static let requestTimeout: TimeInterval = 60
+
+    /// For every request made through Soto: the shared client's settings,
+    /// without compressed replies. That client takes gzip and refuses a
+    /// reply that grows more than 25 times as it's unpacked, and listings
+    /// of similar keys do: MinIO's listing of a folder with a few hundred
+    /// files failed with "limit". S3 replies are small XML, so they're
+    /// asked for uncompressed instead. Shared by every provider and never
+    /// shut down, like `HTTPClient.shared`.
+    static let httpClient: HTTPClient = {
+        var configuration = HTTPClient.Configuration.singletonConfiguration
+        configuration.decompression = .disabled
+        return HTTPClient(eventLoopGroup: HTTPClient.defaultEventLoopGroup, configuration: configuration)
+    }()
 
     /// For the lifecycle requests: 20 seconds without a byte, 60 in all
     /// (the reply's body included).
