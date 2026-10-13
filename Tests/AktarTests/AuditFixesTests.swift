@@ -144,13 +144,18 @@ final class AuditFixesTests: XCTestCase {
     // MARK: - Metadata in WebP, GIF and PNG
 
     func testWebPMetadataChunksAreRemoved() throws {
-        let vp8x = chunk("VP8X", [0x08 | 0x04 | 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        // EXIF, XMP and ICC flags.
+        let flags: UInt8 = 0x08 | 0x04 | 0x20
+        let vp8x = chunk("VP8X", [flags, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         let webp = riff([vp8x, chunk("ICCP", [1, 2, 3]), chunk("VP8L", [9, 9, 9, 9, 9]), chunk("EXIF", [1, 2, 3, 4]), chunk("XMP ", Array("<x>exif:GPSLatitude</x>".utf8))])
 
         let all = try XCTUnwrap(ContainerMetadata.webp(webp, policy: .removeAll, exifHasLocation: false))
         let bytes = [UInt8](all)
         XCTAssertEqual(Array(bytes[0..<4]), Array("RIFF".utf8))
-        XCTAssertEqual(Int(bytes[4]) | Int(bytes[5]) << 8 | Int(bytes[6]) << 16 | Int(bytes[7]) << 24, bytes.count - 8)
+        // Split up so older compilers type-check it in time.
+        let low: Int = Int(bytes[4]) | Int(bytes[5]) << 8
+        let high: Int = Int(bytes[6]) << 16 | Int(bytes[7]) << 24
+        XCTAssertEqual(low | high, bytes.count - 8)
         XCTAssertEqual(bytes[20], 0x20, "EXIF and XMP flags cleared, ICC kept")
         XCTAssertFalse(String(decoding: all, as: UTF8.self).contains("EXIF"))
         XCTAssertFalse(String(decoding: all, as: UTF8.self).contains("GPS"))
@@ -167,18 +172,26 @@ final class AuditFixesTests: XCTestCase {
     }
 
     func testGIFMetadataBlocksAreRemoved() throws {
-        var gif: [UInt8] = Array("GIF89a".utf8) + [1, 0, 1, 0, 0x80, 0, 0] + [0, 0, 0, 255, 255, 255]
+        let screen: [UInt8] = [1, 0, 1, 0, 0x80, 0, 0]
+        let palette: [UInt8] = [0, 0, 0, 255, 255, 255]
+        var gif: [UInt8] = Array("GIF89a".utf8)
+        gif += screen
+        gif += palette
         let loop: [UInt8] = [0x21, 0xFF, 11] + Array("NETSCAPE2.0".utf8) + [3, 1, 0, 0, 0]
         let xmpData = Array("<x>exif:GPSLatitude=1</x>".utf8)
         let xmp: [UInt8] = [0x21, 0xFF, 11] + Array("XMP DataXMP".utf8) + [UInt8(xmpData.count)] + xmpData + [0]
         let comment: [UInt8] = [0x21, 0xFE, 5] + Array("hello".utf8) + [0]
         let image: [UInt8] = [0x2C, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 0x44, 0x01, 0]
-        gif += loop + xmp + comment + image + [0x3B]
+        for block in [loop, xmp, comment, image, [0x3B]] { gif += block }
 
+        let header = Array(gif[0..<19])
+        let trailer: [UInt8] = [0x3B]
         let all = try XCTUnwrap(ContainerMetadata.gif(Data(gif), policy: .removeAll))
-        XCTAssertEqual([UInt8](all), Array(gif[0..<19]) + loop + image + [0x3B])
+        let withoutAll: [UInt8] = header + loop + image + trailer
+        XCTAssertEqual([UInt8](all), withoutAll)
         let location = try XCTUnwrap(ContainerMetadata.gif(Data(gif), policy: .removeLocation))
-        XCTAssertEqual([UInt8](location), Array(gif[0..<19]) + loop + comment + image + [0x3B])
+        let withoutLocation: [UInt8] = header + loop + comment + image + trailer
+        XCTAssertEqual([UInt8](location), withoutLocation)
         XCTAssertNil(try ContainerMetadata.gif(all, policy: .removeAll))
         XCTAssertThrowsError(try ContainerMetadata.gif(Data(gif.dropLast(3)), policy: .removeAll))
     }
