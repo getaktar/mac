@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The Aktar plugin for Obsidian can pair with Aktar in one click, the way
+  the Raycast extension does (`aktar://connect?callback=obsidian://aktar-connect`).
+  Aktar asks first, and hands its local API token only to the app that
+  opens obsidian:// links when that's Obsidian itself, signed by its
+  developer.
+
 ## [0.18.1] - 2026-10-14
 
 ### Fixed

@@ -4504,6 +4504,106 @@
         }
       }
     },
+    "Couldn’t connect Obsidian" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian konnte nicht verbunden werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar Obsidian"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de connecter Obsidian"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak dapat menghubungkan Obsidian"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile collegare Obsidian"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidianに接続できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian을 연결할 수 없음"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan Obsidian niet verbinden"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie można połączyć Obsidian"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível conectar o Obsidian"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключить Obsidian"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian bağlanamadı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося під’єднати Obsidian"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không thể kết nối Obsidian"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接 Obsidian"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法連接 Obsidian"
+          }
+        }
+      }
+    },
     "Couldn’t connect Raycast" : {
       "localizations" : {
         "de" : {
@@ -6300,6 +6400,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "儲存空間"
+          }
+        }
+      }
+    },
+    "The Aktar plugin in Obsidian wants to upload files and browse your buckets through Aktar. This turns on Aktar’s local API, which you can turn off any time in Settings > Integrations." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Aktar-Plug-in in Obsidian möchte über Aktar Dateien hochladen und deine Buckets durchsuchen. Dadurch wird die lokale API von Aktar aktiviert, die du jederzeit unter Einstellungen > Integrationen deaktivieren kannst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plugin de Aktar en Obsidian quiere subir archivos y explorar tus buckets a través de Aktar. Esto activa la API local de Aktar, que puedes desactivar en cualquier momento en Ajustes > Integraciones."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le module Aktar dans Obsidian souhaite envoyer des fichiers et parcourir vos buckets via Aktar. Cela active l’API locale d’Aktar, que vous pouvez désactiver à tout moment dans Réglages > Intégrations."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plugin Aktar di Obsidian ingin mengunggah file dan menelusuri bucket Anda melalui Aktar. Ini mengaktifkan API lokal Aktar, yang dapat Anda nonaktifkan kapan saja di Pengaturan > Integrasi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il plugin Aktar in Obsidian vuole caricare file e sfogliare i tuoi bucket tramite Aktar. Questo attiva l’API locale di Aktar, che puoi disattivare in qualsiasi momento in Impostazioni > Integrazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ObsidianのAktarプラグインが、Aktarを通じてファイルをアップロードし、バケットを閲覧しようとしています。これによりAktarのローカルAPIがオンになります。設定 > 連携からいつでもオフにできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian의 Aktar 플러그인이 Aktar를 통해 파일을 업로드하고 버킷을 탐색하려고 합니다. 이렇게 하면 Aktar의 로컬 API가 켜지며, 설정 > 통합에서 언제든지 끌 수 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De Aktar-plug-in in Obsidian wil via Aktar bestanden uploaden en door je buckets bladeren. Hiermee wordt de lokale API van Aktar ingeschakeld, die je altijd kunt uitschakelen via Instellingen > Integraties."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wtyczka Aktar w Obsidian chce przesyłać pliki i przeglądać Twoje buckety przez Aktar. Spowoduje to włączenie lokalnego API Aktara, które możesz w każdej chwili wyłączyć w Ustawieniach > Integracje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O plugin do Aktar no Obsidian quer enviar arquivos e navegar pelos seus buckets pelo Aktar. Isso ativa a API local do Aktar, que você pode desativar a qualquer momento em Ajustes > Integrações."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плагин Aktar в Obsidian хочет загружать файлы и просматривать ваши бакеты через Aktar. Это включит локальный API Aktar, который можно в любой момент выключить в разделе «Настройки» > «Интеграции»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian’daki Aktar eklentisi Aktar üzerinden dosya yüklemek ve bucket’larına göz atmak istiyor. Bu, Aktar’ın yerel API’sini açar; istediğin zaman Ayarlar > Entegrasyonlar’dan kapatabilirsin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плагін Aktar в Obsidian хоче вивантажувати файли й переглядати ваші бакети через Aktar. Це ввімкне локальний API Aktar, який можна будь-коли вимкнути в Параметрах > Інтеграції."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plugin Aktar trong Obsidian muốn tải tệp lên và duyệt bucket của bạn qua Aktar. Thao tác này bật API cục bộ của Aktar, bạn có thể tắt bất cứ lúc nào trong Cài đặt > Tích hợp."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian 中的 Aktar 插件想要通过 Aktar 上传文件并浏览你的存储桶。这会开启 Aktar 的本地 API，你可以随时在“设置 > 集成”中关闭。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian 中的 Aktar 外掛程式想透過 Aktar 上傳檔案並瀏覽你的儲存貯體。這會開啟 Aktar 的本機 API，你可以隨時在「設定 > 整合」中關閉。"
+          }
+        }
+      }
+    },
+    "The app that opens Obsidian links on this Mac isn’t Obsidian, so Aktar didn’t share its API token. Install Obsidian from obsidian.md and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App, die auf diesem Mac Obsidian-Links öffnet, ist nicht Obsidian, daher hat Aktar sein API-Token nicht weitergegeben. Installiere Obsidian von obsidian.md und versuche es erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app que abre los enlaces de Obsidian en este Mac no es Obsidian, así que Aktar no compartió su token de API. Instala Obsidian desde obsidian.md e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app qui ouvre les liens Obsidian sur ce Mac n’est pas Obsidian : Aktar n’a donc pas partagé son jeton d’API. Installez Obsidian depuis obsidian.md et réessayez."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikasi yang membuka tautan Obsidian di Mac ini bukan Obsidian, jadi Aktar tidak membagikan token API-nya. Instal Obsidian dari obsidian.md lalu coba lagi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app che apre i link di Obsidian su questo Mac non è Obsidian, quindi Aktar non ha condiviso il suo token API. Installa Obsidian da obsidian.md e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMacでObsidianのリンクを開くアプリがObsidianではないため、AktarはAPIトークンを渡しませんでした。obsidian.mdからObsidianをインストールして、もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Mac에서 Obsidian 링크를 여는 앱이 Obsidian이 아니므로 Aktar가 API 토큰을 공유하지 않았습니다. obsidian.md에서 Obsidian을 설치하고 다시 시도하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De app die Obsidian-links op deze Mac opent is niet Obsidian, dus Aktar heeft zijn API-token niet gedeeld. Installeer Obsidian via obsidian.md en probeer het opnieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikacja, która otwiera linki Obsidian na tym Macu, nie jest aplikacją Obsidian, więc Aktar nie udostępnił swojego tokena API. Zainstaluj Obsidian ze strony obsidian.md i spróbuj ponownie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app que abre links do Obsidian neste Mac não é o Obsidian, então o Aktar não compartilhou o token da API. Instale o Obsidian em obsidian.md e tente de novo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение, которое открывает ссылки Obsidian на этом Mac, не является Obsidian, поэтому Aktar не передал свой токен API. Установите Obsidian с obsidian.md и попробуйте снова."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Mac’te Obsidian bağlantılarını açan uygulama Obsidian değil, bu yüzden Aktar API token’ını paylaşmadı. Obsidian’ı obsidian.md’den yükleyip tekrar dene."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Програма, яка відкриває посилання Obsidian на цьому Mac, не є Obsidian, тому Aktar не передав свій токен API. Установіть Obsidian із obsidian.md і спробуйте ще раз."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ứng dụng mở liên kết Obsidian trên máy Mac này không phải là Obsidian, nên Aktar không chia sẻ token API. Hãy cài Obsidian từ obsidian.md rồi thử lại."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在这台 Mac 上打开 Obsidian 链接的应用不是 Obsidian，因此 Aktar 没有共享其 API 令牌。请从 obsidian.md 安装 Obsidian 后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在這台 Mac 上打開 Obsidian 連結的 App 不是 Obsidian，因此 Aktar 沒有分享其 API 權杖。請從 obsidian.md 安裝 Obsidian 後再試一次。"
           }
         }
       }
@@ -43504,6 +43804,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "連接相容於 S3 的儲存服務供應商\n即可開始上傳檔案。"
+          }
+        }
+      }
+    },
+    "Connect Obsidian to Aktar?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian mit Aktar verbinden?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Conectar Obsidian con Aktar?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecter Obsidian à Aktar ?"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hubungkan Obsidian ke Aktar?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connettere Obsidian ad Aktar?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ObsidianをAktarに接続しますか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian을 Aktar에 연결하겠습니까?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian verbinden met Aktar?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połączyć Obsidian z Aktarem?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectar o Obsidian ao Aktar?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить Obsidian к Aktar?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsidian, Aktar'a bağlansın mı?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Під’єднати Obsidian до Aktar?"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kết nối Obsidian với Aktar?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要将 Obsidian 连接到 Aktar 吗？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要將 Obsidian 連接到 Aktar 嗎？"
           }
         }
       }

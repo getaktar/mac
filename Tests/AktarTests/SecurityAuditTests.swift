@@ -159,6 +159,24 @@ final class SecurityAuditTests: XCTestCase {
         XCTAssertEqual(RaycastApp.handler(opening: callback)?.standardizedFileURL, raycast.standardizedFileURL)
     }
 
+    // MARK: - Obsidian pairing
+
+    func testOnlyObsidianCountsAsObsidian() throws {
+        XCTAssertFalse(ObsidianApp.isObsidian(URL(fileURLWithPath: "/System/Applications/Calculator.app")))
+        XCTAssertFalse(ObsidianApp.isObsidian(URL(fileURLWithPath: "/nonexistent/Obsidian.app")))
+        let raycast = URL(fileURLWithPath: "/Applications/Raycast.app")
+        if FileManager.default.fileExists(atPath: raycast.path) {
+            XCTAssertFalse(ObsidianApp.isObsidian(raycast), "another genuinely signed app isn't Obsidian")
+        }
+        let obsidian = URL(fileURLWithPath: "/Applications/Obsidian.app")
+        guard FileManager.default.fileExists(atPath: obsidian.path) else {
+            throw XCTSkip("Obsidian isn't installed on this Mac.")
+        }
+        XCTAssertTrue(ObsidianApp.isObsidian(obsidian))
+        let callback = try XCTUnwrap(URL(string: "obsidian://aktar-connect"))
+        XCTAssertEqual(ObsidianApp.handler(opening: callback)?.standardizedFileURL, obsidian.standardizedFileURL)
+    }
+
     // MARK: - Import review
 
     private func importedPayload() throws -> DestinationTransfer.Payload {

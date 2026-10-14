@@ -18,17 +18,19 @@ extension Notification.Name {
 ///                                (no minutes: until resumed; 1 to 525600)
 ///     aktar://watch/resume       resume watching
 ///     aktar://connect?callback=raycast://extensions/<author>/<extension>/<command>
+///     aktar://connect?callback=obsidian://aktar-connect
 ///     aktar://import#<data>      open Settings > Destinations to import a
 ///                                destination shared from another device
 ///                                (the transfer code is still asked for)
 ///
-/// `connect` is how the Raycast extension pairs: after the user approves,
-/// the local API is turned on and its port and token are handed back to
-/// the callback as Raycast launch context. Only `raycast://extensions/…`
-/// callbacks into the official extension (`merttopuz/aktar`) are accepted,
-/// so a link from a web page or another extension can't collect the token,
-/// and only when the app that opens raycast:// links is Raycast itself,
-/// signed by Raycast, so another app that claims the scheme can't either.
+/// `connect` is how the Raycast extension and the Obsidian plugin pair:
+/// after the user approves, the local API is turned on and its port and
+/// token are handed back to the callback as launch context. Only
+/// `raycast://extensions/…` callbacks into the official extension
+/// (`merttopuz/aktar`) and `obsidian://aktar-connect` are accepted, so a
+/// link from a web page can't send the token anywhere else, and only when
+/// the app that opens those links is Raycast or Obsidian itself, signed by
+/// its developer, so another app that claims the scheme can't collect it.
 @MainActor
 enum URLSchemeHandler {
     /// `launchedApp` is true when this link is what started Aktar. A web
@@ -135,9 +137,17 @@ enum URLSchemeHandler {
     private static func connect(_ url: URL) {
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         guard let rawCallback = items.first(where: { $0.name == "callback" })?.value,
-              var callback = URLComponents(string: rawCallback),
-              callback.scheme?.lowercased() == "raycast",
-              callback.host?.lowercased() == "extensions",
+              let callback = URLComponents(string: rawCallback) else { return }
+        switch callback.scheme?.lowercased() {
+        case "raycast": connectRaycast(callback)
+        case "obsidian": connectObsidian(callback)
+        default: break
+        }
+    }
+
+    private static func connectRaycast(_ original: URLComponents) {
+        var callback = original
+        guard callback.host?.lowercased() == "extensions",
               isAllowedExtensionPath(callback.path),
               let probe = callback.url else { return }
 
@@ -161,13 +171,8 @@ enum URLSchemeHandler {
             """)
         alert.addButton(withTitle: String(localized: "Connect"))
         alert.addButton(withTitle: String(localized: "Cancel"))
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        guard alert.runModal() == .alertFirstButtonReturn, let json = enableAndDescribe() else { return }
 
-        let service = LocalAPIService.shared
-        service.isEnabled = true
-        let context: [String: Any] = ["aktar": ["port": Int(service.port), "token": service.token]]
-        guard let data = try? JSONSerialization.data(withJSONObject: context),
-              let json = String(data: data, encoding: .utf8) else { return }
         var query = (callback.queryItems ?? []).filter { $0.name != "launchContext" }
         query.append(URLQueryItem(name: "launchContext", value: json))
         callback.queryItems = query
@@ -175,5 +180,46 @@ enum URLSchemeHandler {
         // that changes in between doesn't get the link.
         guard let target = callback.url, let raycast = RaycastApp.handler(opening: target) else { return }
         NSWorkspace.shared.open([target], withApplicationAt: raycast, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    /// The Aktar plugin for Obsidian. Its callback is fixed
+    /// (`obsidian://aktar-connect`); nothing else the link carries is
+    /// passed on.
+    private static func connectObsidian(_ callback: URLComponents) {
+        guard callback.host?.lowercased() == "aktar-connect",
+              callback.path.isEmpty || callback.path == "/",
+              let probe = URL(string: "obsidian://aktar-connect") else { return }
+
+        NSApp.activate(ignoringOtherApps: true)
+        guard ObsidianApp.handler(opening: probe) != nil else {
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = String(localized: "Couldn\u{2019}t connect Obsidian")
+            alert.informativeText = String(localized: "The app that opens Obsidian links on this Mac isn\u{2019}t Obsidian, so Aktar didn\u{2019}t share its API token. Install Obsidian from obsidian.md and try again.")
+            alert.runModal()
+            return
+        }
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Connect Obsidian to Aktar?")
+        alert.informativeText = String(localized: "The Aktar plugin in Obsidian wants to upload files and browse your buckets through Aktar. This turns on Aktar\u{2019}s local API, which you can turn off any time in Settings > Integrations.")
+        alert.addButton(withTitle: String(localized: "Connect"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn, let json = enableAndDescribe() else { return }
+
+        var answer = URLComponents()
+        answer.scheme = "obsidian"
+        answer.host = "aktar-connect"
+        answer.queryItems = [URLQueryItem(name: "launchContext", value: json)]
+        guard let target = answer.url, let obsidian = ObsidianApp.handler(opening: target) else { return }
+        NSWorkspace.shared.open([target], withApplicationAt: obsidian, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    /// Turns the local API on and returns `{"aktar": {"port", "token"}}` for the paired app.
+    private static func enableAndDescribe() -> String? {
+        let service = LocalAPIService.shared
+        service.isEnabled = true
+        let context: [String: Any] = ["aktar": ["port": Int(service.port), "token": service.token]]
+        guard let data = try? JSONSerialization.data(withJSONObject: context) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 }
