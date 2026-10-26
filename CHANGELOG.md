@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-26
+
+### Security
+
+- Updated the Swift packages Aktar is built on to their latest versions:
+  Sparkle 2.10.1, Soto 7.17.0, SwiftNIO 2.104.0, swift-crypto 5.0.3 and
+  their dependencies
+
 ### Added
 
 - The Aktar plugin for Obsidian can pair with Aktar in one click, the way
