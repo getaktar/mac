@@ -358,8 +358,8 @@ final class LocalAPIRouter {
         }
         let (short, shortProblem) = Self.shortOverride(request)
         if let shortProblem { return shortProblem }
-        guard var input = ClipboardService.readFileInput() else {
-            return .error(422, "The clipboard has no file or image to upload.")
+        guard var input = ClipboardService.readInput() else {
+            return .error(422, "The clipboard has nothing to upload: no file, image, link or text.")
         }
         input.shortLink = short
         // Without a destinationId, "Use for" decides by file type.

@@ -7,7 +7,7 @@ import Observation
 @MainActor
 @Observable
 final class UploadManager {
-    private(set) var jobs: [UploadJob] = []
+    var jobs: [UploadJob] = []
     private var activeCount = 0
     private let maxConcurrent = 3
     /// Folders uploaded with their structure that still have files going:
@@ -43,23 +43,43 @@ final class UploadManager {
     /// Settings > General: a notification after each upload. Uploads from
     /// watched folders follow the folder's own choice instead.
     static let showNotificationKey = "showNotificationAfterUpload"
-    private var showsSuccessNotifications: Bool {
+    var showsSuccessNotifications: Bool {
         UserDefaults.standard.object(forKey: Self.showNotificationKey) as? Bool ?? true
+    }
+
+    /// Settings > General: the link is copied as soon as Aktar knows where
+    /// the file goes, before its bytes are sent (docs/capture-and-instant-links.md).
+    static let instantLinksKey = "copyLinkBeforeUploadFinishes"
+    var instantLinksEnabled: Bool {
+        UserDefaults.standard.object(forKey: Self.instantLinksKey) as? Bool ?? true
     }
 
     /// Told when an upload from a watched folder ends, however it ends
     /// (also after a Retry from the panel); see `WatchService`.
     var onWatchedUploadFinished: ((UploadJob, WatchUploadOutcome) -> Void)?
 
-    private let destinationStore: DestinationStore
-    private let repository: UploadRepository
+    let destinationStore: DestinationStore
+    let repository: UploadRepository
     /// Short links for uploads; see docs/short-links.md.
     let shortLinks: ShortLinkService
+    /// Uploads whose link was copied, kept until their bytes are there.
+    @ObservationIgnored let outbox: UploadOutbox
+    @ObservationIgnored let network = NetworkMonitor()
+    /// The uploads the user started, by ID, for Undo and pasting.
+    @ObservationIgnored var actions: [UUID: UploadAction] = [:]
+    /// The upload Undo would take back now (the panel's Undo button and
+    /// the Undo shortcut); nil once its time is up.
+    var undoableActionID: UUID?
+    @ObservationIgnored var undoTimer: Task<Void, Never>?
+    @ObservationIgnored var offlineTimer: Task<Void, Never>?
 
-    init(destinationStore: DestinationStore, repository: UploadRepository) {
+    init(destinationStore: DestinationStore, repository: UploadRepository, outbox: UploadOutbox = UploadOutbox()) {
         self.destinationStore = destinationStore
         self.repository = repository
+        self.outbox = outbox
         shortLinks = ShortLinkService(destinationStore: destinationStore, modelContext: repository.modelContext)
+        network.onCameOnline = { [weak self] in self?.retryOffline(onlyDue: false) }
+        restoreOutbox()
     }
 
     /// The "Delete after" choice that actually applies to `destination`:
@@ -128,9 +148,14 @@ final class UploadManager {
     /// (see `DestinationRouting`), with that destination's settings. When a
     /// drop ends up in several destinations, its links are still copied
     /// together, in drop order.
-    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil) {
+    ///
+    /// Everything but a watched folder's files is one `UploadAction`, which
+    /// Undo takes back as a whole; with `paste`, its link is pasted into
+    /// that app once it's copied (see `PasteRequest`).
+    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil, paste: PasteRequest? = nil) {
+        let action = inputs.contains { $0.watch == nil } ? newAction(paste: paste) : nil
         if let destination {
-            enqueue(inputs, to: destination, expiryDays: expiryDays)
+            enqueue(inputs, to: destination, expiryDays: expiryDays, action: action)
             return
         }
         var routed = inputs.compactMap { input in routedDestination(for: input).map { (input: input, destination: $0) } }
@@ -160,7 +185,7 @@ final class UploadManager {
         }
         for id in order {
             let entries = routed.filter { $0.destination.id == id }
-            enqueue(entries.map(\.input), to: entries[0].destination, expiryDays: expiryDays)
+            enqueue(entries.map(\.input), to: entries[0].destination, expiryDays: expiryDays, action: action)
         }
     }
 
@@ -182,7 +207,7 @@ final class UploadManager {
         )
     }
 
-    private func enqueue(_ inputs: [UploadInput], to destination: DestinationConfig, expiryDays: Int?) {
+    private func enqueue(_ inputs: [UploadInput], to destination: DestinationConfig, expiryDays: Int?, action: UploadAction?) {
         let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
         let days = rulesActive ? expiryDays ?? self.expiryDays(for: destination) : 0
         let newJobs = expandingFolders(inputs, for: destination).map { input in
@@ -191,7 +216,12 @@ final class UploadManager {
             } else {
                 UploadExpiry.options.contains(days) ? days : nil
             }
-            return UploadJob(input: input, destination: destination, expiryDays: jobDays)
+            let job = UploadJob(input: input, destination: destination, expiryDays: jobDays)
+            if let action, input.watch == nil {
+                job.actionID = action.id
+                action.jobIDs.append(job.id)
+            }
+            return job
         }
         jobs.insert(contentsOf: newJobs, at: 0)
         for job in newJobs { enqueueForStart(job) }
@@ -201,11 +231,15 @@ final class UploadManager {
     /// Stops the job: in-flight parts stop and its multipart upload is
     /// aborted (see `MultipartUploader`), also one kept from a failed try.
     /// The row says Cancelled for a moment, then goes.
+    ///
+    /// A job whose link was already copied takes it back: its short link
+    /// is deleted, it leaves the outbox, and the clipboard gets back what
+    /// was there before, if it still holds that link.
     func cancel(_ job: UploadJob) {
         let wasRunning: Bool
         switch job.state {
         case .uploading: wasRunning = true
-        case .waiting, .failed: wasRunning = false
+        case .waiting, .failed, .offline: wasRunning = false
         case .succeeded, .cancelled: return
         }
         job.state = .cancelled
@@ -218,6 +252,7 @@ final class UploadManager {
             TempFiles.removeIfOwned(job.input.fileURL)
         }
         job.multipartSession = nil
+        withdrawEarlyLink(of: job)
         if let group = job.input.group { finishGroupIfDone(group) }
         if !wasRunning { reportWatched(job, .cancelled) }
         Task { [weak self] in
@@ -226,7 +261,7 @@ final class UploadManager {
         }
     }
 
-    private static func abort(_ session: MultipartSession, destination: DestinationConfig) {
+    static func abort(_ session: MultipartSession, destination: DestinationConfig) {
         Task.detached {
             if let credentials = try? KeychainService.load(for: destination.id) {
                 await S3Provider(config: destination, credentials: credentials)
@@ -286,6 +321,10 @@ final class UploadManager {
     }
 
     func retry(_ job: UploadJob) {
+        switch job.state {
+        case .failed, .offline: break
+        case .waiting, .uploading, .succeeded, .cancelled: return
+        }
         job.state = .waiting
         enqueueForStart(job)
         drainQueue()
@@ -445,7 +484,7 @@ final class UploadManager {
     @ObservationIgnored private var manualQueue = JobQueue()
     @ObservationIgnored private var watchedQueue = JobQueue()
 
-    private func enqueueForStart(_ job: UploadJob) {
+    func enqueueForStart(_ job: UploadJob) {
         if job.input.watch != nil {
             watchedQueue.push(job)
         } else {
@@ -454,7 +493,7 @@ final class UploadManager {
     }
 
     /// Starts waiting jobs while there's room; each job is looked at once.
-    private func drainQueue() {
+    func drainQueue() {
         while activeCount < maxConcurrent, let job = manualQueue.pop() ?? watchedQueue.pop() {
             // Cancelled or started meanwhile.
             guard case .waiting = job.state else { continue }
@@ -467,6 +506,7 @@ final class UploadManager {
         job.state = .uploading(progress: 0)
         job.resuming = false
         job.reused = false
+        if job.firstAttemptAt == nil { job.firstAttemptAt = .now }
         let reuseDuplicates = reuseDuplicateLinks
 
         job.task = Task { [weak self] in
@@ -478,17 +518,31 @@ final class UploadManager {
                 }
                 let credentials = try KeychainService.load(for: destination.id)
                 let provider = S3Provider(config: destination, credentials: credentials)
+
+                // A copied link: its file is downloaded first, into the
+                // folder its placeholder is in, and then it's like any file.
+                if let remote = job.input.remote, job.downloaded == nil {
+                    if !self.network.isOnline { throw URLError(.notConnectedToInternet) }
+                    job.isDownloading = true
+                    defer { job.isDownloading = false }
+                    job.downloaded = try await RemoteDownloader.download(remote, into: job.input.fileURL.deletingLastPathComponent()) { progress in
+                        guard case .uploading = job.state else { return }
+                        job.state = .uploading(progress: progress)
+                    }
+                    job.state = .uploading(progress: 0)
+                }
+
                 // A folder (or a package, such as a Keynote document) goes
                 // up as a ZIP made on the spot, its photos cleaned the same
                 // way as below.
                 let policy = destination.imageMetadata ?? .default
-                var fileURL = job.input.fileURL
+                var fileURL = job.downloaded?.fileURL ?? job.input.fileURL
                 // A watched folder's file is read only while it's still the
                 // file the watcher checked.
                 if let watch = job.input.watch, !watch.isStillWatchedFile(at: fileURL) {
                     throw WatchedFileChangedError()
                 }
-                var filename = job.input.originalFilename
+                var filename = job.displayName
                 var zipped: URL?
                 if FolderUpload.isFolder(fileURL) {
                     let folder = fileURL
@@ -520,7 +574,8 @@ final class UploadManager {
                     fileURL = processed.url
                     filename = processed.filename
                 }
-                let contentType = ContentTypeResolver.resolve(for: fileURL)
+                let typedFile = fileURL
+                let contentType = try await offMain { ContentTypeResolver.uploadContentType(for: typedFile) }
 
                 // Otherwise photos and videos lose their location (or all
                 // metadata) first, on a copy; everything else is uploaded
@@ -543,9 +598,12 @@ final class UploadManager {
                 let watch = job.input.watch
                 let template = watch?.pathTemplate ?? destination.objectPathTemplate
                 let generatesKey = job.input.objectKey == nil && job.input.folderKey == nil
-                let canReuse = reuseDuplicates && job.input.objectKey == nil && (job.input.group?.isDrop ?? true) && zipped == nil
+                // A link already handed out names its key: that's where
+                // this upload goes, whatever else is in the bucket.
+                let pinnedKey = job.earlyLink?.objectKey
+                let canReuse = pinnedKey == nil && reuseDuplicates && job.input.objectKey == nil && (job.input.group?.isDrop ?? true) && zipped == nil
                 let isCopy = uploadURL != job.input.fileURL
-                let wantsMD5 = generatesKey && ObjectKeyGenerator.usesMD5(template)
+                let wantsMD5 = generatesKey && pinnedKey == nil && ObjectKeyGenerator.usesMD5(template)
                 // A watched folder's file is hashed once: here, in this pass,
                 // or by the watcher, which then hands its hash over.
                 let wantsSHA256 = canReuse || (generatesKey && ObjectKeyGenerator.usesSHA256(template))
@@ -567,7 +625,9 @@ final class UploadManager {
                     return Self.replacingExtension(of: key, with: (filename as NSString).pathExtension)
                 }
                 var objectKey: String
-                if let exact = job.input.objectKey {
+                if let pinnedKey {
+                    objectKey = pinnedKey
+                } else if let exact = job.input.objectKey {
                     objectKey = withNewExtension(exact)
                     // The bucket browser checked the name the user chose,
                     // not the converted one: number it rather than replace
@@ -627,7 +687,7 @@ final class UploadManager {
                 // A watched folder replacing its own upload so the link
                 // stays sends the exact key instead, and isn't numbered. A
                 // key that may not list the bucket uploads as before.
-                if generatesKey, job.input.folderKey == nil, !ObjectKeyGenerator.hasUniqueToken(template) {
+                if pinnedKey == nil, generatesKey, job.input.folderKey == nil, !ObjectKeyGenerator.hasUniqueToken(template) {
                     do {
                         objectKey = try await Self.freeKey(objectKey, provider: provider)
                     } catch StorageError.accessDenied {
@@ -676,6 +736,28 @@ final class UploadManager {
                         job.resuming = true
                     }
                 }
+
+                // Instant link: the link is copied now, before the bytes go,
+                // and the upload is kept until they're there. (Decided here,
+                // not before the task: `uploadAndWait` marks its job only
+                // once `upload` has returned.)
+                if job.earlyLink == nil, self.instantLinksEnabled, Self.canCopyEarly(job) {
+                    try await self.copyEarlyLink(job, objectKey: objectKey, destination: destination, provider: provider, filename: filename)
+                }
+                // Offline, the upload waits for the network right away
+                // rather than after the provider's retries.
+                if !self.network.isOnline { throw URLError(.notConnectedToInternet) }
+                let pinned = job.earlyLink?.objectKey
+                // A try whose answer was lost may have written the key
+                // already: an object there, as big as this file and written
+                // since the first try, is this upload's own.
+                let firstAttempt = job.firstAttemptAt ?? .now
+                func isOwnEarlierWrite(_ key: String) async -> Bool {
+                    guard key == pinned, let info = try? await provider.objectInfo(key: key),
+                          info.size == fileSize, let written = info.lastModified else { return false }
+                    return written >= firstAttempt.addingTimeInterval(-120)
+                }
+
                 if generatesKey, job.input.folderKey == nil, ObjectKeyGenerator.usesShortCode(template) {
                     // A key with {short} never replaces a file that has it
                     // already: a taken one is made again with a new code. A
@@ -690,7 +772,10 @@ final class UploadManager {
                                 days: job.expiryDays
                             )
                         },
-                        exists: { try await provider.objectExists(key: $0) },
+                        exists: { key in
+                            guard try await provider.objectExists(key: key) else { return false }
+                            return await !isOwnEarlierWrite(key)
+                        },
                         write: { key, onlyIfNew in
                             if let resumed = session, resumed.objectKey != key {
                                 Self.abort(resumed, destination: destination)
@@ -704,6 +789,7 @@ final class UploadManager {
                                 // MultipartUploader aborted it.
                                 job.multipartSession = nil
                                 session = nil
+                                if await isOwnEarlierWrite(key) { return }
                                 throw StorageError.alreadyExists
                             }
                         }
@@ -711,39 +797,57 @@ final class UploadManager {
                 } else {
                     try await send(to: objectKey, onlyIfNew: false, session: session, identity: identity)
                 }
+                // Cancelled or undone while the last bytes went: they're
+                // taken back out of the bucket.
+                try await self.takeBackIfCancelled(job, objectKey: objectKey, provider: provider)
                 guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
                     throw StorageError.invalidPublicBaseURL
                 }
                 let result = UploadResult(objectKey: objectKey, publicURL: publicURL, byteSize: Int(fileSize))
 
-                // Signing happens locally, so this only fails on a broken
-                // endpoint, where the public URL is the better fallback.
-                var link = result.publicURL
-                var temporaryExpiresAt: Date?
-                if let duration = destination.temporaryLink,
-                   let signed = try? await provider.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
-                    link = signed
-                    temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
+                let link: URL
+                let shortening: ShortLinkService.Attempt
+                if let early = job.earlyLink, early.objectKey == objectKey {
+                    // Made when the link was copied.
+                    link = early.link
+                    shortening = early.attempt
+                } else {
+                    if let early = job.earlyLink {
+                        // The key was taken after all (a {short} clash), so
+                        // the copied link points elsewhere: its short link
+                        // goes, and the new link is copied in its place.
+                        self.deleteEarlyShortLink(early, destination: destination)
+                    }
+                    // Signing happens locally, so this only fails on a broken
+                    // endpoint, where the public URL is the better fallback.
+                    var signedLink = result.publicURL
+                    var temporaryExpiresAt: Date?
+                    if let duration = destination.temporaryLink,
+                       let signed = try? await provider.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
+                        signedLink = signed
+                        temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
+                    }
+                    link = signedLink
+                    // The short link is made before anything is copied. A
+                    // replace keeps the key, so its short link stays as it is
+                    // (rule 8); a file of a folder uploaded with its structure
+                    // isn't shortened on its own (rule 11).
+                    // `short=1` / `short=0` from the local API override the
+                    // destination's rules for this upload.
+                    shortening = job.input.replacing != nil || job.input.shortLink == false
+                        ? .skipped
+                        : await self.shortLinks.shorten(
+                            signedLink,
+                            destination: destination,
+                            temporaryExpiresAt: temporaryExpiresAt,
+                            uploadExpiresAt: job.expiryDays.map { Date.now.addingTimeInterval(TimeInterval($0) * 86_400) },
+                            isFolderFile: job.input.group.map { !$0.isDrop } ?? false,
+                            explicit: job.input.shortLink == true
+                        )
                 }
 
-                // The short link is made before anything is copied. A
-                // replace keeps the key, so its short link stays as it is
-                // (rule 8); a file of a folder uploaded with its structure
-                // isn't shortened on its own (rule 11).
-                // `short=1` / `short=0` from the local API override the
-                // destination's rules for this upload.
-                let shortening: ShortLinkService.Attempt = job.input.replacing != nil || job.input.shortLink == false
-                    ? .skipped
-                    : await self.shortLinks.shorten(
-                        link,
-                        destination: destination,
-                        temporaryExpiresAt: temporaryExpiresAt,
-                        uploadExpiresAt: job.expiryDays.map { Date.now.addingTimeInterval(TimeInterval($0) * 86_400) },
-                        isFolderFile: job.input.group.map { !$0.isDrop } ?? false,
-                        explicit: job.input.shortLink == true
-                    )
-
                 let thumbnail = await thumbnailTask?.value
+                try await self.takeBackIfCancelled(job, objectKey: objectKey, provider: provider, shortening: shortening, destination: destination)
                 self.finish(job: job, result: result, destination: destination, link: link, shortening: shortening, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
                 await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
                 await self.afterUpload(job: job, result: result, destination: destination, link: link, filename: filename, credentials: credentials)
@@ -752,12 +856,28 @@ final class UploadManager {
                     self.stopped(job: job)
                 } else if error is CancellationError {
                     job.state = .cancelled
+                    self.withdrawEarlyLink(of: job)
                     self.stopped(job: job)
                 } else {
                     self.fail(job: job, error: error, destination: destination)
                 }
             }
         }
+    }
+
+    /// A job cancelled (Cancel, Undo) after its bytes were sent, before it
+    /// finished: the object it wrote is deleted, with a short link made for
+    /// it after the upload, and the task ends as cancelled. A replace keeps
+    /// what it wrote (there's nothing to go back to).
+    private func takeBackIfCancelled(_ job: UploadJob, objectKey: String, provider: S3Provider, shortening: ShortLinkService.Attempt? = nil, destination: DestinationConfig? = nil) async throws {
+        guard case .cancelled = job.state else { return }
+        if job.input.replacing == nil {
+            try? await provider.delete(objectKey: objectKey)
+        }
+        if case .created(let pending) = shortening, job.earlyLink == nil, let destination {
+            deleteUnstoredShortLink(EarlyShortLink(pending), destination: destination)
+        }
+        throw CancellationError()
     }
 
     /// The multipart upload to continue for this file, if one was started
@@ -779,7 +899,8 @@ final class UploadManager {
             return nil
         }
         let sameTarget: Bool
-        if job.input.objectKey != nil || job.input.folderKey != nil {
+        if job.input.objectKey != nil || job.input.folderKey != nil || job.earlyLink != nil {
+            // An exact key, or the one a copied link points at.
             sameTarget = session.objectKey == objectKey
         } else {
             sameTarget = session.keyBasis != nil && session.keyBasis == identity.keyBasis
@@ -877,9 +998,10 @@ final class UploadManager {
             openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: record.localFilename, for: destination)
             finishGroupIfDone(group)
         } else {
-            ClipboardService.copy(format(link, shortURL: shortURL, filename: record.localFilename, for: destination))
+            copyLink(format(link, shortURL: shortURL, filename: record.localFilename, for: destination), for: job)
             if showsSuccessNotifications, shortFailure == nil {
-                NotificationService.notifyUploadReused(filename: record.localFilename)
+                NotificationService.notifyUploadReused(filename: record.localFilename, identifier: notificationID(for: job), actionID: job.actionID)
+                noteNotification(for: job)
             }
             closePanelIfWanted()
         }
@@ -902,6 +1024,13 @@ final class UploadManager {
             repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
         }
         job.recordID = record.id
+        if job.input.replacing == nil, let action = job.actionID.flatMap({ actions[$0] }) {
+            action.recordIDs.append(record.id)
+        }
+        if job.isInOutbox {
+            outbox.remove(job.id)
+            job.isInOutbox = false
+        }
         let (shortURL, shortFailure) = shortLink(shortening, recordID: record.id, link: link, publicURL: result.publicURL)
         job.shortLinkError = shortFailure
         if let shortFailure {
@@ -933,16 +1062,29 @@ final class UploadManager {
             openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: filename, for: destination)
             finishGroupIfDone(group)
         } else {
-            ClipboardService.copy(format(link, shortURL: shortURL, filename: filename, for: destination))
+            let text = format(link, shortURL: shortURL, filename: filename, for: destination)
+            if let early = job.earlyLink, early.objectKey != result.objectKey {
+                // The key changed after the link was copied: the new one
+                // takes its place, if the clipboard still holds it.
+                if clipboardStillHolds(early.copiedText, for: job) { copyLink(text, for: job) }
+                NotificationService.notifyLinkChanged(filename: filename)
+            } else if job.earlyLink == nil {
+                copyLink(text, for: job)
+            }
             if showsSuccessNotifications, shortFailure == nil {
                 if job.input.replacing != nil {
                     NotificationService.notifyReplaced(filename: filename)
                 } else {
-                    NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays)
+                    NotificationService.notifyUploadSucceeded(filename: filename, expiryDays: job.expiryDays, identifier: notificationID(for: job), actionID: job.actionID, uploadID: record.id)
+                    noteNotification(for: job)
                 }
+            } else {
+                // A "still uploading" notice would be out of date now.
+                NotificationService.remove(identifier: notificationID(for: job))
             }
-            closePanelIfWanted()
+            if job.earlyLink == nil { closePanelIfWanted() }
         }
+        if let action = job.actionID.flatMap({ actions[$0] }) { extendUndo(action) }
 
         activeCount -= 1
         drainQueue()
@@ -997,7 +1139,7 @@ final class UploadManager {
         ThumbnailKeys.bucketPrefixes(for: destination, among: destinationStore.destinations)
     }
 
-    private func format(_ link: URL, shortURL: URL? = nil, filename: String, for destination: DestinationConfig) -> String {
+    func format(_ link: URL, shortURL: URL? = nil, filename: String, for destination: DestinationConfig) -> String {
         OutputFormatter.format(publicURL: link, shortURL: shortURL, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
     }
 
@@ -1065,7 +1207,7 @@ final class UploadManager {
         return format(link, shortURL: shortURL, filename: filename, for: destination)
     }
 
-    private func closePanelIfWanted() {
+    func closePanelIfWanted() {
         let closeAfterUpload = UserDefaults.standard.object(forKey: "closePopoverAfterUpload") as? Bool ?? true
         if closeAfterUpload {
             NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
@@ -1074,38 +1216,69 @@ final class UploadManager {
 
     /// Once none of a folder's files is waiting or uploading, copies the
     /// links of the ones that made it, one per line and in folder order.
-    /// Failed files have their own notifications and can still be retried;
-    /// a retry then copies just its own link.
+    /// Failed files (and ones waiting for the network) have their own
+    /// notifications and are retried; a retry then copies just its own link.
     private func finishGroupIfDone(_ group: UploadGroup) {
         guard let links = openGroups[group.id] else { return }
         let stillGoing = jobs.contains { job in
             guard job.input.group?.id == group.id else { return false }
             switch job.state {
             case .waiting, .uploading: return true
-            case .succeeded, .failed, .cancelled: return false
+            case .succeeded, .failed, .offline, .cancelled: return false
             }
         }
         guard !stillGoing else { return }
         openGroups[group.id] = nil
         guard !links.isEmpty else { return }
+        let groupJob = jobs.first { $0.input.group?.id == group.id }
+        let action = groupJob?.actionID.flatMap { actions[$0] }
+        // Undo is taking the files back: nothing to copy or announce.
+        if action?.isUndoing == true { return }
         let output = links.keys.sorted().compactMap { links[$0] }.joined(separator: "\n")
-        ClipboardService.copy(output)
+        if let action {
+            copy(output, in: action)
+        } else {
+            ClipboardService.copy(output)
+        }
         let summary = links.count == group.count
             ? String(localized: "\(group.name) (\(group.count) files)")
             : String(localized: "\(group.name) (\(links.count) of \(group.count) files)")
         if showsSuccessNotifications {
-            NotificationService.notifyUploadSucceeded(filename: summary)
+            let identifier = "aktar.upload.group.\(group.id.uuidString)"
+            NotificationService.notifyUploadSucceeded(filename: summary, identifier: identifier, actionID: action?.id)
+            action?.notificationIDs.insert(identifier)
         }
+        if let action { extendUndo(action) }
         closePanelIfWanted()
     }
 
+    /// A failure for want of a connection (or while offline) waits for the
+    /// network, also for a job whose link wasn't copied yet; a watched
+    /// folder's files have their own retries, and a job someone waits for
+    /// reports the failure. Anything else fails and waits for Retry.
     private func fail(job: UploadJob, error: Error, destination: DestinationConfig) {
         let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if job.input.watch == nil, !job.isWaitedFor, Self.isTransient(error) || !network.isOnline {
+            job.state = .offline(message)
+            job.offlineRetries += 1
+            job.nextRetryAt = Date.now.addingTimeInterval(OfflineRetry.delay(afterTries: job.offlineRetries))
+            if job.offlineRetries == 1 {
+                NotificationService.notifyWaitingForNetwork(filename: job.displayName, linkCopied: job.earlyLink != nil, identifier: notificationID(for: job), actionID: job.actionID)
+                noteNotification(for: job)
+            }
+            scheduleOfflineRetry()
+            activeCount -= 1
+            drainQueue()
+            return
+        }
         job.state = .failed(message)
+        if job.isInOutbox, let entry = outboxEntry(for: job, failure: message) {
+            outbox.update(entry)
+        }
         if job.input.watch != nil {
             reportWatched(job, .failed(message: message, retryable: Self.isTransient(error)))
         } else {
-            NotificationService.notifyUploadFailed(filename: job.input.originalFilename, reason: message)
+            NotificationService.notifyUploadFailed(filename: job.displayName, reason: message, linkCopied: job.earlyLink != nil, identifier: notificationID(for: job))
         }
         if let group = job.input.group { finishGroupIfDone(group) }
 
@@ -1184,6 +1357,9 @@ extension UploadManager {
         guard let job = jobs.first(where: { $0.input.fileURL == input.fileURL && $0.input.replacing == input.replacing }) else {
             return .failed(String(localized: "The upload could not be queued."))
         }
+        // Set before the job's task first runs (that's a later turn of the
+        // main actor), so a failure is reported instead of waited out.
+        job.isWaitedFor = true
         return await settle(job)
     }
 
@@ -1198,7 +1374,7 @@ extension UploadManager {
                     return .succeeded(record, reused: job.reused, shortLinkError: job.shortLinkError)
                 }
                 return .failed(String(localized: "The upload finished but its history entry is missing."))
-            case .failed(let message):
+            case .failed(let message), .offline(let message):
                 dismiss(job)
                 return .failed(message)
             case .cancelled:
@@ -1255,6 +1431,7 @@ extension UploadManager {
         guard let job = jobs.first(where: { $0.input.fileURL == input.fileURL && $0.input.replacing == input.replacing }) else {
             return .failed(String(localized: "The upload could not be queued."))
         }
+        job.isWaitedFor = true
         return await settle(job)
     }
 

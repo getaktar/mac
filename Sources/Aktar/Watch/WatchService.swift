@@ -676,13 +676,24 @@ final class WatchNotificationActions: NSObject, UNUserNotificationCenterDelegate
     @MainActor weak var service: WatchService?
     /// Retry on a failed short link, with the upload's ID.
     @MainActor var retryShortLink: ((UUID) -> Void)?
+    /// Undo on an upload, with its action's ID and, when it has one, the
+    /// upload's.
+    @MainActor var undoUpload: ((UUID, UUID?) -> Void)?
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let action = response.actionIdentifier
+        let info = response.notification.request.content.userInfo
         if action == NotificationService.retryShortLinkActionID {
-            guard let raw = response.notification.request.content.userInfo[NotificationService.uploadIDKey] as? String,
+            guard let raw = info[NotificationService.uploadIDKey] as? String,
                   let uploadID = UUID(uuidString: raw) else { return }
             await MainActor.run { retryShortLink?(uploadID) }
+            return
+        }
+        if action == NotificationService.undoActionID {
+            guard let raw = info[NotificationService.actionIDKey] as? String,
+                  let actionID = UUID(uuidString: raw) else { return }
+            let uploadID = (info[NotificationService.uploadIDKey] as? String).flatMap(UUID.init(uuidString:))
+            await MainActor.run { undoUpload?(actionID, uploadID) }
             return
         }
         guard let raw = response.notification.request.content.userInfo[NotificationService.folderIDKey] as? String,

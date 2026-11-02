@@ -85,7 +85,7 @@ enum URLSchemeHandler {
     /// Any web page or app can open an aktar:// link, so uploading the
     /// clipboard that way always asks first, saying what would go where.
     private static func confirmClipboardUpload(appState: AppState) {
-        guard let input = ClipboardService.readFileInput() else { return }
+        guard let input = ClipboardService.readInput() else { return }
         // Where "Use for" sends it, which the question names.
         guard let destination = appState.uploadManager.routedDestination(for: input) else {
             TempFiles.removeIfOwned(input.fileURL)
@@ -95,7 +95,9 @@ enum URLSchemeHandler {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = String(localized: "Upload the clipboard to \u{201C}\(destination.name)\u{201D}?")
-        alert.informativeText = String(localized: "A link asked Aktar to upload what\u{2019}s on your clipboard: \u{201C}\(input.originalFilename)\u{201D}. Only upload it if you opened that link yourself.")
+        // A copied link is named by its address: that's what gets downloaded.
+        let what = input.remote?.url.absoluteString ?? input.originalFilename
+        alert.informativeText = String(localized: "A link asked Aktar to upload what\u{2019}s on your clipboard: \u{201C}\(what)\u{201D}. Only upload it if you opened that link yourself.")
         alert.addButton(withTitle: String(localized: "Upload"))
         alert.addButton(withTitle: String(localized: "Cancel"))
         guard alert.runModal() == .alertFirstButtonReturn else {

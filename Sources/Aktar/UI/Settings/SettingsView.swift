@@ -1,3 +1,4 @@
+import AppKit
 import KeyboardShortcuts
 import SwiftUI
 
@@ -131,7 +132,11 @@ private struct GeneralSettingsView: View {
     @AppStorage(UploadManager.showNotificationKey) private var showNotification = true
     @AppStorage("closePopoverAfterUpload") private var closePopover = true
     @AppStorage(UploadManager.reuseDuplicatesKey) private var reuseDuplicates = true
+    @AppStorage(UploadManager.instantLinksKey) private var instantLinks = true
     @State private var language = AppLanguage.override
+    /// Refreshed when Aktar comes back to the front (after System Settings).
+    @State private var canRecordScreen = ScreenCapture.hasPermission
+    @State private var canPaste = PasteService.hasPermission
     /// Nil until measured.
     @State private var thumbnailUsage: Int64?
     @State private var isConfirmingThumbnailClear = false
@@ -207,32 +212,70 @@ private struct GeneralSettingsView: View {
                 }
             }
 
-            SettingsSection(title: "Keyboard shortcut") {
+            SettingsSection(title: "Keyboard shortcuts") {
                 SettingsCard {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Paste & upload from anywhere")
-                            Text("Works even when the panel is closed. Click to record, or press Delete to clear it.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        KeyboardShortcuts.Recorder(for: .uploadFromClipboard)
-                    }
-                    .padding(12)
+                    ShortcutRow(
+                        name: .uploadFromClipboard,
+                        title: "Paste & upload from anywhere",
+                        subtitle: "Uploads what\u{2019}s on the clipboard: a file, an image, text, or the file a copied link points to. Works even when the panel is closed. Click to record, or press Delete to clear it."
+                    )
                     SettingsCardDivider()
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Rename and upload clipboard")
-                            Text("Asks for the file\u{2019}s name first, then uploads it like the shortcut above.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        KeyboardShortcuts.Recorder(for: .renameAndUploadFromClipboard)
-                    }
-                    .padding(12)
+                    ShortcutRow(
+                        name: .uploadClipboardAndPaste,
+                        title: "Upload clipboard and paste the link",
+                        subtitle: "The same, then pastes the link where you\u{2019}re typing, ready for GitHub, Slack or Linear."
+                    )
+                    SettingsCardDivider()
+                    ShortcutRow(
+                        name: .renameAndUploadFromClipboard,
+                        title: "Rename and upload clipboard",
+                        subtitle: "Asks for the file\u{2019}s name first, then uploads it like the shortcut above."
+                    )
+                    SettingsCardDivider()
+                    ShortcutRow(
+                        name: .captureAndUpload,
+                        title: "Capture and upload",
+                        subtitle: "Select an area, or press Space to pick a window. The screenshot is uploaded and its link copied."
+                    )
+                    SettingsCardDivider()
+                    ShortcutRow(
+                        name: .captureUploadAndPaste,
+                        title: "Capture, upload and paste the link",
+                        subtitle: "The same, then pastes the link where you were typing."
+                    )
+                    SettingsCardDivider()
+                    ShortcutRow(
+                        name: .undoLastUpload,
+                        title: "Undo the last upload",
+                        subtitle: "For 10 seconds after an upload: deletes the file and its short link, and puts back what was on the clipboard. The upload\u{2019}s notification has Undo too."
+                    )
                 }
+            }
+
+            SettingsSection(title: "Permissions") {
+                SettingsCard {
+                    PermissionRow(
+                        title: String(localized: "Screen Recording"),
+                        subtitle: "For Capture, which uses macOS\u{2019}s screenshot tool.",
+                        isAllowed: canRecordScreen
+                    ) {
+                        if !CGRequestScreenCaptureAccess() { SystemSettingsLink.open(.screenRecording) }
+                        canRecordScreen = ScreenCapture.hasPermission
+                    }
+                    SettingsCardDivider()
+                    PermissionRow(
+                        title: PasteService.permissionPaneName,
+                        subtitle: "For pasting links where you\u{2019}re typing: Aktar presses \u{2318}V for you.",
+                        isAllowed: canPaste
+                    ) {
+                        if !CGRequestPostEventAccess() { SystemSettingsLink.open(.accessibility) }
+                        canPaste = PasteService.hasPermission
+                    }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                canRecordScreen = ScreenCapture.hasPermission
+                canPaste = PasteService.hasPermission
             }
 
             SettingsSection(title: "Uploads") {
@@ -253,6 +296,12 @@ private struct GeneralSettingsView: View {
                         title: "Reuse links for duplicate files",
                         subtitle: "When a file you already uploaded to the same destination comes up again, Aktar copies its existing link instead of uploading it again.",
                         isOn: $reuseDuplicates
+                    )
+                    SettingsCardDivider()
+                    SettingsToggleRow(
+                        title: "Copy the link right away",
+                        subtitle: "Copies the link as soon as Aktar knows where the file goes, before the upload finishes, so even a large video doesn\u{2019}t keep you waiting. The link works once the upload is done. Offline, it waits and uploads when you\u{2019}re back online.",
+                        isOn: $instantLinks
                     )
                 }
             }
@@ -303,6 +352,60 @@ private struct GeneralSettingsView: View {
                 LoginItemService.setEnabled(newValue)
             }
         )
+    }
+}
+
+/// A shortcut with its title, explanation and recorder.
+private struct ShortcutRow: View {
+    let name: KeyboardShortcuts.Name
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            KeyboardShortcuts.Recorder(for: name)
+        }
+        .padding(12)
+    }
+}
+
+/// A macOS permission Aktar needs for a feature: allowed, or a button
+/// that asks for it (or opens its page in System Settings).
+private struct PermissionRow: View {
+    /// Already localized: it can depend on the macOS version.
+    let title: String
+    let subtitle: LocalizedStringKey
+    let isAllowed: Bool
+    let allow: () -> Void
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: title)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            if isAllowed {
+                Label("Allowed", systemImage: "checkmark.circle.fill")
+                    .labelStyle(.titleAndIcon)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Button("Allow\u{2026}", action: allow)
+            }
+        }
+        .padding(12)
     }
 }
 

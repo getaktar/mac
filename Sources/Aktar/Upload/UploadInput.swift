@@ -8,6 +8,11 @@ enum UploadSource {
     case finderExtension
     /// Picked up from a watched folder, by its ID.
     case watchedFolder(UUID)
+    /// A screenshot taken with Capture.
+    case capture
+    /// An upload whose link was copied before it finished, continued at
+    /// launch; see `UploadOutbox`.
+    case outbox
 }
 
 struct UploadInput: Sendable {
@@ -37,6 +42,10 @@ struct UploadInput: Sendable {
     /// API's `short=1` / `short=0`): true makes one whatever the length,
     /// false makes none. Nil follows the destination.
     var shortLink: Bool? = nil
+    /// A link copied to the clipboard: the file is downloaded from it when
+    /// the upload starts, into `fileURL`'s folder (`fileURL` itself is only
+    /// a placeholder until then).
+    var remote: RemoteSource? = nil
 }
 
 /// What a replace writes over: the history entry it updates, if there's

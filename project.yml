@@ -9,8 +9,8 @@ options:
 # One version for the app and its Share extension, which must match.
 settings:
   base:
-    MARKETING_VERSION: "0.19.0"
-    CURRENT_PROJECT_VERSION: "26"
+    MARKETING_VERSION: "0.20.0"
+    CURRENT_PROJECT_VERSION: "27"
 
 packages:
   Soto:
@@ -23,7 +23,9 @@ packages:
     from: 1.24.0
   KeyboardShortcuts:
     url: https://github.com/sindresorhus/KeyboardShortcuts.git
-    from: 1.9.0
+    # 3.1.0 fixes the shortcut recorder on macOS 26 and 27, which took no
+    # keys at all before (sindresorhus/KeyboardShortcuts#241).
+    from: 3.1.0
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle.git
     from: 2.7.0
@@ -150,8 +152,9 @@ targets:
 
   # Unit tests for the Watched Folders engine, the destination transfer
   # format, the short link engine, the upload pipeline (keys, links,
-  # metadata, image processing) and the S3 layer's request building,
-  # lifecycle rules and error mapping. They're built from those sources and
+  # metadata, image processing), clipboard text and links, the outbox of
+  # instant links, and the S3 layer's request building, lifecycle rules
+  # and error mapping. They're built from those sources and
   # the models they use (they don't need the app around them), so the tests
   # run without launching Aktar.
   AktarTests:
@@ -199,6 +202,11 @@ targets:
       - path: Sources/Aktar/Upload/MultipartUpload.swift
       - path: Sources/Aktar/Thumbnails/BucketThumbnails.swift
       - path: Sources/Aktar/Upload/NotificationService.swift
+      - path: Sources/Aktar/Clipboard/ClipboardText.swift
+      - path: Sources/Aktar/Clipboard/ClipboardSnapshot.swift
+      - path: Sources/Aktar/Upload/RemoteDownload.swift
+      - path: Sources/Aktar/Upload/UploadOutbox.swift
+      - path: Sources/Aktar/Upload/NetworkMonitor.swift
       - path: docs/short-link-providers.json
         buildPhase: resources
     dependencies:

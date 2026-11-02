@@ -294,6 +294,8 @@ struct MenuBarView: View {
                 HStack(spacing: 8) {
                     Button("Paste") { uploadClipboard() }
                     Button("Browse") { chooseFile() }
+                    Button("Capture") { appState.capture(paste: false) }
+                        .help("Select an area to upload, or press Space to pick a window")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
@@ -388,7 +390,7 @@ struct MenuBarView: View {
                 rows.append(job)
             case .waiting where watched:
                 watchedWaiting += 1
-            case .waiting, .failed, .cancelled:
+            case .waiting, .failed, .offline, .cancelled:
                 rows.append(job)
             case .succeeded:
                 break
@@ -472,21 +474,36 @@ private struct JobRowView: View {
                 .fill(Color.secondary.opacity(0.15))
                 .frame(width: 32, height: 32)
                 .overlay(
-                    Image(systemName: FileKindIcon.symbolName(for: job.input.originalFilename))
+                    Image(systemName: FileKindIcon.symbolName(for: job.displayName))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(job.input.originalFilename).font(.caption).lineLimit(1)
+                Text(job.displayName).font(.caption).lineLimit(1)
                 if let folderName = job.input.watch?.folderName {
                     Text("Watched: \(folderName)").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                 }
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
-                    if job.resuming {
+                    if job.isDownloading {
+                        Text("Downloading the link\u{2026}").font(.caption2).foregroundStyle(.secondary)
+                    } else if job.resuming {
                         Text("Resuming upload\u{2026}").font(.caption2).foregroundStyle(.secondary)
+                    } else if job.earlyLink != nil {
+                        Text("Link copied, uploading\u{2026}").font(.caption2).foregroundStyle(.secondary)
+                    }
+                case .offline:
+                    HStack(spacing: 6) {
+                        Label("Waiting for a connection", systemImage: "wifi.slash")
+                            .labelStyle(.titleAndIcon)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Button("Retry") { appState.uploadManager.retry(job) }
+                            .font(.caption2)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.accentColor)
                     }
                 case .failed:
                     HStack(spacing: 6) {
@@ -504,7 +521,7 @@ private struct JobRowView: View {
             }
 
             switch job.state {
-            case .waiting, .uploading, .failed:
+            case .waiting, .uploading, .failed, .offline:
                 Button {
                     appState.uploadManager.cancel(job)
                 } label: {
@@ -512,7 +529,7 @@ private struct JobRowView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help("Cancel")
+                .help(job.earlyLink != nil ? "Cancel and take back the copied link" : "Cancel")
             case .succeeded, .cancelled:
                 EmptyView()
             }
@@ -549,6 +566,16 @@ private struct RecentRowView: View {
             .buttonStyle(.plain)
 
             Spacer()
+
+            // Next to Copy, never in its place: a click meant for Copy
+            // mustn't delete the upload.
+            if appState.uploadManager.isUndoable(recordID: record.id) {
+                Button("Undo") { appState.uploadManager.undoLatest() }
+                    .font(.caption2)
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .help("Delete this upload and its short link, and put back what was on the clipboard")
+            }
 
             Button("Copy") { ClipboardService.copy(appState.uploadManager.shortLinks.active(for: record.id)?.shortUrl ?? record.publicURLString) }
                 .font(.caption2)

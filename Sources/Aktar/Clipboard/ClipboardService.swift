@@ -7,6 +7,15 @@ enum ClipboardService {
         pasteboard.setString(string, forType: .string)
     }
 
+    /// Goes up with every change to the clipboard, by any app.
+    static var changeCount: Int { NSPasteboard.general.changeCount }
+
+    static var string: String? { NSPasteboard.general.string(forType: .string) }
+
+    static func clear() {
+        NSPasteboard.general.clearContents()
+    }
+
     /// Copies a secret (the local API token, a transfer link) marked as
     /// concealed and transient (nspasteboard.org), so clipboard managers
     /// that follow the convention neither show nor keep it. Returns the
@@ -29,14 +38,17 @@ enum ClipboardService {
         pasteboard.clearContents()
     }
 
-    /// Inspects the clipboard for something uploadable: a copied file of any
-    /// kind (Finder copy) takes priority, falling back to raw image bytes
-    /// (a real screenshot/copy that isn't backed by a file on disk).
-    static func readFileInput() -> UploadInput? {
+    /// Inspects the clipboard for something uploadable, in this order:
+    /// - a copied file of any kind (Finder copy),
+    /// - raw image bytes (a screenshot or an image copied from an app),
+    /// - a link (the whole text is one http(s) address): the file it points
+    ///   to is downloaded when the upload starts,
+    /// - text, saved as a .txt, .md or .json file.
+    static func readInput() -> UploadInput? {
         let pasteboard = NSPasteboard.general
 
-        // Files only: a copied web link isn't something to upload, and the
-        // image copied along with it (if any) is tried next.
+        // Files only here: a copied web link is handled below, after the
+        // image that may have been copied along with it.
         if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL],
            let fileURL = fileURLs.first {
             return UploadInput(fileURL: fileURL, originalFilename: fileURL.lastPathComponent, source: .clipboard)
@@ -48,7 +60,47 @@ enum ClipboardService {
                 return writeTemporaryImage(image)
             }
         }
+
+        let text = pasteboard.string(forType: .string) ?? ""
+        if let link = ClipboardText.link(in: text) ?? copiedWebLink(pasteboard, text: text) {
+            return remoteInput(for: link)
+        }
+        if ClipboardText.hasContent(text) {
+            return writeTemporaryText(text)
+        }
         return nil
+    }
+
+    /// A link copied with "Copy Link" whose text is its title (one line)
+    /// or nothing, rather than the address itself.
+    private static func copiedWebLink(_ pasteboard: NSPasteboard, text: String) -> URL? {
+        guard !text.contains(where: \.isNewline),
+              let raw = pasteboard.string(forType: .URL) else { return nil }
+        return ClipboardText.link(in: raw)
+    }
+
+    /// An upload whose file is downloaded from `link` first. Its file goes
+    /// in a folder of its own among the clipboard's, so it's deleted with
+    /// the upload like a copied image.
+    static func remoteInput(for link: URL) -> UploadInput? {
+        let source = RemoteSource(url: link)
+        guard let folder = try? TempFiles.newFolder(in: TempFiles.clipboard),
+              let placeholder = TempFiles.fileURL(named: source.suggestedName, in: folder) else { return nil }
+        var input = UploadInput(fileURL: placeholder, originalFilename: source.suggestedName, source: .clipboard)
+        input.remote = source
+        return input
+    }
+
+    private static func writeTemporaryText(_ text: String) -> UploadInput? {
+        let id = UUID().uuidString.lowercased()
+        let filename = "clipboard-\(id.prefix(8)).\(ClipboardText.kind(of: text).fileExtension)"
+        do {
+            let url = try TempFiles.newFolder(in: TempFiles.clipboard).appendingPathComponent(filename)
+            try Data(text.utf8).write(to: url)
+            return UploadInput(fileURL: url, originalFilename: filename, source: .clipboard)
+        } catch {
+            return nil
+        }
     }
 
     private static func writeTemporaryImage(_ image: NSImage) -> UploadInput? {

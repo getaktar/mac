@@ -440,7 +440,7 @@ struct LibraryView: View {
     private var activeJobs: [UploadJob] {
         appState.uploadManager.jobs.filter {
             switch $0.state {
-            case .waiting, .uploading, .failed, .cancelled: return true
+            case .waiting, .uploading, .failed, .offline, .cancelled: return true
             case .succeeded: return false
             }
         }
@@ -631,22 +631,37 @@ private struct ActiveUploadRow: View {
                 .fill(Color.secondary.opacity(0.15))
                 .frame(width: 44, height: 44)
                 .overlay(
-                    Image(systemName: FileKindIcon.symbolName(for: job.input.originalFilename))
+                    Image(systemName: FileKindIcon.symbolName(for: job.displayName))
                         .foregroundStyle(.secondary)
                 )
             VStack(alignment: .leading, spacing: 4) {
-                Text(job.input.originalFilename).lineLimit(1)
+                Text(job.displayName).lineLimit(1)
                 if let folderName = job.input.watch?.folderName {
                     Text("Watched: \(folderName)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 switch job.state {
                 case .uploading(let progress):
                     ProgressView(value: progress)
-                    if job.resuming {
+                    if job.isDownloading {
+                        Text("Downloading the link\u{2026}").font(.caption).foregroundStyle(.secondary)
+                    } else if job.resuming {
                         Text("Resuming upload\u{2026}").font(.caption).foregroundStyle(.secondary)
+                    } else if job.earlyLink != nil {
+                        Text("Link copied, uploading\u{2026}").font(.caption).foregroundStyle(.secondary)
                     }
                 case .waiting:
                     Text("Waiting\u{2026}").font(.caption).foregroundStyle(.secondary)
+                case .offline:
+                    HStack(spacing: 6) {
+                        Label("Waiting for a connection", systemImage: "wifi.slash")
+                            .labelStyle(.titleAndIcon)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Button("Retry") { appState.uploadManager.retry(job) }
+                            .font(.caption2)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.accentColor)
+                    }
                 case .failed(let message):
                     HStack(spacing: 6) {
                         Text(message).font(.caption2).foregroundStyle(.red).lineLimit(1)
@@ -662,7 +677,7 @@ private struct ActiveUploadRow: View {
                 }
             }
             switch job.state {
-            case .waiting, .uploading, .failed:
+            case .waiting, .uploading, .failed, .offline:
                 Button {
                     appState.uploadManager.cancel(job)
                 } label: {
@@ -670,7 +685,7 @@ private struct ActiveUploadRow: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help("Cancel")
+                .help(job.earlyLink != nil ? "Cancel and take back the copied link" : "Cancel")
             case .succeeded, .cancelled:
                 EmptyView()
             }

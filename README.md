@@ -13,7 +13,17 @@ get a public link back on your clipboard.
 ## Features
 
 - Lives in the menu bar (`LSUIElement`, no Dock icon)
-- Drag & drop, clipboard paste, or file picker to upload
+- Drag & drop, clipboard paste, or file picker to upload; text on the
+  clipboard uploads as a file, and a copied link's file is downloaded and
+  re-hosted in your bucket
+- Capture: one shortcut to select an area or a window with macOS's own
+  screenshot tool, uploaded with its link copied
+- The link is copied right away, before a large upload finishes; offline,
+  uploads wait and go on when you're back, even after a restart
+- Upload and paste: one shortcut uploads the clipboard (or a capture) and
+  pastes the link where you're typing
+- Undo for 10 seconds after an upload: deletes the file and its short link
+  and puts back what was on the clipboard
 - Bring your own storage: Amazon S3, Cloudflare R2, Backblaze B2,
   DigitalOcean Spaces, MinIO, or any other S3-compatible endpoint
 - Multiple destinations, switchable per upload
@@ -53,6 +63,14 @@ Aktar has no backend, no telemetry, and no account system. The only other
 request it makes is the update check ([Sparkle](https://sparkle-project.org)),
 which downloads `appcast.xml` from this repository's latest GitHub release and
 sends no information about you or your Mac; you can turn it off in Settings.
+When you upload a link you copied, Aktar downloads that file (no cookies, no
+cache) to upload it to your storage.
+Capture needs the Screen Recording permission (macOS's screenshot tool runs on
+Aktar's behalf), and pasting links for you needs Accessibility (Device Control
+and Data Access on macOS 27; Aktar presses ⌘V); both are asked for only when
+you use those features. An upload whose
+link was copied before it finished is kept in Aktar's container until it's
+uploaded, then deleted.
 If you turn on Settings > Integrations > Allow local connections (off by
 default, and what the Raycast extension uses), Aktar also listens on
 `127.0.0.1` for requests carrying a random token that is kept in the Keychain.

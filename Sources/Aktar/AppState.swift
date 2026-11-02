@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import KeyboardShortcuts
 import Observation
 
@@ -28,6 +28,20 @@ final class AppState {
         }
         KeyboardShortcuts.onKeyDown(for: .renameAndUploadFromClipboard) { [weak self] in
             Task { @MainActor in self?.uploadFromClipboard(rename: true) }
+        }
+        KeyboardShortcuts.onKeyDown(for: .uploadClipboardAndPaste) { [weak self] in
+            Task { @MainActor in self?.uploadFromClipboard(paste: true) }
+        }
+        KeyboardShortcuts.onKeyDown(for: .captureAndUpload) { [weak self] in
+            Task { @MainActor in self?.capture(paste: false) }
+        }
+        KeyboardShortcuts.onKeyDown(for: .captureUploadAndPaste) { [weak self] in
+            Task { @MainActor in self?.capture(paste: true) }
+        }
+        KeyboardShortcuts.onKeyDown(for: .undoLastUpload) { [weak self] in
+            Task { @MainActor in
+                if self?.uploadManager.undoLatest() != true { NSSound.beep() }
+            }
         }
         startExpirySweep()
         RemoteThumbnailLoader.shared.repository = repository
@@ -79,7 +93,7 @@ final class AppState {
     /// A destination's shortcut: the clipboard goes there, never rerouted.
     func uploadFromClipboard(toDestinationID id: UUID) {
         guard let destination = destinationStore.destinations.first(where: { $0.id == id }),
-              let input = ClipboardService.readFileInput() else { return }
+              let input = ClipboardService.readInput() else { return }
         uploadManager.upload([input], to: destination)
     }
 
@@ -115,13 +129,37 @@ final class AppState {
     }
 
     /// `rename` asks for the file's name first; see `RenamePrompt`.
-    func uploadFromClipboard(rename: Bool = false) {
-        guard let input = ClipboardService.readFileInput() else { return }
+    /// `paste` pastes the link into the app in front once it's copied
+    /// (Upload and Paste); without the Accessibility permission it's only
+    /// copied.
+    func uploadFromClipboard(rename: Bool = false, paste: Bool = false) {
+        // Before anything else can come to the front.
+        let target = paste ? PasteRequest.frontmost() : nil
+        guard let input = ClipboardService.readInput() else {
+            if paste { NSSound.beep() }
+            return
+        }
         let inputs = rename ? RenamePrompt.rename([input]) : [input]
         guard !inputs.isEmpty else {
             TempFiles.removeIfOwned(input.fileURL)
             return
         }
-        uploadManager.upload(inputs)
+        let canPaste = paste && PasteService.ensurePermission()
+        uploadManager.upload(inputs, paste: canPaste ? target : nil)
+    }
+
+    /// Capture: picks an area or window with macOS's screenshot tool and
+    /// uploads it like a pasted image ("Use for" decides where). With
+    /// `paste`, the link is then pasted into the app that was in front.
+    func capture(paste: Bool) {
+        let target = paste ? PasteRequest.frontmost(for: 300) : nil
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        Task {
+            guard let input = await ScreenCapture.capture() else { return }
+            // Counted from the end of the capture, which takes its time.
+            let request = target.map { PasteRequest(processID: $0.processID, deadline: Date.now.addingTimeInterval(30)) }
+            let canPaste = paste && PasteService.ensurePermission()
+            uploadManager.upload([input], paste: canPaste ? request : nil)
+        }
     }
 }

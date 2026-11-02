@@ -6,13 +6,28 @@ import KeyboardShortcuts
 /// the KeyboardShortcuts package), which need no Accessibility or Input
 /// Monitoring permission - only a real key press from the user triggers it.
 extension KeyboardShortcuts.Name {
-    nonisolated(unsafe) static let uploadFromClipboard = Self(
+    static let uploadFromClipboard = Self(
         "uploadFromClipboard",
-        default: .init(.u, modifiers: [.command, .shift, .control])
+        initial: .init(.u, modifiers: [.command, .shift, .control])
     )
 
     /// The same, but asking for the file's name first. Unset by default.
-    nonisolated(unsafe) static let renameAndUploadFromClipboard = Self("renameAndUploadFromClipboard")
+    static let renameAndUploadFromClipboard = Self("renameAndUploadFromClipboard")
+
+    /// Uploads the clipboard and pastes the link where the user is typing
+    /// (needs Accessibility; see `PasteService`). Unset by default.
+    static let uploadClipboardAndPaste = Self("uploadClipboardAndPaste")
+
+    /// Capture an area or window and upload it; see `ScreenCapture`. Unset
+    /// by default.
+    static let captureAndUpload = Self("captureAndUpload")
+
+    /// The same, then the link is pasted. Unset by default.
+    static let captureUploadAndPaste = Self("captureUploadAndPaste")
+
+    /// Takes back the latest upload while Undo is offered for it. Unset by
+    /// default.
+    static let undoLastUpload = Self("undoLastUpload")
 
     /// A destination's own shortcut: uploads the clipboard there, whatever
     /// "Use for" says. Unset by default; kept on this Mac only.

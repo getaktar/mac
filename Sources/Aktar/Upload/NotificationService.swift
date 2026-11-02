@@ -5,25 +5,92 @@ enum NotificationService {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
-    static func notifyUploadSucceeded(filename: String, expiryDays: Int? = nil) {
+    /// `identifier` replaces an earlier notification of the same upload
+    /// ("still uploading"). With `actionID`, it has Undo; see
+    /// `UploadManager.undo`.
+    static func notifyUploadSucceeded(filename: String, expiryDays: Int? = nil, identifier: String? = nil, actionID: UUID? = nil, uploadID: UUID? = nil) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Uploaded")
         content.body = filename
         if let expiryDays {
             content.subtitle = String(localized: "Deletes after \(UploadExpiry.label(days: expiryDays))")
         }
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        offerUndo(content, actionID: actionID, uploadID: uploadID)
+        post(content, identifier: identifier)
     }
 
     /// Nothing was uploaded: the file was already in the destination, and
     /// its link was copied.
-    static func notifyUploadReused(filename: String) {
+    static func notifyUploadReused(filename: String, identifier: String? = nil, actionID: UUID? = nil) {
         let content = UNMutableNotificationContent()
         content.title = filename
         content.body = String(localized: "Already uploaded - copied the existing link")
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        offerUndo(content, actionID: actionID, uploadID: nil)
+        post(content, identifier: identifier)
+    }
+
+    // MARK: - Instant link, offline queue and Undo
+
+    /// The link was copied before the upload finished, and it's still
+    /// going after a moment.
+    static func notifyLinkCopiedUploading(filename: String, identifier: String, actionID: UUID?) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Link copied")
+        content.subtitle = filename
+        content.body = String(localized: "Still uploading. The link works once the upload is done.")
+        offerUndo(content, actionID: actionID, uploadID: nil)
+        post(content, identifier: identifier)
+    }
+
+    /// An upload is waiting for the network; it goes on when it's back.
+    static func notifyWaitingForNetwork(filename: String, linkCopied: Bool, identifier: String, actionID: UUID?) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Waiting for a connection")
+        content.subtitle = filename
+        content.body = linkCopied
+            ? String(localized: "The link is copied. The file uploads when you\u{2019}re back online, and the link works from then on.")
+            : String(localized: "The file uploads when you\u{2019}re back online.")
+        offerUndo(content, actionID: actionID, uploadID: nil)
+        post(content, identifier: identifier)
+    }
+
+    /// A clash in the bucket gave the upload another key after its link
+    /// was copied; the new link was copied in its place.
+    static func notifyLinkChanged(filename: String) {
+        let content = UNMutableNotificationContent()
+        content.title = filename
+        content.body = String(localized: "The link changed while uploading. The new link is copied; the one copied before doesn\u{2019}t work.")
+        post(content)
+    }
+
+    static func notifyUndone(names: [String]) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Upload undone")
+        content.body = names.count == 1 ? names[0] : String(localized: "\(names.count) files")
+        post(content)
+    }
+
+    static let uploadDoneCategory = "aktar.upload.done"
+    static let undoActionID = "aktar.upload.undo"
+    static let actionIDKey = "actionID"
+
+    private static func offerUndo(_ content: UNMutableNotificationContent, actionID: UUID?, uploadID: UUID?) {
+        guard let actionID else { return }
+        content.categoryIdentifier = uploadDoneCategory
+        var info: [String: String] = [actionIDKey: actionID.uuidString]
+        if let uploadID { info[uploadIDKey] = uploadID.uuidString }
+        content.userInfo = info
+    }
+
+    static func remove(identifier: String) {
+        remove(identifiers: [identifier])
+    }
+
+    static func remove(identifiers: [String]) {
+        guard !identifiers.isEmpty else { return }
+        let center = UNUserNotificationCenter.current()
+        center.removeDeliveredNotifications(withIdentifiers: identifiers)
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
     /// A file was written over an upload; its link stays the same.
@@ -41,12 +108,16 @@ enum NotificationService {
         post(content)
     }
 
-    static func notifyUploadFailed(filename: String, reason: String) {
+    /// `linkCopied`: the upload's link was copied already, and won't work
+    /// until it's uploaded (Retry in the panel).
+    static func notifyUploadFailed(filename: String, reason: String, linkCopied: Bool = false, identifier: String? = nil) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Upload failed")
+        if linkCopied {
+            content.subtitle = String(localized: "The copied link won\u{2019}t work until the file is uploaded.")
+        }
         content.body = "\(filename): \(reason)"
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        post(content, identifier: identifier)
     }
 
     // MARK: - Watched folders
@@ -175,14 +246,17 @@ enum NotificationService {
     static let folderIDKey = "folderID"
 
     /// Delete from Bucket and Keep Uploaded Files on a delete ask, which
-    /// answer it in the background, and Retry on a failed short link.
+    /// answer it in the background, Retry on a failed short link, and Undo
+    /// on an upload.
     static func registerCategories() {
         let delete = UNNotificationAction(identifier: deleteActionID, title: String(localized: "Delete from Bucket"), options: [.destructive])
         let keep = UNNotificationAction(identifier: keepActionID, title: String(localized: "Keep Uploaded Files"), options: [])
         let category = UNNotificationCategory(identifier: deleteAskCategory, actions: [delete, keep], intentIdentifiers: [])
         let retry = UNNotificationAction(identifier: retryShortLinkActionID, title: String(localized: "Retry"), options: [])
         let shortLink = UNNotificationCategory(identifier: shortLinkFailedCategory, actions: [retry], intentIdentifiers: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category, shortLink])
+        let undo = UNNotificationAction(identifier: undoActionID, title: String(localized: "Undo"), options: [.destructive])
+        let uploadDone = UNNotificationCategory(identifier: uploadDoneCategory, actions: [undo], intentIdentifiers: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category, shortLink, uploadDone])
     }
 
     /// Asks whether the uploads of files deleted from a watched folder go
@@ -209,8 +283,8 @@ enum NotificationService {
         "aktar.watch.delete-ask.\(folderID.uuidString)"
     }
 
-    private static func post(_ content: UNMutableNotificationContent) {
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+    private static func post(_ content: UNMutableNotificationContent, identifier: String? = nil) {
+        let request = UNNotificationRequest(identifier: identifier ?? UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
     }
 }

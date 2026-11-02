@@ -151,7 +151,7 @@ struct UploadFileIntent: AppIntent {
 
 struct UploadClipboardIntent: AppIntent {
     static let title: LocalizedStringResource = "Upload Clipboard"
-    static let description = IntentDescription("Uploads the file or image on the clipboard with Aktar and returns its link.")
+    static let description = IntentDescription("Uploads what\u{2019}s on the clipboard with Aktar (a file, an image, the file a copied link points to, or text) and returns its link.")
     static let openAppWhenRun = false
 
     @Parameter(title: "Destination", description: "Leave empty to use \u{201C}Use for\u{201D} and the default destination.")
@@ -165,8 +165,8 @@ struct UploadClipboardIntent: AppIntent {
     func perform() async throws -> some IntentResult & ReturnsValue<URL> {
         let manager = try AktarIntentSupport.manager()
         let config = try AktarIntentSupport.destination(destination)
-        guard let input = ClipboardService.readFileInput() else {
-            throw AktarIntentError(String(localized: "The clipboard has no file or image to upload."))
+        guard let input = ClipboardService.readInput() else {
+            throw AktarIntentError(String(localized: "The clipboard has nothing to upload: no file, image, link or text."))
         }
         defer { TempFiles.removeIfOwned(input.fileURL) }
         return .result(value: try await AktarIntentSupport.link(manager.uploadAndWait(input, to: config), manager: manager))
