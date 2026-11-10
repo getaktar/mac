@@ -93,6 +93,27 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
+    /// The file is up but its share page couldn't be written; the file's
+    /// own link was copied instead.
+    static func notifySharePageFailed(filename: String, reason: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "The share page couldn\u{2019}t be written")
+        content.subtitle = filename
+        content.body = String(localized: "The file\u{2019}s own link was copied instead. \(reason)")
+        post(content)
+    }
+
+    /// Files arrived through a file request and are in history now.
+    static func notifyRequestReceived(count: Int, title: String) {
+        let content = UNMutableNotificationContent()
+        content.title = count == 1 ? String(localized: "Received 1 file") : String(localized: "Received \(count) files")
+        content.body = FileRequests.sourceLabel(title: title)
+        content.userInfo = [openLibraryKey: "1"]
+        post(content)
+    }
+
+    static let openLibraryKey = "openLibrary"
+
     /// A file was written over an upload; its link stays the same.
     static func notifyReplaced(filename: String) {
         let content = UNMutableNotificationContent()

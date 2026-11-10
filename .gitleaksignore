@@ -1,0 +1,3 @@
+# Test value, not a secret: the derived key of the share page encryption test
+# vector (a fixed test password), shared with the Windows and mobile apps.
+docs/share-page/vectors.json:generic-api-key:49

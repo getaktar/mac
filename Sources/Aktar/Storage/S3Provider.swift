@@ -236,6 +236,13 @@ final class S3Provider: StorageProvider, Sendable {
     /// A presigned GET URL, which works for private buckets and doesn't
     /// depend on the public base URL being set up correctly.
     func temporaryURL(for objectKey: String, expiresIn seconds: Int64) async throws -> URL {
+        try await s3.signURL(url: try endpointURL(for: objectKey), httpMethod: .GET, expires: .seconds(seconds))
+    }
+
+    /// The object's address at the S3 endpoint, unsigned: path style
+    /// (`https://endpoint/bucket/key`) or virtual hosted
+    /// (`https://bucket.endpoint/key`).
+    func endpointURL(for objectKey: String) throws -> URL {
         guard var components = URLComponents(string: config.endpoint.contains("://") ? config.endpoint : "https://\(config.endpoint)") else {
             throw StorageError.unknown(String(localized: "The endpoint URL is not valid."))
         }
@@ -249,7 +256,44 @@ final class S3Provider: StorageProvider, Sendable {
         guard let url = components.url else {
             throw StorageError.unknown(String(localized: "The endpoint URL is not valid."))
         }
-        return try await s3.signURL(url: url, httpMethod: .GET, expires: .seconds(seconds))
+        return url
+    }
+
+    /// A presigned PUT for a file request's slot (docs/share-pages.md, part
+    /// 4). Besides `host`, it signs `content-type` and, for a provider that
+    /// does conditional writes, `if-none-match: *`: the browser has to send
+    /// exactly those, so a PUT with another Content-Type is refused.
+    func presignedPUT(for objectKey: String, contentType: String, ifNoneMatch: Bool, expiresIn seconds: Int64) async throws -> URL {
+        var headers = HTTPHeaders()
+        headers.add(name: "content-type", value: contentType)
+        if ifNoneMatch { headers.add(name: "if-none-match", value: "*") }
+        return try await s3.signURL(url: try endpointURL(for: objectKey), httpMethod: .PUT, headers: headers, expires: .seconds(seconds))
+    }
+
+    // MARK: - CORS
+
+    /// Makes sure the bucket lets pages on `origin` PUT into it, for file
+    /// requests. Every other rule goes back as it came (see `CORSXML`), and
+    /// nothing is written when Aktar's rule is already there. Throws when
+    /// the bucket's rules can't be read or written (MinIO has no bucket
+    /// CORS; a key may lack the permission).
+    func ensureCORSRule(origin: String) async throws {
+        let url = try bucketURL(query: "cors")
+        let (status, body) = try await lifecycleRequest(url: url, method: .GET)
+        var existing: [CORSXML.Rule] = []
+        if (200..<300).contains(status) {
+            guard let rules = CORSXML.configurationRules(in: body) else {
+                throw StorageError.unknown(String(localized: "The bucket's CORS rules couldn't be read, so nothing was changed."))
+            }
+            existing = rules
+        } else if LifecycleXML.error(in: body).code != "NoSuchCORSConfiguration" {
+            throw Self.lifecycleError(status: status, body: body, bucket: config.bucket)
+        }
+        guard let xml = CORSXML.merged(existing, origin: origin) else { return }
+        let (putStatus, putBody) = try await lifecycleRequest(url: url, method: .PUT, body: Data(xml.utf8))
+        guard (200..<300).contains(putStatus) else {
+            throw Self.lifecycleError(status: putStatus, body: putBody, bucket: config.bucket)
+        }
     }
 
     /// Makes sure the bucket has one lifecycle rule per expiry duration (see
@@ -385,7 +429,7 @@ final class S3Provider: StorageProvider, Sendable {
         }
     }
 
-    private static func lifecycleError(status: Int, body: String, bucket: String) -> StorageError {
+    static func lifecycleError(status: Int, body: String, bucket: String) -> StorageError {
         let (code, message) = LifecycleXML.error(in: body)
         switch (status, code) {
         case (_, "NoSuchBucket"):

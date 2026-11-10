@@ -321,6 +321,101 @@ final class S3IntegrationTests: XCTestCase {
         XCTAssertEqual(plainStatus, 403)
     }
 
+    // MARK: - Share pages and file requests
+
+    func testSharePageIsWrittenNextToTheFileAndDeletedWithIt() async throws {
+        let template = try XCTUnwrap(SharePages.bundledTemplate())
+        _ = try await provider.upload(fileURL: try makeFile("shot.png", bytes: 1000), objectKey: "tmp/7d/2026/11/x7Kp2.png", contentType: "image/png", progress: nil)
+        let pageKey = SharePages.pageKey(forFileKey: "tmp/7d/2026/11/x7Kp2.png")
+        XCTAssertEqual(pageKey, "tmp/7d/2026/11/x7Kp2.png.html", "under the same expiry prefix")
+        let page = SharePage(kind: .file, lang: "en", created: .now, files: [
+            .init(name: "shot.png", url: "https://files.example.com/tmp/7d/2026/11/x7Kp2.png", size: 1000, type: "image/png"),
+        ])
+        try await SharePagePublisher.write(page, key: pageKey, provider: provider, template: template)
+
+        let head = try await provider.s3.headObject(.init(bucket: bucket, key: pageKey))
+        XCTAssertEqual(head.contentType, "text/html; charset=utf-8")
+        XCTAssertEqual(head.cacheControl, "public, max-age=60")
+        XCTAssertNil(head.contentDisposition, "the page opens in the browser")
+        let stored = try await provider.getObject(key: pageKey, maxBytes: 1_000_000)
+        XCTAssertEqual(stored.map { String(decoding: $0.data, as: UTF8.self) }, SharePages.build(page, template: template))
+
+        // A gallery's page stays while another of its files points at it.
+        try await provider.delete(objectKey: "tmp/7d/2026/11/x7Kp2.png")
+        await SharePagePublisher.delete(pageKey: pageKey, stillUsed: true, provider: provider)
+        let kept = try await provider.objectExists(key: pageKey)
+        XCTAssertTrue(kept)
+        await SharePagePublisher.delete(pageKey: pageKey, stillUsed: false, provider: provider)
+        let gone = try await provider.objectExists(key: pageKey)
+        XCTAssertFalse(gone)
+        // A page that's already gone is fine.
+        await SharePagePublisher.delete(pageKey: pageKey, stillUsed: false, provider: provider)
+    }
+
+    func testEncryptedFileRoundTrip() async throws {
+        let plain = try makeFile("secret.bin", bytes: 300_000)
+        let sealed = directory.appendingPathComponent("sealed")
+        let keys = ShareEncryption.KeyMaterial.newLinkKey()
+        let meta = ShareEncryption.Metadata(name: "secret.bin", type: "application/octet-stream", size: 300_000)
+        let length = try ShareEncryption.encrypt(file: plain, to: sealed, metadata: meta, keys: keys)
+        let key = SharePages.encryptedKey(expiryDays: nil)
+        let result = try await provider.upload(fileURL: sealed, objectKey: key, contentType: "application/octet-stream", progress: nil)
+        XCTAssertEqual(Int64(result.byteSize), length)
+        let head = try await provider.s3.headObject(.init(bucket: bucket, key: key))
+        XCTAssertNil(head.contentDisposition)
+        let downloaded = directory.appendingPathComponent("downloaded")
+        _ = try await provider.download(key: key, to: downloaded, maxBytes: length)
+        let opened = directory.appendingPathComponent("opened")
+        XCTAssertEqual(try ShareEncryption.decrypt(file: downloaded, to: opened) { _ in keys.key }, meta)
+        XCTAssertEqual(try Self.sha256(opened), try Self.sha256(plain))
+    }
+
+    func testPresignedPutTakesOnlyItsSignedContentType() async throws {
+        let key = FileRequests.fileKey(id: "Req0000001", slot: 1)
+        let url = try await provider.presignedPUT(for: key, contentType: "application/octet-stream", ifNoneMatch: false, expiresIn: 600)
+        XCTAssertTrue(url.query?.contains("X-Amz-SignedHeaders=content-type%3Bhost") == true, url.query ?? "")
+
+        // The headers the page sends: accepted.
+        let accepted = try await Self.put(url, body: Data("first".utf8), headers: ["Content-Type": "application/octet-stream"])
+        XCTAssertEqual(accepted, 200)
+        let stored = try await provider.getObject(key: key, maxBytes: 100)
+        XCTAssertEqual(stored?.data, Data("first".utf8))
+
+        // Another Content-Type (a page trying to send HTML): refused.
+        let html = try await Self.put(url, body: Data("<script>".utf8), headers: ["Content-Type": "text/html"])
+        XCTAssertEqual(html, 403)
+        let unchanged = try await provider.getObject(key: key, maxBytes: 100)
+        XCTAssertEqual(unchanged?.data, Data("first".utf8))
+
+        // A slot signed with if-none-match needs it, and takes one write.
+        let meta = FileRequests.metadataKey(id: "Req0000001", slot: 1)
+        let once = try await provider.presignedPUT(for: meta, contentType: "application/json", ifNoneMatch: true, expiresIn: 600)
+        let withoutCondition = try await Self.put(once, body: Data("{}".utf8), headers: ["Content-Type": "application/json"])
+        // MinIO answers 400 for a signed header that's missing, S3 403.
+        XCTAssertTrue([400, 403].contains(withoutCondition), "\(withoutCondition)")
+        let first = try await Self.put(once, body: Data(#"{"name":"a"}"#.utf8), headers: ["Content-Type": "application/json", "If-None-Match": "*"])
+        XCTAssertEqual(first, 200)
+        let second = try await Self.put(once, body: Data(#"{"name":"b"}"#.utf8), headers: ["Content-Type": "application/json", "If-None-Match": "*"])
+        XCTAssertEqual(second, 412)
+    }
+
+    func testCORSRefusedWithoutBucketCORS() async throws {
+        // MinIO has no bucket CORS: creating a request stops here, with the
+        // rule to add by hand.
+        do {
+            try await provider.ensureCORSRule(origin: "https://files.example.com")
+            XCTFail("MinIO doesn't take bucket CORS rules")
+        } catch {}
+    }
+
+    private static func put(_ url: URL, body: Data, headers: [String: String]) async throws -> Int {
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
+        let (_, response) = try await URLSession.shared.upload(for: request, from: body)
+        return (response as? HTTPURLResponse)?.statusCode ?? 0
+    }
+
     // MARK: - Browsing
 
     func testListingFoldersAndObjects() async throws {

@@ -696,6 +696,13 @@ final class WatchNotificationActions: NSObject, UNUserNotificationCenterDelegate
             await MainActor.run { undoUpload?(actionID, uploadID) }
             return
         }
+        // "Received 3 files": the Library, where they are now.
+        if info[NotificationService.openLibraryKey] != nil, action == UNNotificationDefaultActionIdentifier {
+            await MainActor.run {
+                NotificationCenter.default.post(name: .aktarOpenWindow, object: "library")
+            }
+            return
+        }
         guard let raw = response.notification.request.content.userInfo[NotificationService.folderIDKey] as? String,
               let folderID = UUID(uuidString: raw) else { return }
         await MainActor.run {

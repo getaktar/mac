@@ -83,6 +83,17 @@ struct MenuBarView: View {
         HStack {
             Text("Upload").font(.headline)
             Spacer()
+            Menu {
+                Button("Request Files\u{2026}") { RequestFilesWindowController.shared.show(appState: appState) }
+                Button("Requests") { openAppWindow("library") }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .foregroundStyle(.secondary)
+            .help("More")
             Button {
                 openAppWindow("settings")
             } label: {
@@ -547,7 +558,7 @@ private struct RecentRowView: View {
             thumbnail
 
             Button {
-                ClipboardService.copy(record.publicURLString)
+                ClipboardService.copy(appState.uploadManager.copyText(for: record))
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(record.localFilename).font(.caption).lineLimit(1)
@@ -577,7 +588,7 @@ private struct RecentRowView: View {
                     .help("Delete this upload and its short link, and put back what was on the clipboard")
             }
 
-            Button("Copy") { ClipboardService.copy(appState.uploadManager.shortLinks.active(for: record.id)?.shortUrl ?? record.publicURLString) }
+            Button("Copy") { ClipboardService.copy(appState.uploadManager.copyText(for: record)) }
                 .font(.caption2)
                 .buttonStyle(.bordered)
                 .controlSize(.mini)
@@ -592,7 +603,7 @@ private struct RecentRowView: View {
                 }
                 Divider()
                 Button("Open in Browser") {
-                    if let url = record.publicURL { NSWorkspace.shared.open(url) }
+                    if let url = record.shareURL { NSWorkspace.shared.open(url) }
                 }
                 Button("Show in Library") { openLibrary() }
                 Divider()
@@ -610,7 +621,7 @@ private struct RecentRowView: View {
     }
 
     private var displayURL: String {
-        record.publicURLString
+        record.shareURLString
             .replacingOccurrences(of: "https://", with: "")
             .replacingOccurrences(of: "http://", with: "")
     }

@@ -17,6 +17,9 @@ struct EarlyLink: Codable, Sendable, Equatable {
     var shortLinkError: String?
     /// What was put on the clipboard.
     var copiedText: String
+    /// The share page `link` opens, written once the file is up; nil when
+    /// the link is the file's own.
+    var pageKey: String? = nil
 }
 
 /// A short link made at the provider for an early link.

@@ -190,6 +190,16 @@ final class UploadRepository {
         }
     }
 
+    /// History entries whose link opens the page at `key` (one, or every
+    /// file of a gallery).
+    func records(sharePageKey key: String, destinationID: UUID) -> [UploadRecord] {
+        let pageKey: String? = key
+        let descriptor = FetchDescriptor<UploadRecord>(
+            predicate: #Predicate { $0.sharePageKey == pageKey && $0.destinationID == destinationID }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
+
     /// History entries of the object at `key`.
     func records(key: String, destinationID: UUID) -> [UploadRecord] {
         let descriptor = FetchDescriptor<UploadRecord>(

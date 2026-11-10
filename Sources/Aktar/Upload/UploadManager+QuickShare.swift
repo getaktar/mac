@@ -127,17 +127,26 @@ extension UploadManager {
 
     /// Copies the link to `objectKey` (shortened, as "Copy as" says) before
     /// the bytes go, and keeps the upload in the outbox until they're there.
-    func copyEarlyLink(_ job: UploadJob, objectKey: String, destination: DestinationConfig, provider: S3Provider, filename: String) async throws {
-        guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
+    /// `withPage`: the link is to the file's share page, written once the
+    /// file is up; until then it doesn't open, like the file's.
+    func copyEarlyLink(_ job: UploadJob, objectKey: String, destination: DestinationConfig, provider: S3Provider, filename: String, withPage: Bool = false) async throws {
+        let pageKey = withPage ? SharePages.pageKey(forFileKey: objectKey) : nil
+        let linkKey = pageKey ?? objectKey
+        guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: linkKey),
+              let fileURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
             throw StorageError.invalidPublicBaseURL
         }
         // Signing happens on this Mac, so it works offline too.
         var link = publicURL
+        var fileLink = fileURL
         var temporaryExpiresAt: Date?
         if let duration = destination.temporaryLink,
-           let signed = try? await provider.temporaryURL(for: objectKey, expiresIn: duration.rawValue) {
+           let signed = try? await provider.temporaryURL(for: linkKey, expiresIn: duration.rawValue) {
             link = signed
             temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
+            if pageKey != nil, let signedFile = try? await provider.temporaryURL(for: objectKey, expiresIn: duration.rawValue) {
+                fileLink = signedFile
+            }
         }
         let shortening: ShortLinkService.Attempt = job.input.shortLink == false
             ? .skipped
@@ -149,7 +158,7 @@ extension UploadManager {
                 isFolderFile: false,
                 explicit: job.input.shortLink == true
             )
-        var early = EarlyLink(objectKey: objectKey, link: link, temporaryExpiresAt: temporaryExpiresAt, copiedText: "")
+        var early = EarlyLink(objectKey: objectKey, link: link, temporaryExpiresAt: temporaryExpiresAt, copiedText: "", pageKey: pageKey)
         var shortURL: URL?
         switch shortening {
         case .created(let pending):
@@ -165,7 +174,7 @@ extension UploadManager {
             deleteEarlyShortLink(early, destination: destination)
             throw CancellationError()
         }
-        early.copiedText = format(link, shortURL: shortURL, filename: filename, for: destination)
+        early.copiedText = format(link, shortURL: shortURL, filename: filename, for: destination, fileURL: pageKey != nil ? fileLink : nil)
         job.earlyLink = early
         copyLink(early.copiedText, for: job)
         keepInOutbox(job)

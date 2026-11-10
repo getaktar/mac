@@ -46,6 +46,18 @@ struct UploadInput: Sendable {
     /// the upload starts, into `fileURL`'s folder (`fileURL` itself is only
     /// a placeholder until then).
     var remote: RemoteSource? = nil
+    /// A file sent through a file request: collected into history without
+    /// a copied link, a notification or a share page.
+    var request: RequestUploadContext? = nil
+    /// Nobody is there to answer a prompt (the local API, Shortcuts):
+    /// a password destination encrypts with the key in the link instead,
+    /// and no share page is written.
+    var isUnattended = false
+}
+
+struct RequestUploadContext: Sendable, Hashable {
+    let id: String
+    let title: String
 }
 
 /// What a replace writes over: the history entry it updates, if there's
@@ -101,4 +113,7 @@ struct UploadGroup: Sendable, Hashable {
     /// rather than the files of a folder: their links are still copied
     /// together, and each can reuse an earlier upload's link.
     var isDrop = false
+    /// The files get one gallery page and one link instead of a link each
+    /// (docs/share-pages.md, part 2).
+    var isGallery = false
 }

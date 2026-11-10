@@ -58,6 +58,10 @@ final class UploadJob: Identifiable {
     /// Someone (the local API, a Shortcuts action) waits for the outcome:
     /// a failure is reported to them instead of waiting for the network.
     var isWaitedFor = false
+    /// The password typed for an encrypted upload, until its key is made.
+    var password: String?
+    /// An encrypted upload's key, kept for its retries.
+    var encryptionKeys: ShareEncryption.KeyMaterial?
 
     /// Waiting or uploading: its file is still needed.
     var isActive: Bool {

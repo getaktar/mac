@@ -9,6 +9,8 @@ import UniformTypeIdentifiers
 /// history, or a live view of one destination's bucket.
 private enum LibrarySource: Hashable {
     case history
+    /// File requests made on this Mac.
+    case requests
     case bucket(UUID)
 }
 
@@ -49,6 +51,7 @@ struct LibraryView: View {
     @State private var isDropTargeted = false
     @State private var source: LibrarySource? = .history
     @State private var browserCache = BucketBrowserCache()
+    @State private var selectedRequestID: String?
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
@@ -59,6 +62,8 @@ struct LibraryView: View {
             Group {
                 if let browser = currentBrowser {
                     BucketListView(model: browser)
+                } else if source == .requests {
+                    RequestsListView(selection: $selectedRequestID)
                 } else {
                     sidebar
                 }
@@ -67,6 +72,12 @@ struct LibraryView: View {
         } detail: {
             if let browser = currentBrowser {
                 BucketDetailView(model: browser)
+            } else if source == .requests {
+                if let selectedRequestID {
+                    RequestDetailView(requestID: selectedRequestID)
+                } else {
+                    NoSelectionView()
+                }
             } else {
                 detail
             }
@@ -111,6 +122,8 @@ struct LibraryView: View {
             Section("Library") {
                 Label("History", systemImage: "clock")
                     .tag(LibrarySource.history)
+                Label("Requests", systemImage: "tray.and.arrow.down")
+                    .tag(LibrarySource.requests)
             }
             if !appState.destinationStore.destinations.isEmpty {
                 Section("Buckets") {
@@ -287,7 +300,7 @@ struct LibraryView: View {
         let targets = selectionTargets(for: record)
         if targets.count > 1 {
             Button("Copy \(targets.count) URLs") {
-                ClipboardService.copy(targets.map(\.publicURLString).joined(separator: "\n"))
+                ClipboardService.copy(targets.map { appState.uploadManager.copyText(for: $0) }.joined(separator: "\n"))
             }
             Button("Copy \(targets.count) as Markdown") {
                 ClipboardService.copy(targets.map { markdown(for: $0) }.joined(separator: "\n"))
@@ -306,7 +319,7 @@ struct LibraryView: View {
             }
             Divider()
             Button("Open in Browser") {
-                if let url = record.publicURL { NSWorkspace.shared.open(url) }
+                if let url = record.shareURL { NSWorkspace.shared.open(url) }
             }
             Button("Reveal Details") { selectedIDs = [record.id] }
             Divider()
@@ -476,7 +489,7 @@ struct LibraryView: View {
                 .keyboardShortcut("f", modifiers: [.command])
             Button("") {
                 if let record = records.first(where: { selectedIDs == [$0.id] }) {
-                    ClipboardService.copy(record.publicURLString)
+                    ClipboardService.copy(appState.uploadManager.copyText(for: record))
                 }
             }
             .keyboardShortcut("c", modifiers: [.command])
@@ -1188,6 +1201,8 @@ private struct UploadDetailView: View {
     }
 
     private var previewKind: PreviewKind {
+        // The bucket only has noise; the thumbnail made here is all there is.
+        if record.isEncrypted { return .unsupported }
         if record.mimeType.hasPrefix("image/") { return .image }
         if record.mimeType == "application/pdf" { return .pdf }
         let ext = (record.localFilename as NSString).pathExtension.lowercased()
@@ -1283,7 +1298,7 @@ private struct UploadDetailView: View {
 
     private var fileKindPreview: some View {
         Button {
-            if let url = record.publicURL { NSWorkspace.shared.open(url) }
+            if let url = record.shareURL { NSWorkspace.shared.open(url) }
         } label: {
             VStack(spacing: 10) {
                 // A video's frame, a document's first page and the like.
@@ -1337,13 +1352,14 @@ private struct UploadDetailView: View {
 
     private var linkSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Link").font(.subheadline.bold()).foregroundStyle(.secondary)
+            Text(record.isEncrypted ? LocalizedStringKey("Encrypted Link") : record.sharePageKey != nil ? LocalizedStringKey("Share Page") : LocalizedStringKey("Link"))
+                .font(.subheadline.bold()).foregroundStyle(.secondary)
             HStack {
-                Text(record.publicURLString)
+                Text(record.shareURLString)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
-                    .help(record.publicURLString)
+                    .help(record.shareURLString)
                 Spacer(minLength: 8)
                 Button {
                     copyURL()
@@ -1358,13 +1374,17 @@ private struct UploadDetailView: View {
                 }
                 .help("Show QR Code")
                 Button {
-                    if let url = record.publicURL { NSWorkspace.shared.open(url) }
+                    if let url = record.shareURL { NSWorkspace.shared.open(url) }
                 } label: {
                     Image(systemName: "arrow.up.forward.square")
                 }
                 .help("Open in Browser")
             }
             .buttonStyle(.plain)
+            if record.sharePageKey != nil, !record.isEncrypted {
+                Button("Copy File Link") { ClipboardService.copy(record.publicURLString) }
+                    .controlSize(.small)
+            }
         }
     }
 
@@ -1404,7 +1424,7 @@ private struct UploadDetailView: View {
     }
 
     private func copyURL() {
-        ClipboardService.copy(record.publicURLString)
+        ClipboardService.copy(appState.uploadManager.copyText(for: record))
         justCopiedURL = true
         Task {
             try? await Task.sleep(for: .seconds(1.5))
@@ -1441,7 +1461,7 @@ private struct UploadDetailView: View {
                 }
                 Divider()
                 Button("Open in Browser") {
-                    if let url = record.publicURL { NSWorkspace.shared.open(url) }
+                    if let url = record.shareURL { NSWorkspace.shared.open(url) }
                 }
                 Divider()
                 Button("Replace File\u{2026}") { ReplaceFile.replace(record, using: appState.uploadManager) }
@@ -1553,7 +1573,7 @@ private struct MultiSelectionDetailView: View {
 
             HStack {
                 Button("Copy URLs") {
-                    ClipboardService.copy(records.map(\.publicURLString).joined(separator: "\n"))
+                    ClipboardService.copy(records.map(\.shareURLString).joined(separator: "\n"))
                 }
                 Button("Copy Markdown") {
                     let lines = records.map {

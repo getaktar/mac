@@ -122,7 +122,8 @@ enum ShortCode {
     static let alphabet = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
     /// `randomBytes` gives that many random bytes; tests pass their own.
-    static func make(randomBytes: (Int) -> [UInt8] = systemRandomBytes) -> String {
+    /// Other lengths are for share pages' keys and file request IDs.
+    static func make(length: Int = length, randomBytes: (Int) -> [UInt8] = systemRandomBytes) -> String {
         var code = ""
         while code.count < length {
             for byte in randomBytes(length) where byte < 248 && code.count < length {

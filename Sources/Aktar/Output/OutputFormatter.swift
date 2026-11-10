@@ -21,14 +21,22 @@ enum OutputFormatter {
     /// `shortURL`, that's what URL, Markdown, HTML and a custom template's
     /// {url} use; a custom template also has {shortUrl} (the short link,
     /// or the long one without it) and {longUrl}.
+    ///
+    /// `fileURL` is the file's own link when `publicURL` is its share page
+    /// (docs/share-pages.md): Markdown and HTML embed images, videos and
+    /// audio from it, and a custom template has it as {file}.
     static func format(
         publicURL longURL: URL,
         shortURL: URL? = nil,
         mode: OutputMode,
         filename: String,
-        customTemplate: String = "![{filename}]({url})"
+        customTemplate: String = "![{filename}]({url})",
+        fileURL: URL? = nil
     ) -> String {
-        let publicURL = shortURL ?? longURL
+        var publicURL = shortURL ?? longURL
+        if let fileURL, mode == .markdown || mode == .html, isMedia(filename) {
+            publicURL = fileURL
+        }
         switch mode {
         case .url:
             return publicURL.absoluteString
@@ -43,7 +51,18 @@ enum OutputFormatter {
         // A custom template is the user's own markup, so nothing in it is
         // escaped: {filename} goes in exactly as it is.
         case .custom:
-            return apply(template: customTemplate, publicURL: publicURL, longURL: longURL, filename: filename)
+            return apply(template: customTemplate, publicURL: publicURL, longURL: longURL, fileURL: fileURL ?? longURL, filename: filename)
+        }
+    }
+
+    /// A gallery's one link, never embedded: named after its first file
+    /// for Markdown (`[a.png +2](url)`) and HTML (`<a href>`), the URL
+    /// alone otherwise.
+    static func formatGallery(link: URL, title: String, mode: OutputMode) -> String {
+        switch mode {
+        case .url, .custom: return link.absoluteString
+        case .markdown: return "[\(escapedMarkdown(title))](\(link.absoluteString))"
+        case .html: return "<a href=\"\(link.absoluteString)\">\(escapedHTML(title))</a>"
         }
     }
 
@@ -83,6 +102,14 @@ enum OutputFormatter {
         return type.conforms(to: .image)
     }
 
+    /// Images, videos and audio: what Markdown and HTML embed from the
+    /// file's own link rather than its page.
+    static func isMedia(_ filename: String) -> Bool {
+        let ext = (filename as NSString).pathExtension
+        guard !ext.isEmpty, let type = UTType(filenameExtension: ext) else { return false }
+        return type.conforms(to: .image) || type.conforms(to: .audiovisualContent)
+    }
+
     static func formatBatch(
         entries: [(publicURL: URL, filename: String)],
         mode: OutputMode,
@@ -93,13 +120,14 @@ enum OutputFormatter {
             .joined(separator: "\n")
     }
 
-    private static func apply(template: String, publicURL: URL, longURL: URL, filename: String) -> String {
+    private static func apply(template: String, publicURL: URL, longURL: URL, fileURL: URL, filename: String) -> String {
         let name = (filename as NSString).deletingPathExtension
         let ext = (filename as NSString).pathExtension
         return template
             .replacingOccurrences(of: "{url}", with: publicURL.absoluteString)
             .replacingOccurrences(of: "{shortUrl}", with: publicURL.absoluteString)
             .replacingOccurrences(of: "{longUrl}", with: longURL.absoluteString)
+            .replacingOccurrences(of: "{file}", with: fileURL.absoluteString)
             .replacingOccurrences(of: "{filename}", with: filename)
             .replacingOccurrences(of: "{name}", with: name)
             .replacingOccurrences(of: "{ext}", with: ext)

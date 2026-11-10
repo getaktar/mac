@@ -14,8 +14,12 @@ enum TempFiles {
     static let thumbnails = "AktarThumbnails"
     /// Files handed over by a Shortcuts action.
     static let intents = "AktarIntents"
+    /// Encrypted copies of files on their way up.
+    static let encrypting = "AktarEncrypting"
+    /// Files collected from file requests, until they're in history.
+    static let requests = "AktarRequests"
 
-    private static let owned = [clipboard, localAPI, zip, processing, metadata, thumbnails, intents]
+    private static let owned = [clipboard, localAPI, zip, processing, metadata, thumbnails, intents, encrypting, requests]
 
     static func folder(_ name: String) -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent(name, isDirectory: true)
@@ -53,12 +57,16 @@ enum TempFiles {
         }
     }
 
-    /// Deletes the file Aktar made for an upload (a clipboard image) along
-    /// with its folder. Any other file is left alone.
+    /// Deletes the file Aktar made for an upload (a clipboard image, a file
+    /// collected from a request) along with its folder. Any other file is
+    /// left alone.
     static func removeIfOwned(_ url: URL) {
-        let root = folder(clipboard).standardizedFileURL.path + "/"
         let path = url.standardizedFileURL.path
-        guard path.hasPrefix(root) else { return }
-        try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
+        for name in [clipboard, requests] {
+            let root = folder(name).standardizedFileURL.path + "/"
+            guard path.hasPrefix(root) else { continue }
+            try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
+            return
+        }
     }
 }

@@ -421,6 +421,8 @@ private struct DestinationsSettingsView: View {
         case edit(DestinationConfig)
         /// "Import from Another Device", with a link from aktar://import.
         case importing(String?)
+        /// "Import from ShareX", with what the picked file holds.
+        case sharex(ShareXConfigImport.Result, UUID)
 
         var id: String {
             switch self {
@@ -428,6 +430,7 @@ private struct DestinationsSettingsView: View {
             case .cloudflare: return "cloudflare"
             case .edit(let destination): return destination.id.uuidString
             case .importing(let link): return "import" + (link ?? "")
+            case .sharex(_, let id): return "sharex" + id.uuidString
             }
         }
 
@@ -439,6 +442,7 @@ private struct DestinationsSettingsView: View {
 
     @Environment(AppState.self) private var appState
     @State private var formTarget: FormTarget?
+    @State private var shareXError: String?
 
     var body: some View {
         SettingsPage(title: "Destinations", subtitle: "Manage where your files are uploaded.") {
@@ -460,7 +464,7 @@ private struct DestinationsSettingsView: View {
                                 onShare: {
                                     ShareDestinationWindowController.shared.show(destination, customTemplate: appState.uploadManager.customTemplate)
                                 },
-                                onRemove: { appState.destinationStore.remove(destination) }
+                                onRemove: { appState.removeDestination(destination) }
                             )
                         }
                     }
@@ -476,11 +480,23 @@ private struct DestinationsSettingsView: View {
                     Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
                 }
                 .buttonStyle(.bordered)
+                Button("Import from ShareX\u{2026}") { importFromShareX() }
+                    .buttonStyle(.bordered)
             }
+        }
+        .alert("Couldn\u{2019}t Read the ShareX Settings", isPresented: Binding(
+            get: { shareXError != nil },
+            set: { if !$0 { shareXError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(shareXError ?? "")
         }
         .sheet(item: $formTarget) { target in
             if case .importing(let link) = target {
                 ImportDestinationView(initialLink: link) { formTarget = nil }
+            } else if case .sharex(let result, _) = target {
+                ShareXImportView(result: result) { formTarget = nil }
             } else if case .cloudflare = target {
                 CloudflareSetupView { formTarget = nil }
             } else {
@@ -498,6 +514,14 @@ private struct DestinationsSettingsView: View {
         // aktar://import opens the import with its link filled in.
         .onAppear(perform: handlePendingImport)
         .onChange(of: appState.pendingImportLink) { handlePendingImport() }
+    }
+
+    private func importFromShareX() {
+        switch ShareXImportView.chooseFile() {
+        case .success(let result): formTarget = .sharex(result, UUID())
+        case .failure(let error): shareXError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        case nil: break
+        }
     }
 
     private func handlePendingImport() {
@@ -529,6 +553,8 @@ private struct DestinationsSettingsView: View {
             Button("Add Destination") { formTarget = .add }
                 .buttonStyle(.bordered)
             Button("Import from Another Device\u{2026}") { formTarget = .importing(nil) }
+                .buttonStyle(.bordered)
+            Button("Import from ShareX\u{2026}") { importFromShareX() }
                 .buttonStyle(.bordered)
         }
         .frame(maxWidth: .infinity)
@@ -635,7 +661,10 @@ private struct OutputSettingsView: View {
                             Text("Template").font(.caption).foregroundStyle(.secondary)
                             TextField("Template", text: $manager.customTemplate)
                                 .textFieldStyle(.roundedBorder)
-                            Text("Available variables: {url} {shortUrl} {longUrl} {filename} {name} {ext}")
+                            Text("Available variables: {url} {shortUrl} {longUrl} {file} {filename} {name} {ext}")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text("With a share page, {url} is the page and {file} the file itself.")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

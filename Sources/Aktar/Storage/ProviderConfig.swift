@@ -98,11 +98,23 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// The link shortener uploads here go through; nil is off. Its token
     /// is in the Keychain with the keys (`StorageCredentials`).
     var shortLinks: ShortLinkSettings?
+    /// Each upload also writes a share page next to the file, and its link
+    /// is copied instead (docs/share-pages.md); nil is off.
+    var sharePage: Bool?
+    /// Files are encrypted on this Mac before they go up, and the link
+    /// opens a page that decrypts them in the browser; nil is off.
+    var encryption: ShareEncryption.Mode?
+    /// The page origin whose CORS rule file requests set up in this
+    /// bucket; set again when it changes or a request fails. Not
+    /// transferred.
+    var requestCorsOrigin: String?
 
     /// The path template of a new destination. Saved ones keep theirs.
     static let defaultObjectPathTemplate = "{year}/{month}/{short}.{ext}"
     /// The shortest links: just the code, on the bucket's own domain.
     static let cleanURLTemplate = "{short}.{ext}"
+
+    var writesSharePages: Bool { sharePage == true && encryption == nil }
 
     static func deriveR2Endpoint(accountID: String) -> String {
         "https://\(accountID).r2.cloudflarestorage.com"

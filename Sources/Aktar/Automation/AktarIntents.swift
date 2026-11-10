@@ -57,7 +57,7 @@ struct UploadEntity: AppEntity {
     init(_ record: UploadRecord, link: URL? = nil) {
         id = record.id
         filename = record.localFilename
-        self.link = link ?? record.publicURL ?? URL(string: "about:blank")!
+        self.link = link ?? (record.isEncrypted ? record.shareURL : record.publicURL) ?? URL(string: "about:blank")!
         objectKey = record.objectKey
         destinationName = record.destinationName
         uploadedAt = record.createdAt

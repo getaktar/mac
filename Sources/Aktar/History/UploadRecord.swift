@@ -26,6 +26,19 @@ final class UploadRecord: Identifiable {
     /// When a new file was last written over this upload at its key (Replace
     /// File); nil when it never was. `createdAt` stays the first upload.
     var replacedAt: Date?
+    /// The key of the share page (or gallery) this upload's link opens; nil
+    /// for an upload without one (docs/share-pages.md). Several records
+    /// share a gallery's key.
+    var sharePageKey: String?
+    /// An encrypted upload's key, base64url of the 32 raw (or password
+    /// derived) bytes, so Replace File keeps the link working.
+    var encryptionKey: String?
+    /// A password-encrypted upload's salt, hex; nil when the key is in the
+    /// link.
+    var encryptionSalt: String?
+    /// The file request this upload came in through, and its title then.
+    var requestID: String?
+    var requestTitle: String?
 
     /// When the bytes in the bucket were written: the last replace, or the
     /// upload. What's compared with the object's date to tell whether the
@@ -62,9 +75,43 @@ final class UploadRecord: Identifiable {
         self.watchedFolderName = watchedFolderName
     }
 
-    /// "Watched: Screenshots" for an upload from a watched folder.
+    /// "Watched: Screenshots" for an upload from a watched folder,
+    /// "Request: Logs" for one sent through a file request.
     var sourceLabel: String? {
-        watchedFolderName.map { String(localized: "Watched: \($0)") }
+        if requestID != nil { return FileRequests.sourceLabel(title: requestTitle ?? "") }
+        return watchedFolderName.map { String(localized: "Watched: \($0)") }
+    }
+
+    var isEncrypted: Bool { encryptionKey != nil }
+
+    /// The share page's (or gallery's) own address, without a fragment.
+    var sharePageURL: URL? {
+        guard let sharePageKey else { return nil }
+        return SharePages.pageURL(fileURL: publicURL?.absoluteString ?? publicURLString, fileKey: objectKey, pageKey: sharePageKey)
+    }
+
+    /// The fragment an encrypted upload's link carries, `k=<key>`; nil for
+    /// a password, which the link never carries.
+    var encryptionFragment: String? {
+        guard let encryptionKey, encryptionSalt == nil else { return nil }
+        return "k=" + encryptionKey
+    }
+
+    /// What copying the upload gives: its page (with the key of an
+    /// encrypted one), or the file itself.
+    var shareURL: URL? {
+        guard let page = sharePageURL else { return publicURL }
+        return Self.appendingFragment(encryptionFragment, to: page)
+    }
+
+    var shareURLString: String { shareURL?.absoluteString ?? publicURLString }
+
+    /// `url` with `#fragment`; the short link of an encrypted upload is
+    /// made without it and gets it back here.
+    static func appendingFragment(_ fragment: String?, to url: URL) -> URL {
+        guard let fragment, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        components.fragment = fragment
+        return components.url ?? url
     }
 
     /// Some destinations were saved with a schemeless base URL (e.g.

@@ -9,8 +9,8 @@ options:
 # One version for the app and its Share extension, which must match.
 settings:
   base:
-    MARKETING_VERSION: "0.20.0"
-    CURRENT_PROJECT_VERSION: "27"
+    MARKETING_VERSION: "0.21.0"
+    CURRENT_PROJECT_VERSION: "28"
 
 packages:
   Soto:
@@ -43,6 +43,10 @@ targets:
       # The short link provider definitions, bundled straight from the docs
       # so there's one copy; see ShortLinkProviders.
       - path: docs/short-link-providers.json
+        buildPhase: resources
+      # The share page, bundled straight from the docs: the same file ships
+      # in every app, byte for byte; see SharePages.
+      - path: docs/share-page/template.html
         buildPhase: resources
     dependencies:
       - package: Soto
@@ -207,7 +211,13 @@ targets:
       - path: Sources/Aktar/Upload/RemoteDownload.swift
       - path: Sources/Aktar/Upload/UploadOutbox.swift
       - path: Sources/Aktar/Upload/NetworkMonitor.swift
+      - path: Sources/Aktar/SharePages
+      - path: Sources/Aktar/Transfer/ShareXConfigImport.swift
       - path: docs/short-link-providers.json
+        buildPhase: resources
+      - path: docs/share-page/template.html
+        buildPhase: resources
+      - path: docs/share-page/vectors.json
         buildPhase: resources
     dependencies:
       - package: Soto

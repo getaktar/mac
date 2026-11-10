@@ -37,6 +37,8 @@ struct DestinationFormView: View {
     private let hasSavedCloudflareToken: Bool
     @State private var purgeCheck: PurgeCheck?
     @State private var hooks: [WatchHook]
+    @State private var sharePage: Bool
+    @State private var encryption: ShareEncryption.Mode?
     @State private var shortLinks: ShortLinkFormState
     /// The provider of the short link token saved for this destination.
     private let savedShortLinkProvider: String?
@@ -102,6 +104,8 @@ struct DestinationFormView: View {
         _shortCache = State(initialValue: existing?.shortCache ?? false)
         _cloudflareZoneId = State(initialValue: existing?.cloudflareZoneId ?? "")
         _hooks = State(initialValue: existing?.hooks ?? [])
+        _sharePage = State(initialValue: existing?.sharePage ?? false)
+        _encryption = State(initialValue: existing?.encryption)
         _shortLinks = State(initialValue: ShortLinkFormState(existing?.shortLinks))
         let hasShortLinkToken = existing.flatMap { try? KeychainService.load(for: $0.id).shortLinkToken }.map { !$0.isEmpty } ?? false
         savedShortLinkProvider = hasShortLinkToken ? existing?.shortLinks?.providerId : nil
@@ -226,6 +230,8 @@ struct DestinationFormView: View {
                 autoDeleteSection
 
                 uploadDefaultsSection
+
+                sharingSection
 
                 useForSection
 
@@ -652,9 +658,13 @@ struct DestinationFormView: View {
         let region: String
 
         init(_ config: DestinationConfig) {
-            endpoint = config.endpoint.trimmingCharacters(in: .whitespaces)
-            bucket = config.bucket.trimmingCharacters(in: .whitespaces)
-            region = config.region.trimmingCharacters(in: .whitespaces)
+            self.init(endpoint: config.endpoint, bucket: config.bucket, region: config.region)
+        }
+
+        init(endpoint: String, bucket: String, region: String) {
+            self.endpoint = endpoint.trimmingCharacters(in: .whitespaces)
+            self.bucket = bucket.trimmingCharacters(in: .whitespaces)
+            self.region = region.trimmingCharacters(in: .whitespaces)
         }
     }
 
@@ -795,8 +805,76 @@ struct DestinationFormView: View {
             cloudflareZoneId: cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 ? nil : cloudflareZoneId.trimmingCharacters(in: .whitespacesAndNewlines),
             hooks: hooks.isEmpty ? nil : hooks,
-            shortLinks: shortLinks.settings()
+            shortLinks: shortLinks.settings(),
+            sharePage: sharePage ? true : nil,
+            encryption: encryption,
+            // The CORS rule was set up for this bucket and these links.
+            requestCorsOrigin: existing.flatMap { old in
+                Connection(old) == Connection(endpoint: endpoint, bucket: bucket, region: region)
+                    && old.publicBaseURL == publicBaseURL && old.temporaryLink == temporaryLink ? old.requestCorsOrigin : nil
+            }
         )
+    }
+
+    /// Share Page and Encryption (docs/share-pages.md), with the warnings
+    /// about where the pages are served from.
+    private var sharingSection: some View {
+        Section {
+            Toggle(isOn: $sharePage) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Share Page")
+                    Text("Copies a link to a page with a preview and a download button, written next to the file in your bucket. Slack, Discord, iMessage and X show a card for it.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .disabled(encryption != nil)
+            if sharePage, encryption == nil {
+                pageWarnings(encrypted: false)
+            }
+            Picker("Encryption", selection: $encryption) {
+                Text("Off").tag(ShareEncryption.Mode?.none)
+                Text("Key in the Link").tag(ShareEncryption.Mode?.some(.link))
+                Text("Ask for a Password").tag(ShareEncryption.Mode?.some(.password))
+            }
+            if let encryption {
+                Text(encryption == .link
+                    ? String(localized: "Anyone with the link can open the file.")
+                    : String(localized: "Aktar asks for a password for each upload. Share it separately; the link alone doesn\u{2019}t open the file. Uploads nobody is there to type one for (watched folders, Shortcuts, the local API, file requests) get the key in the link instead."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                pageWarnings(encrypted: true)
+            }
+        } header: {
+            Text("Sharing")
+        } footer: {
+            Text("Files are encrypted on this device before they\u{2019}re uploaded. The link opens a page that decrypts them in the browser; your storage provider only ever sees noise.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func pageWarnings(encrypted: Bool) -> some View {
+        if SharePages.isR2Dev(publicBaseURL: publicBaseURL) {
+            Label("r2.dev links are rate limited and some filters block HTML pages on them. A custom domain works better.", systemImage: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        if SharePages.isPathStyle(publicBaseURL: publicBaseURL, bucket: bucket) {
+            Label(
+                encrypted
+                    ? String(localized: "Encrypted links need their own domain (or virtual-hosted URLs) to be safe here.")
+                    : String(localized: "Pages here share one web address with everything else on this server."),
+                systemImage: "exclamationmark.triangle.fill"
+            )
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     /// Kept while thumbnails aren't in the bucket, so switching back finds

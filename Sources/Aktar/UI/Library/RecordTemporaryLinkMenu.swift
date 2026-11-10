@@ -9,6 +9,11 @@ struct RecordTemporaryLinkMenu: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
+        // An encrypted upload's file can't be opened on its own.
+        if !record.isEncrypted { menu }
+    }
+
+    private var menu: some View {
         Menu("Copy Temporary Link") {
             ForEach(TemporaryLinkDuration.allCases) { duration in
                 Button(duration.title) {

@@ -116,7 +116,9 @@ final class ShortLinkService {
         guard let destination = destination(record.destinationID) else {
             throw StorageError.unknown(String(localized: "This upload's destination was removed."))
         }
-        guard let publicURL = record.publicURL else { throw ShortLinkError.invalidEndpoint }
+        // An upload with a share page shortens the page (an encrypted
+        // one's without its key, which never goes to the shortener).
+        guard let publicURL = record.sharePageURL ?? record.publicURL else { throw ShortLinkError.invalidEndpoint }
         var link = publicURL
         var temporaryExpiresAt: Date?
         if let duration = destination.temporaryLink, destination.shortLinks?.shortenTemporaryLinks == true,

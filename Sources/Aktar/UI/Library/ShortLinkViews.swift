@@ -196,10 +196,17 @@ struct RecordShortLinkMenuItems: View {
     var body: some View {
         let service = appState.uploadManager.shortLinks
         if let active = service.active(for: record.id) {
-            Button("Copy Short Link") { ClipboardService.copy(active.shortUrl) }
-            Button("Copy Original Link") { ClipboardService.copy(record.publicURLString) }
+            Button("Copy Short Link") {
+                // An encrypted upload's key goes after it.
+                ClipboardService.copy(active.url.map { UploadRecord.appendingFragment(record.encryptionFragment, to: $0).absoluteString } ?? active.shortUrl)
+            }
+            Button("Copy Original Link") { ClipboardService.copy(record.shareURLString) }
         } else {
-            Button("Copy URL") { ClipboardService.copy(record.publicURLString) }
+            Button("Copy URL") { ClipboardService.copy(record.shareURLString) }
+        }
+        // A page's file, on its own (not an encrypted one's noise).
+        if record.sharePageKey != nil, !record.isEncrypted {
+            Button("Copy File Link") { ClipboardService.copy(record.publicURLString) }
         }
         if service.canCreate(for: record) {
             Button("Create Short Link") {

@@ -709,7 +709,8 @@ final class LocalAPIRouter {
 
     /// The formats use the upload's active short link, as copying does.
     private func uploadDTO(_ record: UploadRecord, reused: Bool?, shortLinkError: String? = nil) -> UploadDTO {
-        let url = record.publicURL
+        // An encrypted upload's file is noise; its link is the page.
+        let url = record.isEncrypted ? record.shareURL : record.publicURL
         let manager = appState.uploadManager
         func formatted(_ mode: OutputMode) -> String {
             manager.formattedLink(for: record, mode: mode)

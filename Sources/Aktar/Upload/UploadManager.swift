@@ -15,6 +15,8 @@ final class UploadManager {
     /// Each link as its destination's "Copy as" formats it: the files of a
     /// drop can go to different destinations.
     private var openGroups: [UUID: [Int: String]] = [:]
+    /// The files of open gallery groups so far, by position.
+    @ObservationIgnored private var galleryEntries: [UUID: [Int: GalleryEntry]] = [:]
 
     /// Settings > Output: what's copied after an upload, unless the
     /// destination has its own choice.
@@ -115,12 +117,15 @@ final class UploadManager {
 
     /// A new temporary link to an uploaded file, for sharing it from
     /// history, e.g. when the bucket is private.
-    func temporaryURL(for record: UploadRecord, validFor duration: TemporaryLinkDuration) async throws -> URL {
+    /// `page` signs its share page instead of the file (without an
+    /// encrypted one's key).
+    func temporaryURL(for record: UploadRecord, validFor duration: TemporaryLinkDuration, page: Bool = false) async throws -> URL {
         guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) else {
             throw StorageError.unknown(String(localized: "This upload's destination was removed."))
         }
         let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
-        return try await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue)
+        let key = page ? record.sharePageKey ?? record.objectKey : record.objectKey
+        return try await provider.temporaryURL(for: key, expiresIn: duration.rawValue)
     }
 
     /// The link copying an upload would give now: its active short link,
@@ -128,13 +133,14 @@ final class UploadManager {
     /// otherwise the public URL (also when the destination is gone or
     /// signing fails).
     func shareLink(for record: UploadRecord) async -> URL? {
-        if let short = shortLinks.active(for: record.id)?.url { return short }
+        let fragment = record.encryptionFragment
+        if let short = shortLinks.active(for: record.id)?.url { return UploadRecord.appendingFragment(fragment, to: short) }
         if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }),
            let duration = destination.temporaryLink,
-           let url = try? await temporaryURL(for: record, validFor: duration) {
-            return url
+           let url = try? await temporaryURL(for: record, validFor: duration, page: record.sharePageKey != nil) {
+            return UploadRecord.appendingFragment(fragment, to: url)
         }
-        return record.publicURL
+        return record.shareURL
     }
 
     /// `expiryDays` overrides the menu bar's "Delete after" choice (0 keeps
@@ -153,7 +159,7 @@ final class UploadManager {
     /// Undo takes back as a whole; with `paste`, its link is pasted into
     /// that app once it's copied (see `PasteRequest`).
     func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil, paste: PasteRequest? = nil) {
-        let action = inputs.contains { $0.watch == nil } ? newAction(paste: paste) : nil
+        let action = inputs.contains { $0.watch == nil && $0.request == nil } ? newAction(paste: paste) : nil
         if let destination {
             enqueue(inputs, to: destination, expiryDays: expiryDays, action: action)
             return
@@ -210,14 +216,16 @@ final class UploadManager {
     private func enqueue(_ inputs: [UploadInput], to destination: DestinationConfig, expiryDays: Int?, action: UploadAction?) {
         let rulesActive = ExpiryRuleStore.shared.isActive(destination.id)
         let days = rulesActive ? expiryDays ?? self.expiryDays(for: destination) : 0
-        let newJobs = expandingFolders(inputs, for: destination).map { input in
+        let prompted = askPasswords(groupedForSharing(expandingFolders(inputs, for: destination), destination: destination), for: destination)
+        let newJobs = prompted.map { input, password in
             let jobDays: Int? = if let key = input.objectKey {
                 rulesActive ? UploadExpiry.days(forKey: key) : nil
             } else {
                 UploadExpiry.options.contains(days) ? days : nil
             }
             let job = UploadJob(input: input, destination: destination, expiryDays: jobDays)
-            if let action, input.watch == nil {
+            job.password = password
+            if let action, input.watch == nil, input.request == nil {
                 job.actionID = action.id
                 action.jobIDs.append(job.id)
             }
@@ -226,6 +234,35 @@ final class UploadManager {
         jobs.insert(contentsOf: newJobs, at: 0)
         for job in newJobs { enqueueForStart(job) }
         drainQueue()
+    }
+
+    /// Several files uploaded together to a destination with share pages
+    /// get one gallery (docs/share-pages.md, part 2); to one that encrypts,
+    /// their links are copied together, one per line. Files that already
+    /// have a group (a folder, a drop to several destinations) keep it.
+    private func groupedForSharing(_ inputs: [UploadInput], destination: DestinationConfig) -> [UploadInput] {
+        guard destination.writesSharePages || destination.encryption != nil else { return inputs }
+        let candidates = inputs.indices.filter { index in
+            let input = inputs[index]
+            return input.group == nil && input.watch == nil && input.request == nil && !input.isUnattended
+                && input.objectKey == nil && input.folderKey == nil && input.replacing == nil
+        }
+        guard candidates.count > 1 else { return inputs }
+        var inputs = inputs
+        let groupID = UUID()
+        openGroups[groupID] = [:]
+        if destination.writesSharePages { galleryEntries[groupID] = [:] }
+        for (position, index) in candidates.enumerated() {
+            inputs[index].group = UploadGroup(
+                id: groupID,
+                name: String(localized: "Uploads"),
+                index: position,
+                count: candidates.count,
+                isDrop: true,
+                isGallery: destination.writesSharePages
+            )
+        }
+        return inputs
     }
 
     /// Stops the job: in-flight parts stop and its multipart upload is
@@ -279,7 +316,9 @@ final class UploadManager {
             guard input.objectKey == nil, input.folderKey == nil, FolderUpload.isFolder(input.fileURL) else { return [input] }
             // The folder's own name, or the one it was given before upload.
             let name = input.originalFilename
-            switch input.asZip ? .zip : destination.folderUpload ?? .default {
+            // An encrypted upload's key ignores the path, so a folder's
+            // structure can't be kept: it goes up as one ZIP.
+            switch input.asZip || destination.encryption != nil ? .zip : destination.folderUpload ?? .default {
             case .zip:
                 var zipped = input
                 zipped.originalFilename = name + ".zip"
@@ -290,10 +329,11 @@ final class UploadManager {
                     let prefix = FolderUpload.keyPrefix(template: destination.objectPathTemplate, folderName: name)
                     let groupID = UUID()
                     openGroups[groupID] = [:]
+                    if destination.writesSharePages { galleryEntries[groupID] = [:] }
                     return entries.enumerated().map { index, entry in
                         var file = UploadInput(fileURL: entry.fileURL, originalFilename: entry.fileURL.lastPathComponent, source: input.source)
                         file.folderKey = prefix + entry.relativePath
-                        file.group = UploadGroup(id: groupID, name: name, index: index, count: entries.count)
+                        file.group = UploadGroup(id: groupID, name: name, index: index, count: entries.count, isGallery: destination.writesSharePages)
                         return file
                     }
                 } catch {
@@ -351,6 +391,7 @@ final class UploadManager {
         let provider = S3Provider(config: destination, credentials: credentials)
         try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
+        await deletePageIfUnused(of: record, provider: provider)
         RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: record.objectKey)
         // The file is gone; its short links follow in the background.
         shortLinks.cleanUpAfterFileDeleted(uploadID: record.id, destination: destination, filename: record.localFilename)
@@ -447,6 +488,7 @@ final class UploadManager {
         // too; this covers a sweep that gets there first.
         try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
+        await deletePageIfUnused(of: record, provider: provider)
         RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: record.objectKey)
         repository.delete(record)
     }
@@ -592,6 +634,13 @@ final class UploadManager {
                 let uploadURL = stripped ?? fileURL
                 let fileSize = try S3Provider.fileSize(of: uploadURL)
 
+                // Encrypted (docs/share-pages.md, part 5): the processed file
+                // is sealed into a copy, which is what goes up, under a key
+                // that ignores the path template.
+                let encryptionKeys = await self.encryptionKeys(for: job, destination: destination)
+                let encrypting = encryptionKeys != nil
+                let ownPage = !encrypting && self.wantsOwnPage(job, destination: destination)
+
                 // Hashes of the bytes that go up, only when something needs
                 // them: the path variables, reusing a link, or recognizing a
                 // temporary copy when a multipart upload is resumed.
@@ -602,12 +651,13 @@ final class UploadManager {
                 // this upload goes, whatever else is in the bucket.
                 let pinnedKey = job.earlyLink?.objectKey
                 let canReuse = pinnedKey == nil && reuseDuplicates && job.input.objectKey == nil && (job.input.group?.isDrop ?? true) && zipped == nil
+                    && !encrypting && job.input.replacing == nil
                 let isCopy = uploadURL != job.input.fileURL
-                let wantsMD5 = generatesKey && pinnedKey == nil && ObjectKeyGenerator.usesMD5(template)
+                let wantsMD5 = !encrypting && generatesKey && pinnedKey == nil && ObjectKeyGenerator.usesMD5(template)
                 // A watched folder's file is hashed once: here, in this pass,
                 // or by the watcher, which then hands its hash over.
-                let wantsSHA256 = canReuse || (generatesKey && ObjectKeyGenerator.usesSHA256(template))
-                    || (isCopy && fileSize > S3Provider.multipartThreshold)
+                let wantsSHA256 = canReuse || (!encrypting && generatesKey && ObjectKeyGenerator.usesSHA256(template))
+                    || (!encrypting && isCopy && fileSize > S3Provider.multipartThreshold)
                     || (!isCopy && watch?.wantsContentHash == true)
                 let known = isCopy ? nil : watch?.sha256
                 var hashes = try await offMain {
@@ -627,6 +677,8 @@ final class UploadManager {
                 var objectKey: String
                 if let pinnedKey {
                     objectKey = pinnedKey
+                } else if encrypting, job.input.objectKey == nil {
+                    objectKey = SharePages.encryptedKey(expiryDays: job.expiryDays)
                 } else if let exact = job.input.objectKey {
                     objectKey = withNewExtension(exact)
                     // The bucket browser checked the name the user chose,
@@ -657,8 +709,11 @@ final class UploadManager {
                    DuplicateReuse.isUnchanged(size: info.size, lastModified: info.lastModified, uploadedSize: Int64(record.byteSize), uploadedAt: record.writtenAt) {
                     var link = publicURL
                     var temporaryExpiresAt: Date?
+                    // An earlier upload with a page: its page link is copied.
+                    let reusedKey = record.isEncrypted ? record.objectKey : record.sharePageKey ?? record.objectKey
+                    if record.sharePageKey != nil, !record.isEncrypted, let page = record.sharePageURL { link = page }
                     if let duration = destination.temporaryLink,
-                       let signed = try? await provider.temporaryURL(for: record.objectKey, expiresIn: duration.rawValue) {
+                       let signed = try? await provider.temporaryURL(for: reusedKey, expiresIn: duration.rawValue) {
                         link = signed
                         temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
                     }
@@ -687,7 +742,7 @@ final class UploadManager {
                 // A watched folder replacing its own upload so the link
                 // stays sends the exact key instead, and isn't numbered. A
                 // key that may not list the bucket uploads as before.
-                if pinnedKey == nil, generatesKey, job.input.folderKey == nil, !ObjectKeyGenerator.hasUniqueToken(template) {
+                if pinnedKey == nil, generatesKey, !encrypting, job.input.folderKey == nil, !ObjectKeyGenerator.hasUniqueToken(template) {
                     do {
                         objectKey = try await Self.freeKey(objectKey, provider: provider)
                     } catch StorageError.accessDenied {
@@ -695,9 +750,42 @@ final class UploadManager {
                     }
                 }
 
+                var sendURL = uploadURL
+                var sendSize = fileSize
+                var sendType = contentType
+                var sealedFolder: URL?
+                defer { if let sealedFolder { try? FileManager.default.removeItem(at: sealedFolder) } }
+                if let encryptionKeys {
+                    let folder = try TempFiles.newFolder(in: TempFiles.encrypting)
+                    sealedFolder = folder
+                    let sealed = folder.appendingPathComponent("sealed.bin")
+                    let metadata = ShareEncryption.Metadata(
+                        name: filename,
+                        type: SharePages.bareType(contentType),
+                        size: fileSize,
+                        syntax: SharePages.isTextType(contentType) ? Self.encryptedSyntax(filename) : nil
+                    )
+                    sendSize = try await offMain {
+                        try ShareEncryption.encrypt(file: uploadURL, to: sealed, metadata: metadata, keys: encryptionKeys)
+                    }
+                    sendURL = sealed
+                    sendType = "application/octet-stream"
+                    // A new nonce makes new bytes: parts sent before can't be used.
+                    if let old = job.multipartSession {
+                        Self.abort(old, destination: destination)
+                        job.multipartSession = nil
+                    }
+                }
+                let bodyURL = sendURL
+                let bodySize = sendSize
+                let bodyType = sendType
+
                 // Sends the file to `key`, only if the key is new when
                 // `onlyIfNew`. Each try counts its progress from the start.
                 @MainActor func send(to key: String, onlyIfNew: Bool, session: MultipartSession?, identity: MultipartFileIdentity?) async throws {
+                    let fileSize = bodySize
+                    let uploadURL = bodyURL
+                    let contentType = bodyType
                     let reporter = ProgressReporter(total: fileSize) { progress in
                         guard case .uploading = job.state else { return }
                         job.state = .uploading(progress: progress)
@@ -726,7 +814,7 @@ final class UploadManager {
 
                 var session: MultipartSession?
                 var identity: MultipartFileIdentity?
-                if fileSize > S3Provider.multipartThreshold {
+                if !encrypting, fileSize > S3Provider.multipartThreshold {
                     let keyBasis = generatesKey ? [template, filename, watch?.subpath ?? ""].joined(separator: "\u{0}") : nil
                     let fileIdentity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256, keyBasis: keyBasis)
                     identity = fileIdentity
@@ -741,8 +829,8 @@ final class UploadManager {
                 // and the upload is kept until they're there. (Decided here,
                 // not before the task: `uploadAndWait` marks its job only
                 // once `upload` has returned.)
-                if job.earlyLink == nil, self.instantLinksEnabled, Self.canCopyEarly(job) {
-                    try await self.copyEarlyLink(job, objectKey: objectKey, destination: destination, provider: provider, filename: filename)
+                if job.earlyLink == nil, !encrypting, self.instantLinksEnabled, Self.canCopyEarly(job) {
+                    try await self.copyEarlyLink(job, objectKey: objectKey, destination: destination, provider: provider, filename: filename, withPage: ownPage)
                 }
                 // Offline, the upload waits for the network right away
                 // rather than after the provider's retries.
@@ -754,11 +842,11 @@ final class UploadManager {
                 let firstAttempt = job.firstAttemptAt ?? .now
                 func isOwnEarlierWrite(_ key: String) async -> Bool {
                     guard key == pinned, let info = try? await provider.objectInfo(key: key),
-                          info.size == fileSize, let written = info.lastModified else { return false }
+                          info.size == bodySize, let written = info.lastModified else { return false }
                     return written >= firstAttempt.addingTimeInterval(-120)
                 }
 
-                if generatesKey, job.input.folderKey == nil, ObjectKeyGenerator.usesShortCode(template) {
+                if generatesKey, !encrypting, job.input.folderKey == nil, ObjectKeyGenerator.usesShortCode(template) {
                     // A key with {short} never replaces a file that has it
                     // already: a taken one is made again with a new code. A
                     // resumed multipart upload keeps its key unless that
@@ -803,14 +891,72 @@ final class UploadManager {
                 guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: objectKey) else {
                     throw StorageError.invalidPublicBaseURL
                 }
-                let result = UploadResult(objectKey: objectKey, publicURL: publicURL, byteSize: Int(fileSize))
+                let result = UploadResult(objectKey: objectKey, publicURL: publicURL, byteSize: Int(bodySize))
+
+                // A share page: its thumbnail goes to the bucket first, as
+                // the page shows it, then the page itself.
+                let thumbnail = await thumbnailTask?.value
+                var share: ShareOutcome?
+                var shareFailure: String?
+                if encrypting || ownPage {
+                    try await self.takeBackIfCancelled(job, objectKey: objectKey, provider: provider)
+                    let thumbnailKey = encrypting ? nil : await self.updateBucketThumbnails(thumbnail, objectKey: objectKey, destination: destination, provider: provider)
+                    let pageKey = job.earlyLink?.pageKey ?? self.replacedPageKey(of: job)
+                        ?? job.input.objectKey.flatMap { key in self.repository.records(key: key, destinationID: destination.id).compactMap(\.sharePageKey).first }
+                        ?? SharePages.pageKey(forFileKey: objectKey)
+                    do {
+                        let (fileLink, fileSignedUntil) = try await self.link(toKey: objectKey, destination: destination, provider: provider)
+                        let (_, pageSignedUntil) = try await self.link(toKey: pageKey, destination: destination, provider: provider)
+                        let thumbnailLink = await self.thumbnailLink(key: thumbnailKey, destination: destination, provider: provider)
+                        let expires = Self.pageExpiry([
+                            job.expiryDays.map { Date.now.addingTimeInterval(TimeInterval($0) * 86_400) },
+                            fileSignedUntil, pageSignedUntil,
+                        ])
+                        let text = encrypting ? nil : await Task.detached { SharePages.pageText(of: uploadURL, contentType: contentType) }.value
+                        let page = self.singlePage(
+                            filename: filename, fileLink: fileLink, size: fileSize, contentType: contentType,
+                            thumbnailLink: thumbnailLink, text: text, expires: expires,
+                            encrypted: encryptionKeys.map { (fileLink, bodySize, $0.salt != nil) }
+                        )
+                        try await self.writePage(page, key: pageKey, provider: provider)
+                        share = ShareOutcome(pageKey: pageKey, fileLink: fileLink, fragment: encryptionKeys?.fragment, keys: encryptionKeys)
+                    } catch let error as CancellationError {
+                        throw error
+                    } catch {
+                        // An encrypted file can't be shared without its page.
+                        if encrypting {
+                            try? await provider.delete(objectKey: objectKey)
+                            throw error
+                        }
+                        shareFailure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                    }
+                }
 
                 let link: URL
                 let shortening: ShortLinkService.Attempt
-                if let early = job.earlyLink, early.objectKey == objectKey {
+                if let early = job.earlyLink, early.objectKey == objectKey, share != nil || early.pageKey == nil {
                     // Made when the link was copied.
                     link = early.link
                     shortening = early.attempt
+                } else if let share, job.input.replacing == nil {
+                    // The page's link (without an encrypted one's key) is what's
+                    // shortened and copied.
+                    let (pageLink, pageSignedUntil) = try await self.link(toKey: share.pageKey, destination: destination, provider: provider)
+                    link = pageLink
+                    shortening = job.input.shortLink == false
+                        ? .skipped
+                        : await self.shortLinks.shorten(
+                            pageLink,
+                            destination: destination,
+                            temporaryExpiresAt: pageSignedUntil,
+                            uploadExpiresAt: job.expiryDays.map { Date.now.addingTimeInterval(TimeInterval($0) * 86_400) },
+                            isFolderFile: false,
+                            explicit: job.input.shortLink == true
+                        )
+                } else if let share {
+                    // A replace keeps its link, and its short link.
+                    link = try await self.link(toKey: share.pageKey, destination: destination, provider: provider).0
+                    shortening = .skipped
                 } else {
                     if let early = job.earlyLink {
                         // The key was taken after all (a {short} clash), so
@@ -846,11 +992,21 @@ final class UploadManager {
                         )
                 }
 
-                let thumbnail = await thumbnailTask?.value
                 try await self.takeBackIfCancelled(job, objectKey: objectKey, provider: provider, shortening: shortening, destination: destination)
-                self.finish(job: job, result: result, destination: destination, link: link, shortening: shortening, uploadedFileURL: fileURL, filename: filename, contentHash: hashes.sha256, thumbnail: thumbnail?.data)
-                await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
-                await self.afterUpload(job: job, result: result, destination: destination, link: link, filename: filename, credentials: credentials)
+                if let shareFailure {
+                    NotificationService.notifySharePageFailed(filename: filename, reason: shareFailure)
+                }
+                // A gallery's file: its thumbnail is in the bucket before the
+                // gallery is written.
+                var galleryThumbnailKey: String?
+                if share == nil, !encrypting, job.input.group?.isGallery == true {
+                    galleryThumbnailKey = await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
+                }
+                self.finish(job: job, result: result, destination: destination, link: link, shortening: shortening, uploadedFileURL: fileURL, filename: filename, contentHash: encrypting ? nil : hashes.sha256, thumbnail: thumbnail?.data, share: share, galleryThumbnailKey: galleryThumbnailKey)
+                if share == nil, !encrypting, job.input.group?.isGallery != true {
+                    await self.updateBucketThumbnails(thumbnail, objectKey: result.objectKey, destination: destination, provider: provider)
+                }
+                await self.afterUpload(job: job, result: result, destination: destination, link: share.map { UploadRecord.appendingFragment($0.fragment, to: link) } ?? link, filename: filename, credentials: credentials, pageKey: share?.pageKey)
             } catch {
                 if case .cancelled = job.state {
                     self.stopped(job: job)
@@ -996,9 +1152,18 @@ final class UploadManager {
             )))
         } else if let group = job.input.group, openGroups[group.id] != nil {
             openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: record.localFilename, for: destination)
+            if group.isGallery {
+                galleryEntries[group.id]?[group.index] = GalleryEntry(
+                    recordID: record.id, objectKey: record.objectKey, name: record.localFilename, size: Int64(record.byteSize),
+                    type: record.mimeType, thumbnailKey: nil, expiresAt: record.expiresAt, isNew: false
+                )
+            }
             finishGroupIfDone(group)
+        } else if job.input.request != nil {
+            // Collected from a file request: nothing to copy or announce.
         } else {
-            copyLink(format(link, shortURL: shortURL, filename: record.localFilename, for: destination), for: job)
+            let fileLink = record.sharePageKey != nil ? record.publicURL : nil
+            copyLink(format(link, shortURL: shortURL, filename: record.localFilename, for: destination, fileURL: fileLink), for: job)
             if showsSuccessNotifications, shortFailure == nil {
                 NotificationService.notifyUploadReused(filename: record.localFilename, identifier: notificationID(for: job), actionID: job.actionID)
                 noteNotification(for: job)
@@ -1013,7 +1178,7 @@ final class UploadManager {
     /// the destination is set to one, unless `shortening` made a short
     /// link for it. History keeps the public URL. `filename` is the name
     /// the upload goes by, with the extension of a converted photo.
-    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, shortening: ShortLinkService.Attempt, uploadedFileURL: URL, filename: String, contentHash: String?, thumbnail: Data?) {
+    private func finish(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, shortening: ShortLinkService.Attempt, uploadedFileURL: URL, filename: String, contentHash: String?, thumbnail: Data?, share: ShareOutcome? = nil, galleryThumbnailKey: String? = nil) {
         job.state = .succeeded(publicURLString: result.publicURL.absoluteString)
         TempFiles.removeIfOwned(job.input.fileURL)
         var input = job.input
@@ -1024,6 +1189,18 @@ final class UploadManager {
             repository.record(result: result, input: input, destination: destination, expiryDays: job.expiryDays, uploadedFileURL: uploadedFileURL, contentHash: contentHash, thumbnail: thumbnail)
         }
         job.recordID = record.id
+        if let share {
+            record.sharePageKey = share.pageKey
+            if let keys = share.keys {
+                record.encryptionKey = ShareEncryption.base64URL(keys.key)
+                record.encryptionSalt = keys.salt.map(ShareEncryption.hex)
+            }
+        }
+        if let request = job.input.request {
+            record.requestID = request.id
+            record.requestTitle = request.title
+        }
+        if share != nil || job.input.request != nil { try? repository.modelContext.save() }
         if job.input.replacing == nil, let action = job.actionID.flatMap({ actions[$0] }) {
             action.recordIDs.append(record.id)
         }
@@ -1031,11 +1208,13 @@ final class UploadManager {
             outbox.remove(job.id)
             job.isInOutbox = false
         }
-        let (shortURL, shortFailure) = shortLink(shortening, recordID: record.id, link: link, publicURL: result.publicURL)
+        let (shortURL, shortFailure) = shortLink(shortening, recordID: record.id, link: link, publicURL: share != nil ? link : result.publicURL)
         job.shortLinkError = shortFailure
         if let shortFailure {
             NotificationService.notifyShortLinkFailed(filename: filename, reason: shortFailure, uploadID: record.id)
         }
+        let text = share.map { shareText(link: link, shortURL: shortURL, filename: filename, destination: destination, share: $0) }
+            ?? format(link, shortURL: shortURL, filename: filename, for: destination)
         NotificationCenter.default.post(
             name: .aktarUploadSucceeded,
             object: destination.id,
@@ -1047,27 +1226,38 @@ final class UploadManager {
         // links are copied together, with one notification, once the last
         // is done.
         if job.input.watch != nil {
+            // An encrypted one's link carries its key, also after a short link.
+            let fragment = share?.fragment
             reportWatched(job, .succeeded(WatchUploadSuccess(
                 objectKey: result.objectKey,
                 publicURL: result.publicURL.absoluteString,
-                link: link.absoluteString,
+                link: UploadRecord.appendingFragment(fragment, to: link).absoluteString,
                 reused: false,
                 byteSize: Int64(result.byteSize),
                 destinationID: destination.id,
                 filename: filename,
                 contentHash: job.originalContentHash,
-                shortUrl: shortURL?.absoluteString
+                shortUrl: shortURL.map { UploadRecord.appendingFragment(fragment, to: $0).absoluteString }
             )))
         } else if let group = job.input.group, openGroups[group.id] != nil {
-            openGroups[group.id]?[group.index] = format(link, shortURL: shortURL, filename: filename, for: destination)
+            openGroups[group.id]?[group.index] = text
+            if group.isGallery {
+                galleryEntries[group.id]?[group.index] = GalleryEntry(
+                    recordID: record.id, objectKey: result.objectKey, name: filename, size: Int64(result.byteSize),
+                    type: SharePages.bareType(ContentTypeResolver.resolve(for: uploadedFileURL)), thumbnailKey: galleryThumbnailKey,
+                    expiresAt: record.expiresAt, isNew: true
+                )
+            }
             finishGroupIfDone(group)
+        } else if job.input.request != nil {
+            // Collected from a file request: the request says what came in.
         } else {
-            let text = format(link, shortURL: shortURL, filename: filename, for: destination)
-            if let early = job.earlyLink, early.objectKey != result.objectKey {
-                // The key changed after the link was copied: the new one
-                // takes its place, if the clipboard still holds it.
+            if let early = job.earlyLink, early.objectKey != result.objectKey || (early.pageKey != nil && share == nil) {
+                // The key changed after the link was copied (or its page
+                // couldn't be written): the new one takes its place, if the
+                // clipboard still holds it.
                 if clipboardStillHolds(early.copiedText, for: job) { copyLink(text, for: job) }
-                NotificationService.notifyLinkChanged(filename: filename)
+                if early.objectKey != result.objectKey { NotificationService.notifyLinkChanged(filename: filename) }
             } else if job.earlyLink == nil {
                 copyLink(text, for: job)
             }
@@ -1094,34 +1284,41 @@ final class UploadManager {
     /// destination keeps them there. Any other thumbnail at that key (in
     /// another profile's folder on this bucket, or one that couldn't be
     /// replaced) belongs to a file that was there before, so it goes.
-    private func updateBucketThumbnails(_ thumbnail: GeneratedThumbnail?, objectKey: String, destination: DestinationConfig, provider: S3Provider) async {
+    /// Returns the key of the thumbnail saved, for a share page.
+    @discardableResult
+    func updateBucketThumbnails(_ thumbnail: GeneratedThumbnail?, objectKey: String, destination: DestinationConfig, provider: S3Provider) async -> String? {
         var stale = thumbnailPrefixes(for: destination)
-        guard !stale.isEmpty else { return }
+        guard !stale.isEmpty else { return nil }
+        var saved: String?
         if let prefix = destination.bucketThumbnailPrefix, let thumbnail, thumbnail.isWebP,
            (try? await BucketThumbnails.save(thumbnail.data, for: objectKey, prefix: prefix, provider: provider)) != nil {
             stale.removeAll { $0 == prefix }
+            saved = ThumbnailKeys.key(for: objectKey, prefix: prefix)
         }
         try? await BucketThumbnails.delete(for: objectKey, prefixes: stale, provider: provider)
+        return saved
     }
 
     /// A replace, and a watched folder writing over its own upload so the
     /// link stays, clear Cloudflare's cache when the destination is set up
     /// for it. Then an upload made by hand runs the destination's hooks.
-    private func afterUpload(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, filename: String, credentials: StorageCredentials) async {
+    private func afterUpload(job: UploadJob, result: UploadResult, destination: DestinationConfig, link: URL, filename: String, credentials: StorageCredentials, pageKey: String? = nil) async {
         let replaced = job.input.replacing != nil || (job.input.watch != nil && job.input.objectKey != nil)
         if replaced {
             RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: result.objectKey)
             if CloudflarePurge.isSetUp(destination, credentials: credentials),
                let zone = destination.cloudflareZoneId, let token = credentials.cloudflareToken {
+                // The rewritten page too.
+                let pageURL = pageKey.flatMap { PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: $0) }
                 do {
-                    try await CloudflarePurge.purge(urls: [result.publicURL], zoneID: zone, token: token)
+                    try await CloudflarePurge.purge(urls: [result.publicURL] + [pageURL].compactMap { $0 }, zoneID: zone, token: token)
                 } catch {
                     let reason = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
                     NotificationService.notifyPurgeFailed(filename: filename, reason: reason)
                 }
             }
         }
-        guard job.input.watch == nil else { return }
+        guard job.input.watch == nil, job.input.request == nil else { return }
         DestinationHooks.shared.run(after: .init(
             fileURL: job.input.fileURL,
             filename: filename,
@@ -1139,8 +1336,9 @@ final class UploadManager {
         ThumbnailKeys.bucketPrefixes(for: destination, among: destinationStore.destinations)
     }
 
-    func format(_ link: URL, shortURL: URL? = nil, filename: String, for destination: DestinationConfig) -> String {
-        OutputFormatter.format(publicURL: link, shortURL: shortURL, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate)
+    /// `fileURL` is the file's own link when `link` is its share page.
+    func format(_ link: URL, shortURL: URL? = nil, filename: String, for destination: DestinationConfig, fileURL: URL? = nil) -> String {
+        OutputFormatter.format(publicURL: link, shortURL: shortURL, mode: outputMode(for: destination), filename: filename, customTemplate: customTemplate, fileURL: fileURL)
     }
 
     /// The short link to copy for an upload, from what `shorten` did: the
@@ -1168,8 +1366,10 @@ final class UploadManager {
         do {
             let short = try await createShortLink(for: record)
             guard let shortURL = short.url, let longURL = URL(string: short.targetUrl) ?? record.publicURL else { return }
-            if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) {
-                ClipboardService.copy(format(longURL, shortURL: shortURL, filename: filename, for: destination))
+            if record.isEncrypted {
+                ClipboardService.copy(UploadRecord.appendingFragment(record.encryptionFragment, to: shortURL).absoluteString)
+            } else if let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) {
+                ClipboardService.copy(format(longURL, shortURL: shortURL, filename: filename, for: destination, fileURL: record.sharePageKey != nil ? record.publicURL : nil))
             } else {
                 ClipboardService.copy(shortURL.absoluteString)
             }
@@ -1181,27 +1381,48 @@ final class UploadManager {
     }
 
     /// Create Short Link in the Library.
+    /// A short link for the upload's page when it has one (never with an
+    /// encrypted one's key), otherwise for its file.
     func createShortLink(for record: UploadRecord) async throws -> ShortLink {
         try await shortLinks.createShortLink(for: record) { [weak self] duration in
             guard let self else { throw CancellationError() }
-            return try await self.temporaryURL(for: record, validFor: duration)
+            return try await self.temporaryURL(for: record, validFor: duration, page: record.sharePageKey != nil)
         }
     }
 
     /// `record`'s link as the destination's "Copy as" says, with its short
-    /// link when it has one (or `mode` instead of the destination's).
+    /// link when it has one (or `mode` instead of the destination's). An
+    /// upload with a share page gives its page (images, videos and audio
+    /// embed the file); an encrypted one always its plain link with the key.
     func formattedLink(for record: UploadRecord, mode: OutputMode? = nil) -> String {
-        guard let url = record.publicURL else { return record.publicURLString }
+        guard let url = record.sharePageURL ?? record.publicURL else { return record.publicURLString }
         let short = shortLinks.active(for: record.id)?.url
+        if record.isEncrypted {
+            return UploadRecord.appendingFragment(record.encryptionFragment, to: short ?? url).absoluteString
+        }
         let destination = destinationStore.destinations.first { $0.id == record.destinationID }
         let mode = mode ?? destination.map(outputMode(for:)) ?? outputMode
-        return OutputFormatter.format(publicURL: url, shortURL: short, mode: mode, filename: record.localFilename, customTemplate: customTemplate)
+        return OutputFormatter.format(
+            publicURL: url, shortURL: short, mode: mode, filename: record.localFilename, customTemplate: customTemplate,
+            fileURL: record.sharePageKey != nil ? record.publicURL : nil
+        )
+    }
+
+    /// What Copy gives for an upload: its short link, or its page (with an
+    /// encrypted one's key), or its file.
+    func copyText(for record: UploadRecord) -> String {
+        if let short = shortLinks.active(for: record.id)?.url {
+            return UploadRecord.appendingFragment(record.encryptionFragment, to: short).absoluteString
+        }
+        return record.shareURLString
     }
 
     /// `link` as the destination's "Copy as" formats it, for copying the
-    /// links of a watched folder's uploads.
+    /// links of a watched folder's uploads. An encrypted destination's are
+    /// plain links.
     func formatted(_ link: URL, shortURL: URL? = nil, filename: String, destinationID: UUID) -> String {
-        guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else {
+        guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }),
+              destination.encryption == nil else {
             return (shortURL ?? link).absoluteString
         }
         return format(link, shortURL: shortURL, filename: filename, for: destination)
@@ -1229,11 +1450,17 @@ final class UploadManager {
         }
         guard !stillGoing else { return }
         openGroups[group.id] = nil
+        let gallery = galleryEntries.removeValue(forKey: group.id)
         guard !links.isEmpty else { return }
         let groupJob = jobs.first { $0.input.group?.id == group.id }
         let action = groupJob?.actionID.flatMap { actions[$0] }
         // Undo is taking the files back: nothing to copy or announce.
         if action?.isUndoing == true { return }
+        if let gallery, let destination = groupJob?.destination, !gallery.isEmpty {
+            let entries = gallery.keys.sorted().compactMap { gallery[$0] }
+            Task { await finishGallery(group, entries: entries, destination: destination, action: action) }
+            return
+        }
         let output = links.keys.sorted().compactMap { links[$0] }.joined(separator: "\n")
         if let action {
             copy(output, in: action)
@@ -1352,6 +1579,7 @@ extension UploadManager {
     func uploadAndWait(_ input: UploadInput, to destination: DestinationConfig? = nil, expiryDays: Int? = nil) async -> UploadWaitResult? {
         var input = input
         input.asZip = true
+        input.isUnattended = true
         guard destination != nil || routedDestination(for: input) != nil else { return nil }
         upload([input], to: destination, expiryDays: expiryDays)
         guard let job = jobs.first(where: { $0.input.fileURL == input.fileURL && $0.input.replacing == input.replacing }) else {

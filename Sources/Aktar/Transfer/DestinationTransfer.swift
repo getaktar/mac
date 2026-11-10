@@ -276,6 +276,8 @@ enum DestinationTransfer {
         if let hooks = config.hooks, !hooks.isEmpty {
             destination["hooks"] = hooks.map { ["kind": $0.kind.rawValue, "target": $0.target, "enabled": $0.enabled] as [String: Any] }
         }
+        if config.sharePage == true { destination["sharePage"] = true }
+        if let encryption = config.encryption { destination["encryption"] = encryption.rawValue }
         // The same JSON as destinations.json; see docs/short-links.md.
         if let shortLinks = config.shortLinks,
            let data = try? JSONEncoder().encode(shortLinks),
@@ -355,7 +357,9 @@ enum DestinationTransfer {
                 zone.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) } ? zone : nil
             },
             hooks: hooks(object["hooks"]),
-            shortLinks: shortLinks(object["shortLinks"])
+            shortLinks: shortLinks(object["shortLinks"]),
+            sharePage: bool(object["sharePage"]) == true ? true : nil,
+            encryption: string(object["encryption"]).flatMap(ShareEncryption.Mode.init(rawValue:))
         )
         let credentials = StorageCredentials(
             accessKeyId: accessKeyId,

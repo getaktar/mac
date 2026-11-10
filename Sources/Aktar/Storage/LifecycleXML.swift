@@ -106,7 +106,7 @@ enum LifecycleXML {
     /// The inner XML of each `<tag>…</tag>` (or `<tag attr="…">…</tag>`)
     /// directly or indirectly inside `xml`. Lifecycle elements don't nest
     /// within themselves, so the first closing tag always ends the block.
-    private static func blocks(_ tag: String, in xml: String) -> [String] {
+    static func blocks(_ tag: String, in xml: String) -> [String] {
         var result: [String] = []
         var rest = xml[...]
         while let open = rest.range(of: "<\(tag)", options: .literal) {
@@ -136,11 +136,11 @@ enum LifecycleXML {
         return next == ">" || next == "/" || next.isWhitespace
     }
 
-    private static func value(_ tag: String, in xml: String) -> String? {
+    static func value(_ tag: String, in xml: String) -> String? {
         blocks(tag, in: xml).first.map(unescape)?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func unescape(_ text: String) -> String {
+    static func unescape(_ text: String) -> String {
         text.replacingOccurrences(of: "&lt;", with: "<")
             .replacingOccurrences(of: "&gt;", with: ">")
             .replacingOccurrences(of: "&quot;", with: "\"")

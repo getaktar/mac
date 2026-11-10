@@ -9,6 +9,8 @@ final class AppState {
     let repository = UploadRepository()
     let uploadManager: UploadManager
     let watchService: WatchService
+    /// File requests (docs/share-pages.md, part 4).
+    let fileRequests: FileRequestService
     let updater = AppUpdater()
     /// The Settings tab to show next, by `SettingsTab` raw value; Settings
     /// switches to it and clears it.
@@ -22,6 +24,7 @@ final class AppState {
         TempFiles.purgeAtLaunch()
         uploadManager = UploadManager(destinationStore: destinationStore, repository: repository)
         watchService = WatchService(uploadManager: uploadManager, destinationStore: destinationStore)
+        fileRequests = FileRequestService(uploadManager: uploadManager, destinationStore: destinationStore)
         NotificationService.requestAuthorizationIfNeeded()
         KeyboardShortcuts.onKeyDown(for: .uploadFromClipboard) { [weak self] in
             Task { @MainActor in self?.uploadFromClipboard() }
@@ -44,6 +47,7 @@ final class AppState {
             }
         }
         startExpirySweep()
+        fileRequests.start()
         RemoteThumbnailLoader.shared.repository = repository
         destinationStore.onUpdate = { [weak self] old, new in
             self?.destinationUpdated(from: old, to: new)
@@ -105,6 +109,13 @@ final class AppState {
                 try? await Task.sleep(for: .seconds(3600))
             }
         }
+    }
+
+    /// Removes a destination; its open file requests close first, while its
+    /// keys are still there to empty them.
+    func removeDestination(_ destination: DestinationConfig) {
+        fileRequests.closeRequests(of: destination)
+        destinationStore.remove(destination)
     }
 
     /// Opens Settings on the tab with this raw value ("watchedFolders").

@@ -61,11 +61,14 @@ extension S3Provider {
         }
     }
 
-    /// One small PUT from memory, such as a thumbnail.
-    func putObject(data: Data, objectKey: String, contentType: String) async throws {
+    /// One small PUT from memory, such as a thumbnail or a share page.
+    /// `cacheControl` replaces the destination's own (a page is always
+    /// sent with a short one). Never with a Content-Disposition: a share
+    /// page has to open in the browser.
+    func putObject(data: Data, objectKey: String, contentType: String, cacheControl: String? = nil) async throws {
         try await withRetries {
             var headers = ["Content-Type": contentType]
-            if let cacheControl { headers["Cache-Control"] = cacheControl }
+            if let cacheControl = cacheControl ?? self.cacheControl { headers["Cache-Control"] = cacheControl }
             let request = try signedRequest(method: .PUT, key: objectKey, headers: headers)
             let (body, response) = try await Self.transferSession.upload(for: request, from: data)
             _ = try check(body, response)

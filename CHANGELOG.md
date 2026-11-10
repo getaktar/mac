@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-10
+
+### Added
+
+- Share pages: turn on Share Page for a destination and every upload also
+  gets a small page next to it in your bucket, with a preview, a download
+  button and the date it expires. Its link is the one copied, and Slack,
+  Discord, iMessage and X show a card for it. Text and code files show up
+  highlighted, with Copy Text and Wrap. Nothing is hosted anywhere but your
+  own bucket, and the page goes when the file does
+- Galleries: several files dropped, pasted or shared at once (or a folder
+  uploaded with its structure) get one page and one link, with Download all
+  as a ZIP
+- Encrypted links: a destination can encrypt files on your Mac before they
+  go up, with the key in the link or a password you're asked for each time.
+  The link opens a page that decrypts the file in the browser; your storage
+  provider only ever sees noise, and the key never reaches a link shortener.
+  Replace File keeps the link working
+- Request Files (in the panel's More menu and in the Library): a link where
+  anyone can send you files, straight into your bucket, for an hour, a day
+  or a week, with a title, a note and limits on how many and how big. What
+  arrives goes through the destination's usual upload (naming, Delete
+  after, thumbnails, short links) and shows up in history. The Library's
+  Requests list has Check Now, Close Now, Copy Link and the QR code
+- Import from ShareX in Settings > Destinations: pick ShareX's
+  UploadersConfig.json or a .sxb backup, and its Amazon S3 and Backblaze B2
+  uploaders become destinations (path template included), its URL
+  shorteners can be added to them, and each new destination is tested right
+  away. Keys ShareX encrypted for Windows are typed in once
+
+### Changed
+
+- "Copy as" Custom has a {file} variable: with a share page, {url} is the
+  page and {file} the file itself. Markdown and HTML keep embedding images,
+  videos and audio from the file
+- Share to Another Device and Import from Another Device carry the Share
+  Page and Encryption settings
+
 ## [0.20.0] - 2026-11-02
 
 ### Added
