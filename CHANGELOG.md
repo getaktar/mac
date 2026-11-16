@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-16
+
+### Fixed
+
+- Request Files no longer stops at the CORS error when the rule is already
+  on the bucket: with a key that can't change bucket settings (an R2 "Object
+  Read & Write" token, for one), Aktar now asks the way a browser would and
+  carries on if uploads are allowed
+- The CORS error says why Aktar couldn't add the rule itself and where to
+  add it (for R2, the path in the Cloudflare dashboard)
+- Encrypted links: big files (over 200 MB) are decrypted straight into the
+  file you save in Chrome and Edge, instead of being held in memory; in other
+  browsers the decrypted file is kept in smaller pieces
+- Share pages no longer make browsers ask for a favicon that isn't there
+
 ## [0.21.0] - 2026-11-10
 
 ### Added

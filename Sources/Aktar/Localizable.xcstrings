@@ -90048,6 +90048,206 @@
         }
       }
     },
+    "This key can’t change the bucket’s settings, so Aktar couldn’t add the rule itself. Add the rule below in your provider’s dashboard, then choose I Added the Rule." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Schlüssel kann die Einstellungen des Buckets nicht ändern, deshalb konnte Aktar die Regel nicht selbst hinzufügen. Füge die Regel unten im Dashboard deines Anbieters hinzu und wähle dann „Ich habe die Regel hinzugefügt“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta clave no puede cambiar los ajustes del bucket, así que Aktar no pudo añadir la regla. Añade la regla de abajo en el panel de tu proveedor y elige «Ya añadí la regla»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette clé ne peut pas modifier les réglages du bucket, Aktar n’a donc pas pu ajouter la règle lui-même. Ajoutez la règle ci-dessous dans le tableau de bord de votre fournisseur, puis choisissez « J’ai ajouté la règle »."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci ini tidak bisa mengubah pengaturan bucket, jadi Aktar tidak bisa menambahkan aturan itu sendiri. Tambahkan aturan di bawah di dasbor penyedia Anda, lalu pilih Saya Sudah Menambahkan Aturan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa chiave non può modificare le impostazioni del bucket, quindi Aktar non ha potuto aggiungere la regola da solo. Aggiungi la regola qui sotto nella dashboard del tuo provider, poi scegli «Ho aggiunto la regola»."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このキーではバケットの設定を変更できないため、Aktar はルールを追加できませんでした。プロバイダのダッシュボードで下のルールを追加してから「ルールを追加しました」を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 키로는 버킷 설정을 바꿀 수 없어 Aktar가 규칙을 직접 추가하지 못했습니다. 제공업체 대시보드에서 아래 규칙을 추가한 뒤 ‘규칙을 추가했습니다’를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze sleutel kan de instellingen van de bucket niet wijzigen, dus Aktar kon de regel niet zelf toevoegen. Voeg de regel hieronder toe in het dashboard van je provider en kies dan ‘Ik heb de regel toegevoegd’."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten klucz nie może zmieniać ustawień bucketu, więc Aktar nie mógł sam dodać reguły. Dodaj poniższą regułę w panelu dostawcy, a potem wybierz „Dodałem regułę”."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta chave não pode alterar as configurações do bucket, então o Aktar não conseguiu adicionar a regra. Adicione a regra abaixo no painel do seu provedor e escolha “Já adicionei a regra”."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот ключ не может менять настройки бакета, поэтому Aktar не смог добавить правило сам. Добавьте правило ниже в панели вашего провайдера и выберите «Я добавил правило»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu anahtar bucket'ın ayarlarını değiştiremiyor, bu yüzden Aktar kuralı kendisi ekleyemedi. Aşağıdaki kuralı sağlayıcınızın panelinden ekleyin, sonra Kuralı Ekledim'i seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей ключ не може змінювати налаштування бакета, тому Aktar не зміг додати правило сам. Додайте правило нижче в панелі вашого провайдера й виберіть «Я додав правило»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa này không thể thay đổi cài đặt của bucket, nên Aktar không tự thêm quy tắc được. Thêm quy tắc bên dưới trong bảng điều khiển của nhà cung cấp rồi chọn Tôi đã thêm quy tắc."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此密钥无法更改存储桶的设置，因此 Aktar 无法自行添加规则。请在服务商的控制台中添加下面的规则，然后选择“我已添加规则”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此金鑰無法變更儲存貯體的設定，因此 Aktar 無法自行加入規則。請在供應商的主控台加入下方的規則，然後選擇「我已加入規則」。"
+          }
+        }
+      }
+    },
+    "This key can’t change the bucket’s settings, so Aktar couldn’t add the rule itself. In the Cloudflare dashboard, open R2 > %@ > Settings > CORS Policy, add the rule below, then choose I Added the Rule." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Schlüssel kann die Einstellungen des Buckets nicht ändern, deshalb konnte Aktar die Regel nicht selbst hinzufügen. Öffne im Cloudflare-Dashboard R2 > %@ > Settings > CORS Policy, füge die Regel unten hinzu und wähle dann „Ich habe die Regel hinzugefügt“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta clave no puede cambiar los ajustes del bucket, así que Aktar no pudo añadir la regla. En el panel de Cloudflare, abre R2 > %@ > Settings > CORS Policy, añade la regla de abajo y elige «Ya añadí la regla»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette clé ne peut pas modifier les réglages du bucket, Aktar n’a donc pas pu ajouter la règle lui-même. Dans le tableau de bord Cloudflare, ouvrez R2 > %@ > Settings > CORS Policy, ajoutez la règle ci-dessous, puis choisissez « J’ai ajouté la règle »."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci ini tidak bisa mengubah pengaturan bucket, jadi Aktar tidak bisa menambahkan aturan itu sendiri. Di dasbor Cloudflare, buka R2 > %@ > Settings > CORS Policy, tambahkan aturan di bawah, lalu pilih Saya Sudah Menambahkan Aturan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa chiave non può modificare le impostazioni del bucket, quindi Aktar non ha potuto aggiungere la regola da solo. Nella dashboard di Cloudflare apri R2 > %@ > Settings > CORS Policy, aggiungi la regola qui sotto, poi scegli «Ho aggiunto la regola»."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このキーではバケットの設定を変更できないため、Aktar はルールを追加できませんでした。Cloudflare ダッシュボードで R2 > %@ > Settings > CORS Policy を開き、下のルールを追加してから「ルールを追加しました」を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 키로는 버킷 설정을 바꿀 수 없어 Aktar가 규칙을 직접 추가하지 못했습니다. Cloudflare 대시보드에서 R2 > %@ > Settings > CORS Policy을 열고 아래 규칙을 추가한 뒤 ‘규칙을 추가했습니다’를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze sleutel kan de instellingen van de bucket niet wijzigen, dus Aktar kon de regel niet zelf toevoegen. Open in het Cloudflare-dashboard R2 > %@ > Settings > CORS Policy, voeg de regel hieronder toe en kies dan ‘Ik heb de regel toegevoegd’."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten klucz nie może zmieniać ustawień bucketu, więc Aktar nie mógł sam dodać reguły. W panelu Cloudflare otwórz R2 > %@ > Settings > CORS Policy, dodaj poniższą regułę, a potem wybierz „Dodałem regułę”."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta chave não pode alterar as configurações do bucket, então o Aktar não conseguiu adicionar a regra. No painel da Cloudflare, abra R2 > %@ > Settings > CORS Policy, adicione a regra abaixo e escolha “Já adicionei a regra”."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот ключ не может менять настройки бакета, поэтому Aktar не смог добавить правило сам. В панели Cloudflare откройте R2 > %@ > Settings > CORS Policy, добавьте правило ниже и выберите «Я добавил правило»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu anahtar bucket'ın ayarlarını değiştiremiyor, bu yüzden Aktar kuralı kendisi ekleyemedi. Cloudflare panelinde R2 > %@ > Settings > CORS Policy bölümünü açın, aşağıdaki kuralı ekleyin, sonra Kuralı Ekledim'i seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей ключ не може змінювати налаштування бакета, тому Aktar не зміг додати правило сам. У панелі Cloudflare відкрийте R2 > %@ > Settings > CORS Policy, додайте правило нижче й виберіть «Я додав правило»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa này không thể thay đổi cài đặt của bucket, nên Aktar không tự thêm quy tắc được. Trong bảng điều khiển Cloudflare, mở R2 > %@ > Settings > CORS Policy, thêm quy tắc bên dưới rồi chọn Tôi đã thêm quy tắc."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此密钥无法更改存储桶的设置，因此 Aktar 无法自行添加规则。请在 Cloudflare 控制台中打开 R2 > %@ > Settings > CORS Policy，添加下面的规则，然后选择“我已添加规则”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此金鑰無法變更儲存貯體的設定，因此 Aktar 無法自行加入規則。請在 Cloudflare 主控台開啟 R2 > %@ > Settings > CORS Policy，加入下方的規則，然後選擇「我已加入規則」。"
+          }
+        }
+      }
+    },
     "Title" : {
       "localizations" : {
         "de" : {

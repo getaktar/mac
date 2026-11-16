@@ -63,6 +63,36 @@ for (const size of [0, 5, 65535, 65536, 65537, 200000]) {
   vectors.link.push({ size, meta: new TextDecoder().decode(metaJSON(meta)), encryptedLength: sealed.length, sha256: sha256(sealed), hex: sealed.length <= 400 ? hex(sealed) : undefined });
 }
 
+// sink: the records go to it (in order, waited for) instead of parts;
+// onMeta returning false stops after the metadata, before any content.
+{
+  const size = 200000;
+  const meta = { name: 'big.bin', type: 'application/octet-stream', size };
+  const plain = pattern(size);
+  const sealed = await encrypt(plain, meta, { rawKey, noncePrefix });
+  const keyFor = () => page.aktarImportKey(rawKey);
+  const got = [];
+  const sink = (p) => new Promise((resolve) => setTimeout(() => { got.push(Buffer.from(p)); resolve(); }, 0));
+  const sunk = await page.aktarDecrypt(reader(sealed), keyFor, null, { sink });
+  assert.equal(sunk.parts, null);
+  assert.deepEqual(sunk.meta, meta);
+  assert.equal(sha256(Buffer.concat(got)), sha256(plain));
+  // Damaged: still rejected through a sink.
+  const flipped = new Uint8Array(sealed); flipped[sealed.length - 3] ^= 1;
+  await assert.rejects(page.aktarDecrypt(reader(flipped), keyFor, null, { sink: () => {} }), (e) => e.aktar === 'damaged');
+  // Stopped after the metadata: nothing sunk, and only the start was read.
+  let reads = 0, sunkBytes = 0;
+  const counting = reader(sealed, 1024);
+  const stopped = await page.aktarDecrypt(() => { reads++; return counting(); }, keyFor, null, { onMeta: (m) => m.size < 1000, sink: (p) => { sunkBytes += p.length; } });
+  assert.equal(stopped.stopped, true);
+  assert.deepEqual(stopped.meta, meta);
+  assert.equal(sunkBytes, 0);
+  assert.ok(reads <= 2, `read ${reads} chunks`);
+  // onMeta returning anything else carries on.
+  const carried = await page.aktarDecrypt(reader(sealed), keyFor, null, { onMeta: () => undefined });
+  assert.equal(sha256(Buffer.concat(carried.parts.map((p) => Buffer.from(p)))), sha256(plain));
+}
+
 // Wrong key: the metadata record fails, reported as wrongKey.
 {
   const sealed = await encrypt(pattern(10), { name: 'a', type: 'text/plain', size: 10 }, { rawKey, noncePrefix });

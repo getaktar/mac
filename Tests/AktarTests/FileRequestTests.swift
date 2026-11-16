@@ -132,6 +132,65 @@ final class FileRequestTests: XCTestCase {
         XCTAssertTrue(replaced.contains("aktar-file-requests"))
     }
 
+    // MARK: - Preflight (a key that can't touch CORS)
+
+    func testPreflightAllowsTheRuleAsAddedInADashboard() {
+        let r2 = [
+            "Access-Control-Allow-Origin": "https://cdn.example.com",
+            "Access-Control-Allow-Methods": "PUT",
+            "Access-Control-Allow-Headers": "content-type,if-none-match",
+        ]
+        let both = CORSPreflight.requestHeaders(conditional: true)
+        XCTAssertEqual(both, ["content-type", "if-none-match"])
+        XCTAssertTrue(CORSPreflight.allows(status: 204, headers: r2, origin: origin, requestHeaders: both))
+        // Header names and values in any case, lists with spaces.
+        XCTAssertTrue(CORSPreflight.allows(status: 200, headers: [
+            "access-control-allow-origin": "https://cdn.example.com",
+            "ACCESS-CONTROL-ALLOW-METHODS": "GET, put",
+            "Access-Control-Allow-Headers": "Content-Type, If-None-Match",
+        ], origin: origin, requestHeaders: both))
+        // Wildcards.
+        XCTAssertTrue(CORSPreflight.allows(status: 204, headers: [
+            "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "*", "Access-Control-Allow-Headers": "*",
+        ], origin: origin, requestHeaders: both))
+        // Without conditional writes the page sends Content-Type only.
+        let contentTypeOnly = r2.merging(["Access-Control-Allow-Headers": "content-type"]) { $1 }
+        XCTAssertTrue(CORSPreflight.allows(status: 204, headers: contentTypeOnly, origin: origin, requestHeaders: CORSPreflight.requestHeaders(conditional: false)))
+        XCTAssertFalse(CORSPreflight.allows(status: 204, headers: contentTypeOnly, origin: origin, requestHeaders: both))
+    }
+
+    func testPreflightRefusals() {
+        let both = CORSPreflight.requestHeaders(conditional: true)
+        let good = [
+            "Access-Control-Allow-Origin": "https://cdn.example.com",
+            "Access-Control-Allow-Methods": "PUT",
+            "Access-Control-Allow-Headers": "content-type,if-none-match",
+        ]
+        XCTAssertFalse(CORSPreflight.allows(status: 400, headers: [:], origin: origin, requestHeaders: both), "R2 without a rule")
+        XCTAssertFalse(CORSPreflight.allows(status: 403, headers: good, origin: origin, requestHeaders: both))
+        XCTAssertFalse(CORSPreflight.allows(status: 204, headers: good.merging(["Access-Control-Allow-Origin": "https://other.example.com"]) { $1 }, origin: origin, requestHeaders: both))
+        XCTAssertFalse(CORSPreflight.allows(status: 204, headers: good.merging(["Access-Control-Allow-Methods": "GET"]) { $1 }, origin: origin, requestHeaders: both))
+        XCTAssertFalse(CORSPreflight.allows(status: 204, headers: good.filter { $0.key != "Access-Control-Allow-Origin" }, origin: origin, requestHeaders: both))
+        XCTAssertFalse(CORSPreflight.allows(status: 204, headers: good.filter { $0.key != "Access-Control-Allow-Headers" }, origin: origin, requestHeaders: both))
+    }
+
+    func testCORSHintOnlyForAKeyWithoutThePermission() {
+        let r2 = DestinationConfig(
+            name: "R2", preset: .cloudflareR2, accountID: "acc", endpoint: "https://acc.r2.cloudflarestorage.com", region: "auto",
+            bucket: "my-bucket", publicBaseURL: "https://cdn.example.com", objectPathTemplate: "{filename}.{ext}",
+            forcePathStyle: false, isDefault: false
+        )
+        var s3 = r2
+        s3.preset = .customS3
+        let r2Hint = CORSPreflight.hint(for: StorageError.lifecycleNotAllowed, destination: r2)
+        XCTAssertTrue(r2Hint?.contains("R2 > my-bucket > Settings > CORS Policy") == true, r2Hint ?? "nil")
+        let s3Hint = CORSPreflight.hint(for: StorageError.accessDenied, destination: s3)
+        XCTAssertNotNil(s3Hint)
+        XCTAssertFalse(s3Hint?.contains("Cloudflare") == true)
+        XCTAssertNil(CORSPreflight.hint(for: StorageError.unknown("NotImplemented"), destination: r2), "MinIO: no bucket CORS at all")
+
+    }
+
     func testUnreadableCORSIsNotOverwritten() {
         XCTAssertNil(CORSXML.configurationRules(in: "<html>proxy error</html>"))
         XCTAssertNil(CORSXML.configurationRules(in: "<CORSConfiguration><CORSRule><ID>x</ID></CORSConfiguration>"), "a rule that doesn't close")

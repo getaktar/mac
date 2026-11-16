@@ -406,6 +406,11 @@ final class S3IntegrationTests: XCTestCase {
             try await provider.ensureCORSRule(origin: "https://files.example.com")
             XCTFail("MinIO doesn't take bucket CORS rules")
         } catch {}
+        // ...but MinIO answers every origin's preflight (its API allows `*`
+        // by default), so browsers can upload and the request goes ahead
+        // through the preflight fallback.
+        let allowed = await provider.allowsBrowserPUT(from: "https://files.example.com", objectKey: FileRequests.fileKey(id: "preflight", slot: 1), conditional: true)
+        XCTAssertTrue(allowed)
     }
 
     private static func put(_ url: URL, body: Data, headers: [String: String]) async throws -> Int {

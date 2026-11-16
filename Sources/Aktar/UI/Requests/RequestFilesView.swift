@@ -142,7 +142,7 @@ struct RequestFilesView: View {
                 created = request
             } catch let failure as FileRequestService.CreateError {
                 error = failure.errorDescription
-                if case .cors(let origin, _) = failure { corsRule = (origin, CORSXML.ruleJSON(origin: origin)) }
+                if case .cors(let origin, _, _) = failure { corsRule = (origin, CORSXML.ruleJSON(origin: origin)) }
             } catch {
                 self.error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }

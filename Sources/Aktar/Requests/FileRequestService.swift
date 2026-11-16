@@ -47,13 +47,15 @@ final class FileRequestService {
 
     enum CreateError: LocalizedError {
         /// The bucket doesn't let browsers on `origin` upload to it.
-        case cors(origin: String, reason: String)
+        /// `hint`: why Aktar couldn't add the rule itself, when it's known.
+        case cors(origin: String, reason: String, hint: String?)
         case other(String)
 
         var errorDescription: String? {
             switch self {
-            case .cors(let origin, _):
-                return String(localized: "This bucket doesn\u{2019}t let browsers upload to it. Allow PUT from \(origin) in its CORS settings, then try again.")
+            case .cors(let origin, _, let hint):
+                let message = String(localized: "This bucket doesn\u{2019}t let browsers upload to it. Allow PUT from \(origin) in its CORS settings, then try again.")
+                return hint.map { message + "\n\n" + $0 } ?? message
             case .other(let message):
                 return message
             }
@@ -89,19 +91,29 @@ final class FileRequestService {
         let seconds = Int64(min(draft.duration, 7 * 86_400))
         let origins = try Self.origins(for: destination, provider: provider, id: id)
 
+        let conditional = ShortKeys.usesConditionalWrites(destination.preset)
         if let pageOrigin = origins.page, pageOrigin != origins.upload, destination.requestCorsOrigin != pageOrigin {
             if !corsDoneByHand {
                 do {
                     try await provider.ensureCORSRule(origin: pageOrigin)
                 } catch {
-                    throw CreateError.cors(origin: pageOrigin, reason: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
+                    // The key may not touch CORS while the rule is already
+                    // there (added in the dashboard): ask the way a browser
+                    // would before stopping.
+                    let allowed = await provider.allowsBrowserPUT(from: pageOrigin, objectKey: FileRequests.fileKey(id: id, slot: 1), conditional: conditional)
+                    guard allowed else {
+                        throw CreateError.cors(
+                            origin: pageOrigin,
+                            reason: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription,
+                            hint: CORSPreflight.hint(for: error, destination: destination)
+                        )
+                    }
                 }
             }
             destination.requestCorsOrigin = pageOrigin
             destinationStore.update(destination)
         }
 
-        let conditional = ShortKeys.usesConditionalWrites(destination.preset)
         var slots: [SharePage.Request.Slot] = []
         for slot in 1...max(1, draft.slots) {
             let file = try await provider.presignedPUT(for: FileRequests.fileKey(id: id, slot: slot), contentType: "application/octet-stream", ifNoneMatch: conditional, expiresIn: seconds)

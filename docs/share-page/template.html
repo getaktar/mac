@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https: http: data: blob:; media-src https: http: blob:; frame-src https: http: blob:; connect-src https: http:; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="data:,">
 <title>{{TITLE}}</title>
 {{META}}
 <style>
@@ -155,8 +156,12 @@ AktarQueue.prototype.take = function (n) {
 // read(): resolves to the next chunk of the encrypted file (Uint8Array) or
 // null at its end. keyFor(header): resolves to the AES key. onProgress(bytes)
 // is told how much was read. Resolves to { meta, parts } (parts are the
-// decrypted content records, in order).
-function aktarDecrypt(read, keyFor, onProgress) {
+// decrypted content records, in order). options (all optional):
+// sink(bytes) takes each decrypted content record instead of parts (parts is
+// then null; a returned promise is waited for), and onMeta(meta) returning
+// false stops once the metadata is read ({ meta, parts: null, stopped: true }).
+function aktarDecrypt(read, keyFor, onProgress, options) {
+  options = options || {};
   var queue = new AktarQueue(), done = false, total = 0;
   function fill(n) {
     if (done || queue.length >= n) return Promise.resolve(queue.length >= n);
@@ -165,7 +170,12 @@ function aktarDecrypt(read, keyFor, onProgress) {
       return fill(n);
     });
   }
-  var header, key, meta, parts = [];
+  var header, key, meta, parts = [], size = 0;
+  function take(p) {
+    size += p.length;
+    if (options.sink) return options.sink(p);
+    parts.push(p);
+  }
   return fill(AKTAR_HEADER_LENGTH).then(function (ok) {
     if (!ok) throw aktarError('damaged');
     header = aktarParseHeader(queue.take(AKTAR_HEADER_LENGTH));
@@ -179,22 +189,23 @@ function aktarDecrypt(read, keyFor, onProgress) {
   }).then(function (plain) {
     try { meta = JSON.parse(new TextDecoder().decode(plain)); } catch (e) { throw aktarError('damaged'); }
     if (!meta || typeof meta.name !== 'string' || typeof meta.type !== 'string' || typeof meta.size !== 'number') throw aktarError('damaged');
+    if (options.onMeta && options.onMeta(meta) === false) return { meta: meta, parts: null, stopped: true };
     var full = header.recordSize + AKTAR_TAG_LENGTH, index = 1;
     function next() {
       return fill(full + 1).then(function () {
         if (queue.length > full) {
-          return aktarOpenRecord(key, header, index++, false, queue.take(full)).then(function (p) { parts.push(p); return next(); });
+          return aktarOpenRecord(key, header, index++, false, queue.take(full)).then(take).then(next);
         }
         if (queue.length < AKTAR_TAG_LENGTH) throw aktarError('damaged');
-        return aktarOpenRecord(key, header, index, true, queue.take(queue.length)).then(function (p) { parts.push(p); });
+        return aktarOpenRecord(key, header, index, true, queue.take(queue.length)).then(take);
       });
     }
-    return next().catch(function (e) { throw e && e.aktar ? e : aktarError('damaged'); });
-  }).then(function () {
-    var size = 0;
-    for (var i = 0; i < parts.length; i++) size += parts[i].length;
+    return next().catch(function (e) { throw e && e.aktar ? e : aktarError('damaged'); })
+      .then(function () { return { meta: meta, parts: options.sink ? null : parts }; });
+  }).then(function (result) {
+    if (result.stopped) return result;
     if (size !== meta.size) throw aktarError('damaged');
-    return { meta: meta, parts: parts };
+    return result;
   });
 }
 /* AKTAR-CRYPTO-END */
@@ -203,25 +214,25 @@ function aktarDecrypt(read, keyFor, onProgress) {
   'use strict';
 
   var STRINGS = {
-    'en': ['Download', 'Download all', 'Preparing ZIP…', 'Copy link', 'Copy text', 'Copied', 'Wrap lines', '{n} files', 'Available until {date}', 'This link has expired.', 'This file is no longer available.', 'Encrypted file', 'Decrypted in your browser. The storage provider can’t read it.', 'Decrypting…', 'Password', 'Unlock', 'Wrong password, or the file is damaged.', 'This link is missing its key. Ask the sender for the full link.', 'This file couldn’t be decrypted. It may be damaged.', 'Send files', 'Files go straight to the requester’s own storage.', 'Choose files', 'or drop them here', 'Sending…', 'Sent', 'Failed', 'Too large. The limit is {size}.', 'No more files can be sent with this link.', 'Retry', 'Shared with Aktar', 'No preview for this file type.'],
-    'tr': ['İndir', 'Tümünü indir', 'ZIP hazırlanıyor…', 'Linki kopyala', 'Metni kopyala', 'Kopyalandı', 'Satırları kaydır', '{n} dosya', '{date} tarihine kadar erişilebilir', 'Bu linkin süresi doldu.', 'Bu dosya artık mevcut değil.', 'Şifreli dosya', 'Tarayıcında çözüldü. Depolama sağlayıcısı içeriği okuyamaz.', 'Şifre çözülüyor…', 'Parola', 'Aç', 'Parola yanlış ya da dosya bozuk.', 'Bu linkte anahtar eksik. Gönderenden linkin tamamını iste.', 'Bu dosyanın şifresi çözülemedi. Dosya bozuk olabilir.', 'Dosya gönder', 'Dosyalar doğrudan isteyenin kendi depolama alanına gider.', 'Dosya seç', 'ya da buraya bırak', 'Gönderiliyor…', 'Gönderildi', 'Başarısız', 'Çok büyük. Sınır {size}.', 'Bu linkle daha fazla dosya gönderilemez.', 'Tekrar dene', 'Aktar ile paylaşıldı', 'Bu dosya türü için önizleme yok.'],
-    'de': ['Herunterladen', 'Alle herunterladen', 'ZIP wird erstellt…', 'Link kopieren', 'Text kopieren', 'Kopiert', 'Zeilen umbrechen', '{n} Dateien', 'Verfügbar bis {date}', 'Dieser Link ist abgelaufen.', 'Diese Datei ist nicht mehr verfügbar.', 'Verschlüsselte Datei', 'In deinem Browser entschlüsselt. Der Speicheranbieter kann sie nicht lesen.', 'Wird entschlüsselt…', 'Passwort', 'Entsperren', 'Falsches Passwort oder beschädigte Datei.', 'Diesem Link fehlt der Schlüssel. Bitte den Absender um den vollständigen Link.', 'Diese Datei konnte nicht entschlüsselt werden. Sie ist möglicherweise beschädigt.', 'Dateien senden', 'Dateien landen direkt im eigenen Speicher der anfragenden Person.', 'Dateien auswählen', 'oder hierher ziehen', 'Wird gesendet…', 'Gesendet', 'Fehlgeschlagen', 'Zu groß. Das Limit ist {size}.', 'Über diesen Link können keine weiteren Dateien gesendet werden.', 'Erneut versuchen', 'Geteilt mit Aktar', 'Keine Vorschau für diesen Dateityp.'],
-    'es': ['Descargar', 'Descargar todo', 'Preparando ZIP…', 'Copiar enlace', 'Copiar texto', 'Copiado', 'Ajustar líneas', '{n} archivos', 'Disponible hasta el {date}', 'Este enlace ha caducado.', 'Este archivo ya no está disponible.', 'Archivo cifrado', 'Descifrado en tu navegador. El proveedor de almacenamiento no puede leerlo.', 'Descifrando…', 'Contraseña', 'Desbloquear', 'Contraseña incorrecta o archivo dañado.', 'A este enlace le falta la clave. Pide al remitente el enlace completo.', 'No se pudo descifrar este archivo. Puede estar dañado.', 'Enviar archivos', 'Los archivos van directamente al almacenamiento propio de quien los solicita.', 'Elegir archivos', 'o suéltalos aquí', 'Enviando…', 'Enviado', 'Error', 'Demasiado grande. El límite es {size}.', 'No se pueden enviar más archivos con este enlace.', 'Reintentar', 'Compartido con Aktar', 'No hay vista previa para este tipo de archivo.'],
-    'fr': ['Télécharger', 'Tout télécharger', 'Préparation du ZIP…', 'Copier le lien', 'Copier le texte', 'Copié', 'Retour à la ligne', '{n} fichiers', 'Disponible jusqu’au {date}', 'Ce lien a expiré.', 'Ce fichier n’est plus disponible.', 'Fichier chiffré', 'Déchiffré dans votre navigateur. Le fournisseur de stockage ne peut pas le lire.', 'Déchiffrement…', 'Mot de passe', 'Déverrouiller', 'Mot de passe incorrect ou fichier endommagé.', 'Il manque la clé à ce lien. Demandez le lien complet à l’expéditeur.', 'Impossible de déchiffrer ce fichier. Il est peut-être endommagé.', 'Envoyer des fichiers', 'Les fichiers vont directement dans le stockage de la personne qui les demande.', 'Choisir des fichiers', 'ou déposez-les ici', 'Envoi…', 'Envoyé', 'Échec', 'Trop volumineux. La limite est de {size}.', 'Plus aucun fichier ne peut être envoyé avec ce lien.', 'Réessayer', 'Partagé avec Aktar', 'Pas d’aperçu pour ce type de fichier.'],
-    'id': ['Unduh', 'Unduh semua', 'Menyiapkan ZIP…', 'Salin tautan', 'Salin teks', 'Disalin', 'Bungkus baris', '{n} file', 'Tersedia hingga {date}', 'Tautan ini sudah kedaluwarsa.', 'File ini sudah tidak tersedia.', 'File terenkripsi', 'Didekripsi di browser Anda. Penyedia penyimpanan tidak dapat membacanya.', 'Mendekripsi…', 'Kata sandi', 'Buka', 'Kata sandi salah, atau file rusak.', 'Tautan ini tidak memiliki kuncinya. Minta tautan lengkap kepada pengirim.', 'File ini tidak dapat didekripsi. Mungkin file rusak.', 'Kirim file', 'File langsung masuk ke penyimpanan milik peminta.', 'Pilih file', 'atau letakkan di sini', 'Mengirim…', 'Terkirim', 'Gagal', 'Terlalu besar. Batasnya {size}.', 'Tidak ada lagi file yang dapat dikirim dengan tautan ini.', 'Coba lagi', 'Dibagikan dengan Aktar', 'Tidak ada pratinjau untuk jenis file ini.'],
-    'it': ['Scarica', 'Scarica tutto', 'Preparazione dello ZIP…', 'Copia link', 'Copia testo', 'Copiato', 'A capo automatico', '{n} file', 'Disponibile fino al {date}', 'Questo link è scaduto.', 'Questo file non è più disponibile.', 'File crittografato', 'Decrittografato nel tuo browser. Il provider di archiviazione non può leggerlo.', 'Decrittografia…', 'Password', 'Sblocca', 'Password errata o file danneggiato.', 'A questo link manca la chiave. Chiedi il link completo al mittente.', 'Impossibile decrittografare questo file. Potrebbe essere danneggiato.', 'Invia file', 'I file arrivano direttamente nello spazio di archiviazione di chi li richiede.', 'Scegli file', 'o trascinali qui', 'Invio…', 'Inviato', 'Non riuscito', 'Troppo grande. Il limite è {size}.', 'Non è possibile inviare altri file con questo link.', 'Riprova', 'Condiviso con Aktar', 'Nessuna anteprima per questo tipo di file.'],
-    'ja': ['ダウンロード', 'すべてダウンロード', 'ZIPを準備中…', 'リンクをコピー', 'テキストをコピー', 'コピーしました', '行を折り返す', '{n} 個のファイル', '{date} まで利用可能', 'このリンクは期限切れです。', 'このファイルは利用できなくなりました。', '暗号化されたファイル', 'ブラウザ内で復号されました。ストレージプロバイダは内容を読めません。', '復号中…', 'パスワード', '開く', 'パスワードが違うか、ファイルが破損しています。', 'このリンクには鍵がありません。送信者に完全なリンクを依頼してください。', 'このファイルを復号できませんでした。破損している可能性があります。', 'ファイルを送信', 'ファイルはリクエストした人のストレージに直接届きます。', 'ファイルを選択', 'またはここにドロップ', '送信中…', '送信済み', '失敗', '大きすぎます。上限は {size} です。', 'このリンクではこれ以上ファイルを送信できません。', '再試行', 'Aktar で共有', 'このファイル形式はプレビューできません。'],
-    'ko': ['다운로드', '모두 다운로드', 'ZIP 준비 중…', '링크 복사', '텍스트 복사', '복사됨', '줄 바꿈', '파일 {n}개', '{date}까지 이용 가능', '이 링크는 만료되었습니다.', '이 파일은 더 이상 사용할 수 없습니다.', '암호화된 파일', '브라우저에서 복호화되었습니다. 스토리지 제공업체는 내용을 읽을 수 없습니다.', '복호화 중…', '비밀번호', '열기', '비밀번호가 틀렸거나 파일이 손상되었습니다.', '이 링크에 키가 없습니다. 보낸 사람에게 전체 링크를 요청하세요.', '이 파일을 복호화할 수 없습니다. 손상되었을 수 있습니다.', '파일 보내기', '파일은 요청한 사람의 스토리지로 바로 전송됩니다.', '파일 선택', '또는 여기에 놓기', '보내는 중…', '보냄', '실패', '너무 큽니다. 한도는 {size}입니다.', '이 링크로는 더 이상 파일을 보낼 수 없습니다.', '다시 시도', 'Aktar로 공유됨', '이 파일 형식은 미리 볼 수 없습니다.'],
-    'nl': ['Downloaden', 'Alles downloaden', 'ZIP voorbereiden…', 'Link kopiëren', 'Tekst kopiëren', 'Gekopieerd', 'Regels omlopen', '{n} bestanden', 'Beschikbaar tot {date}', 'Deze link is verlopen.', 'Dit bestand is niet meer beschikbaar.', 'Versleuteld bestand', 'Ontsleuteld in je browser. De opslagprovider kan het niet lezen.', 'Ontsleutelen…', 'Wachtwoord', 'Ontgrendelen', 'Verkeerd wachtwoord, of het bestand is beschadigd.', 'Deze link mist de sleutel. Vraag de afzender om de volledige link.', 'Dit bestand kon niet worden ontsleuteld. Het is mogelijk beschadigd.', 'Bestanden versturen', 'Bestanden gaan rechtstreeks naar de eigen opslag van degene die erom vraagt.', 'Bestanden kiezen', 'of sleep ze hierheen', 'Versturen…', 'Verstuurd', 'Mislukt', 'Te groot. De limiet is {size}.', 'Met deze link kunnen geen bestanden meer worden verstuurd.', 'Opnieuw', 'Gedeeld met Aktar', 'Geen voorbeeld voor dit bestandstype.'],
-    'pl': ['Pobierz', 'Pobierz wszystko', 'Przygotowywanie ZIP…', 'Kopiuj link', 'Kopiuj tekst', 'Skopiowano', 'Zawijaj wiersze', 'Pliki: {n}', 'Dostępne do {date}', 'Ten link wygasł.', 'Ten plik nie jest już dostępny.', 'Zaszyfrowany plik', 'Odszyfrowano w przeglądarce. Dostawca magazynu nie może go odczytać.', 'Odszyfrowywanie…', 'Hasło', 'Odblokuj', 'Nieprawidłowe hasło lub uszkodzony plik.', 'W tym linku brakuje klucza. Poproś nadawcę o pełny link.', 'Nie udało się odszyfrować pliku. Może być uszkodzony.', 'Wyślij pliki', 'Pliki trafiają bezpośrednio do magazynu osoby, która o nie prosi.', 'Wybierz pliki', 'lub upuść je tutaj', 'Wysyłanie…', 'Wysłano', 'Niepowodzenie', 'Za duży. Limit to {size}.', 'Tym linkiem nie można wysłać więcej plików.', 'Spróbuj ponownie', 'Udostępniono przez Aktar', 'Brak podglądu dla tego typu pliku.'],
-    'pt-BR': ['Baixar', 'Baixar tudo', 'Preparando ZIP…', 'Copiar link', 'Copiar texto', 'Copiado', 'Quebrar linhas', '{n} arquivos', 'Disponível até {date}', 'Este link expirou.', 'Este arquivo não está mais disponível.', 'Arquivo criptografado', 'Descriptografado no seu navegador. O provedor de armazenamento não consegue lê-lo.', 'Descriptografando…', 'Senha', 'Desbloquear', 'Senha incorreta ou arquivo danificado.', 'Falta a chave neste link. Peça o link completo a quem enviou.', 'Não foi possível descriptografar este arquivo. Ele pode estar danificado.', 'Enviar arquivos', 'Os arquivos vão direto para o armazenamento próprio de quem os pediu.', 'Escolher arquivos', 'ou solte-os aqui', 'Enviando…', 'Enviado', 'Falhou', 'Grande demais. O limite é {size}.', 'Não é possível enviar mais arquivos com este link.', 'Tentar novamente', 'Compartilhado com o Aktar', 'Sem pré-visualização para este tipo de arquivo.'],
-    'ru': ['Скачать', 'Скачать все', 'Подготовка ZIP…', 'Копировать ссылку', 'Копировать текст', 'Скопировано', 'Переносить строки', 'Файлов: {n}', 'Доступно до {date}', 'Срок действия ссылки истёк.', 'Этот файл больше недоступен.', 'Зашифрованный файл', 'Расшифровано в вашем браузере. Хранилище не может его прочитать.', 'Расшифровка…', 'Пароль', 'Открыть', 'Неверный пароль или файл повреждён.', 'В ссылке нет ключа. Попросите отправителя прислать полную ссылку.', 'Не удалось расшифровать файл. Возможно, он повреждён.', 'Отправить файлы', 'Файлы попадают прямо в хранилище того, кто их запросил.', 'Выбрать файлы', 'или перетащите их сюда', 'Отправка…', 'Отправлено', 'Ошибка', 'Слишком большой. Лимит {size}.', 'По этой ссылке больше нельзя отправить файлы.', 'Повторить', 'Отправлено через Aktar', 'Предпросмотр для этого типа файлов недоступен.'],
-    'uk': ['Завантажити', 'Завантажити все', 'Підготовка ZIP…', 'Копіювати посилання', 'Копіювати текст', 'Скопійовано', 'Переносити рядки', 'Файлів: {n}', 'Доступно до {date}', 'Термін дії посилання минув.', 'Цей файл більше недоступний.', 'Зашифрований файл', 'Розшифровано у вашому браузері. Сховище не може його прочитати.', 'Розшифрування…', 'Пароль', 'Відкрити', 'Неправильний пароль або файл пошкоджено.', 'У посиланні немає ключа. Попросіть відправника надіслати повне посилання.', 'Не вдалося розшифрувати файл. Можливо, його пошкоджено.', 'Надіслати файли', 'Файли потрапляють прямо до сховища того, хто їх запросив.', 'Вибрати файли', 'або перетягніть їх сюди', 'Надсилання…', 'Надіслано', 'Помилка', 'Завеликий. Ліміт {size}.', 'Цим посиланням більше не можна надіслати файли.', 'Повторити', 'Надіслано через Aktar', 'Попередній перегляд для цього типу файлів недоступний.'],
-    'vi': ['Tải xuống', 'Tải xuống tất cả', 'Đang chuẩn bị ZIP…', 'Sao chép liên kết', 'Sao chép văn bản', 'Đã sao chép', 'Ngắt dòng', '{n} tệp', 'Có sẵn đến {date}', 'Liên kết này đã hết hạn.', 'Tệp này không còn nữa.', 'Tệp đã mã hóa', 'Được giải mã trong trình duyệt của bạn. Nhà cung cấp lưu trữ không thể đọc được.', 'Đang giải mã…', 'Mật khẩu', 'Mở khóa', 'Sai mật khẩu hoặc tệp bị hỏng.', 'Liên kết này thiếu khóa. Hãy xin người gửi liên kết đầy đủ.', 'Không thể giải mã tệp này. Tệp có thể bị hỏng.', 'Gửi tệp', 'Tệp được chuyển thẳng vào kho lưu trữ của người yêu cầu.', 'Chọn tệp', 'hoặc thả vào đây', 'Đang gửi…', 'Đã gửi', 'Thất bại', 'Quá lớn. Giới hạn là {size}.', 'Không thể gửi thêm tệp bằng liên kết này.', 'Thử lại', 'Được chia sẻ bằng Aktar', 'Không có bản xem trước cho loại tệp này.'],
-    'zh-Hans': ['下载', '全部下载', '正在准备 ZIP…', '复制链接', '复制文本', '已复制', '自动换行', '{n} 个文件', '可用至 {date}', '此链接已过期。', '此文件已不可用。', '加密文件', '已在你的浏览器中解密。存储服务商无法读取其内容。', '正在解密…', '密码', '解锁', '密码错误，或文件已损坏。', '此链接缺少密钥。请向发送者索取完整链接。', '无法解密此文件，文件可能已损坏。', '发送文件', '文件会直接存入请求者自己的存储空间。', '选择文件', '或拖放到这里', '正在发送…', '已发送', '失败', '文件过大，上限为 {size}。', '此链接无法再发送更多文件。', '重试', '通过 Aktar 分享', '此文件类型无法预览。'],
-    'zh-Hant': ['下載', '全部下載', '正在準備 ZIP…', '拷貝連結', '拷貝文字', '已拷貝', '自動換行', '{n} 個檔案', '可用至 {date}', '此連結已過期。', '此檔案已無法使用。', '加密檔案', '已在你的瀏覽器中解密。儲存服務供應商無法讀取其內容。', '正在解密…', '密碼', '解鎖', '密碼錯誤，或檔案已損毀。', '此連結缺少金鑰。請向傳送者索取完整連結。', '無法解密此檔案，檔案可能已損毀。', '傳送檔案', '檔案會直接存入請求者自己的儲存空間。', '選擇檔案', '或拖放到這裡', '正在傳送…', '已傳送', '失敗', '檔案過大，上限為 {size}。', '此連結無法再傳送更多檔案。', '重試', '透過 Aktar 分享', '此檔案類型無法預覽。']
+    'en': ['Download', 'Download all', 'Preparing ZIP…', 'Copy link', 'Copy text', 'Copied', 'Wrap lines', '{n} files', 'Available until {date}', 'This link has expired.', 'This file is no longer available.', 'Encrypted file', 'Decrypted in your browser. The storage provider can’t read it.', 'Decrypting…', 'Password', 'Unlock', 'Wrong password, or the file is damaged.', 'This link is missing its key. Ask the sender for the full link.', 'This file couldn’t be decrypted. It may be damaged.', 'Send files', 'Files go straight to the requester’s own storage.', 'Choose files', 'or drop them here', 'Sending…', 'Sent', 'Failed', 'Too large. The limit is {size}.', 'No more files can be sent with this link.', 'Retry', 'Shared with Aktar', 'No preview for this file type.', 'Large file: it’s decrypted straight into the file you save.', 'Saved.'],
+    'tr': ['İndir', 'Tümünü indir', 'ZIP hazırlanıyor…', 'Linki kopyala', 'Metni kopyala', 'Kopyalandı', 'Satırları kaydır', '{n} dosya', '{date} tarihine kadar erişilebilir', 'Bu linkin süresi doldu.', 'Bu dosya artık mevcut değil.', 'Şifreli dosya', 'Tarayıcında çözüldü. Depolama sağlayıcısı içeriği okuyamaz.', 'Şifre çözülüyor…', 'Parola', 'Aç', 'Parola yanlış ya da dosya bozuk.', 'Bu linkte anahtar eksik. Gönderenden linkin tamamını iste.', 'Bu dosyanın şifresi çözülemedi. Dosya bozuk olabilir.', 'Dosya gönder', 'Dosyalar doğrudan isteyenin kendi depolama alanına gider.', 'Dosya seç', 'ya da buraya bırak', 'Gönderiliyor…', 'Gönderildi', 'Başarısız', 'Çok büyük. Sınır {size}.', 'Bu linkle daha fazla dosya gönderilemez.', 'Tekrar dene', 'Aktar ile paylaşıldı', 'Bu dosya türü için önizleme yok.', 'Büyük dosya: şifresi doğrudan kaydettiğin dosyaya çözülür.', 'Kaydedildi.'],
+    'de': ['Herunterladen', 'Alle herunterladen', 'ZIP wird erstellt…', 'Link kopieren', 'Text kopieren', 'Kopiert', 'Zeilen umbrechen', '{n} Dateien', 'Verfügbar bis {date}', 'Dieser Link ist abgelaufen.', 'Diese Datei ist nicht mehr verfügbar.', 'Verschlüsselte Datei', 'In deinem Browser entschlüsselt. Der Speicheranbieter kann sie nicht lesen.', 'Wird entschlüsselt…', 'Passwort', 'Entsperren', 'Falsches Passwort oder beschädigte Datei.', 'Diesem Link fehlt der Schlüssel. Bitte den Absender um den vollständigen Link.', 'Diese Datei konnte nicht entschlüsselt werden. Sie ist möglicherweise beschädigt.', 'Dateien senden', 'Dateien landen direkt im eigenen Speicher der anfragenden Person.', 'Dateien auswählen', 'oder hierher ziehen', 'Wird gesendet…', 'Gesendet', 'Fehlgeschlagen', 'Zu groß. Das Limit ist {size}.', 'Über diesen Link können keine weiteren Dateien gesendet werden.', 'Erneut versuchen', 'Geteilt mit Aktar', 'Keine Vorschau für diesen Dateityp.', 'Große Datei: Sie wird direkt in die Datei entschlüsselt, die du speicherst.', 'Gespeichert.'],
+    'es': ['Descargar', 'Descargar todo', 'Preparando ZIP…', 'Copiar enlace', 'Copiar texto', 'Copiado', 'Ajustar líneas', '{n} archivos', 'Disponible hasta el {date}', 'Este enlace ha caducado.', 'Este archivo ya no está disponible.', 'Archivo cifrado', 'Descifrado en tu navegador. El proveedor de almacenamiento no puede leerlo.', 'Descifrando…', 'Contraseña', 'Desbloquear', 'Contraseña incorrecta o archivo dañado.', 'A este enlace le falta la clave. Pide al remitente el enlace completo.', 'No se pudo descifrar este archivo. Puede estar dañado.', 'Enviar archivos', 'Los archivos van directamente al almacenamiento propio de quien los solicita.', 'Elegir archivos', 'o suéltalos aquí', 'Enviando…', 'Enviado', 'Error', 'Demasiado grande. El límite es {size}.', 'No se pueden enviar más archivos con este enlace.', 'Reintentar', 'Compartido con Aktar', 'No hay vista previa para este tipo de archivo.', 'Archivo grande: se descifra directamente en el archivo que guardes.', 'Guardado.'],
+    'fr': ['Télécharger', 'Tout télécharger', 'Préparation du ZIP…', 'Copier le lien', 'Copier le texte', 'Copié', 'Retour à la ligne', '{n} fichiers', 'Disponible jusqu’au {date}', 'Ce lien a expiré.', 'Ce fichier n’est plus disponible.', 'Fichier chiffré', 'Déchiffré dans votre navigateur. Le fournisseur de stockage ne peut pas le lire.', 'Déchiffrement…', 'Mot de passe', 'Déverrouiller', 'Mot de passe incorrect ou fichier endommagé.', 'Il manque la clé à ce lien. Demandez le lien complet à l’expéditeur.', 'Impossible de déchiffrer ce fichier. Il est peut-être endommagé.', 'Envoyer des fichiers', 'Les fichiers vont directement dans le stockage de la personne qui les demande.', 'Choisir des fichiers', 'ou déposez-les ici', 'Envoi…', 'Envoyé', 'Échec', 'Trop volumineux. La limite est de {size}.', 'Plus aucun fichier ne peut être envoyé avec ce lien.', 'Réessayer', 'Partagé avec Aktar', 'Pas d’aperçu pour ce type de fichier.', 'Fichier volumineux : il est déchiffré directement dans le fichier que vous enregistrez.', 'Enregistré.'],
+    'id': ['Unduh', 'Unduh semua', 'Menyiapkan ZIP…', 'Salin tautan', 'Salin teks', 'Disalin', 'Bungkus baris', '{n} file', 'Tersedia hingga {date}', 'Tautan ini sudah kedaluwarsa.', 'File ini sudah tidak tersedia.', 'File terenkripsi', 'Didekripsi di browser Anda. Penyedia penyimpanan tidak dapat membacanya.', 'Mendekripsi…', 'Kata sandi', 'Buka', 'Kata sandi salah, atau file rusak.', 'Tautan ini tidak memiliki kuncinya. Minta tautan lengkap kepada pengirim.', 'File ini tidak dapat didekripsi. Mungkin file rusak.', 'Kirim file', 'File langsung masuk ke penyimpanan milik peminta.', 'Pilih file', 'atau letakkan di sini', 'Mengirim…', 'Terkirim', 'Gagal', 'Terlalu besar. Batasnya {size}.', 'Tidak ada lagi file yang dapat dikirim dengan tautan ini.', 'Coba lagi', 'Dibagikan dengan Aktar', 'Tidak ada pratinjau untuk jenis file ini.', 'File besar: didekripsi langsung ke file yang kamu simpan.', 'Tersimpan.'],
+    'it': ['Scarica', 'Scarica tutto', 'Preparazione dello ZIP…', 'Copia link', 'Copia testo', 'Copiato', 'A capo automatico', '{n} file', 'Disponibile fino al {date}', 'Questo link è scaduto.', 'Questo file non è più disponibile.', 'File crittografato', 'Decrittografato nel tuo browser. Il provider di archiviazione non può leggerlo.', 'Decrittografia…', 'Password', 'Sblocca', 'Password errata o file danneggiato.', 'A questo link manca la chiave. Chiedi il link completo al mittente.', 'Impossibile decrittografare questo file. Potrebbe essere danneggiato.', 'Invia file', 'I file arrivano direttamente nello spazio di archiviazione di chi li richiede.', 'Scegli file', 'o trascinali qui', 'Invio…', 'Inviato', 'Non riuscito', 'Troppo grande. Il limite è {size}.', 'Non è possibile inviare altri file con questo link.', 'Riprova', 'Condiviso con Aktar', 'Nessuna anteprima per questo tipo di file.', 'File grande: viene decifrato direttamente nel file che salvi.', 'Salvato.'],
+    'ja': ['ダウンロード', 'すべてダウンロード', 'ZIPを準備中…', 'リンクをコピー', 'テキストをコピー', 'コピーしました', '行を折り返す', '{n} 個のファイル', '{date} まで利用可能', 'このリンクは期限切れです。', 'このファイルは利用できなくなりました。', '暗号化されたファイル', 'ブラウザ内で復号されました。ストレージプロバイダは内容を読めません。', '復号中…', 'パスワード', '開く', 'パスワードが違うか、ファイルが破損しています。', 'このリンクには鍵がありません。送信者に完全なリンクを依頼してください。', 'このファイルを復号できませんでした。破損している可能性があります。', 'ファイルを送信', 'ファイルはリクエストした人のストレージに直接届きます。', 'ファイルを選択', 'またはここにドロップ', '送信中…', '送信済み', '失敗', '大きすぎます。上限は {size} です。', 'このリンクではこれ以上ファイルを送信できません。', '再試行', 'Aktar で共有', 'このファイル形式はプレビューできません。', '大きなファイルです。保存先のファイルに直接復号されます。', '保存しました。'],
+    'ko': ['다운로드', '모두 다운로드', 'ZIP 준비 중…', '링크 복사', '텍스트 복사', '복사됨', '줄 바꿈', '파일 {n}개', '{date}까지 이용 가능', '이 링크는 만료되었습니다.', '이 파일은 더 이상 사용할 수 없습니다.', '암호화된 파일', '브라우저에서 복호화되었습니다. 스토리지 제공업체는 내용을 읽을 수 없습니다.', '복호화 중…', '비밀번호', '열기', '비밀번호가 틀렸거나 파일이 손상되었습니다.', '이 링크에 키가 없습니다. 보낸 사람에게 전체 링크를 요청하세요.', '이 파일을 복호화할 수 없습니다. 손상되었을 수 있습니다.', '파일 보내기', '파일은 요청한 사람의 스토리지로 바로 전송됩니다.', '파일 선택', '또는 여기에 놓기', '보내는 중…', '보냄', '실패', '너무 큽니다. 한도는 {size}입니다.', '이 링크로는 더 이상 파일을 보낼 수 없습니다.', '다시 시도', 'Aktar로 공유됨', '이 파일 형식은 미리 볼 수 없습니다.', '큰 파일입니다. 저장하는 파일에 바로 복호화됩니다.', '저장했습니다.'],
+    'nl': ['Downloaden', 'Alles downloaden', 'ZIP voorbereiden…', 'Link kopiëren', 'Tekst kopiëren', 'Gekopieerd', 'Regels omlopen', '{n} bestanden', 'Beschikbaar tot {date}', 'Deze link is verlopen.', 'Dit bestand is niet meer beschikbaar.', 'Versleuteld bestand', 'Ontsleuteld in je browser. De opslagprovider kan het niet lezen.', 'Ontsleutelen…', 'Wachtwoord', 'Ontgrendelen', 'Verkeerd wachtwoord, of het bestand is beschadigd.', 'Deze link mist de sleutel. Vraag de afzender om de volledige link.', 'Dit bestand kon niet worden ontsleuteld. Het is mogelijk beschadigd.', 'Bestanden versturen', 'Bestanden gaan rechtstreeks naar de eigen opslag van degene die erom vraagt.', 'Bestanden kiezen', 'of sleep ze hierheen', 'Versturen…', 'Verstuurd', 'Mislukt', 'Te groot. De limiet is {size}.', 'Met deze link kunnen geen bestanden meer worden verstuurd.', 'Opnieuw', 'Gedeeld met Aktar', 'Geen voorbeeld voor dit bestandstype.', 'Groot bestand: het wordt direct ontsleuteld in het bestand dat je opslaat.', 'Opgeslagen.'],
+    'pl': ['Pobierz', 'Pobierz wszystko', 'Przygotowywanie ZIP…', 'Kopiuj link', 'Kopiuj tekst', 'Skopiowano', 'Zawijaj wiersze', 'Pliki: {n}', 'Dostępne do {date}', 'Ten link wygasł.', 'Ten plik nie jest już dostępny.', 'Zaszyfrowany plik', 'Odszyfrowano w przeglądarce. Dostawca magazynu nie może go odczytać.', 'Odszyfrowywanie…', 'Hasło', 'Odblokuj', 'Nieprawidłowe hasło lub uszkodzony plik.', 'W tym linku brakuje klucza. Poproś nadawcę o pełny link.', 'Nie udało się odszyfrować pliku. Może być uszkodzony.', 'Wyślij pliki', 'Pliki trafiają bezpośrednio do magazynu osoby, która o nie prosi.', 'Wybierz pliki', 'lub upuść je tutaj', 'Wysyłanie…', 'Wysłano', 'Niepowodzenie', 'Za duży. Limit to {size}.', 'Tym linkiem nie można wysłać więcej plików.', 'Spróbuj ponownie', 'Udostępniono przez Aktar', 'Brak podglądu dla tego typu pliku.', 'Duży plik: jest odszyfrowywany od razu do zapisywanego pliku.', 'Zapisano.'],
+    'pt-BR': ['Baixar', 'Baixar tudo', 'Preparando ZIP…', 'Copiar link', 'Copiar texto', 'Copiado', 'Quebrar linhas', '{n} arquivos', 'Disponível até {date}', 'Este link expirou.', 'Este arquivo não está mais disponível.', 'Arquivo criptografado', 'Descriptografado no seu navegador. O provedor de armazenamento não consegue lê-lo.', 'Descriptografando…', 'Senha', 'Desbloquear', 'Senha incorreta ou arquivo danificado.', 'Falta a chave neste link. Peça o link completo a quem enviou.', 'Não foi possível descriptografar este arquivo. Ele pode estar danificado.', 'Enviar arquivos', 'Os arquivos vão direto para o armazenamento próprio de quem os pediu.', 'Escolher arquivos', 'ou solte-os aqui', 'Enviando…', 'Enviado', 'Falhou', 'Grande demais. O limite é {size}.', 'Não é possível enviar mais arquivos com este link.', 'Tentar novamente', 'Compartilhado com o Aktar', 'Sem pré-visualização para este tipo de arquivo.', 'Arquivo grande: ele é descriptografado direto no arquivo que você salvar.', 'Salvo.'],
+    'ru': ['Скачать', 'Скачать все', 'Подготовка ZIP…', 'Копировать ссылку', 'Копировать текст', 'Скопировано', 'Переносить строки', 'Файлов: {n}', 'Доступно до {date}', 'Срок действия ссылки истёк.', 'Этот файл больше недоступен.', 'Зашифрованный файл', 'Расшифровано в вашем браузере. Хранилище не может его прочитать.', 'Расшифровка…', 'Пароль', 'Открыть', 'Неверный пароль или файл повреждён.', 'В ссылке нет ключа. Попросите отправителя прислать полную ссылку.', 'Не удалось расшифровать файл. Возможно, он повреждён.', 'Отправить файлы', 'Файлы попадают прямо в хранилище того, кто их запросил.', 'Выбрать файлы', 'или перетащите их сюда', 'Отправка…', 'Отправлено', 'Ошибка', 'Слишком большой. Лимит {size}.', 'По этой ссылке больше нельзя отправить файлы.', 'Повторить', 'Отправлено через Aktar', 'Предпросмотр для этого типа файлов недоступен.', 'Большой файл: он расшифровывается сразу в сохраняемый файл.', 'Сохранено.'],
+    'uk': ['Завантажити', 'Завантажити все', 'Підготовка ZIP…', 'Копіювати посилання', 'Копіювати текст', 'Скопійовано', 'Переносити рядки', 'Файлів: {n}', 'Доступно до {date}', 'Термін дії посилання минув.', 'Цей файл більше недоступний.', 'Зашифрований файл', 'Розшифровано у вашому браузері. Сховище не може його прочитати.', 'Розшифрування…', 'Пароль', 'Відкрити', 'Неправильний пароль або файл пошкоджено.', 'У посиланні немає ключа. Попросіть відправника надіслати повне посилання.', 'Не вдалося розшифрувати файл. Можливо, його пошкоджено.', 'Надіслати файли', 'Файли потрапляють прямо до сховища того, хто їх запросив.', 'Вибрати файли', 'або перетягніть їх сюди', 'Надсилання…', 'Надіслано', 'Помилка', 'Завеликий. Ліміт {size}.', 'Цим посиланням більше не можна надіслати файли.', 'Повторити', 'Надіслано через Aktar', 'Попередній перегляд для цього типу файлів недоступний.', 'Великий файл: його розшифровано одразу у файл, який ви зберігаєте.', 'Збережено.'],
+    'vi': ['Tải xuống', 'Tải xuống tất cả', 'Đang chuẩn bị ZIP…', 'Sao chép liên kết', 'Sao chép văn bản', 'Đã sao chép', 'Ngắt dòng', '{n} tệp', 'Có sẵn đến {date}', 'Liên kết này đã hết hạn.', 'Tệp này không còn nữa.', 'Tệp đã mã hóa', 'Được giải mã trong trình duyệt của bạn. Nhà cung cấp lưu trữ không thể đọc được.', 'Đang giải mã…', 'Mật khẩu', 'Mở khóa', 'Sai mật khẩu hoặc tệp bị hỏng.', 'Liên kết này thiếu khóa. Hãy xin người gửi liên kết đầy đủ.', 'Không thể giải mã tệp này. Tệp có thể bị hỏng.', 'Gửi tệp', 'Tệp được chuyển thẳng vào kho lưu trữ của người yêu cầu.', 'Chọn tệp', 'hoặc thả vào đây', 'Đang gửi…', 'Đã gửi', 'Thất bại', 'Quá lớn. Giới hạn là {size}.', 'Không thể gửi thêm tệp bằng liên kết này.', 'Thử lại', 'Được chia sẻ bằng Aktar', 'Không có bản xem trước cho loại tệp này.', 'Tệp lớn: tệp được giải mã thẳng vào tệp bạn lưu.', 'Đã lưu.'],
+    'zh-Hans': ['下载', '全部下载', '正在准备 ZIP…', '复制链接', '复制文本', '已复制', '自动换行', '{n} 个文件', '可用至 {date}', '此链接已过期。', '此文件已不可用。', '加密文件', '已在你的浏览器中解密。存储服务商无法读取其内容。', '正在解密…', '密码', '解锁', '密码错误，或文件已损坏。', '此链接缺少密钥。请向发送者索取完整链接。', '无法解密此文件，文件可能已损坏。', '发送文件', '文件会直接存入请求者自己的存储空间。', '选择文件', '或拖放到这里', '正在发送…', '已发送', '失败', '文件过大，上限为 {size}。', '此链接无法再发送更多文件。', '重试', '通过 Aktar 分享', '此文件类型无法预览。', '大文件：会直接解密到你保存的文件中。', '已保存。'],
+    'zh-Hant': ['下載', '全部下載', '正在準備 ZIP…', '拷貝連結', '拷貝文字', '已拷貝', '自動換行', '{n} 個檔案', '可用至 {date}', '此連結已過期。', '此檔案已無法使用。', '加密檔案', '已在你的瀏覽器中解密。儲存服務供應商無法讀取其內容。', '正在解密…', '密碼', '解鎖', '密碼錯誤，或檔案已損毀。', '此連結缺少金鑰。請向傳送者索取完整連結。', '無法解密此檔案，檔案可能已損毀。', '傳送檔案', '檔案會直接存入請求者自己的儲存空間。', '選擇檔案', '或拖放到這裡', '正在傳送…', '已傳送', '失敗', '檔案過大，上限為 {size}。', '此連結無法再傳送更多檔案。', '重試', '透過 Aktar 分享', '此檔案類型無法預覽。', '大型檔案：會直接解密到你儲存的檔案中。', '已儲存。']
   };
-  var KEYS = ['download', 'downloadAll', 'zipping', 'copyLink', 'copyText', 'copied', 'wrap', 'nFiles', 'expires', 'expired', 'unavailable', 'encrypted', 'e2eNote', 'decrypting', 'password', 'unlock', 'wrongPassword', 'missingKey', 'damaged', 'sendFiles', 'requestHint', 'chooseFiles', 'orDrop', 'sending', 'sent', 'failed', 'tooLarge', 'full', 'retry', 'sharedWith', 'noPreview'];
+  var KEYS = ['download', 'downloadAll', 'zipping', 'copyLink', 'copyText', 'copied', 'wrap', 'nFiles', 'expires', 'expired', 'unavailable', 'encrypted', 'e2eNote', 'decrypting', 'password', 'unlock', 'wrongPassword', 'missingKey', 'damaged', 'sendFiles', 'requestHint', 'chooseFiles', 'orDrop', 'sending', 'sent', 'failed', 'tooLarge', 'full', 'retry', 'sharedWith', 'noPreview', 'bigFile', 'saved'];
 
   var data;
   try { data = JSON.parse(document.getElementById('aktar-data').textContent); } catch (e) { data = null; }
@@ -488,16 +499,24 @@ function aktarDecrypt(read, keyFor, onProgress) {
     function fail(code) {
       card.textContent = '';
       card.appendChild(el('h1', { text: t('encrypted') }));
-      card.appendChild(el('p', { class: 'error', text: t(code === 'missingKey' ? 'missingKey' : code === 'wrongKey' ? 'wrongPassword' : code === 'expired' ? 'expired' : code === 'unavailable' ? 'unavailable' : 'damaged') }));
+      card.appendChild(el('p', { class: 'error', text: message(code) }));
     }
     if (!url) { fail('unavailable'); return; }
 
-    function run(keyFor) {
-      card.textContent = '';
-      card.appendChild(el('h1', { text: t('encrypted') }));
-      card.appendChild(status);
-      status.textContent = t('decrypting');
-      fetch(url).then(function (response) {
+    // Above STREAM_ABOVE bytes, where the browser can write to a file the
+    // visitor picks (showSaveFilePicker), the file is decrypted straight into
+    // it and nothing piles up in memory. Elsewhere the records are gathered
+    // in Blobs of BLOB_CHUNK bytes, which browsers may keep on disk.
+    var STREAM_ABOVE = 200e6, BLOB_CHUNK = 16e6;
+    var canSave = typeof window.showSaveFilePicker === 'function' && window.isSecureContext !== false;
+
+    function message(code) {
+      return t(code === 'missingKey' ? 'missingKey' : code === 'wrongKey' ? 'wrongPassword' : code === 'expired' ? 'expired' : code === 'unavailable' ? 'unavailable' : 'damaged');
+    }
+
+    // Fetches and decrypts the file; onPercent(n) is told how far it got.
+    function open(keyFor, onPercent, options) {
+      return fetch(url).then(function (response) {
         if (response.status === 403) throw aktarError(isExpired() ? 'expired' : 'unavailable');
         if (!response.ok) throw aktarError('unavailable');
         var reader = response.body && response.body.getReader ? response.body.getReader() : null;
@@ -506,16 +525,36 @@ function aktarDecrypt(read, keyFor, onProgress) {
           ? function () { return reader.read().then(function (r) { return r.done ? null : r.value; }); }
           : function () { if (whole === 'done') return Promise.resolve(null); return response.arrayBuffer().then(function (b) { whole = 'done'; return new Uint8Array(b); }); };
         var size = typeof enc.size === 'number' ? enc.size : 0;
+        var stop = function () { if (reader) reader.cancel().catch(function () {}); };
         return aktarDecrypt(read, keyFor, function (n) {
-          if (size > 0) status.textContent = t('decrypting') + ' ' + Math.min(100, Math.round(n * 100 / size)) + '%';
-        });
-      }).then(function (result) {
+          if (size > 0) onPercent(Math.min(100, Math.round(n * 100 / size)));
+        }, options).then(function (result) { if (result.stopped) stop(); return result; }, function (e) { stop(); throw e; });
+      });
+    }
+
+    function run(keyFor) {
+      // The key is made once, also when a big file is fetched again to save it.
+      var key = null;
+      var once = function (header) { if (!key) key = Promise.resolve().then(function () { return keyFor(header); }); return key; };
+      card.textContent = '';
+      card.appendChild(el('h1', { text: t('encrypted') }));
+      card.appendChild(status);
+      status.textContent = t('decrypting');
+      var big = canSave && typeof enc.size === 'number' && enc.size > STREAM_ABOVE;
+      var blobs = [], pending = [], pendingBytes = 0;
+      var options = big ? { onMeta: function () { return false; } } : { sink: function (p) {
+        pending.push(p); pendingBytes += p.length;
+        if (pendingBytes >= BLOB_CHUNK) { blobs.push(new Blob(pending)); pending = []; pendingBytes = 0; }
+      } };
+      open(once, function (n) { status.textContent = t('decrypting') + ' ' + n + '%'; }, options).then(function (result) {
         var meta = result.meta;
         var type = /^[\w.+-]+\/[\w.+-]+$/.test(meta.type) ? meta.type : 'application/octet-stream';
-        var blob = new Blob(result.parts, { type: type });
-        var blobURL = URL.createObjectURL(blob);
         var name = String(meta.name).replace(/[\\/]/g, '_') || 'file';
         var note = el('p', { class: 'hint', text: '🔒 ' + t('e2eNote') });
+        if (result.stopped) { showSave(once, meta, name, note); return; }
+        var blob = new Blob(blobs.concat(pending), { type: type });
+        blobs = pending = null;
+        var blobURL = URL.createObjectURL(blob);
         var isText = type.indexOf('text/') === 0 || /^application\/(json|xml|javascript|x-sh|x-yaml|toml)$/.test(type);
         if (isText && blob.size <= 1000000) {
           return blob.text().then(function (text) {
@@ -533,6 +572,39 @@ function aktarDecrypt(read, keyFor, onProgress) {
         if (e && e.aktar === 'wrongKey' && enc.password) { askPassword(true); return; }
         fail(e && e.aktar ? e.aktar : 'damaged');
       });
+    }
+
+    // A big file: Download asks where to save it, then fetches it again and
+    // decrypts it into that file. A file that fails to decrypt is discarded.
+    function showSave(keyFor, meta, name, note) {
+      var progress = el('p', { class: 'meta' });
+      var button = el('button', { class: 'btn primary', type: 'button', text: t('download') });
+      button.addEventListener('click', function () {
+        progress.className = 'meta';
+        window.showSaveFilePicker({ suggestedName: name }).then(function (handle) {
+          return handle.createWritable().then(function (writable) {
+            button.disabled = true;
+            progress.textContent = t('decrypting');
+            return open(keyFor, function (n) { progress.textContent = t('decrypting') + ' ' + n + '%'; }, { sink: function (p) { return writable.write(p); } })
+              .then(function () { return writable.close(); }, function (e) { return writable.abort().catch(function () {}).then(function () { throw e; }); });
+          });
+        }).then(function () {
+          button.disabled = false;
+          progress.textContent = t('saved');
+        }, function (e) {
+          button.disabled = false;
+          if (e && e.name === 'AbortError') { progress.textContent = ''; return; }
+          progress.className = 'error';
+          progress.textContent = message(e && e.aktar ? e.aktar : 'damaged');
+        });
+      });
+      var row = el('div', { class: 'row' }, [button, copyButton(t('copyLink'), function () { return location.href; })]);
+      render([el('div', { class: 'card' }, [
+        el('h1', { text: name }),
+        metaLine([formatSize(meta.size), expiryText()]),
+        el('p', { class: 'hint', text: t('bigFile') }),
+        row, progress, note
+      ]), footer()]);
     }
 
     function askPassword(again) {

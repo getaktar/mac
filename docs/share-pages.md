@@ -279,9 +279,20 @@ ID `aktar-file-requests`, or by the same origin + PUT when the provider drops
 IDs), `PutBucketCors`. Once per destination and origin; remember it in the
 destination (`requestCorsOrigin`, not transferred) and redo it if it fails
 later. If the provider refuses (MinIO has no bucket CORS; a key without the
-permission), show: "This bucket doesn't let browsers upload to it. Allow PUT
+permission, such as an R2 "Object Read & Write" token), first ask the way a
+browser would: an unsigned `OPTIONS` to slot 1's file URL with `Origin`,
+`Access-Control-Request-Method: PUT` and `Access-Control-Request-Headers`
+(`content-type`, plus `if-none-match` when writes are conditional). A 2xx
+whose Allow-Origin is the origin (or `*`), whose Allow-Methods has PUT (or
+`*`) and whose Allow-Headers has every header (or `*`) means the rule is
+already there (added in a dashboard): carry on and remember the origin.
+Otherwise show: "This bucket doesn't let browsers upload to it. Allow PUT
 from <origin> in its CORS settings, then try again." with the rule as JSON
-to copy, and don't create the request.
+to copy, plus, when the refusal was a 403/AccessDenied, "This key can't
+change the bucket's settings, so Aktar couldn't add the rule itself." and
+where to add it (R2: `R2 > <bucket> > Settings > CORS Policy` in the
+Cloudflare dashboard), and don't create the request. "I Added the Rule"
+creates it without asking the bucket.
 
 ### Collecting
 
@@ -403,6 +414,20 @@ memory. The page refuses truncated files (no final record), reordered or
 altered records (the AAD and nonce bind them), and a size that doesn't match
 the metadata.
 
+Where the decrypted file goes in the page:
+
+- Above 200 MB, in a browser that can write to a file the visitor picks
+  (`showSaveFilePicker`: desktop Chrome and Edge), the page reads only the
+  header and metadata, shows the name and size with Download and the hint
+  "Large file: it's decrypted straight into the file you save", then on
+  Download fetches the file again and decrypts it record by record into the
+  chosen file (`aktarDecrypt`'s `sink`). A file that fails to decrypt is
+  discarded (`abort`), never left half written. No preview.
+- Otherwise the records are gathered in Blobs of 16 MB and joined at the end
+  (browsers may keep large Blobs on disk), with the preview as before. Safari
+  and Firefox have no file picker, so a very large file there still needs
+  the memory of its own size; that's the known limit.
+
 Platform crypto: Mac CryptoKit `AES.GCM` + CommonCrypto PBKDF2 (as
 DestinationTransfer); Windows the `aes-gcm` and `pbkdf2` crates already in
 Cargo.toml; mobile `expo-crypto`'s AES-GCM (as the transfer codec) and
@@ -423,6 +448,67 @@ phone: show progress in the password prompt).
 - Device QA (not possible here): Slack/Discord/iMessage/X cards for a page on
   a custom domain, decrypting a 1 GB file in Safari and Chrome, a request
   link opened on a phone.
+
+### Device QA (2026-11-16)
+
+Mac 0.21.0 (build 28), Cloudflare R2 destination with a custom domain
+(`aktar-demo`, Share Page on), pages opened in Chrome and Safari on macOS.
+
+Passed:
+
+- Share page, gallery (2 files: "2 files · 3.3 MB") and text page: served as
+  `text/html; charset=utf-8`, og:title/description/image correct, Turkish
+  text and symbols intact.
+- Key in the Link, 279 MB zip: header matches the format (AKE1, kdf 0,
+  64 KB records), page shows only "Encrypted file", the `#k=` fragment never
+  reaches the network, decrypted in ~10 s in Chrome, also opens in Safari.
+- Ask for a Password, 2.7 MB PNG: kdf 1, 600 000 iterations, random salt;
+  a wrong password shows "wrong password or damaged file" and the form again;
+  the right one decrypts and previews.
+- File request on R2: two files (12 MB + a small text file) sent from Chrome,
+  all four PUTs (file + `.json`) 200, no console errors. Another
+  Content-Type: 403. No `If-None-Match`: 403. Writing a used slot again: 412.
+  The app collected both into history (source: the request, no share page,
+  as specified) and deleted the temporary copies (404).
+
+Found (all four fixed afterwards, same day; see each item):
+
+1. **The encrypted page keeps the whole plaintext in memory.** Decryption is
+   streamed record by record, but every record is pushed into `parts`
+   (`template.html` `aktarDecrypt`) and turned into one Blob at the end; the
+   JS heap reached ~300 MB for the 279 MB file. The spec says "never the
+   whole file in memory". Fine in desktop Chrome/Safari at this size; a 1 GB
+   file on iOS Safari is the likely failure. A fix needs streaming to disk
+   (File System Access API where available, a service worker otherwise), so
+   it's a template change for every app. *Fixed:* see "Where the decrypted
+   file goes" under Format. Same 279 MB file: the page now reads ~4 MB before
+   Download and saved the file with a peak JS heap of ~120 MB (garbage not
+   yet collected, nothing kept), SHA-256 equal to a Node decryption; the
+   Blob path for browsers without the picker ended at ~41 MB of heap.
+2. **R2 keys can't write CORS, and the error doesn't say so.** An R2 key
+   with Object Read & Write (the usual one) can't call `PutBucketCors`;
+   "This bucket doesn't let browsers upload to it" is shown without the
+   reason. Worth a provider-specific hint for R2 ("this key can't change
+   bucket settings; add the rule in the Cloudflare dashboard"). *Fixed:*
+   on a 403/AccessDenied the message gets a hint (for R2 with the dashboard
+   path `R2 > <bucket> > Settings > CORS Policy`).
+3. **"Create Link" keeps failing after the rule exists.** With the rule
+   already on the bucket, every "Create Link" retries `ensureCORSRule`, fails
+   on the key's permission and shows the CORS error again; only "I Added the
+   Rule" gets past it. Suggested fix: when writing the rule fails, send the
+   browser's preflight (`OPTIONS` with `Origin` and
+   `Access-Control-Request-Method: PUT`) to the upload origin and go ahead if
+   it's allowed. *Fixed:* when reading or writing the rule fails, the app
+   sends that preflight (unsigned `OPTIONS` to slot 1's file URL with
+   `Origin`, `Access-Control-Request-Method: PUT` and the headers the page
+   will send) and carries on, remembering the origin, if the answer allows
+   it (`CORSPreflight` on Mac, the same on Windows and mobile).
+4. Minor: pages don't declare an icon, so browsers ask for `/favicon.ico`
+   and log a 404 on custom domains. *Fixed:* `<link rel="icon" href="data:,">`.
+
+Not done yet: file request on AWS S3 (no S3 destination on the test Mac),
+Windows, iOS and Android, iOS Safari with a 1 GB encrypted file, a request
+link opened on a phone, Slack/Discord/iMessage/X cards.
 
 ## Decisions made while building the Mac app
 

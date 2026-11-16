@@ -302,3 +302,50 @@ enum CORSXML {
             .replacingOccurrences(of: ">", with: "&gt;")
     }
 }
+
+/// The browser's CORS preflight for a file request's PUT, sent by the app
+/// itself. A key that can't read or write the bucket's CORS rules (an R2
+/// "Object Read & Write" token, for one) still can't stop the request when
+/// the rule is already there: the preflight shows whether browsers on the
+/// page's origin may upload.
+enum CORSPreflight {
+    /// Why Aktar couldn't add the rule, for a key that may not change the
+    /// bucket's settings; nil for any other failure (MinIO has no bucket
+    /// CORS at all).
+    static func hint(for error: Error, destination: DestinationConfig) -> String? {
+        switch error as? StorageError {
+        case .lifecycleNotAllowed?, .accessDenied?:
+            if destination.preset == .cloudflareR2 {
+                return String(localized: "This key can\u{2019}t change the bucket\u{2019}s settings, so Aktar couldn\u{2019}t add the rule itself. In the Cloudflare dashboard, open R2 > \(destination.bucket) > Settings > CORS Policy, add the rule below, then choose I Added the Rule.")
+            }
+            return String(localized: "This key can\u{2019}t change the bucket\u{2019}s settings, so Aktar couldn\u{2019}t add the rule itself. Add the rule below in your provider\u{2019}s dashboard, then choose I Added the Rule.")
+        default:
+            return nil
+        }
+    }
+
+    /// The headers the page sends with each PUT, lowercased.
+    static func requestHeaders(conditional: Bool) -> [String] {
+        conditional ? ["content-type", "if-none-match"] : ["content-type"]
+    }
+
+    /// Whether a preflight reply lets a page on `origin` PUT with
+    /// `headers`: a 2xx answer whose Allow-Origin is the origin (or `*`),
+    /// whose Allow-Methods has PUT (or `*`) and whose Allow-Headers has
+    /// every header (or `*`). Header names are matched case-insensitively.
+    static func allows(status: Int, headers: [String: String], origin: String, requestHeaders: [String]) -> Bool {
+        guard (200..<300).contains(status) else { return false }
+        func value(_ name: String) -> String? {
+            headers.first { $0.key.caseInsensitiveCompare(name) == .orderedSame }?.value
+        }
+        func list(_ name: String) -> Set<String> {
+            Set((value(name) ?? "").split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty })
+        }
+        let allowedOrigin = value("Access-Control-Allow-Origin")?.trimmingCharacters(in: .whitespaces)
+        guard allowedOrigin == "*" || allowedOrigin == origin else { return false }
+        let methods = list("Access-Control-Allow-Methods")
+        guard methods.contains("*") || methods.contains("put") else { return false }
+        let allowedHeaders = list("Access-Control-Allow-Headers")
+        return allowedHeaders.contains("*") || requestHeaders.allSatisfy { allowedHeaders.contains($0.lowercased()) }
+    }
+}

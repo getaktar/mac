@@ -296,6 +296,28 @@ final class S3Provider: StorageProvider, Sendable {
         }
     }
 
+    /// Whether browsers on `origin` may already PUT `objectKey`: the
+    /// preflight a browser sends before a file request's upload (see
+    /// `CORSPreflight`). Unsigned, like the browser's. False when there's
+    /// no answer.
+    func allowsBrowserPUT(from origin: String, objectKey: String, conditional: Bool) async -> Bool {
+        guard let url = try? endpointURL(for: objectKey) else { return false }
+        let headers = CORSPreflight.requestHeaders(conditional: conditional)
+        var request = URLRequest(url: url)
+        request.httpMethod = "OPTIONS"
+        request.timeoutInterval = 20
+        request.setValue(origin, forHTTPHeaderField: "Origin")
+        request.setValue("PUT", forHTTPHeaderField: "Access-Control-Request-Method")
+        request.setValue(headers.joined(separator: ","), forHTTPHeaderField: "Access-Control-Request-Headers")
+        guard let (_, response) = try? await Self.controlSession.data(for: request),
+              let http = response as? HTTPURLResponse else { return false }
+        var fields: [String: String] = [:]
+        for (name, value) in http.allHeaderFields {
+            if let name = name as? String, let value = value as? String { fields[name] = value }
+        }
+        return CORSPreflight.allows(status: http.statusCode, headers: fields, origin: origin, requestHeaders: headers)
+    }
+
     /// Makes sure the bucket has one lifecycle rule per expiry duration (see
     /// `UploadExpiry`). A PUT replaces the bucket's whole lifecycle
     /// configuration, so every rule that isn't Aktar's is sent back exactly
