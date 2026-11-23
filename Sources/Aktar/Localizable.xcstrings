@@ -4,6 +4,2706 @@
     "" : {
       "shouldTranslate" : false
     },
+    "%@ (not installed)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (nicht installiert)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (no instalado)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (non installé)"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (belum terpasang)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (non installato)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（未インストール）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(설치 안 됨)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (niet geïnstalleerd)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (niezainstalowany)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (não instalado)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (не установлен)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (yüklü değil)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (не встановлено)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (chưa cài đặt)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（未安装）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（未安裝）"
+          }
+        }
+      }
+    },
+    "%@ didn’t open. Check that it’s set up as Settings > General > Capture tool describes, or pick another tool there." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wurde nicht geöffnet. Prüfe, ob es wie unter Einstellungen > Allgemein > Aufnahmewerkzeug beschrieben eingerichtet ist, oder wähle dort ein anderes Werkzeug."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no se abrió. Comprueba que está configurado como indica Ajustes > General > Herramienta de captura, o elige otra herramienta allí."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ne s’est pas ouvert. Vérifiez qu’il est configuré comme l’indique Réglages > Général > Outil de capture, ou choisissez-y un autre outil."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tidak terbuka. Pastikan sudah diatur seperti yang dijelaskan di Pengaturan > Umum > Alat tangkap layar, atau pilih alat lain di sana."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non si è aperto. Controlla che sia configurato come descritto in Impostazioni > Generali > Strumento di acquisizione, oppure scegli lì un altro strumento."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@が開きませんでした。「設定」>「一般」>「取り込みツール」の説明どおりに設定されているか確認するか、そこで別のツールを選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@이(가) 열리지 않았습니다. 설정 > 일반 > 캡처 도구의 안내대로 설정되었는지 확인하거나 그곳에서 다른 도구를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is niet geopend. Controleer of het is ingesteld zoals Instellingen > Algemeen > Hulpmiddel voor vastleggen beschrijft, of kies daar een ander hulpmiddel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie udało się otworzyć %@. Sprawdź, czy jest skonfigurowany tak, jak opisano w Ustawienia > Ogólne > Narzędzie do przechwytywania, albo wybierz tam inne narzędzie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O %@ não abriu. Verifique se está configurado como descrito em Ajustes > Geral > Ferramenta de captura, ou escolha outra ferramenta lá."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не открылся. Проверьте, что он настроен, как описано в Настройки > Основные > Инструмент для снимков, или выберите там другой инструмент."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ açılmadı. Ayarlar > Genel > Yakalama aracı’da anlatıldığı gibi kurulduğundan emin olun ya da oradan başka bir araç seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не відкрився. Перевірте, чи його налаштовано, як описано в Параметри > Загальні > Інструмент для знімків, або виберіть там інший інструмент."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ không mở được. Hãy kiểm tra đã thiết lập như mô tả trong Cài đặt > Cài đặt chung > Công cụ chụp, hoặc chọn công cụ khác ở đó."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 没有打开。请确认已按“设置”>“通用”>“截取工具”中的说明设置好，或在那里选择其他工具。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 沒有打開。請確認已按「設定」>「一般」>「擷取工具」中的說明設定好，或在那裡選擇其他工具。"
+          }
+        }
+      }
+    },
+    "%@ isn’t installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist nicht installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está instalado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’est pas installé"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ belum terpasang"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non è installato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@はインストールされていません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@이(가) 설치되어 있지 않음"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is niet geïnstalleerd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nie jest zainstalowany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O %@ não está instalado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не установлен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ yüklü değil"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не встановлено"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chưa cài đặt %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安装 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安裝 %@"
+          }
+        }
+      }
+    },
+    "%@ isn’t installed on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist auf diesem Mac nicht installiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está instalado en este Mac."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’est pas installé sur ce Mac."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ belum terpasang di Mac ini."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non è installato su questo Mac."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMacには%@がインストールされていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Mac에 %@이(가) 설치되어 있지 않습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is niet geïnstalleerd op deze Mac."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nie jest zainstalowany na tym Macu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O %@ não está instalado neste Mac."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не установлен на этом Mac."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bu Mac’te yüklü değil."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не встановлено на цьому Mac."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ chưa được cài trên máy Mac này."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac 上未安装 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這台 Mac 上未安裝 %@。"
+          }
+        }
+      }
+    },
+    "Capture is set to use %@. Install it, or pick another tool in Settings > General > Capture tool." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für Aufnahmen ist %@ eingestellt. Installiere es oder wähle unter Einstellungen > Allgemein > Aufnahmewerkzeug ein anderes Werkzeug."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La captura está configurada para usar %@. Instálalo o elige otra herramienta en Ajustes > General > Herramienta de captura."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La capture est réglée pour utiliser %@. Installez-le, ou choisissez un autre outil dans Réglages > Général > Outil de capture."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tangkap Layar diatur untuk memakai %@. Pasang aplikasinya, atau pilih alat lain di Pengaturan > Umum > Alat tangkap layar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’acquisizione è impostata per usare %@. Installalo, oppure scegli un altro strumento in Impostazioni > Generali > Strumento di acquisizione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り込みには%@を使う設定になっています。インストールするか、「設定」>「一般」>「取り込みツール」で別のツールを選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "캡처가 %@을(를) 사용하도록 설정되어 있습니다. 설치하거나 설정 > 일반 > 캡처 도구에서 다른 도구를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vastleggen is ingesteld op %@. Installeer het, of kies een ander hulpmiddel in Instellingen > Algemeen > Hulpmiddel voor vastleggen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przechwytywanie jest ustawione na %@. Zainstaluj go albo wybierz inne narzędzie w Ustawienia > Ogólne > Narzędzie do przechwytywania."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A captura está configurada para usar o %@. Instale-o ou escolha outra ferramenta em Ajustes > Geral > Ferramenta de captura."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для снимков выбран %@. Установите его или выберите другой инструмент в Настройки > Основные > Инструмент для снимков."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama için %@ seçili. Yükleyin ya da Ayarlar > Genel > Yakalama aracı’dan başka bir araç seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для знімків вибрано %@. Установіть його або виберіть інший інструмент у Параметри > Загальні > Інструмент для знімків."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp đang được đặt để dùng %@. Hãy cài đặt nó, hoặc chọn công cụ khác trong Cài đặt > Cài đặt chung > Công cụ chụp."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "截取已设置为使用 %@。请安装它，或在“设置”>“通用”>“截取工具”中选择其他工具。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取已設定為使用 %@。請安裝它，或在「設定」>「一般」>「擷取工具」中選擇其他工具。"
+          }
+        }
+      }
+    },
+    "Capture Now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt aufnehmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturar ahora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturer maintenant"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tangkap Sekarang"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acquisisci ora"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今すぐ取り込む"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지금 캡처"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nu vastleggen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przechwyć teraz"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturar Agora"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сделать снимок"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi Yakala"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зробити знімок"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp ngay"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即截取"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即擷取"
+          }
+        }
+      }
+    },
+    "Capture tool" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahmewerkzeug"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herramienta de captura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outil de capture"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alat tangkap layar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strumento di acquisizione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り込みツール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "캡처 도구"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hulpmiddel voor vastleggen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Narzędzie do przechwytywania"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ferramenta de captura"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инструмент для снимков"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama aracı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Інструмент для знімків"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Công cụ chụp"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "截取工具"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取工具"
+          }
+        }
+      }
+    },
+    "Capture with" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnehmen mit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturar con"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturer avec"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tangkap layar dengan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acquisisci con"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用するツール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용할 도구"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vastleggen met"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przechwytuj za pomocą"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturar com"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Делать снимки с помощью"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılacak araç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Робити знімки за допомогою"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp bằng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用的工具"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用的工具"
+          }
+        }
+      }
+    },
+    "Choose" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇"
+          }
+        }
+      }
+    },
+    "Choose the folder %@ saves screenshots to." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Ordner, in dem %@ Bildschirmfotos sichert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la carpeta donde %@ guarda las capturas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez le dossier où %@ enregistre les captures."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih folder tempat %@ menyimpan tangkapan layar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la cartella in cui %@ salva le istantanee."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@がスクリーンショットを保存するフォルダを選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@이(가) 스크린샷을 저장하는 폴더를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies de map waarin %@ schermafbeeldingen bewaart."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz folder, w którym %@ zapisuje zrzuty ekranu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha a pasta onde o %@ salva as capturas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите папку, куда %@ сохраняет снимки экрана."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ uygulamasının ekran görüntülerini kaydettiği klasörü seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть папку, куди %@ зберігає знімки екрана."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn thư mục mà %@ lưu ảnh chụp màn hình."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择 %@ 存储截屏的文件夹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇 %@ 儲存截圖的檔案夾。"
+          }
+        }
+      }
+    },
+    "Choose…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswählen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir…"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seç…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати…"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇…"
+          }
+        }
+      }
+    },
+    "Flameshot asks for Screen Recording permission for itself the first time." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot fragt beim ersten Mal selbst nach der Berechtigung für Bildschirmaufnahme."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera vez, Flameshot pide el permiso de Grabación de pantalla para sí mismo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La première fois, Flameshot demande l’autorisation d’enregistrement de l’écran pour lui-même."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pertama kali, Flameshot meminta izin Perekaman Layar untuk dirinya sendiri."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prima volta Flameshot chiede il permesso di registrazione dello schermo per sé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshotは初回に、自分自身の画面収録の許可を求めます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot은 처음 실행할 때 자체 화면 기록 권한을 요청합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot vraagt de eerste keer zelf toestemming voor schermopname."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przy pierwszym użyciu Flameshot sam poprosi o pozwolenie na nagrywanie ekranu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na primeira vez, o Flameshot pede a permissão de Gravação de Tela para si mesmo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В первый раз Flameshot сам запросит разрешение на запись экрана."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot ilk seferde kendisi için Ekran Kaydı izni ister."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Першого разу Flameshot сам попросить дозвіл на запис екрана."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lần đầu, Flameshot sẽ tự xin quyền Ghi màn hình."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 第一次使用时会为自己请求“录屏”权限。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 第一次使用時會為自己請求「螢幕錄製」權限。"
+          }
+        }
+      }
+    },
+    "Get %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ laden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtener %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtenir %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dapatkan %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarica %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を入手"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 받기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ downloaden"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pobierz %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obter %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачать %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ edinin"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантажити %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tải %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得 %@"
+          }
+        }
+      }
+    },
+    "If nothing happens, turn on the URL scheme in macshot’s settings. Leave macshot’s own upload off." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn nichts passiert, schalte in den Einstellungen von macshot das URL-Schema ein. Lass den eigenen Upload von macshot aus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si no pasa nada, activa el esquema de URL en los ajustes de macshot. Deja desactivada la subida propia de macshot."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S’il ne se passe rien, activez le schéma d’URL dans les réglages de macshot. Laissez l’envoi propre à macshot désactivé."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jika tidak terjadi apa-apa, nyalakan skema URL di pengaturan macshot. Biarkan unggahan bawaan macshot mati."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se non succede nulla, attiva lo schema URL nelle impostazioni di macshot. Lascia disattivato il caricamento di macshot."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "何も起きない場合は、macshotの設定でURLスキームをオンにしてください。macshot自体のアップロードはオフのままにします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아무 일도 일어나지 않으면 macshot 설정에서 URL 스킴을 켜세요. macshot 자체 업로드는 꺼 두세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebeurt er niets, zet dan het URL-schema aan in de instellingen van macshot. Laat de eigen upload van macshot uit."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeśli nic się nie dzieje, włącz schemat URL w ustawieniach macshot. Własne wysyłanie macshot zostaw wyłączone."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se nada acontecer, ative o esquema de URL nos ajustes do macshot. Deixe o envio próprio do macshot desativado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если ничего не происходит, включите URL-схему в настройках macshot. Собственную загрузку macshot оставьте выключенной."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiçbir şey olmazsa macshot ayarlarından URL şemasını açın. macshot’ın kendi yüklemesini kapalı bırakın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо нічого не відбувається, увімкніть URL-схему в параметрах macshot. Власне вивантаження macshot залиште вимкненим."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nếu không có gì xảy ra, hãy bật lược đồ URL trong cài đặt của macshot. Để tắt tính năng tải lên riêng của macshot."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果没有反应，请在 macshot 的设置中开启 URL 协议。macshot 自带的上传请保持关闭。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果沒有反應，請在 macshot 的設定中開啟 URL 協定。macshot 內建的上傳請保持關閉。"
+          }
+        }
+      }
+    },
+    "In CleanShot X, open Settings > Advanced and turn on the API (“Allow applications to control CleanShot”)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne in CleanShot X Einstellungen > Erweitert und schalte die API ein („Allow applications to control CleanShot“)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En CleanShot X, abre Ajustes > Avanzado y activa la API (“Allow applications to control CleanShot”)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans CleanShot X, ouvrez Réglages > Avancé et activez l’API (« Allow applications to control CleanShot »)."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Di CleanShot X, buka Pengaturan > Lanjutan dan nyalakan API (“Allow applications to control CleanShot”)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In CleanShot X, apri Impostazioni > Avanzate e attiva l’API (“Allow applications to control CleanShot”)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CleanShot Xで「設定」>「詳細」を開き、API（“Allow applications to control CleanShot”）をオンにします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CleanShot X에서 설정 > 고급을 열고 API(“Allow applications to control CleanShot”)를 켜세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in CleanShot X Instellingen > Geavanceerd en zet de API aan (‘Allow applications to control CleanShot’)."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W CleanShot X otwórz Ustawienia > Zaawansowane i włącz API („Allow applications to control CleanShot”)."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No CleanShot X, abra Ajustes > Avançado e ative a API (“Allow applications to control CleanShot”)."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В CleanShot X откройте Настройки > Дополнительно и включите API («Allow applications to control CleanShot»)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CleanShot X’te Ayarlar > Gelişmiş’i açın ve API’yi açın (“Allow applications to control CleanShot”)."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У CleanShot X відкрийте Параметри > Додатково й увімкніть API («Allow applications to control CleanShot»)."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trong CleanShot X, mở Cài đặt > Nâng cao và bật API (“Allow applications to control CleanShot”)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 CleanShot X 中打开“设置”>“高级”，开启 API（“Allow applications to control CleanShot”）。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 CleanShot X 中打開「設定」>「進階」，開啟 API（“Allow applications to control CleanShot”）。"
+          }
+        }
+      }
+    },
+    "In Shottr, open Settings > Advanced and turn on URL Schema API." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne in Shottr Einstellungen > Erweitert und schalte „URL Schema API“ ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Shottr, abre Ajustes > Avanzado y activa URL Schema API."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans Shottr, ouvrez Réglages > Avancé et activez URL Schema API."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Di Shottr, buka Pengaturan > Lanjutan dan nyalakan URL Schema API."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Shottr, apri Impostazioni > Avanzate e attiva URL Schema API."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shottrで「設定」>「詳細」を開き、URL Schema APIをオンにします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shottr에서 설정 > 고급을 열고 URL Schema API를 켜세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Shottr Instellingen > Geavanceerd en zet URL Schema API aan."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W Shottr otwórz Ustawienia > Zaawansowane i włącz URL Schema API."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Shottr, abra Ajustes > Avançado e ative URL Schema API."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В Shottr откройте Настройки > Дополнительно и включите URL Schema API."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shottr’da Ayarlar > Gelişmiş’i açın ve URL Schema API’yi açın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У Shottr відкрийте Параметри > Додатково й увімкніть URL Schema API."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trong Shottr, mở Cài đặt > Nâng cao và bật URL Schema API."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Shottr 中打开“设置”>“高级”，开启 URL Schema API。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Shottr 中打開「設定」>「進階」，開啟 URL Schema API。"
+          }
+        }
+      }
+    },
+    "macOS Screenshot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS-Bildschirmfoto"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captura de macOS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture d’écran macOS"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tangkapan Layar macOS"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Istantanea schermo di macOS"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOSのスクリーンショット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 스크린샷"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS-schermafbeelding"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zrzut ekranu macOS"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captura de Tela do macOS"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снимок экрана macOS"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS Ekran Görüntüsü"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знімок екрана macOS"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp màn hình macOS"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 截屏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 截圖"
+          }
+        }
+      }
+    },
+    "Optional. An image %@ saves here while Aktar waits is uploaded too; copying works without it. Aktar waits up to 10 minutes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Ein Bild, das %@ hier sichert, während Aktar wartet, wird ebenfalls hochgeladen; Kopieren funktioniert auch ohne. Aktar wartet bis zu 10 Minuten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional. Una imagen que %@ guarde aquí mientras Aktar espera también se sube; copiar funciona sin ella. Aktar espera hasta 10 minutos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facultatif. Une image que %@ enregistre ici pendant qu’Aktar attend est aussi envoyée ; la copie fonctionne sans. Aktar attend jusqu’à 10 minutes."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opsional. Gambar yang disimpan %@ di sini selama Aktar menunggu juga diunggah; menyalin tetap berfungsi tanpanya. Aktar menunggu hingga 10 menit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facoltativa. Anche un’immagine che %@ salva qui mentre Aktar attende viene caricata; la copia funziona anche senza. Aktar attende fino a 10 minuti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "省略可。Aktarが待っている間に%@がここに保存した画像もアップロードされます。コピーならこの設定は不要です。Aktarは最大10分待ちます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 사항. Aktar가 기다리는 동안 %@이(가) 여기에 저장한 이미지도 업로드됩니다. 복사는 이 설정 없이도 됩니다. Aktar는 최대 10분 기다립니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optioneel. Een afbeelding die %@ hier bewaart terwijl Aktar wacht, wordt ook geüpload; kopiëren werkt zonder. Aktar wacht maximaal 10 minuten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcjonalnie. Obraz, który %@ zapisze tutaj, gdy Aktar czeka, też zostanie wysłany; kopiowanie działa bez tego. Aktar czeka do 10 minut."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional. Uma imagem que o %@ salvar aqui enquanto o Aktar espera também é enviada; copiar funciona sem isso. O Aktar espera até 10 minutos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Необязательно. Изображение, которое %@ сохранит сюда, пока Aktar ждёт, тоже загрузится; копирование работает и без этого. Aktar ждёт до 10 минут."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsteğe bağlı. Aktar beklerken %@ buraya bir görsel kaydederse o da yüklenir; kopyalamak bu ayar olmadan da çalışır. Aktar en fazla 10 dakika bekler."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Необов’язково. Зображення, яке %@ збереже сюди, поки Aktar чекає, теж вивантажиться; копіювання працює й без цього. Aktar чекає до 10 хвилин."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chọn. Ảnh mà %@ lưu vào đây trong lúc Aktar chờ cũng được tải lên; sao chép vẫn hoạt động khi không có. Aktar chờ tối đa 10 phút."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可选。Aktar 等待期间 %@ 存到这里的图片也会上传；拷贝则无需设置。Aktar 最多等待 10 分钟。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選用。Aktar 等待期間 %@ 儲存到這裡的圖片也會上傳；拷貝則不需設定。Aktar 最多等待 10 分鐘。"
+          }
+        }
+      }
+    },
+    "Save folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherungsordner"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta de guardado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossier d’enregistrement"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder simpan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartella di salvataggio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存先フォルダ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 폴더"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewaarmap"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder zapisu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta de salvamento"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка сохранения"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt klasörü"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка збереження"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư mục lưu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储文件夹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存檔案夾"
+          }
+        }
+      }
+    },
+    "Select an area and annotate it in macshot, then copy it (⌘C) or save it to the folder below. That image is uploaded." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Bereich und beschrifte ihn in macshot, dann kopiere ihn (⌘C) oder sichere ihn im Ordner unten. Dieses Bild wird hochgeladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un área y anótala en macshot; luego cópiala (⌘C) o guárdala en la carpeta de abajo. Esa imagen es la que se sube."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une zone et annotez-la dans macshot, puis copiez-la (⌘C) ou enregistrez-la dans le dossier ci-dessous. C’est cette image qui est envoyée."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih area dan beri anotasi di macshot, lalu salin (⌘C) atau simpan ke folder di bawah. Gambar itulah yang diunggah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona un’area e annotala in macshot, poi copiala (⌘C) o salvala nella cartella qui sotto. Viene caricata quell’immagine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲を選択してmacshotで注釈を付け、コピー（⌘C）するか下のフォルダに保存してください。その画像がアップロードされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영역을 선택해 macshot에서 주석을 단 다음 복사(⌘C)하거나 아래 폴더에 저장하세요. 그 이미지가 업로드됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecteer een gebied en annoteer het in macshot, kopieer het daarna (⌘C) of bewaar het in de map hieronder. Die afbeelding wordt geüpload."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaznacz obszar i dodaj adnotacje w macshot, a potem skopiuj go (⌘C) lub zapisz w folderze poniżej. Ten obraz zostanie wysłany."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecione uma área e anote no macshot; depois copie (⌘C) ou salve na pasta abaixo. Essa imagem é enviada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выделите область и добавьте пометки в macshot, затем скопируйте её (⌘C) или сохраните в папку ниже. Загружается именно это изображение."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir alan seçip macshot’ta üzerine notlarınızı ekleyin, sonra kopyalayın (⌘C) ya da aşağıdaki klasöre kaydedin. Yüklenen o görsel olur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виділіть область і додайте позначки в macshot, потім скопіюйте її (⌘C) або збережіть у папку нижче. Вивантажується саме це зображення."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn một vùng và chú thích trong macshot, rồi sao chép (⌘C) hoặc lưu vào thư mục bên dưới. Ảnh đó sẽ được tải lên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择一个区域并在 macshot 中添加标注，然后拷贝（⌘C）或存到下方的文件夹。上传的就是这张图片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選取一個區域並在 macshot 中加上標註，然後拷貝（⌘C）或儲存到下方的檔案夾。上傳的就是這張圖片。"
+          }
+        }
+      }
+    },
+    "Select an area and annotate it, then accept it with the check mark in Flameshot’s toolbar. Esc cancels." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Bereich und beschrifte ihn, dann bestätige mit dem Häkchen in der Symbolleiste von Flameshot. Esc bricht ab."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un área y anótala; luego acéptala con la marca de verificación de la barra de Flameshot. Esc cancela."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une zone et annotez-la, puis validez avec la coche de la barre d’outils de Flameshot. Échap annule."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih area dan beri anotasi, lalu terima dengan tanda centang di bilah alat Flameshot. Esc membatalkan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona un’area e annotala, poi confermala con il segno di spunta nella barra di Flameshot. Esc annulla."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲を選択して注釈を付け、Flameshotのツールバーのチェックマークで確定します。Escでキャンセルします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영역을 선택해 주석을 단 다음 Flameshot 도구 막대의 체크 표시로 확정하세요. Esc를 누르면 취소됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecteer een gebied en annoteer het, accepteer het dan met het vinkje in de knoppenbalk van Flameshot. Esc annuleert."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaznacz obszar i dodaj adnotacje, a potem zatwierdź znaczkiem na pasku narzędzi Flameshot. Esc anuluje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecione uma área e anote; depois aceite com a marca de seleção na barra do Flameshot. Esc cancela."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выделите область и добавьте пометки, затем подтвердите галочкой на панели Flameshot. Esc отменяет."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir alan seçip üzerine notlarınızı ekleyin, sonra Flameshot araç çubuğundaki onay işaretiyle kabul edin. Esc iptal eder."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виділіть область і додайте позначки, потім підтвердьте галочкою на панелі Flameshot. Esc скасовує."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn một vùng và chú thích, rồi chấp nhận bằng dấu kiểm trên thanh công cụ của Flameshot. Esc để hủy."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择一个区域并添加标注，然后点按 Flameshot 工具栏中的勾号确认。按 Esc 取消。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選取一個區域並加上標註，然後按一下 Flameshot 工具列中的勾號確認。按 Esc 取消。"
+          }
+        }
+      }
+    },
+    "Select an area. It opens in CleanShot’s editor: annotate it, then copy it (⌘C) or save it to the folder below. That image is uploaded." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Bereich. Er öffnet sich im Editor von CleanShot: Beschrifte ihn, dann kopiere ihn (⌘C) oder sichere ihn im Ordner unten. Dieses Bild wird hochgeladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un área. Se abre en el editor de CleanShot: anótala y luego cópiala (⌘C) o guárdala en la carpeta de abajo. Esa imagen es la que se sube."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une zone. Elle s’ouvre dans l’éditeur de CleanShot : annotez-la, puis copiez-la (⌘C) ou enregistrez-la dans le dossier ci-dessous. C’est cette image qui est envoyée."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih area. Area itu terbuka di editor CleanShot: beri anotasi, lalu salin (⌘C) atau simpan ke folder di bawah. Gambar itulah yang diunggah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona un’area. Si apre nell’editor di CleanShot: annotala, poi copiala (⌘C) o salvala nella cartella qui sotto. Viene caricata quell’immagine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲を選択するとCleanShotのエディタで開きます。注釈を付けてから、コピー（⌘C）するか下のフォルダに保存してください。その画像がアップロードされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영역을 선택하면 CleanShot 편집기에서 열립니다. 주석을 단 다음 복사(⌘C)하거나 아래 폴더에 저장하세요. 그 이미지가 업로드됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecteer een gebied. Het opent in de editor van CleanShot: annoteer het en kopieer het daarna (⌘C) of bewaar het in de map hieronder. Die afbeelding wordt geüpload."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaznacz obszar. Otworzy się w edytorze CleanShot: dodaj adnotacje, a potem skopiuj go (⌘C) lub zapisz w folderze poniżej. Ten obraz zostanie wysłany."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecione uma área. Ela abre no editor do CleanShot: anote e depois copie (⌘C) ou salve na pasta abaixo. Essa imagem é enviada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выделите область. Она откроется в редакторе CleanShot: добавьте пометки, затем скопируйте её (⌘C) или сохраните в папку ниже. Загружается именно это изображение."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir alan seçin. CleanShot düzenleyicisinde açılır: üzerine notlarınızı ekleyin, sonra kopyalayın (⌘C) ya da aşağıdaki klasöre kaydedin. Yüklenen o görsel olur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виділіть область. Вона відкриється в редакторі CleanShot: додайте позначки, потім скопіюйте її (⌘C) або збережіть у папку нижче. Вивантажується саме це зображення."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn một vùng. Vùng đó mở trong trình chỉnh sửa của CleanShot: chú thích, rồi sao chép (⌘C) hoặc lưu vào thư mục bên dưới. Ảnh đó sẽ được tải lên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择一个区域，它会在 CleanShot 的编辑器中打开：添加标注后拷贝（⌘C）或存到下方的文件夹。上传的就是这张图片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選取一個區域，它會在 CleanShot 的編輯器中打開：加上標註後拷貝（⌘C）或儲存到下方的檔案夾。上傳的就是這張圖片。"
+          }
+        }
+      }
+    },
+    "Select an area. It opens in Shottr’s editor: annotate it, then copy it (⌘C) or save it to the folder below. That image is uploaded." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Bereich. Er öffnet sich im Editor von Shottr: Beschrifte ihn, dann kopiere ihn (⌘C) oder sichere ihn im Ordner unten. Dieses Bild wird hochgeladen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un área. Se abre en el editor de Shottr: anótala y luego cópiala (⌘C) o guárdala en la carpeta de abajo. Esa imagen es la que se sube."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une zone. Elle s’ouvre dans l’éditeur de Shottr : annotez-la, puis copiez-la (⌘C) ou enregistrez-la dans le dossier ci-dessous. C’est cette image qui est envoyée."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih area. Area itu terbuka di editor Shottr: beri anotasi, lalu salin (⌘C) atau simpan ke folder di bawah. Gambar itulah yang diunggah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona un’area. Si apre nell’editor di Shottr: annotala, poi copiala (⌘C) o salvala nella cartella qui sotto. Viene caricata quell’immagine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲を選択するとShottrのエディタで開きます。注釈を付けてから、コピー（⌘C）するか下のフォルダに保存してください。その画像がアップロードされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영역을 선택하면 Shottr 편집기에서 열립니다. 주석을 단 다음 복사(⌘C)하거나 아래 폴더에 저장하세요. 그 이미지가 업로드됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecteer een gebied. Het opent in de editor van Shottr: annoteer het en kopieer het daarna (⌘C) of bewaar het in de map hieronder. Die afbeelding wordt geüpload."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaznacz obszar. Otworzy się w edytorze Shottr: dodaj adnotacje, a potem skopiuj go (⌘C) lub zapisz w folderze poniżej. Ten obraz zostanie wysłany."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecione uma área. Ela abre no editor do Shottr: anote e depois copie (⌘C) ou salve na pasta abaixo. Essa imagem é enviada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выделите область. Она откроется в редакторе Shottr: добавьте пометки, затем скопируйте её (⌘C) или сохраните в папку ниже. Загружается именно это изображение."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir alan seçin. Shottr düzenleyicisinde açılır: üzerine notlarınızı ekleyin, sonra kopyalayın (⌘C) ya da aşağıdaki klasöre kaydedin. Yüklenen o görsel olur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виділіть область. Вона відкриється в редакторі Shottr: додайте позначки, потім скопіюйте її (⌘C) або збережіть у папку нижче. Вивантажується саме це зображення."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn một vùng. Vùng đó mở trong trình chỉnh sửa của Shottr: chú thích, rồi sao chép (⌘C) hoặc lưu vào thư mục bên dưới. Ảnh đó sẽ được tải lên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择一个区域，它会在 Shottr 的编辑器中打开：添加标注后拷贝（⌘C）或存到下方的文件夹。上传的就是这张图片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選取一個區域，它會在 Shottr 的編輯器中打開：加上標註後拷貝（⌘C）或儲存到下方的檔案夾。上傳的就是這張圖片。"
+          }
+        }
+      }
+    },
+    "Stop Waiting" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht mehr warten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejar de esperar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêter d’attendre"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berhenti Menunggu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smetti di attendere"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待つのをやめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기다리기 중단"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop met wachten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przestań czekać"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar de Aguardar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не ждать"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beklemeyi Durdur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не чекати"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dừng chờ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止等待"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止等待"
+          }
+        }
+      }
+    },
+    "The tool that takes the screenshot. With an editor such as CleanShot X, Shottr, macshot or Flameshot, you can annotate it before it’s uploaded." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Werkzeug, das das Bildschirmfoto macht. Mit einem Editor wie CleanShot X, Shottr, macshot oder Flameshot kannst du es vor dem Hochladen beschriften."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La herramienta que toma la captura. Con un editor como CleanShot X, Shottr, macshot o Flameshot, puedes anotarla antes de subirla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’outil qui prend la capture. Avec un éditeur comme CleanShot X, Shottr, macshot ou Flameshot, vous pouvez l’annoter avant son envoi."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alat yang mengambil tangkapan layar. Dengan editor seperti CleanShot X, Shottr, macshot, atau Flameshot, Anda bisa memberinya anotasi sebelum diunggah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo strumento che acquisisce lo schermo. Con un editor come CleanShot X, Shottr, macshot o Flameshot puoi annotare l’immagine prima del caricamento."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スクリーンショットを撮るツールです。CleanShot X、Shottr、macshot、Flameshotなどのエディタがあれば、アップロード前に注釈を付けられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스크린샷을 찍는 도구입니다. CleanShot X, Shottr, macshot, Flameshot 같은 편집기를 쓰면 업로드하기 전에 주석을 달 수 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het hulpmiddel dat de schermafbeelding maakt. Met een editor zoals CleanShot X, Shottr, macshot of Flameshot kun je die annoteren voordat hij wordt geüpload."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Narzędzie, które robi zrzut ekranu. Z edytorem takim jak CleanShot X, Shottr, macshot lub Flameshot możesz dodać adnotacje przed wysłaniem."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A ferramenta que tira a captura de tela. Com um editor como CleanShot X, Shottr, macshot ou Flameshot, você pode anotá-la antes do envio."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инструмент, который делает снимок экрана. С редактором вроде CleanShot X, Shottr, macshot или Flameshot можно добавить пометки до загрузки."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntüsünü alan araç. CleanShot X, Shottr, macshot ya da Flameshot gibi bir düzenleyiciyle görseli yüklemeden önce üzerine not ekleyebilirsiniz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Інструмент, що робить знімок екрана. З редактором на кшталт CleanShot X, Shottr, macshot чи Flameshot можна додати позначки до вивантаження."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Công cụ chụp màn hình. Với trình chỉnh sửa như CleanShot X, Shottr, macshot hoặc Flameshot, bạn có thể chú thích ảnh trước khi tải lên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用来截屏的工具。使用 CleanShot X、Shottr、macshot 或 Flameshot 等编辑器，可以在上传前添加标注。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用來截圖的工具。使用 CleanShot X、Shottr、macshot 或 Flameshot 等編輯器，可以在上傳前加上標註。"
+          }
+        }
+      }
+    },
+    "Try it: the image is uploaded and its link copied." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probiere es aus: Das Bild wird hochgeladen und sein Link kopiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pruébalo: la imagen se sube y se copia su enlace."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayez : l’image est envoyée et son lien copié."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coba: gambar diunggah dan tautannya disalin."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prova: l’immagine viene caricata e il suo link copiato."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試してみましょう。画像がアップロードされ、リンクがコピーされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직접 해 보세요. 이미지가 업로드되고 링크가 복사됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probeer het: de afbeelding wordt geüpload en de link gekopieerd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wypróbuj: obraz zostanie wysłany, a link skopiowany."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimente: a imagem é enviada e o link copiado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте: изображение загрузится, а ссылка скопируется."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deneyin: görsel yüklenir ve bağlantısı kopyalanır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спробуйте: зображення вивантажиться, а посилання скопіюється."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy thử: ảnh được tải lên và liên kết được sao chép."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试一试：图片会上传，链接会被拷贝。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試試看：圖片會上傳，連結會被拷貝。"
+          }
+        }
+      }
+    },
+    "Waiting for %@…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte auf %@…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando a %@…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente de %@…"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menunggu %@…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In attesa di %@…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を待っています…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 기다리는 중…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wachten op %@…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Czekam na %@…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aguardando o %@…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ожидание %@…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bekleniyor…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очікування %@…"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang chờ %@…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在等待 %@…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在等待 %@…"
+          }
+        }
+      }
+    },
     "“%@” and its files stay where they are, and uploads stay in the bucket." : {
       "localizations" : {
         "de" : {

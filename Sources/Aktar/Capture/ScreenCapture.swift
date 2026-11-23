@@ -1,25 +1,58 @@
 import AppKit
 import CoreGraphics
 
-/// Capture: the system's own screenshot tool (`screencapture -i`) picks
-/// an area or a window, and the image goes up like a pasted one
-/// (docs/capture-and-instant-links.md, "Capture"). macOS asks for Screen
-/// Recording permission for Aktar, which the tool runs on behalf of.
+/// The clipboard as it was before a capture tool copied its image: Undo
+/// puts this back, never the image (docs/capture-tools.md).
+struct CapturedClipboard {
+    /// Nil when it couldn't be kept (too big, or marked private).
+    let snapshot: ClipboardSnapshot?
+}
+
+struct CaptureResult {
+    var input: UploadInput
+    /// Set when the image came over the clipboard.
+    var clipboardBefore: CapturedClipboard?
+}
+
+/// Capture: the screenshot tool picked in Settings (macOS's own by
+/// default) takes the image, which goes up like a pasted one
+/// (docs/capture-and-instant-links.md, "Capture"; docs/capture-tools.md).
 ///
-/// The tool runs in Aktar's sandbox, which allows it as it is: the
-/// system's App Sandbox profile lets apps run `/usr/sbin` tools and lets
-/// this one register its `com.apple.screencapture.interactive` service.
+/// macOS's tool (`screencapture -i`) runs in Aktar's sandbox, which allows
+/// it as it is: the system's App Sandbox profile lets apps run `/usr/sbin`
+/// tools and lets this one register its `com.apple.screencapture.interactive`
+/// service. macOS asks for Screen Recording permission for Aktar, which the
+/// tool runs on behalf of. Other tools run as their own apps, with their
+/// own permission.
 @MainActor
 enum ScreenCapture {
     private static var isRunning = false
+    /// Editing takes its time.
+    static let toolTimeout: TimeInterval = 10 * 60
 
     /// Whether Aktar may record the screen.
     static var hasPermission: Bool { CGPreflightScreenCaptureAccess() }
 
+    /// The image from the tool picked in Settings, or nil when the capture
+    /// was cancelled, ran out of time, or couldn't start.
+    static func capture() async -> CaptureResult? {
+        let tool = CaptureTool.current
+        if tool == .system {
+            return await captureWithSystemTool().map { CaptureResult(input: $0) }
+        }
+        guard let appURL = tool.appURL else {
+            showNotInstalled(tool)
+            return nil
+        }
+        // A new capture ends the one still waiting.
+        CaptureWaiting.shared.stop()
+        return await captureWithTool(tool, appURL: appURL)
+    }
+
     /// Lets the user pick an area (Space switches to picking a window, Esc
     /// cancels) and returns the screenshot as an upload, or nil when it was
     /// cancelled, couldn't start, or Aktar may not record the screen yet.
-    static func capture() async -> UploadInput? {
+    static func captureWithSystemTool() async -> UploadInput? {
         guard !isRunning else { return nil }
         guard ensurePermission() else { return nil }
         isRunning = true
@@ -60,13 +93,134 @@ enum ScreenCapture {
         return UploadInput(fileURL: url, originalFilename: filename, source: .capture)
     }
 
+    // MARK: - Other tools
+
+    /// Starts the tool, then takes the first image it copies, or (for one
+    /// with a save folder) saves there. Flameshot runs as a new instance
+    /// of its own (each one hosts its capture on macOS) that copies the
+    /// image and quits; quitting without one is a cancel.
+    private static func captureWithTool(_ tool: CaptureTool, appURL: URL) async -> CaptureResult? {
+        let pasteboard = NSPasteboard.general
+        let before = CapturedClipboard(snapshot: ClipboardSnapshot.take(from: pasteboard))
+        var changeCount = pasteboard.changeCount
+        let folder = tool.usesSaveFolder ? tool.openSaveFolder() : nil
+        defer { folder?.stopAccessingSecurityScopedResource() }
+        var detector = folder.map { NewImageDetector(baseline: CaptureImageFiles.list($0)) }
+
+        var process: NSRunningApplication?
+        switch tool.kind {
+        case .urlScheme(let url):
+            let opened = await withCheckedContinuation { continuation in
+                NSWorkspace.shared.open(url, configuration: NSWorkspace.OpenConfiguration()) { _, error in
+                    continuation.resume(returning: error == nil)
+                }
+            }
+            guard opened else {
+                showFailure(String(localized: "\(tool.name) didn\u{2019}t open. Check that it\u{2019}s set up as Settings > General > Capture tool describes, or pick another tool there."))
+                return nil
+            }
+        case .process:
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.arguments = ["gui", "--clipboard"]
+            configuration.createsNewApplicationInstance = true
+            configuration.addsToRecentItems = false
+            do {
+                process = try await NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
+            } catch {
+                showFailure(error.localizedDescription)
+                return nil
+            }
+        case .systemTool:
+            return nil
+        }
+
+        let generation = CaptureWaiting.shared.begin(tool)
+        defer { CaptureWaiting.shared.end(generation) }
+        let deadline = Date.now.addingTimeInterval(toolTimeout)
+        var quitAt: Date?
+        while Date.now < deadline, CaptureWaiting.shared.isCurrent(generation) {
+            try? await Task.sleep(for: .milliseconds(250))
+            guard CaptureWaiting.shared.isCurrent(generation) else { break }
+
+            if pasteboard.changeCount != changeCount {
+                changeCount = pasteboard.changeCount
+                if let found = PasteboardImage.read(from: pasteboard), let input = input(for: found) {
+                    return CaptureResult(input: input, clipboardBefore: before)
+                }
+            }
+            if let folder, var current = detector {
+                let ready = current.observe(CaptureImageFiles.list(folder), at: .now)
+                detector = current
+                if let ready {
+                    let url = folder.appendingPathComponent(ready)
+                    CaptureClaims.claim(url)
+                    return copiedInput(from: url).map { CaptureResult(input: $0) }
+                }
+            }
+            // The tool may still be handing its copy over as it quits.
+            if let process, process.isTerminated {
+                if let quitAt {
+                    if Date.now.timeIntervalSince(quitAt) > 1 { break }
+                } else {
+                    quitAt = .now
+                }
+            }
+        }
+        return nil
+    }
+
+    /// An upload of what the tool copied, in a temporary file of Aktar's
+    /// own (deleted after the upload), named like macOS's screenshots.
+    private static func input(for found: PasteboardImage.Found) -> UploadInput? {
+        switch found {
+        case .file(let url):
+            return copiedInput(from: url)
+        case .data(let data, let fileExtension):
+            let filename = Self.filename(for: .now, fileExtension: fileExtension)
+            guard let folder = try? TempFiles.newFolder(in: TempFiles.clipboard) else { return nil }
+            let url = folder.appendingPathComponent(filename)
+            do {
+                try data.write(to: url)
+            } catch {
+                try? FileManager.default.removeItem(at: folder)
+                return nil
+            }
+            return UploadInput(fileURL: url, originalFilename: filename, source: .capture)
+        }
+    }
+
+    /// A copy of the tool's file, which stays where the tool put it.
+    private static func copiedInput(from source: URL) -> UploadInput? {
+        let fileExtension = source.pathExtension.isEmpty ? "png" : source.pathExtension.lowercased()
+        let filename = Self.filename(for: .now, fileExtension: fileExtension)
+        guard let folder = try? TempFiles.newFolder(in: TempFiles.clipboard) else { return nil }
+        let url = folder.appendingPathComponent(filename)
+        do {
+            try FileManager.default.copyItem(at: source, to: url)
+        } catch {
+            try? FileManager.default.removeItem(at: folder)
+            return nil
+        }
+        return UploadInput(fileURL: url, originalFilename: filename, source: .capture)
+    }
+
+    private static func showNotInstalled(_ tool: CaptureTool) {
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = String(localized: "\(tool.name) isn\u{2019}t installed")
+        alert.informativeText = String(localized: "Capture is set to use \(tool.name). Install it, or pick another tool in Settings > General > Capture tool.")
+        alert.addButton(withTitle: String(localized: "Get \(tool.name)"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        if alert.runModal() == .alertFirstButtonReturn, let website = tool.website {
+            NSWorkspace.shared.open(website)
+        }
+    }
+
     /// "Screenshot 2026-11-02 at 14.03.12.png", the way macOS names them
     /// (in English, as file names in Aktar are).
-    static func filename(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
-        return "Screenshot \(formatter.string(from: date)).png"
+    static func filename(for date: Date, fileExtension: String = "png") -> String {
+        CaptureImageFiles.filename(for: date, fileExtension: fileExtension)
     }
 
     /// Without the permission, Aktar explains first: macOS doesn't always

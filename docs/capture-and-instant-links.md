@@ -28,7 +28,8 @@ pasted image, its link copied.
   file name Aktar makes), PNG. It's a temporary file, deleted after the upload.
 - Cancelling (Esc) uploads nothing and says nothing.
 - No editor, annotations or screen recording: capture tools do those better
-  (roadmap, "Bilinçli olarak yapılmayacaklar").
+  (roadmap, "Bilinçli olarak yapılmayacaklar"). Capture can run one of them
+  instead of the system tool, so the edited image goes up (capture-tools.md).
 
 Mac: the system's own tool, `/usr/sbin/screencapture -i <file>` (Space switches
 between an area and a window, Esc cancels). It checks Screen Recording for the

@@ -159,18 +159,19 @@ final class AppState {
         uploadManager.upload(inputs, paste: canPaste ? target : nil)
     }
 
-    /// Capture: picks an area or window with macOS's screenshot tool and
-    /// uploads it like a pasted image ("Use for" decides where). With
-    /// `paste`, the link is then pasted into the app that was in front.
+    /// Capture: the screenshot tool picked in Settings (macOS's own by
+    /// default) takes an area or a window, and it's uploaded like a pasted
+    /// image ("Use for" decides where). With `paste`, the link is then
+    /// pasted into the app that was in front.
     func capture(paste: Bool) {
-        let target = paste ? PasteRequest.frontmost(for: 300) : nil
+        let target = paste ? PasteRequest.frontmost(for: ScreenCapture.toolTimeout) : nil
         NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
         Task {
-            guard let input = await ScreenCapture.capture() else { return }
+            guard let result = await ScreenCapture.capture() else { return }
             // Counted from the end of the capture, which takes its time.
             let request = target.map { PasteRequest(processID: $0.processID, deadline: Date.now.addingTimeInterval(30)) }
             let canPaste = paste && PasteService.ensurePermission()
-            uploadManager.upload([input], paste: canPaste ? request : nil)
+            uploadManager.upload([result.input], paste: canPaste ? request : nil, clipboardBefore: result.clipboardBefore)
         }
     }
 }

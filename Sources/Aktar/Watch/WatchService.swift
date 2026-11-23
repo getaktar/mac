@@ -506,6 +506,13 @@ extension WatchService: WatchUploading {
     /// One hand-over per folder: a drop of thousands of files is queued
     /// in one go.
     func enqueue(_ requests: [WatchUploadRequest]) {
+        // A capture already took these from a tool's save folder.
+        var requests = requests
+        requests.removeAll { request in
+            guard CaptureClaims.isClaimed(request.fileURL) else { return false }
+            engines[request.folder.id]?.uploadFinished(requestID: request.id, outcome: .cancelled)
+            return true
+        }
         let byFolder = Dictionary(grouping: requests, by: \.folder.id)
         for (folderID, requests) in byFolder {
             guard let folder = requests.first?.folder else { continue }

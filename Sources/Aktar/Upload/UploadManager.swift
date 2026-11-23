@@ -158,8 +158,15 @@ final class UploadManager {
     /// Everything but a watched folder's files is one `UploadAction`, which
     /// Undo takes back as a whole; with `paste`, its link is pasted into
     /// that app once it's copied (see `PasteRequest`).
-    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil, paste: PasteRequest? = nil) {
+    /// `clipboardBefore`: for a capture that came over the clipboard, the
+    /// clipboard from before the tool copied its image, which is what Undo
+    /// puts back (not the image).
+    func upload(_ inputs: [UploadInput], to destination: DestinationConfig? = nil, expiryDays: Int? = nil, paste: PasteRequest? = nil, clipboardBefore: CapturedClipboard? = nil) {
         let action = inputs.contains { $0.watch == nil && $0.request == nil } ? newAction(paste: paste) : nil
+        if let action, let clipboardBefore {
+            action.snapshot = clipboardBefore.snapshot
+            action.tookSnapshot = true
+        }
         if let destination {
             enqueue(inputs, to: destination, expiryDays: expiryDays, action: action)
             return

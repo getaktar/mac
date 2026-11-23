@@ -167,6 +167,7 @@ targets:
     sources:
       - path: Tests/AktarTests
       - path: Sources/Aktar/Watch/Engine
+      - path: Sources/Aktar/Capture/CaptureTool.swift
       - path: Sources/Aktar/Upload/ObjectKeyGenerator.swift
       - path: Sources/Aktar/Upload/ShortKeys.swift
       - path: Sources/Aktar/Storage/StorageProvider.swift

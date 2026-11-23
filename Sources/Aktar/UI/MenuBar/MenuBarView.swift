@@ -293,6 +293,19 @@ struct MenuBarView: View {
 
     private var dropzone: some View {
         VStack(spacing: 10) {
+            // A capture with another tool waits for its image.
+            if let tool = CaptureWaiting.shared.tool {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Waiting for \(tool.name)\u{2026}")
+                        .font(.caption)
+                    Spacer()
+                    Button("Stop Waiting") { CaptureWaiting.shared.stop() }
+                        .controlSize(.small)
+                }
+                .padding(.horizontal, 12)
+            }
+
             Image(systemName: isTargeted ? "arrow.down.circle.fill" : "arrow.up.circle")
                 .font(.system(size: 28))
                 .foregroundStyle(isTargeted ? Color.accentColor : .secondary)

@@ -212,6 +212,8 @@ private struct GeneralSettingsView: View {
                 }
             }
 
+            CaptureSettingsSection()
+
             SettingsSection(title: "Keyboard shortcuts") {
                 SettingsCard {
                     ShortcutRow(
