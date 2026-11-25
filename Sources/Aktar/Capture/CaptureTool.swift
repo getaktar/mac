@@ -96,13 +96,13 @@ enum CaptureTool: String, CaseIterable, Identifiable, Sendable {
             return []
         case .cleanShot:
             return [
-                String(localized: "In CleanShot X, open Settings > Advanced and turn on the API (\u{201C}Allow applications to control CleanShot\u{201D})."),
+                String(localized: "The first time, CleanShot X asks whether other apps may control it: click Launch & Allow."),
                 String(localized: "Select an area. It opens in CleanShot\u{2019}s editor: annotate it, then copy it (\u{2318}C) or save it to the folder below. That image is uploaded."),
             ]
         case .shottr:
             return [
-                String(localized: "In Shottr, open Settings > Advanced and turn on URL Schema API."),
-                String(localized: "Select an area. It opens in Shottr\u{2019}s editor: annotate it, then copy it (\u{2318}C) or save it to the folder below. That image is uploaded."),
+                String(localized: "The first time, Shottr asks to turn on deep links: click OK, then capture again."),
+                String(localized: "Select an area. It opens in Shottr\u{2019}s editor: annotate it, then click Copy in its toolbar or save it (\u{2318}S) to the folder below. That image is uploaded."),
             ]
         case .macshot:
             return [
@@ -111,6 +111,7 @@ enum CaptureTool: String, CaseIterable, Identifiable, Sendable {
             ]
         case .flameshot:
             return [
+                String(localized: "Install Aktar\u{2019}s Flameshot helper below, once: macOS only lets Aktar start a Flameshot capture through it."),
                 String(localized: "Select an area and annotate it, then accept it with the check mark in Flameshot\u{2019}s toolbar. Esc cancels."),
                 String(localized: "Flameshot asks for Screen Recording permission for itself the first time."),
             ]
@@ -154,6 +155,83 @@ enum CaptureTool: String, CaseIterable, Identifiable, Sendable {
         }
         return url
     }
+}
+
+// MARK: - Flameshot helper
+
+/// macOS drops the arguments a sandboxed app passes when it opens another
+/// app (NSWorkspace and `open` alike, checked on macOS 15), and Flameshot
+/// can't run inside Aktar's sandbox, so Aktar can't start its capture
+/// (`gui --clipboard`) by itself. A script in Aktar's Application Scripts
+/// folder runs outside the sandbox (NSUserUnixTask). Only the user can
+/// put it there, through a save panel Aktar opens on that folder.
+enum FlameshotHelper {
+    static let filename = "flameshot-capture.sh"
+
+    /// Opens a new Flameshot instance with the capture's arguments and
+    /// waits until it quits (`-W`), so Aktar knows when it's done. The
+    /// app's path is the only argument.
+    static let script = """
+        #!/bin/sh
+        # Installed by Aktar (Settings > General > Capture tool): starts a
+        # Flameshot capture that copies the image, and waits until it quits.
+        exec /usr/bin/open -n -W -a "$1" --args gui --clipboard
+
+        """
+
+    static var folder: URL? {
+        try? FileManager.default.url(for: .applicationScriptsDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+    }
+
+    static var url: URL? { folder?.appendingPathComponent(filename) }
+
+    /// Installed as this version of Aktar wrote it; an older or edited one
+    /// is installed again.
+    static var isInstalled: Bool {
+        guard let url, let data = try? Data(contentsOf: url) else { return false }
+        return data == Data(script.utf8)
+    }
+
+    /// Asks the user to save the helper in Aktar's Application Scripts
+    /// folder; true once it's there.
+    @MainActor
+    static func install() -> Bool {
+        guard let folder, let url else { return false }
+        NSApp.activate(ignoringOtherApps: true)
+        let panel = NSSavePanel()
+        panel.directoryURL = folder
+        panel.nameFieldStringValue = filename
+        panel.canCreateDirectories = false
+        panel.message = String(localized: "Click Save to install the Flameshot helper in this folder.")
+        guard panel.runModal() == .OK, let chosen = panel.url else { return false }
+        guard chosen.resolvingSymlinksInPath().path == url.resolvingSymlinksInPath().path else {
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = String(localized: "The helper wasn\u{2019}t installed")
+            alert.informativeText = String(localized: "It only works in the folder the window opens in, with the name it suggests. Try again and click Save without changing them.")
+            alert.addButton(withTitle: String(localized: "OK"))
+            alert.runModal()
+            return false
+        }
+        do {
+            try Data(script.utf8).write(to: chosen)
+            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: chosen.path)
+        } catch {
+            let alert = NSAlert(error: error)
+            alert.runModal()
+            return false
+        }
+        return isInstalled
+    }
+}
+
+/// Set once a helper task has ended; its completion runs on another queue.
+final class TaskEnded: @unchecked Sendable {
+    private let lock = NSLock()
+    private var ended = false
+
+    func set() { lock.withLock { ended = true } }
+    var isSet: Bool { lock.withLock { ended } }
 }
 
 // MARK: - Spotting the image

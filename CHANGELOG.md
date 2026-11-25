@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tool), so what goes up is the annotated image: CleanShot X, Shottr and
   macshot open their editor and Aktar uploads what you copy there or save to
   their folder (it waits up to 10 minutes; Stop Waiting in the panel), and
-  Flameshot uploads what you accept. macOS's own tool stays the default.
+  Flameshot uploads what you accept (it starts through a small helper you
+  install once from Settings). macOS's own tool stays the default.
   Undo puts back the clipboard from before the capture, and a watched folder
   on the same folder doesn't upload the image a second time
 

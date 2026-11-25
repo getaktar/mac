@@ -53,7 +53,9 @@ in two places at once:
 - a new image file in the tool's save folder. On the Mac the user picks
   that folder once (a security-scoped bookmark; Aktar's sandbox can't read
   another app's settings to find it) and it's optional, since copying works
-  without it. Spectacle defaults to `XDG_PICTURES_DIR/Screenshots`.
+  without it. For Spectacle, Aktar reads its settings file: the folder
+  picked there, else its default folder under `XDG_PICTURES_DIR`, whose name
+  is translated (`Ekran Görüntüleri` on a Turkish desktop).
 
 The first image to arrive is the capture. Files there before the wait began
 are never taken; a new file is taken once its size has stayed the same, and
@@ -105,10 +107,10 @@ confirmed in QA.
 | Tool | Way | Start | Notes |
 |---|---|---|---|
 | macOS (default) | A | `screencapture -i <file>` | As before. No editor. |
-| CleanShot X | B | `cleanshot://capture-area?action=annotate` (V) | Its API must be on: Settings > Advanced (Q for the exact place). Paid. |
-| Shottr | B | `shottr://grab/area?then=edit` (V) | "URL Schema API" must be on, Settings > Advanced (V, Shottr 1.8). |
+| CleanShot X | B | `cleanshot://capture-area?action=annotate` (V) | The first call asks "An external application wants to control CleanShot": Launch & Allow (V, 5.0.2 on 2026-11-25). Paid only (no free version; Setapp has a trial): without a license it opens "Activate CleanShot" instead of capturing, so the capture itself is untested. |
+| Shottr | B | `shottr://grab/area?then=edit` (V) | The first call asks "Enable URL Scheme (Deep Links)": OK, and that call doesn't capture, so the user captures again (V, 1.9.1). Copy with the toolbar's Copy button: ⌘C with a shape selected copies the shape's name as text, which Aktar ignores and keeps waiting (V). ⌘S saves to Shottr's folder (default ~/Downloads). Free version works, with a "buy" nag. |
 | macshot | B | `macshot://capture` (V, `AppDelegate.swift`) | URL scheme on by default (`urlSchemeEnabled`). Default save folder `~/Pictures`. Free, GPL. Has its own S3 upload, which Aktar users leave off. |
-| Flameshot | A | new instance of the app via LaunchServices, arguments `gui --clipboard` | On macOS each Flameshot instance hosts its own capture and quits after Accept or Esc (V, `src/main.cpp`). Started through LaunchServices it runs outside Aktar's sandbox, with its own Screen Recording permission; Aktar reads the clipboard once it copied or quit (1 s grace). Bundle `org.flameshot.Flameshot` (V), else `/Applications/flameshot.app`. |
+| Flameshot | A | the helper script `flameshot-capture.sh` in Aktar's Application Scripts folder, run with NSUserUnixTask: `open -n -W -a <app> --args gui --clipboard` | macOS drops the arguments a sandboxed app passes when it opens another app (NSWorkspace `arguments` and `/usr/bin/open` alike), and Flameshot run as Aktar's child dies in the sandbox (`ipc-sysv-sem` denied), all checked on macOS 15.6. The script runs outside the sandbox; only the user can put it there, so Settings and Capture offer "Install Helper...", a save panel on that folder. `-W` makes the task end when Flameshot quits; Aktar reads the clipboard then (1 s grace). On macOS each Flameshot instance hosts its own capture and quits after Accept or Esc (V, `src/main.cpp`). Bundle `org.flameshot.Flameshot` (V), else `/Applications/flameshot.app`. The Homebrew cask is disabled (Gatekeeper); the GitHub dmg is ad hoc signed. |
 | Xnapper, Snagit, Monosnap | C | none | Share menu to Aktar, or a watched folder. |
 
 ### Windows
@@ -137,7 +139,13 @@ All tools on Linux run with the host's environment, not the AppImage's
 
 ## QA
 
-Done: Mac unit tests (CaptureToolTests: tools, folder spotting, clipboard
+Done: Mac with macshot on a real device (2026-11-23, QA build); Mac with
+Shottr 1.9.1 (copy and save) on the M2 (2026-11-25, QA build), Flameshot 15
+there through the helper (the NSWorkspace launch failed: see the table),
+CleanShot X up to its license window; Windows
+Flameshot 15 and ShareX 22.4, Linux Flameshot 13.3, Spectacle (copy and
+save) and Swappy 1.5 end to end against moto (2026-11-25, KDE on X11; fixes
+in desktop commit b177d86); Mac unit tests (CaptureToolTests: tools, folder spotting, clipboard
 images, claims, waiting), desktop repo Rust tests (capture_tools) and the
 Settings view in a browser with the mock backend.
 

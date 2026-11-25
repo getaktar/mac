@@ -10,6 +10,7 @@ struct CaptureSettingsSection: View {
     @State private var tools = CaptureTool.ordered
     @State private var installed: Set<CaptureTool> = Set(CaptureTool.allCases.filter(\.isInstalled))
     @State private var folderPath: String?
+    @State private var helperInstalled = FlameshotHelper.isInstalled
 
     private var tool: CaptureTool { CaptureTool(rawValue: toolID) ?? .system }
 
@@ -69,6 +70,30 @@ struct CaptureSettingsSection: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
 
+                    if tool == .flameshot {
+                        SettingsCardDivider()
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Flameshot helper")
+                                Text("A small script in Aktar\u{2019}s Application Scripts folder that starts Flameshot\u{2019}s capture. Aktar can\u{2019}t put it there by itself.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer()
+                            if helperInstalled {
+                                Label("Installed", systemImage: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                    .font(.callout)
+                            } else {
+                                Button("Install Helper\u{2026}") {
+                                    helperInstalled = FlameshotHelper.install()
+                                }
+                            }
+                        }
+                        .padding(12)
+                    }
+
                     if tool.usesSaveFolder {
                         SettingsCardDivider()
                         HStack {
@@ -121,6 +146,7 @@ struct CaptureSettingsSection: View {
         tools = CaptureTool.ordered
         installed = Set(CaptureTool.allCases.filter(\.isInstalled))
         folderPath = tool.saveFolderPath
+        helperInstalled = FlameshotHelper.isInstalled
     }
 
     private func chooseFolder() {

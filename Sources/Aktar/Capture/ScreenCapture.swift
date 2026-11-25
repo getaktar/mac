@@ -44,6 +44,9 @@ enum ScreenCapture {
             showNotInstalled(tool)
             return nil
         }
+        if tool == .flameshot, !FlameshotHelper.isInstalled {
+            guard askForFlameshotHelper() else { return nil }
+        }
         // A new capture ends the one still waiting.
         CaptureWaiting.shared.stop()
         return await captureWithTool(tool, appURL: appURL)
@@ -97,8 +100,9 @@ enum ScreenCapture {
 
     /// Starts the tool, then takes the first image it copies, or (for one
     /// with a save folder) saves there. Flameshot runs as a new instance
-    /// of its own (each one hosts its capture on macOS) that copies the
-    /// image and quits; quitting without one is a cancel.
+    /// of its own (each one hosts its capture on macOS), started by the
+    /// helper script, that copies the image and quits; quitting without
+    /// one is a cancel.
     private static func captureWithTool(_ tool: CaptureTool, appURL: URL) async -> CaptureResult? {
         let pasteboard = NSPasteboard.general
         let before = CapturedClipboard(snapshot: ClipboardSnapshot.take(from: pasteboard))
@@ -107,7 +111,7 @@ enum ScreenCapture {
         defer { folder?.stopAccessingSecurityScopedResource() }
         var detector = folder.map { NewImageDetector(baseline: CaptureImageFiles.list($0)) }
 
-        var process: NSRunningApplication?
+        var ended: TaskEnded?
         switch tool.kind {
         case .urlScheme(let url):
             let opened = await withCheckedContinuation { continuation in
@@ -120,16 +124,17 @@ enum ScreenCapture {
                 return nil
             }
         case .process:
-            let configuration = NSWorkspace.OpenConfiguration()
-            configuration.arguments = ["gui", "--clipboard"]
-            configuration.createsNewApplicationInstance = true
-            configuration.addsToRecentItems = false
+            guard let helper = FlameshotHelper.url else { return nil }
+            let task: NSUserUnixTask
             do {
-                process = try await NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
+                task = try NSUserUnixTask(url: helper)
             } catch {
                 showFailure(error.localizedDescription)
                 return nil
             }
+            let taskEnded = TaskEnded()
+            ended = taskEnded
+            task.execute(withArguments: [appURL.path]) { _ in taskEnded.set() }
         case .systemTool:
             return nil
         }
@@ -158,7 +163,7 @@ enum ScreenCapture {
                 }
             }
             // The tool may still be handing its copy over as it quits.
-            if let process, process.isTerminated {
+            if let ended, ended.isSet {
                 if let quitAt {
                     if Date.now.timeIntervalSince(quitAt) > 1 { break }
                 } else {
@@ -202,6 +207,20 @@ enum ScreenCapture {
             return nil
         }
         return UploadInput(fileURL: url, originalFilename: filename, source: .capture)
+    }
+
+    /// Flameshot is picked but its helper isn't there (or is outdated):
+    /// installs it, then the capture goes on.
+    private static func askForFlameshotHelper() -> Bool {
+        NotificationCenter.default.post(name: .aktarClosePanel, object: nil)
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Flameshot needs Aktar\u{2019}s helper")
+        alert.informativeText = String(localized: "macOS only lets Aktar start a Flameshot capture through a small script in Aktar\u{2019}s Application Scripts folder. Install it once; the next window opens on that folder.")
+        alert.addButton(withTitle: String(localized: "Install Helper\u{2026}"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else { return false }
+        return FlameshotHelper.install()
     }
 
     private static func showNotInstalled(_ tool: CaptureTool) {

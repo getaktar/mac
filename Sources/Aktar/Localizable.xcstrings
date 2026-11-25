@@ -404,6 +404,106 @@
         }
       }
     },
+    "A small script in Aktar’s Application Scripts folder that starts Flameshot’s capture. Aktar can’t put it there by itself." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein kleines Skript im Ordner „Application Scripts“ von Aktar, das die Aufnahme von Flameshot startet. Aktar kann es nicht selbst dort ablegen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pequeño script en la carpeta Application Scripts de Aktar que inicia la captura de Flameshot. Aktar no puede ponerlo ahí por sí mismo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un petit script dans le dossier Application Scripts d’Aktar qui lance la capture de Flameshot. Aktar ne peut pas l’y placer lui-même."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrip kecil di folder Application Scripts milik Aktar yang memulai tangkapan Flameshot. Aktar tidak bisa menaruhnya di sana sendiri."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un piccolo script nella cartella Application Scripts di Aktar che avvia la cattura di Flameshot. Aktar non può metterlo lì da solo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarの「Application Scripts」フォルダにある、Flameshotのキャプチャを開始する小さなスクリプトです。Aktarが自分でそこに置くことはできません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar의 Application Scripts 폴더에 있는, Flameshot 캡처를 시작하는 작은 스크립트입니다. Aktar가 직접 그곳에 넣을 수는 없습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een klein script in de map Application Scripts van Aktar dat de opname van Flameshot start. Aktar kan het daar niet zelf neerzetten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mały skrypt w folderze Application Scripts aplikacji Aktar, który uruchamia zrzut we Flameshot. Aktar nie może go tam umieścić sam."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um pequeno script na pasta Application Scripts do Aktar que inicia a captura do Flameshot. O Aktar não consegue colocá-lo lá sozinho."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшой скрипт в папке Application Scripts приложения Aktar, который запускает снимок во Flameshot. Aktar не может поместить его туда сам."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar’ın Application Scripts klasöründe Flameshot’ın yakalamasını başlatan küçük bir betik. Aktar onu oraya kendisi koyamaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Невеликий скрипт у папці Application Scripts програми Aktar, який запускає знімок у Flameshot. Aktar не може сам покласти його туди."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Một tập lệnh nhỏ trong thư mục Application Scripts của Aktar để bắt đầu chụp bằng Flameshot. Aktar không tự đặt nó vào đó được."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 的“Application Scripts”文件夹中用来开始 Flameshot 截图的一个小脚本。Aktar 无法自行把它放到那里。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 的「Application Scripts」檔案夾中用來開始 Flameshot 擷取的一個小指令碼。Aktar 無法自行把它放到那裡。"
+          }
+        }
+      }
+    },
     "Capture is set to use %@. Install it, or pick another tool in Settings > General > Capture tool." : {
       "localizations" : {
         "de" : {
@@ -1104,6 +1204,106 @@
         }
       }
     },
+    "Click Save to install the Flameshot helper in this folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicken Sie auf „Sichern“, um das Flameshot-Hilfsprogramm in diesem Ordner zu installieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz clic en Guardar para instalar el asistente de Flameshot en esta carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cliquez sur Enregistrer pour installer l’assistant Flameshot dans ce dossier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik Simpan untuk memasang pembantu Flameshot di folder ini."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai clic su Salva per installare l’assistente Flameshot in questa cartella."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「保存」をクリックすると、このフォルダにFlameshotヘルパーがインストールされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장을 클릭하면 이 폴더에 Flameshot 도우미가 설치됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik op ‘Bewaar’ om de Flameshot-helper in deze map te installeren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknij Zachowaj, aby zainstalować pomocnika Flameshot w tym folderze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clique em Salvar para instalar o assistente do Flameshot nesta pasta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите «Сохранить», чтобы установить помощник Flameshot в эту папку."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot yardımcısını bu klasöre kurmak için Kaydet’e tıklayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть «Зберегти», щоб установити помічник Flameshot у цю папку."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bấm Lưu để cài trình trợ giúp Flameshot vào thư mục này."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按“存储”以将 Flameshot 辅助程序安装到此文件夹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按一下「儲存」以將 Flameshot 輔助程式安裝到此檔案夾。"
+          }
+        }
+      }
+    },
     "Flameshot asks for Screen Recording permission for itself the first time." : {
       "localizations" : {
         "de" : {
@@ -1200,6 +1400,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flameshot 第一次使用時會為自己請求「螢幕錄製」權限。"
+          }
+        }
+      }
+    },
+    "Flameshot helper" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot-Hilfsprogramm"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asistente de Flameshot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistant Flameshot"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pembantu Flameshot"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistente Flameshot"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshotヘルパー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 도우미"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot-helper"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomocnik Flameshot"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistente do Flameshot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помощник Flameshot"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot yardımcısı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помічник Flameshot"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trình trợ giúp Flameshot"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 辅助程序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 輔助程式"
+          }
+        }
+      }
+    },
+    "Flameshot needs Aktar’s helper" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot braucht das Hilfsprogramm von Aktar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot necesita el asistente de Aktar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot a besoin de l’assistant d’Aktar"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot memerlukan pembantu Aktar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot ha bisogno dell’assistente di Aktar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FlameshotにはAktarのヘルパーが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot에는 Aktar의 도우미가 필요합니다"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot heeft de helper van Aktar nodig"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot potrzebuje pomocnika od Aktar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Flameshot precisa do assistente do Aktar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для Flameshot нужен помощник Aktar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot için Aktar’ın yardımcısı gerekiyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для Flameshot потрібен помічник Aktar"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot cần trình trợ giúp của Aktar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 需要 Aktar 的辅助程序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flameshot 需要 Aktar 的輔助程式"
           }
         }
       }
@@ -1404,202 +1804,502 @@
         }
       }
     },
-    "In CleanShot X, open Settings > Advanced and turn on the API (“Allow applications to control CleanShot”)." : {
+    "Install Aktar’s Flameshot helper below, once: macOS only lets Aktar start a Flameshot capture through it." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffne in CleanShot X Einstellungen > Erweitert und schalte die API ein („Allow applications to control CleanShot“)."
+            "value" : "Installieren Sie einmalig unten das Flameshot-Hilfsprogramm von Aktar: Nur darüber erlaubt macOS Aktar, eine Aufnahme mit Flameshot zu starten."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En CleanShot X, abre Ajustes > Avanzado y activa la API (“Allow applications to control CleanShot”)."
+            "value" : "Instala una vez el asistente de Flameshot de Aktar, más abajo: macOS solo deja que Aktar inicie una captura de Flameshot a través de él."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans CleanShot X, ouvrez Réglages > Avancé et activez l’API (« Allow applications to control CleanShot »)."
+            "value" : "Installez une fois l’assistant Flameshot d’Aktar ci-dessous : macOS ne laisse Aktar lancer une capture Flameshot que par son biais."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di CleanShot X, buka Pengaturan > Lanjutan dan nyalakan API (“Allow applications to control CleanShot”)."
+            "value" : "Pasang pembantu Flameshot milik Aktar di bawah, sekali saja: macOS hanya mengizinkan Aktar memulai tangkapan Flameshot melaluinya."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In CleanShot X, apri Impostazioni > Avanzate e attiva l’API (“Allow applications to control CleanShot”)."
+            "value" : "Installa una volta l’assistente Flameshot di Aktar qui sotto: macOS consente ad Aktar di avviare una cattura di Flameshot solo tramite esso."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CleanShot Xで「設定」>「詳細」を開き、API（“Allow applications to control CleanShot”）をオンにします。"
+            "value" : "下からAktarのFlameshotヘルパーを一度だけインストールしてください。macOSでは、AktarがFlameshotのキャプチャを開始できるのはこれを通した場合だけです。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CleanShot X에서 설정 > 고급을 열고 API(“Allow applications to control CleanShot”)를 켜세요."
+            "value" : "아래에서 Aktar의 Flameshot 도우미를 한 번 설치하세요. macOS는 이를 통해서만 Aktar가 Flameshot 캡처를 시작하도록 허용합니다."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open in CleanShot X Instellingen > Geavanceerd en zet de API aan (‘Allow applications to control CleanShot’)."
+            "value" : "Installeer hieronder eenmalig de Flameshot-helper van Aktar: macOS laat Aktar alleen daarmee een Flameshot-opname starten."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "W CleanShot X otwórz Ustawienia > Zaawansowane i włącz API („Allow applications to control CleanShot”)."
+            "value" : "Zainstaluj raz poniżej pomocnika Flameshot od Aktar: macOS pozwala Aktar uruchomić zrzut we Flameshot tylko przez niego."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No CleanShot X, abra Ajustes > Avançado e ative a API (“Allow applications to control CleanShot”)."
+            "value" : "Instale uma vez o assistente do Flameshot do Aktar, abaixo: o macOS só deixa o Aktar iniciar uma captura do Flameshot por meio dele."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "В CleanShot X откройте Настройки > Дополнительно и включите API («Allow applications to control CleanShot»)."
+            "value" : "Один раз установите ниже помощник Flameshot от Aktar: только через него macOS позволяет Aktar начать снимок во Flameshot."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CleanShot X’te Ayarlar > Gelişmiş’i açın ve API’yi açın (“Allow applications to control CleanShot”)."
+            "value" : "Aşağıdan Aktar’ın Flameshot yardımcısını bir kez kurun: macOS, Aktar’ın Flameshot yakalamasını yalnızca onun üzerinden başlatmasına izin verir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У CleanShot X відкрийте Параметри > Додатково й увімкніть API («Allow applications to control CleanShot»)."
+            "value" : "Один раз установіть нижче помічник Flameshot від Aktar: лише через нього macOS дозволяє Aktar почати знімок у Flameshot."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trong CleanShot X, mở Cài đặt > Nâng cao và bật API (“Allow applications to control CleanShot”)."
+            "value" : "Cài trình trợ giúp Flameshot của Aktar ở bên dưới, một lần: macOS chỉ cho Aktar bắt đầu chụp bằng Flameshot thông qua nó."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 CleanShot X 中打开“设置”>“高级”，开启 API（“Allow applications to control CleanShot”）。"
+            "value" : "在下方安装一次 Aktar 的 Flameshot 辅助程序：macOS 只允许 Aktar 通过它开始 Flameshot 截图。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 CleanShot X 中打開「設定」>「進階」，開啟 API（“Allow applications to control CleanShot”）。"
+            "value" : "在下方安裝一次 Aktar 的 Flameshot 輔助程式：macOS 只允許 Aktar 透過它開始 Flameshot 擷取。"
           }
         }
       }
     },
-    "In Shottr, open Settings > Advanced and turn on URL Schema API." : {
+    "Install Helper…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffne in Shottr Einstellungen > Erweitert und schalte „URL Schema API“ ein."
+            "value" : "Hilfsprogramm installieren …"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En Shottr, abre Ajustes > Avanzado y activa URL Schema API."
+            "value" : "Instalar asistente…"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans Shottr, ouvrez Réglages > Avancé et activez URL Schema API."
+            "value" : "Installer l’assistant…"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di Shottr, buka Pengaturan > Lanjutan dan nyalakan URL Schema API."
+            "value" : "Pasang Pembantu…"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In Shottr, apri Impostazioni > Avanzate e attiva URL Schema API."
+            "value" : "Installa assistente…"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shottrで「設定」>「詳細」を開き、URL Schema APIをオンにします。"
+            "value" : "ヘルパーをインストール…"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shottr에서 설정 > 고급을 열고 URL Schema API를 켜세요."
+            "value" : "도우미 설치…"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open in Shottr Instellingen > Geavanceerd en zet URL Schema API aan."
+            "value" : "Installeer helper…"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "W Shottr otwórz Ustawienia > Zaawansowane i włącz URL Schema API."
+            "value" : "Zainstaluj pomocnika…"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No Shottr, abra Ajustes > Avançado e ative URL Schema API."
+            "value" : "Instalar Assistente…"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "В Shottr откройте Настройки > Дополнительно и включите URL Schema API."
+            "value" : "Установить помощник…"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shottr’da Ayarlar > Gelişmiş’i açın ve URL Schema API’yi açın."
+            "value" : "Yardımcıyı Kur…"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У Shottr відкрийте Параметри > Додатково й увімкніть URL Schema API."
+            "value" : "Установити помічник…"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trong Shottr, mở Cài đặt > Nâng cao và bật URL Schema API."
+            "value" : "Cài trình trợ giúp…"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 Shottr 中打开“设置”>“高级”，开启 URL Schema API。"
+            "value" : "安装辅助程序…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 Shottr 中打開「設定」>「進階」，開啟 URL Schema API。"
+            "value" : "安裝輔助程式…"
+          }
+        }
+      }
+    },
+    "Installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installé"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terpasang"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geïnstalleerd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zainstalowany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установлен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulu"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установлено"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã cài"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安裝"
+          }
+        }
+      }
+    },
+    "It only works in the folder the window opens in, with the name it suggests. Try again and click Save without changing them." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es funktioniert nur in dem Ordner, in dem sich das Fenster öffnet, und mit dem vorgeschlagenen Namen. Versuchen Sie es erneut und klicken Sie auf „Sichern“, ohne beides zu ändern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo funciona en la carpeta en la que se abre la ventana y con el nombre que sugiere. Vuelve a intentarlo y haz clic en Guardar sin cambiarlos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne fonctionne que dans le dossier où s’ouvre la fenêtre, avec le nom qu’elle propose. Réessayez et cliquez sur Enregistrer sans les modifier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pembantu hanya berfungsi di folder tempat jendela terbuka, dengan nama yang disarankan. Coba lagi dan klik Simpan tanpa mengubahnya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funziona solo nella cartella in cui si apre la finestra, con il nome che suggerisce. Riprova e fai clic su Salva senza cambiarli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウインドウが開いたフォルダに、提案された名前のまま保存した場合にだけ機能します。どちらも変更せずに、もう一度「保存」をクリックしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "창이 열린 폴더에, 제안된 이름 그대로 있어야만 작동합니다. 둘 다 바꾸지 말고 다시 저장을 클릭하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het werkt alleen in de map waarin het venster opent, met de voorgestelde naam. Probeer het opnieuw en klik op ‘Bewaar’ zonder ze te wijzigen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Działa tylko w folderze, w którym otwiera się okno, i pod proponowaną nazwą. Spróbuj ponownie i kliknij Zachowaj bez ich zmieniania."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele só funciona na pasta em que a janela abre e com o nome sugerido. Tente de novo e clique em Salvar sem alterá-los."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Он работает только в папке, которую открывает окно, и с предложенным именем. Попробуйте ещё раз и нажмите «Сохранить», ничего не меняя."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca pencerenin açıldığı klasörde ve önerdiği adla çalışır. Yeniden deneyin ve ikisini de değiştirmeden Kaydet’e tıklayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Він працює лише в папці, яку відкриває вікно, і з запропонованою назвою. Спробуйте ще раз і натисніть «Зберегти», нічого не змінюючи."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trình trợ giúp chỉ hoạt động trong thư mục mà cửa sổ mở ra, với tên được gợi ý. Hãy thử lại và bấm Lưu mà không đổi chúng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它只能放在窗口打开的文件夹中，并使用建议的名称。请重试，不要更改它们，直接点按“存储”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它只能放在視窗打開的檔案夾中，並使用建議的名稱。請再試一次，不要更改它們，直接按一下「儲存」。"
+          }
+        }
+      }
+    },
+    "macOS only lets Aktar start a Flameshot capture through a small script in Aktar’s Application Scripts folder. Install it once; the next window opens on that folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS erlaubt Aktar, eine Aufnahme mit Flameshot nur über ein kleines Skript im Ordner „Application Scripts“ von Aktar zu starten. Installieren Sie es einmalig; das nächste Fenster öffnet diesen Ordner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS solo deja que Aktar inicie una captura de Flameshot mediante un pequeño script en la carpeta Application Scripts de Aktar. Instálalo una vez; la siguiente ventana se abre en esa carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS ne laisse Aktar lancer une capture Flameshot que via un petit script placé dans le dossier Application Scripts d’Aktar. Installez-le une fois ; la fenêtre suivante s’ouvre sur ce dossier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS hanya mengizinkan Aktar memulai tangkapan Flameshot melalui skrip kecil di folder Application Scripts milik Aktar. Pasang sekali saja; jendela berikutnya terbuka di folder itu."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS consente ad Aktar di avviare una cattura di Flameshot solo tramite un piccolo script nella cartella Application Scripts di Aktar. Installalo una volta; la finestra successiva si apre su quella cartella."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOSでは、AktarがFlameshotのキャプチャを開始できるのは、Aktarの「Application Scripts」フォルダにある小さなスクリプトを通した場合だけです。一度だけインストールしてください。次のウインドウでそのフォルダが開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS는 Aktar의 Application Scripts 폴더에 있는 작은 스크립트를 통해서만 Aktar가 Flameshot 캡처를 시작하도록 허용합니다. 한 번만 설치하세요. 다음 창에서 그 폴더가 열립니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS laat Aktar alleen een Flameshot-opname starten via een klein script in de map Application Scripts van Aktar. Installeer het eenmalig; het volgende venster opent die map."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS pozwala Aktar uruchomić zrzut we Flameshot tylko przez mały skrypt w folderze Application Scripts aplikacji Aktar. Zainstaluj go raz; następne okno otworzy ten folder."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O macOS só deixa o Aktar iniciar uma captura do Flameshot por meio de um pequeno script na pasta Application Scripts do Aktar. Instale-o uma vez; a próxima janela abre nessa pasta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS позволяет Aktar начать снимок во Flameshot только через небольшой скрипт в папке Application Scripts приложения Aktar. Установите его один раз; следующее окно откроет эту папку."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS, Aktar’ın Flameshot yakalamasını yalnızca Aktar’ın Application Scripts klasöründeki küçük bir betik üzerinden başlatmasına izin verir. Bir kez kurun; sonraki pencere o klasörde açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS дозволяє Aktar почати знімок у Flameshot лише через невеликий скрипт у папці Application Scripts програми Aktar. Установіть його один раз; наступне вікно відкриє цю папку."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS chỉ cho Aktar bắt đầu chụp bằng Flameshot thông qua một tập lệnh nhỏ trong thư mục Application Scripts của Aktar. Hãy cài một lần; cửa sổ tiếp theo sẽ mở thư mục đó."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 只允许 Aktar 通过 Aktar 的“Application Scripts”文件夹中的一个小脚本开始 Flameshot 截图。只需安装一次；下一个窗口会打开该文件夹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 只允許 Aktar 透過 Aktar 的「Application Scripts」檔案夾中的一個小指令碼開始 Flameshot 擷取。只需安裝一次；下一個視窗會打開該檔案夾。"
           }
         }
       }
@@ -2204,102 +2904,102 @@
         }
       }
     },
-    "Select an area. It opens in Shottr’s editor: annotate it, then copy it (⌘C) or save it to the folder below. That image is uploaded." : {
+    "Select an area. It opens in Shottr’s editor: annotate it, then click Copy in its toolbar or save it (⌘S) to the folder below. That image is uploaded." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle einen Bereich. Er öffnet sich im Editor von Shottr: Beschrifte ihn, dann kopiere ihn (⌘C) oder sichere ihn im Ordner unten. Dieses Bild wird hochgeladen."
+            "value" : "Wählen Sie einen Bereich aus. Er öffnet sich im Editor von Shottr: Versehen Sie ihn mit Anmerkungen und klicken Sie dann in der Symbolleiste auf „Kopieren“ oder sichern Sie ihn (⌘S) im Ordner unten. Dieses Bild wird hochgeladen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecciona un área. Se abre en el editor de Shottr: anótala y luego cópiala (⌘C) o guárdala en la carpeta de abajo. Esa imagen es la que se sube."
+            "value" : "Selecciona un área. Se abre en el editor de Shottr: anótala y luego haz clic en Copiar en su barra de herramientas o guárdala (⌘S) en la carpeta de abajo. Esa imagen es la que se sube."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sélectionnez une zone. Elle s’ouvre dans l’éditeur de Shottr : annotez-la, puis copiez-la (⌘C) ou enregistrez-la dans le dossier ci-dessous. C’est cette image qui est envoyée."
+            "value" : "Sélectionnez une zone. Elle s’ouvre dans l’éditeur de Shottr : annotez-la, puis cliquez sur Copier dans sa barre d’outils ou enregistrez-la (⌘S) dans le dossier ci-dessous. C’est cette image qui est envoyée."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pilih area. Area itu terbuka di editor Shottr: beri anotasi, lalu salin (⌘C) atau simpan ke folder di bawah. Gambar itulah yang diunggah."
+            "value" : "Pilih area. Area itu terbuka di editor Shottr: beri anotasi, lalu klik Salin di bilah alatnya atau simpan (⌘S) ke folder di bawah. Gambar itulah yang diunggah."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleziona un’area. Si apre nell’editor di Shottr: annotala, poi copiala (⌘C) o salvala nella cartella qui sotto. Viene caricata quell’immagine."
+            "value" : "Seleziona un’area. Si apre nell’editor di Shottr: annotala, poi fai clic su Copia nella sua barra strumenti o salvala (⌘S) nella cartella qui sotto. Viene caricata quell’immagine."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "範囲を選択するとShottrのエディタで開きます。注釈を付けてから、コピー（⌘C）するか下のフォルダに保存してください。その画像がアップロードされます。"
+            "value" : "範囲を選択します。Shottrのエディタで開くので、注釈を付けてからツールバーの「コピー」をクリックするか、下のフォルダに保存（⌘S）します。その画像がアップロードされます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "영역을 선택하면 Shottr 편집기에서 열립니다. 주석을 단 다음 복사(⌘C)하거나 아래 폴더에 저장하세요. 그 이미지가 업로드됩니다."
+            "value" : "영역을 선택하세요. Shottr 편집기에서 열리면 주석을 단 다음 도구 막대의 복사를 클릭하거나 아래 폴더에 저장(⌘S)하세요. 그 이미지가 업로드됩니다."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecteer een gebied. Het opent in de editor van Shottr: annoteer het en kopieer het daarna (⌘C) of bewaar het in de map hieronder. Die afbeelding wordt geüpload."
+            "value" : "Selecteer een gebied. Het opent in de editor van Shottr: voeg aantekeningen toe en klik dan op Kopieer in de knoppenbalk of bewaar het (⌘S) in de map hieronder. Die afbeelding wordt geüpload."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zaznacz obszar. Otworzy się w edytorze Shottr: dodaj adnotacje, a potem skopiuj go (⌘C) lub zapisz w folderze poniżej. Ten obraz zostanie wysłany."
+            "value" : "Zaznacz obszar. Otworzy się w edytorze Shottr: dodaj adnotacje, a potem kliknij Kopiuj na pasku narzędzi albo zapisz go (⌘S) w folderze poniżej. To ten obraz zostanie wysłany."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecione uma área. Ela abre no editor do Shottr: anote e depois copie (⌘C) ou salve na pasta abaixo. Essa imagem é enviada."
+            "value" : "Selecione uma área. Ela abre no editor do Shottr: faça as anotações e clique em Copiar na barra de ferramentas ou salve (⌘S) na pasta abaixo. É essa imagem que é enviada."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Выделите область. Она откроется в редакторе Shottr: добавьте пометки, затем скопируйте её (⌘C) или сохраните в папку ниже. Загружается именно это изображение."
+            "value" : "Выделите область. Она откроется в редакторе Shottr: добавьте пометки, затем нажмите «Копировать» на панели инструментов или сохраните её (⌘S) в папку ниже. Загружается именно это изображение."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir alan seçin. Shottr düzenleyicisinde açılır: üzerine notlarınızı ekleyin, sonra kopyalayın (⌘C) ya da aşağıdaki klasöre kaydedin. Yüklenen o görsel olur."
+            "value" : "Bir alan seçin. Shottr düzenleyicisinde açılır: üzerine notlarınızı ekleyin, sonra araç çubuğundaki Kopyala düğmesine tıklayın ya da aşağıdaki klasöre kaydedin (⌘S). Yüklenen o görsel olur."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Виділіть область. Вона відкриється в редакторі Shottr: додайте позначки, потім скопіюйте її (⌘C) або збережіть у папку нижче. Вивантажується саме це зображення."
+            "value" : "Виділіть область. Вона відкриється в редакторі Shottr: додайте позначки, потім натисніть «Копіювати» на панелі інструментів або збережіть її (⌘S) у папку нижче. Вивантажується саме це зображення."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chọn một vùng. Vùng đó mở trong trình chỉnh sửa của Shottr: chú thích, rồi sao chép (⌘C) hoặc lưu vào thư mục bên dưới. Ảnh đó sẽ được tải lên."
+            "value" : "Chọn một vùng. Vùng đó mở trong trình chỉnh sửa của Shottr: chú thích, rồi bấm Sao chép trên thanh công cụ hoặc lưu (⌘S) vào thư mục bên dưới. Ảnh đó sẽ được tải lên."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择一个区域，它会在 Shottr 的编辑器中打开：添加标注后拷贝（⌘C）或存到下方的文件夹。上传的就是这张图片。"
+            "value" : "选择一个区域。它会在 Shottr 的编辑器中打开：添加标注，然后点按工具栏中的“拷贝”，或存储（⌘S）到下方的文件夹。上传的就是这张图片。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選取一個區域，它會在 Shottr 的編輯器中打開：加上標註後拷貝（⌘C）或儲存到下方的檔案夾。上傳的就是這張圖片。"
+            "value" : "選取一個區域。它會在 Shottr 的編輯器中打開：加上標註，然後按一下工具列中的「拷貝」，或儲存（⌘S）到下方的檔案夾。上傳的就是這張影像。"
           }
         }
       }
@@ -2400,6 +3100,306 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "停止等待"
+          }
+        }
+      }
+    },
+    "The first time, CleanShot X asks whether other apps may control it: click Launch & Allow." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim ersten Mal fragt CleanShot X, ob andere Apps es steuern dürfen: Klicken Sie auf „Launch & Allow“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera vez, CleanShot X pregunta si otras apps pueden controlarlo: haz clic en «Launch & Allow»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La première fois, CleanShot X demande si d’autres apps peuvent le contrôler : cliquez sur « Launch & Allow »."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pertama kali, CleanShot X menanyakan apakah app lain boleh mengendalikannya: klik Launch & Allow."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prima volta CleanShot X chiede se altre app possono controllarlo: fai clic su “Launch & Allow”."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初回はCleanShot Xが他のアプリによる操作を許可するか尋ねます。「Launch & Allow」をクリックしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "처음에는 CleanShot X가 다른 앱이 제어해도 되는지 묻습니다. ‘Launch & Allow’를 클릭하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De eerste keer vraagt CleanShot X of andere apps het mogen bedienen: klik op ‘Launch & Allow’."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za pierwszym razem CleanShot X pyta, czy inne aplikacje mogą nim sterować: kliknij „Launch & Allow”."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na primeira vez, o CleanShot X pergunta se outros apps podem controlá-lo: clique em “Launch & Allow”."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В первый раз CleanShot X спросит, можно ли другим приложениям управлять им: нажмите «Launch & Allow»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CleanShot X ilk seferde başka uygulamaların onu yönetip yönetemeyeceğini sorar: “Launch & Allow”a tıklayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Першого разу CleanShot X запитає, чи можна іншим програмам керувати ним: натисніть «Launch & Allow»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lần đầu, CleanShot X hỏi có cho ứng dụng khác điều khiển nó không: bấm Launch & Allow."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次使用时，CleanShot X 会询问是否允许其他应用控制它：点按“Launch & Allow”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次使用時，CleanShot X 會詢問是否允許其他 App 控制它：按一下「Launch & Allow」。"
+          }
+        }
+      }
+    },
+    "The first time, Shottr asks to turn on deep links: click OK, then capture again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim ersten Mal fragt Shottr, ob Deep Links aktiviert werden sollen: Klicken Sie auf „OK“ und nehmen Sie dann erneut auf."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera vez, Shottr pregunta si activar los enlaces profundos: haz clic en «OK» y vuelve a capturar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La première fois, Shottr propose d’activer les liens profonds : cliquez sur « OK », puis recommencez la capture."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pertama kali, Shottr meminta untuk menyalakan deep link: klik OK, lalu tangkap lagi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prima volta Shottr chiede di attivare i deep link: fai clic su “OK”, poi cattura di nuovo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初回はShottrがディープリンクをオンにするか尋ねます。「OK」をクリックしてから、もう一度キャプチャしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "처음에는 Shottr가 딥 링크를 켤지 묻습니다. ‘OK’를 클릭한 다음 다시 캡처하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De eerste keer vraagt Shottr of deeplinks aan moeten: klik op ‘OK’ en maak de opname opnieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za pierwszym razem Shottr pyta o włączenie głębokich linków: kliknij „OK”, a potem zrób zrzut jeszcze raz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na primeira vez, o Shottr pede para ativar os deep links: clique em “OK” e capture de novo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В первый раз Shottr предложит включить глубокие ссылки: нажмите «OK», затем сделайте снимок ещё раз."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shottr ilk seferde derin bağlantıları açmayı sorar: “OK”e tıklayın, sonra yeniden yakalayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Першого разу Shottr запропонує ввімкнути глибокі посилання: натисніть «OK», потім зробіть знімок ще раз."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lần đầu, Shottr hỏi có bật liên kết sâu không: bấm OK, rồi chụp lại."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次使用时，Shottr 会询问是否开启深层链接：点按“OK”，然后再截图一次。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次使用時，Shottr 會詢問是否開啟深層連結：按一下「OK」，然後再擷取一次。"
+          }
+        }
+      }
+    },
+    "The helper wasn’t installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Hilfsprogramm wurde nicht installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El asistente no se instaló"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’assistant n’a pas été installé"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pembantu tidak terpasang"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’assistente non è stato installato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーはインストールされませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도우미가 설치되지 않았습니다"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De helper is niet geïnstalleerd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomocnik nie został zainstalowany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O assistente não foi instalado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помощник не установлен"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yardımcı kurulmadı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помічник не встановлено"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chưa cài được trình trợ giúp"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安装辅助程序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安裝輔助程式"
           }
         }
       }

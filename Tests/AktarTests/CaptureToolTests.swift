@@ -54,6 +54,16 @@ final class CaptureToolTests: XCTestCase {
         XCTAssertEqual(CaptureImageFiles.filename(for: date, fileExtension: "jpg"), "Screenshot 2026-11-23 at 14.03.12.jpg")
     }
 
+    func testFlameshotHelperStartsACaptureAndWaitsForIt() {
+        XCTAssertTrue(FlameshotHelper.script.hasPrefix("#!/bin/sh\n"))
+        XCTAssertTrue(FlameshotHelper.script.contains("exec /usr/bin/open -n -W -a \"$1\" --args gui --clipboard\n"))
+        XCTAssertEqual(FlameshotHelper.filename, "flameshot-capture.sh")
+        let ended = TaskEnded()
+        XCTAssertFalse(ended.isSet)
+        ended.set()
+        XCTAssertTrue(ended.isSet)
+    }
+
     // MARK: - Save folder
 
     func testOnlyImagesAreTaken() {
