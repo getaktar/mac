@@ -181,6 +181,33 @@ restarts.
   one only goes on while the app runs). The upload goes on the next time the
   app opens.
 
+### What big files cost (Mac, measured 2026-11-25)
+
+A Dropshare review complains that big files are first copied to the internal
+disk. Checked on the Mac (M-series, internal SSD), with the app's own code:
+
+- Outbox, same disk: `FileManager.copyItem` of a 5.4 GB file into the
+  container's Application Support took 0.000 s, three times, and no free
+  space: APFS clones it. The copy also runs in its own Task, so the upload
+  never waits for it.
+- Outbox, another disk: from an ExFAT disk image, 419 MB took 0.75 s and
+  629 MB 1.21 s (a real USB disk is as slow as the disk). Only files up to
+  512 MB are kept (`UploadOutbox.canCopy`); a bigger one isn't copied at
+  all and its upload goes on only while Aktar runs.
+- The one full copy every upload can make is not the outbox's: a video
+  that carries a location (any phone video) is rewritten without it by a
+  passthrough export into `AktarMetadata` before it goes up
+  (`VideoMetadataStripper`, the destination's Image metadata setting,
+  default "Remove location"). 1.7 GB took 2.3 to 2.7 s and needs that much
+  free space until the upload ends; a video without location metadata is
+  left alone (0.01 s, no copy). It's what keeps the location out of the
+  bucket, so it stays; "Keep all" skips it.
+- Other copies are the upload itself: image processing (format, resize),
+  encrypted links, and folders zipped or cleaned for a ZIP upload.
+
+So nothing is copied that doesn't have to be, and a big file on the same
+disk costs no time or space before the upload starts.
+
 ## 3. Upload and paste (desktop)
 
 One shortcut uploads and pastes the link where the user is typing: GitHub,
