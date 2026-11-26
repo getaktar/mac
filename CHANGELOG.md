@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-26
+
+### Added
+
+- WebDAV destinations: upload to any WebDAV folder (Nextcloud, ownCloud,
+  Synology, Hetzner Storage Box, Apache, nginx, rclone) with a Server URL,
+  user name and password; links come from the Public Base URL as for S3.
+  Test Connection checks sign-in, upload and the public link. Files of any
+  size go up in one streamed request. Temporary links, Delete after and
+  Request Files stay S3-only and are hidden for WebDAV destinations.
+- Share to Another Device sends WebDAV destinations as transfer format 2,
+  which older versions turn down; S3 destinations keep format 1.
+- The local API reports each destination's `kind`.
+
+### Changed
+
+- Storage goes through one backend layer (docs/storage-backends.md); S3
+  behaves exactly as before.
+
 ## [0.22.1] - 2026-11-26
 
 ### Fixed
