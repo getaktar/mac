@@ -65,7 +65,7 @@ extension S3Provider {
     /// `cacheControl` replaces the destination's own (a page is always
     /// sent with a short one). Never with a Content-Disposition: a share
     /// page has to open in the browser.
-    func putObject(data: Data, objectKey: String, contentType: String, cacheControl: String? = nil) async throws {
+    func putObject(data: Data, objectKey: String, contentType: String, cacheControl: String?) async throws {
         try await withRetries {
             var headers = ["Content-Type": contentType]
             if let cacheControl = cacheControl ?? self.cacheControl { headers["Cache-Control"] = cacheControl }

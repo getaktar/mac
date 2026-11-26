@@ -49,23 +49,30 @@ struct RequestFilesView: View {
         }
         .frame(width: 460, height: 560)
         .onAppear {
-            if destinationID == nil { destinationID = appState.destinationStore.defaultDestination?.id }
+            if destinationID == nil, let fallback = appState.destinationStore.defaultDestination, fallback.capabilities.fileRequests {
+                destinationID = fallback.id
+            }
         }
     }
 
+    /// Only destinations whose storage can take presigned uploads.
+    private var requestDestinations: [DestinationConfig] {
+        appState.destinationStore.destinations.filter { $0.capabilities.fileRequests }
+    }
+
     private var destination: DestinationConfig? {
-        appState.destinationStore.destinations.first { $0.id == destinationID }
+        requestDestinations.first { $0.id == destinationID }
     }
 
     private var form: some View {
         Form {
             Section {
                 Picker("Destination", selection: $destinationID) {
-                    ForEach(appState.destinationStore.destinations) { destination in
+                    ForEach(requestDestinations) { destination in
                         Text(verbatim: destination.name).tag(UUID?.some(destination.id))
                     }
                 }
-                if let destination, !ShortKeys.usesConditionalWrites(destination.preset) {
+                if let destination, !destination.capabilities.conditionalWrites {
                     Label("On this provider a request link is meant for one sender.", systemImage: "person")
                         .font(.caption)
                         .foregroundStyle(.secondary)

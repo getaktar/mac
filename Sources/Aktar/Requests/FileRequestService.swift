@@ -86,12 +86,15 @@ final class FileRequestService {
         } catch {
             throw CreateError.other((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
         }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        // Presigned PUTs and the bucket's CORS rule: S3 only.
+        guard let provider = StorageBackends.s3(config: destination, credentials: credentials, for: \.fileRequests) else {
+            throw CreateError.other(StorageError.unsupported.errorDescription ?? "")
+        }
         let id = FileRequests.newID()
         let seconds = Int64(min(draft.duration, 7 * 86_400))
         let origins = try Self.origins(for: destination, provider: provider, id: id)
 
-        let conditional = ShortKeys.usesConditionalWrites(destination.preset)
+        let conditional = destination.capabilities.conditionalWrites
         if let pageOrigin = origins.page, pageOrigin != origins.upload, destination.requestCorsOrigin != pageOrigin {
             if !corsDoneByHand {
                 do {
@@ -176,7 +179,7 @@ final class FileRequestService {
               let credentials = try? KeychainService.load(for: destination.id) else { return 0 }
         checking.insert(request.id)
         defer { checking.remove(request.id) }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         guard let objects = try? await listAll(prefix: FileRequests.prefix(id: request.id), provider: provider) else { return 0 }
 
         var collected = 0
@@ -226,7 +229,7 @@ final class FileRequestService {
         return collected
     }
 
-    private func listAll(prefix: String, provider: S3Provider) async throws -> [BucketObject] {
+    private func listAll(prefix: String, provider: any StorageBackend) async throws -> [BucketObject] {
         var objects: [BucketObject] = []
         var token: String?
         repeat {
@@ -246,7 +249,7 @@ final class FileRequestService {
             markClosed(request)
             return
         }
-        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        let provider = StorageBackends.make(config: destination, credentials: try KeychainService.load(for: destination.id))
         let objects = try await listAll(prefix: FileRequests.prefix(id: request.id), provider: provider)
         // The page first: from then on nothing more can be sent.
         try await provider.delete(objectKey: FileRequests.pageKey(id: request.id))
@@ -263,7 +266,7 @@ final class FileRequestService {
         let credentials = try? KeychainService.load(for: destination.id)
         for request in open { markClosed(request) }
         guard let credentials else { return }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         Task {
             for request in open {
                 guard let objects = try? await listAll(prefix: FileRequests.prefix(id: request.id), provider: provider) else { continue }

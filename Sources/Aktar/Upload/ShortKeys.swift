@@ -11,10 +11,6 @@ import Foundation
 enum ShortKeys {
     static let maxAttempts = 5
 
-    static func usesConditionalWrites(_ preset: ProviderPreset) -> Bool {
-        preset == .amazonS3 || preset == .cloudflareR2
-    }
-
     /// Writes with `firstKey`, then with keys from `newKey` while the key
     /// is taken, and returns the key written. `write` gets the key and
     /// whether to send it as a conditional write; it throws

@@ -10,7 +10,7 @@ enum BucketThumbnails {
     /// thumbnail's key isn't one.
     static let maxThumbnailBytes = 2 * 1024 * 1024
 
-    static func save(_ webp: Data, for objectKey: String, prefix: String, provider: S3Provider) async throws {
+    static func save(_ webp: Data, for objectKey: String, prefix: String, provider: any StorageBackend) async throws {
         guard let key = ThumbnailKeys.key(for: objectKey, prefix: prefix) else { return }
         try await provider.putObject(data: webp, objectKey: key, contentType: ThumbnailKeys.contentType)
     }
@@ -18,7 +18,7 @@ enum BucketThumbnails {
     /// Called before the file itself is deleted, so a failure leaves both
     /// in place rather than a thumbnail of a file that's gone. Deleting one
     /// that isn't there succeeds.
-    static func delete(for objectKey: String, prefixes: [String], provider: S3Provider) async throws {
+    static func delete(for objectKey: String, prefixes: [String], provider: any StorageBackend) async throws {
         let keys = prefixes.compactMap { ThumbnailKeys.key(for: objectKey, prefix: $0) }
         guard !keys.isEmpty else { return }
         if keys.count == 1 {
@@ -30,7 +30,7 @@ enum BucketThumbnails {
 
     /// After a file was copied to `newKey`: its thumbnails go along. One
     /// that can't be copied is made again when it's next shown.
-    static func copy(from oldKey: String, to newKey: String, prefixes: [String], provider: S3Provider) async {
+    static func copy(from oldKey: String, to newKey: String, prefixes: [String], provider: any StorageBackend) async {
         for prefix in prefixes {
             guard let source = ThumbnailKeys.key(for: oldKey, prefix: prefix),
                   let target = ThumbnailKeys.key(for: newKey, prefix: prefix),
@@ -42,7 +42,7 @@ enum BucketThumbnails {
     /// The thumbnail of the file at `objectKey`, unless it's older than
     /// `writtenAfter` (the file was replaced after it was made). Nil when
     /// there's none or it can't be read.
-    static func fetch(for objectKey: String, prefix: String, writtenAfter: Date?, provider: S3Provider) async -> Data? {
+    static func fetch(for objectKey: String, prefix: String, writtenAfter: Date?, provider: any StorageBackend) async -> Data? {
         guard let key = ThumbnailKeys.key(for: objectKey, prefix: prefix),
               let result = try? await provider.getObject(key: key, maxBytes: maxThumbnailBytes) else { return nil }
         if let writtenAfter, let lastModified = result.lastModified, lastModified < writtenAfter { return nil }
@@ -52,7 +52,7 @@ enum BucketThumbnails {
     /// Deletes every thumbnail in a thumbnail folder, at the root and in
     /// the expiring folders. Only `.webp` files, the only kind Aktar puts
     /// there, so nothing else that ended up in that folder is touched.
-    static func deleteAll(prefix: String, provider: S3Provider) async throws {
+    static func deleteAll(prefix: String, provider: any StorageBackend) async throws {
         for root in ThumbnailKeys.roots(prefix: prefix) {
             var token: String?
             repeat {
@@ -74,7 +74,7 @@ extension BucketThumbnails {
     static func deleteFolderInBackground(prefix: String, config: DestinationConfig, credentials: StorageCredentials) {
         Task {
             do {
-                try await deleteAll(prefix: prefix, provider: S3Provider(config: config, credentials: credentials))
+                try await deleteAll(prefix: prefix, provider: StorageBackends.make(config: config, credentials: credentials))
                 NotificationService.notifyThumbnailsDeleted(destinationName: config.name)
             } catch {
                 let reason = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

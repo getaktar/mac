@@ -267,9 +267,10 @@ enum MultipartUploader {
             let destination = destinations.first { $0.id == session.destinationID }
             let changed = fileChanged(session)
             guard session.isStale || changed || destination == nil || destination?.bucket != session.bucket else { continue }
+            // Sessions are only made where multipart uploads are.
             if let destination, destination.bucket == session.bucket,
-               let credentials = try? KeychainService.load(for: destination.id) {
-                let provider = S3Provider(config: destination, credentials: credentials)
+               let credentials = try? KeychainService.load(for: destination.id),
+               let provider = StorageBackends.s3(config: destination, credentials: credentials, for: \.multipart) {
                 await provider.abortMultipartUpload(objectKey: session.objectKey, uploadId: session.uploadId)
             }
             await store.remove(session.id)

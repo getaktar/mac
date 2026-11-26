@@ -227,7 +227,10 @@ struct DestinationFormView: View {
                     .foregroundStyle(.secondary)
                 }
 
-                autoDeleteSection
+                // Lifecycle rules are S3's; another kind has no Delete after.
+                if capabilities.expiryRules {
+                    autoDeleteSection
+                }
 
                 uploadDefaultsSection
 
@@ -320,6 +323,12 @@ struct DestinationFormView: View {
 
     /// What makes a destination an upload profile: pick it in the menu bar
     /// and its uploads are copied and expire the way it says.
+    /// What the picked provider's kind of storage can do; controls for
+    /// what it can't are left out.
+    private var capabilities: StorageCapabilities {
+        StorageCapabilities(preset: preset)
+    }
+
     private var uploadDefaultsSection: some View {
         Section {
             Picker("Copy as", selection: $outputMode) {
@@ -328,18 +337,22 @@ struct DestinationFormView: View {
                     Text(LocalizedStringKey(mode.displayName)).tag(OutputMode?.some(mode))
                 }
             }
-            Picker("Link", selection: $temporaryLink) {
-                Text(TemporaryLinkDuration.label(nil)).tag(TemporaryLinkDuration?.none)
-                ForEach(TemporaryLinkDuration.allCases) { duration in
-                    Text(TemporaryLinkDuration.label(duration)).tag(TemporaryLinkDuration?.some(duration))
+            if capabilities.temporaryLinks {
+                Picker("Link", selection: $temporaryLink) {
+                    Text(TemporaryLinkDuration.label(nil)).tag(TemporaryLinkDuration?.none)
+                    ForEach(TemporaryLinkDuration.allCases) { duration in
+                        Text(TemporaryLinkDuration.label(duration)).tag(TemporaryLinkDuration?.some(duration))
+                    }
                 }
             }
-            Picker("Delete after", selection: $expiryDays) {
-                ForEach([0] + UploadExpiry.options, id: \.self) { days in
-                    Text(UploadExpiry.label(days: days)).tag(days)
+            if capabilities.expiryRules {
+                Picker("Delete after", selection: $expiryDays) {
+                    ForEach([0] + UploadExpiry.options, id: \.self) { days in
+                        Text(UploadExpiry.label(days: days)).tag(days)
+                    }
                 }
+                .disabled(!expiryRulesActive)
             }
-            .disabled(!expiryRulesActive)
             Picker("Image metadata", selection: $imageMetadata) {
                 ForEach(ImageMetadataPolicy.allCases) { policy in
                     Text(policy.label).tag(policy)
@@ -699,7 +712,8 @@ struct DestinationFormView: View {
         // rules, so that's confirmed first. A failed check is left to
         // setting up, which reports the same problem with more to go on.
         if let credentials = try? formCredentials(),
-           let inUse = try? await S3Provider(config: currentConfig(), credentials: credentials).expiryPrefixesInUse(),
+           let provider = StorageBackends.s3(config: currentConfig(), credentials: credentials, for: \.expiryRules),
+           let inUse = try? await provider.expiryPrefixesInUse(),
            !inUse.isEmpty {
             prefixesInUse = inUse
             return
@@ -714,7 +728,10 @@ struct DestinationFormView: View {
         do {
             let credentials = try formCredentials()
             do {
-                try await S3Provider(config: config, credentials: credentials).ensureExpiryRules()
+                guard let provider = StorageBackends.s3(config: config, credentials: credentials, for: \.expiryRules) else {
+                    throw StorageError.unsupported
+                }
+                try await provider.ensureExpiryRules()
                 expiryRulesActive = true
                 expiryRulesError = nil
                 expiryRulesRefused = false
@@ -741,7 +758,8 @@ struct DestinationFormView: View {
             let config = currentConfig()
             if removingRules {
                 do {
-                    try await S3Provider(config: config, credentials: try formCredentials()).removeExpiryRules()
+                    // Nothing to remove where there are no lifecycle rules.
+                    try await StorageBackends.s3(config: config, credentials: try formCredentials(), for: \.expiryRules)?.removeExpiryRules()
                 } catch {
                     expiryRulesError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
                     expiryRulesRefused = false
@@ -906,7 +924,7 @@ struct DestinationFormView: View {
         defer { isTesting = false }
         let config = currentConfig()
         let credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
-        let provider = S3Provider(config: config, credentials: credentials)
+        let provider = StorageBackends.make(config: config, credentials: credentials)
         do {
             testResult = try await provider.testConnection()
             testError = nil

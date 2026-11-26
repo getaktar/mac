@@ -129,7 +129,7 @@ extension UploadManager {
     /// the bytes go, and keeps the upload in the outbox until they're there.
     /// `withPage`: the link is to the file's share page, written once the
     /// file is up; until then it doesn't open, like the file's.
-    func copyEarlyLink(_ job: UploadJob, objectKey: String, destination: DestinationConfig, provider: S3Provider, filename: String, withPage: Bool = false) async throws {
+    func copyEarlyLink(_ job: UploadJob, objectKey: String, destination: DestinationConfig, provider: any StorageBackend, filename: String, withPage: Bool = false) async throws {
         let pageKey = withPage ? SharePages.pageKey(forFileKey: objectKey) : nil
         let linkKey = pageKey ?? objectKey
         guard let publicURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: linkKey),
@@ -140,11 +140,11 @@ extension UploadManager {
         var link = publicURL
         var fileLink = fileURL
         var temporaryExpiresAt: Date?
-        if let duration = destination.temporaryLink,
-           let signed = try? await provider.temporaryURL(for: linkKey, expiresIn: duration.rawValue) {
+        if let duration = destination.temporaryLink, let s3 = provider.s3(for: \.temporaryLinks),
+           let signed = try? await s3.temporaryURL(for: linkKey, expiresIn: duration.rawValue) {
             link = signed
             temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
-            if pageKey != nil, let signedFile = try? await provider.temporaryURL(for: objectKey, expiresIn: duration.rawValue) {
+            if pageKey != nil, let signedFile = try? await s3.temporaryURL(for: objectKey, expiresIn: duration.rawValue) {
                 fileLink = signedFile
             }
         }

@@ -261,7 +261,7 @@ struct ShareXImportView: View {
             guard let id = rows[index].savedID, let saved = store.destinations.first(where: { $0.id == id }),
                   let credentials = try? KeychainService.load(for: id) else { continue }
             do {
-                rows[index].test = try await S3Provider(config: saved, credentials: credentials).testConnection()
+                rows[index].test = try await StorageBackends.make(config: saved, credentials: credentials).testConnection()
             } catch {
                 rows[index].testError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }

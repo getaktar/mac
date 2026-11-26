@@ -7,7 +7,7 @@ import SotoS3
 /// S3-compatible storage adapter. Every provider preset (AWS S3, Cloudflare
 /// R2, MinIO, Backblaze B2, DigitalOcean Spaces, custom) goes through this
 /// single adapter, never a separate upload engine per provider.
-final class S3Provider: StorageProvider, Sendable {
+final class S3Provider: StorageBackend, Sendable {
     let config: DestinationConfig
     private let client: AWSClient
     let s3: S3
@@ -88,6 +88,7 @@ final class S3Provider: StorageProvider, Sendable {
         fileURL: URL,
         objectKey: String,
         contentType: String,
+        onlyIfNew: Bool,
         progress: (@MainActor (Double) -> Void)?
     ) async throws -> UploadResult {
         let size = try Self.fileSize(of: fileURL)
@@ -102,15 +103,16 @@ final class S3Provider: StorageProvider, Sendable {
                 contentType: contentType,
                 session: nil,
                 identity: nil,
-                reporter: reporter
+                reporter: reporter,
+                ifNoneMatch: onlyIfNew
             )
         } else {
-            try await putObject(fileURL: fileURL, objectKey: objectKey, contentType: contentType) { sent in
+            try await putObject(fileURL: fileURL, objectKey: objectKey, contentType: contentType, ifNoneMatch: onlyIfNew) { sent in
                 reporter.update(part: 0, sent: sent)
             }
         }
         await progress?(1)
-        guard let url = PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: objectKey) else {
+        guard let url = publicURL(for: objectKey) else {
             throw StorageError.invalidPublicBaseURL
         }
         return UploadResult(objectKey: objectKey, publicURL: url, byteSize: Int(size))
@@ -231,6 +233,10 @@ final class S3Provider: StorageProvider, Sendable {
         } catch {
             throw Self.mapError(error, bucket: config.bucket)
         }
+    }
+
+    func publicURL(for objectKey: String) -> URL? {
+        PublicURLResolver.resolve(baseURL: config.publicBaseURL, objectKey: objectKey)
     }
 
     /// A presigned GET URL, which works for private buckets and doesn't
@@ -380,31 +386,6 @@ final class S3Provider: StorageProvider, Sendable {
             }
         }
         return inUse
-    }
-
-    /// When the object at exactly `key` was last written, or nil when there's
-    /// no such object (`.distantPast` when the provider leaves the date out).
-    /// Listed rather than HEADed, like `objectExists`.
-    func lastModified(key: String) async throws -> Date? {
-        do {
-            let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
-            guard let object = output.contents?.first, object.key == key else { return nil }
-            return object.lastModified ?? .distantPast
-        } catch {
-            throw Self.mapError(error, bucket: config.bucket)
-        }
-    }
-
-    /// The size of the object at exactly `key`, or nil when there's none.
-    /// Listed rather than HEADed, like `objectExists`.
-    func objectSize(key: String) async throws -> Int64? {
-        do {
-            let output = try await s3.listObjectsV2(bucket: config.bucket, maxKeys: 1, prefix: key)
-            guard let object = output.contents?.first, object.key == key else { return nil }
-            return object.size
-        } catch {
-            throw Self.mapError(error, bucket: config.bucket)
-        }
     }
 
     /// The bucket's lifecycle rules, or nil when it has none. Anything that

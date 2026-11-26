@@ -68,8 +68,13 @@ struct MenuBarView: View {
             header
             HStack(alignment: .bottom, spacing: 8) {
                 destinationPicker
-                expiryPicker
-                linkPicker
+                // Hidden where the destination's storage can't do them.
+                if appState.destinationStore.defaultDestination?.capabilities.expiryRules ?? true {
+                    expiryPicker
+                }
+                if appState.destinationStore.defaultDestination?.capabilities.temporaryLinks ?? true {
+                    linkPicker
+                }
             }
             dropzone
             if !appState.watchService.folders.isEmpty {
@@ -84,7 +89,9 @@ struct MenuBarView: View {
             Text("Upload").font(.headline)
             Spacer()
             Menu {
-                Button("Request Files\u{2026}") { RequestFilesWindowController.shared.show(appState: appState) }
+                if appState.destinationStore.destinations.contains(where: { $0.capabilities.fileRequests }) {
+                    Button("Request Files\u{2026}") { RequestFilesWindowController.shared.show(appState: appState) }
+                }
                 Button("Requests") { openAppWindow("library") }
             } label: {
                 Image(systemName: "ellipsis.circle")

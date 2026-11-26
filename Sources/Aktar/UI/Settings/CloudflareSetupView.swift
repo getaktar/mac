@@ -424,7 +424,7 @@ struct CloudflareSetupView: View {
         isTesting = true
         defer { isTesting = false }
         do {
-            testResult = try await S3Provider(config: config, credentials: credentials).testConnection()
+            testResult = try await StorageBackends.make(config: config, credentials: credentials).testConnection()
             testError = nil
         } catch {
             testResult = nil

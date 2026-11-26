@@ -82,22 +82,3 @@ extension StorageError {
         .unknown(String(localized: "This destination\u{2019}s Public Base URL isn\u{2019}t a valid web address. Fix it in Settings > Destinations."))
     }
 }
-
-protocol StorageProvider {
-    func testConnection() async throws -> ConnectionResult
-    func upload(
-        fileURL: URL,
-        objectKey: String,
-        contentType: String,
-        progress: (@MainActor (Double) -> Void)?
-    ) async throws -> UploadResult
-    func delete(objectKey: String) async throws
-    func list(prefix: String, continuationToken: String?) async throws -> BucketListing
-    func listRecursively(prefix: String, continuationToken: String?) async throws -> BucketListing
-    func objectExists(key: String) async throws -> Bool
-    func copy(from sourceKey: String, to destinationKey: String) async throws
-    func createFolder(prefix: String) async throws
-    func temporaryURL(for objectKey: String, expiresIn seconds: Int64) async throws -> URL
-    func ensureExpiryRules() async throws
-    func removeExpiryRules() async throws
-}

@@ -48,7 +48,7 @@ final class BucketBrowserModel {
     /// An error from an action (delete, rename, new folder), shown as an alert.
     var actionError: String?
 
-    @ObservationIgnored private var provider: S3Provider?
+    @ObservationIgnored private var provider: (any StorageBackend)?
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var temporaryURLs: [String: (url: URL, expires: Date)] = [:]
     @ObservationIgnored private var searchIndex: SearchIndex?
@@ -305,7 +305,8 @@ final class BucketBrowserModel {
     /// lifetime), so they work for private buckets and misconfigured public
     /// base URLs alike.
     func temporaryURL(for key: String, validFor seconds: Int64) async throws -> URL {
-        try await storage().temporaryURL(for: key, expiresIn: seconds)
+        guard let signer = try storage().s3(for: \.temporaryLinks) else { throw StorageError.unsupported }
+        return try await signer.temporaryURL(for: key, expiresIn: seconds)
     }
 
     func previewURL(for key: String) async -> URL? {
@@ -491,10 +492,10 @@ final class BucketBrowserModel {
 
     // MARK: - Helpers
 
-    private func storage() throws -> S3Provider {
+    private func storage() throws -> any StorageBackend {
         if let provider { return provider }
         let credentials = try KeychainService.load(for: destination.id)
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         self.provider = provider
         return provider
     }

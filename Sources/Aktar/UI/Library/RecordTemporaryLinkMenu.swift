@@ -10,7 +10,13 @@ struct RecordTemporaryLinkMenu: View {
 
     var body: some View {
         // An encrypted upload's file can't be opened on its own.
-        if !record.isEncrypted { menu }
+        if !record.isEncrypted, canSign { menu }
+    }
+
+    /// Only where the upload's destination signs links (one that's gone
+    /// keeps the menu, which then says so).
+    private var canSign: Bool {
+        appState.destinationStore.destinations.first { $0.id == record.destinationID }?.capabilities.temporaryLinks ?? true
     }
 
     private var menu: some View {

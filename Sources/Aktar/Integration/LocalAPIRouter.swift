@@ -463,9 +463,9 @@ final class LocalAPIRouter {
     // MARK: - Bucket browsing
 
     private func handleBucket(_ request: HTTPRequest, destination: DestinationConfig, route: [String]) async -> HTTPResponse {
-        let storage: S3Provider
+        let storage: any StorageBackend
         do {
-            storage = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+            storage = StorageBackends.make(config: destination, credentials: try KeychainService.load(for: destination.id))
         } catch {
             return failure(error)
         }
@@ -603,7 +603,10 @@ final class LocalAPIRouter {
                 if let problem = Self.problem(withExistingKey: body.key) { return .error(400, "key: \(problem)") }
                 // SigV4 presigned URLs are capped at seven days.
                 let seconds = min(max(body.expiresIn ?? 3600, 60), 604_800)
-                let url = try await storage.temporaryURL(for: body.key, expiresIn: seconds)
+                guard let signer = storage.s3(for: \.temporaryLinks) else {
+                    return .error(409, "This destination can't make temporary links.")
+                }
+                let url = try await signer.temporaryURL(for: body.key, expiresIn: seconds)
                 return .json(200, LinkDTO(url: url.absoluteString, expiresAt: Date.now.addingTimeInterval(TimeInterval(seconds))))
 
             default:
@@ -619,7 +622,7 @@ final class LocalAPIRouter {
     /// Same rule as the Library's bucket browser: keep the file's own name,
     /// adding " 2", " 3"… when it's taken so nothing gets overwritten.
     private func availableKey(for filename: String, in folder: String, destination: DestinationConfig) async throws -> String {
-        let storage = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        let storage = StorageBackends.make(config: destination, credentials: try KeychainService.load(for: destination.id))
         let base = (filename as NSString).deletingPathExtension
         let ext = (filename as NSString).pathExtension
         var candidate = folder + filename

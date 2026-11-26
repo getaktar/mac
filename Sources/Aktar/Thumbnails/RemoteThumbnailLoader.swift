@@ -30,7 +30,7 @@ final class RemoteThumbnailLoader {
     private let memory = NSCache<NSString, NSImage>()
     private var inFlight: [String: Task<NSImage?, Never>] = [:]
     private var historyInFlight: Set<UUID> = []
-    private var providers: [UUID: S3Provider] = [:]
+    private var providers: [UUID: any StorageBackend] = [:]
     /// Downloads and generation running at once, and those waiting.
     private var running = 0
     private var waiting: [CheckedContinuation<Void, Never>] = []
@@ -210,10 +210,10 @@ final class RemoteThumbnailLoader {
         return await work()
     }
 
-    private func provider(for destination: DestinationConfig) -> S3Provider? {
+    private func provider(for destination: DestinationConfig) -> (any StorageBackend)? {
         if let provider = providers[destination.id], provider.config == destination { return provider }
         guard let credentials = try? KeychainService.load(for: destination.id) else { return nil }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         providers[destination.id] = provider
         return provider
     }

@@ -115,9 +115,9 @@ extension UploadManager {
 
     /// The link to `key`: its public URL, or a presigned one when the
     /// destination copies temporary links, with when it stops working.
-    func link(toKey key: String, destination: DestinationConfig, provider: S3Provider) async throws -> (URL, Date?) {
-        if let duration = destination.temporaryLink,
-           let signed = try? await provider.temporaryURL(for: key, expiresIn: duration.rawValue) {
+    func link(toKey key: String, destination: DestinationConfig, provider: any StorageBackend) async throws -> (URL, Date?) {
+        if let duration = destination.temporaryLink, let s3 = provider.s3(for: \.temporaryLinks),
+           let signed = try? await s3.temporaryURL(for: key, expiresIn: duration.rawValue) {
             return (signed, Date.now.addingTimeInterval(TimeInterval(duration.rawValue)))
         }
         guard let url = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: key) else {
@@ -152,7 +152,7 @@ extension UploadManager {
         dates.compactMap { $0 }.min()
     }
 
-    func writePage(_ page: SharePage, key: String, provider: S3Provider) async throws {
+    func writePage(_ page: SharePage, key: String, provider: any StorageBackend) async throws {
         guard let template = Self.pageTemplate else {
             throw StorageError.unknown(String(localized: "The share page template is missing from Aktar."))
         }
@@ -191,7 +191,7 @@ extension UploadManager {
 
     /// The link of the bucket thumbnail at `key` (presigned like the page
     /// on a temporary-link destination).
-    func thumbnailLink(key: String?, destination: DestinationConfig, provider: S3Provider) async -> URL? {
+    func thumbnailLink(key: String?, destination: DestinationConfig, provider: any StorageBackend) async -> URL? {
         guard let key else { return nil }
         return try? await link(toKey: key, destination: destination, provider: provider).0
     }
@@ -204,7 +204,7 @@ extension UploadManager {
     func finishGallery(_ group: UploadGroup, entries: [GalleryEntry], destination: DestinationConfig, action: UploadAction?) async {
         guard let first = entries.first else { return }
         do {
-            let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+            let provider = StorageBackends.make(config: destination, credentials: try KeychainService.load(for: destination.id))
             let single = entries.count == 1
             let pageKey = single ? SharePages.pageKey(forFileKey: first.objectKey) : SharePages.galleryKey(forFirstFileKey: first.objectKey)
             var files: [SharePage.File] = []
@@ -264,7 +264,7 @@ extension UploadManager {
     /// After an upload's file was deleted: its page goes too, unless
     /// another history entry still points at it (a gallery's other files).
     /// A page that's already gone is fine.
-    func deletePageIfUnused(of record: UploadRecord, provider: S3Provider) async {
+    func deletePageIfUnused(of record: UploadRecord, provider: any StorageBackend) async {
         guard let key = record.sharePageKey else { return }
         let others = repository.records(sharePageKey: key, destinationID: record.destinationID).filter { $0.id != record.id }
         await SharePagePublisher.delete(pageKey: key, stillUsed: !others.isEmpty, provider: provider)

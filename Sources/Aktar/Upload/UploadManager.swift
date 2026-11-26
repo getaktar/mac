@@ -123,7 +123,9 @@ final class UploadManager {
         guard let destination = destinationStore.destinations.first(where: { $0.id == record.destinationID }) else {
             throw StorageError.unknown(String(localized: "This upload's destination was removed."))
         }
-        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        guard let provider = StorageBackends.s3(config: destination, credentials: try KeychainService.load(for: destination.id), for: \.temporaryLinks) else {
+            throw StorageError.unsupported
+        }
         let key = page ? record.sharePageKey ?? record.objectKey : record.objectKey
         return try await provider.temporaryURL(for: key, expiresIn: duration.rawValue)
     }
@@ -308,7 +310,7 @@ final class UploadManager {
     static func abort(_ session: MultipartSession, destination: DestinationConfig) {
         Task.detached {
             if let credentials = try? KeychainService.load(for: destination.id) {
-                await S3Provider(config: destination, credentials: credentials)
+                await StorageBackends.s3(config: destination, credentials: credentials, for: \.multipart)?
                     .abortMultipartUpload(objectKey: session.objectKey, uploadId: session.uploadId)
             }
             await MultipartSessionStore.shared.remove(session.id)
@@ -395,7 +397,7 @@ final class UploadManager {
             repository.delete(record)
             return
         }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         try await BucketThumbnails.delete(for: record.objectKey, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: record.objectKey)
         await deletePageIfUnused(of: record, provider: provider)
@@ -440,9 +442,10 @@ final class UploadManager {
                ExpiryRuleStore.shared.isActive(destinationID),
                let credentials = try? KeychainService.load(for: destinationID) {
                 if rulesChecked[destinationID] == nil {
-                    let provider = S3Provider(config: destination, credentials: credentials)
+                    // A kind without lifecycle rules has none in place.
+                    let provider = StorageBackends.s3(config: destination, credentials: credentials, for: \.expiryRules)
                     do {
-                        let inPlace = try await provider.expiryRulesInPlace()
+                        let inPlace = try await provider?.expiryRulesInPlace() ?? false
                         rulesChecked[destinationID] = inPlace
                         if !inPlace {
                             ExpiryRuleStore.shared.set(destinationID, active: false)
@@ -485,7 +488,7 @@ final class UploadManager {
             repository.delete(record)
             return
         }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         guard let written = try await provider.lastModified(key: record.objectKey),
               !Self.uploadedAgain(record, writtenAt: written) else {
             repository.delete(record)
@@ -510,7 +513,9 @@ final class UploadManager {
     /// Installs the bucket's lifecycle rules for a saved destination, which
     /// is what makes "Delete after" available for it.
     func setUpExpiryRules(for destination: DestinationConfig) async throws {
-        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        guard let provider = StorageBackends.s3(config: destination, credentials: try KeychainService.load(for: destination.id), for: \.expiryRules) else {
+            throw StorageError.unsupported
+        }
         do {
             try await provider.ensureExpiryRules()
             ExpiryRuleStore.shared.set(destination.id, active: true)
@@ -523,7 +528,9 @@ final class UploadManager {
     /// The `tmp/{N}d/` folders of a saved destination that already hold
     /// files and would start expiring once the missing rules are set up.
     func expiryPrefixesInUse(for destination: DestinationConfig) async throws -> [String] {
-        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        guard let provider = StorageBackends.s3(config: destination, credentials: try KeychainService.load(for: destination.id), for: \.expiryRules) else {
+            return []
+        }
         return try await provider.expiryPrefixesInUse()
     }
 
@@ -566,7 +573,7 @@ final class UploadManager {
                     throw StorageError.invalidPublicBaseURL
                 }
                 let credentials = try KeychainService.load(for: destination.id)
-                let provider = S3Provider(config: destination, credentials: credentials)
+                let provider = StorageBackends.make(config: destination, credentials: credentials)
 
                 // A copied link: its file is downloaded first, into the
                 // folder its placeholder is in, and then it's like any file.
@@ -719,8 +726,8 @@ final class UploadManager {
                     // An earlier upload with a page: its page link is copied.
                     let reusedKey = record.isEncrypted ? record.objectKey : record.sharePageKey ?? record.objectKey
                     if record.sharePageKey != nil, !record.isEncrypted, let page = record.sharePageURL { link = page }
-                    if let duration = destination.temporaryLink,
-                       let signed = try? await provider.temporaryURL(for: reusedKey, expiresIn: duration.rawValue) {
+                    if let duration = destination.temporaryLink, let s3 = provider.s3(for: \.temporaryLinks),
+                       let signed = try? await s3.temporaryURL(for: reusedKey, expiresIn: duration.rawValue) {
                         link = signed
                         temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
                     }
@@ -797,9 +804,9 @@ final class UploadManager {
                         guard case .uploading = job.state else { return }
                         job.state = .uploading(progress: progress)
                     }
-                    if fileSize > S3Provider.multipartThreshold {
+                    if fileSize > S3Provider.multipartThreshold, let s3 = provider.s3(for: \.multipart) {
                         try await MultipartUploader.upload(
-                            provider: provider,
+                            provider: s3,
                             fileURL: uploadURL,
                             fileSize: fileSize,
                             objectKey: key,
@@ -813,15 +820,18 @@ final class UploadManager {
                         }
                         job.multipartSession = nil
                     } else {
-                        try await provider.putObject(fileURL: uploadURL, objectKey: key, contentType: contentType, ifNoneMatch: onlyIfNew) { sent in
-                            reporter.update(part: 0, sent: sent)
+                        // Everywhere else (and for any kind without
+                        // multipart uploads), one streamed write.
+                        _ = try await provider.upload(fileURL: uploadURL, objectKey: key, contentType: contentType, onlyIfNew: onlyIfNew) { progress in
+                            guard case .uploading = job.state else { return }
+                            job.state = .uploading(progress: progress)
                         }
                     }
                 }
 
                 var session: MultipartSession?
                 var identity: MultipartFileIdentity?
-                if !encrypting, fileSize > S3Provider.multipartThreshold {
+                if !encrypting, fileSize > S3Provider.multipartThreshold, destination.capabilities.multipart {
                     let keyBasis = generatesKey ? [template, filename, watch?.subpath ?? ""].joined(separator: "\u{0}") : nil
                     let fileIdentity = MultipartFileIdentity(fileURL: uploadURL, size: fileSize, contentHash: hashes.sha256, keyBasis: keyBasis)
                     identity = fileIdentity
@@ -860,7 +870,7 @@ final class UploadManager {
                     // one is taken.
                     objectKey = try await ShortKeys.write(
                         firstKey: objectKey,
-                        conditional: ShortKeys.usesConditionalWrites(destination.preset),
+                        conditional: destination.capabilities.conditionalWrites,
                         newKey: {
                             UploadExpiry.key(
                                 Self.generatedKey(template: template, filename: filename, hashes: hashes, watch: watch),
@@ -975,8 +985,8 @@ final class UploadManager {
                     // endpoint, where the public URL is the better fallback.
                     var signedLink = result.publicURL
                     var temporaryExpiresAt: Date?
-                    if let duration = destination.temporaryLink,
-                       let signed = try? await provider.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
+                    if let duration = destination.temporaryLink, let s3 = provider.s3(for: \.temporaryLinks),
+                       let signed = try? await s3.temporaryURL(for: result.objectKey, expiresIn: duration.rawValue) {
                         signedLink = signed
                         temporaryExpiresAt = Date.now.addingTimeInterval(TimeInterval(duration.rawValue))
                     }
@@ -1032,7 +1042,7 @@ final class UploadManager {
     /// finished: the object it wrote is deleted, with a short link made for
     /// it after the upload, and the task ends as cancelled. A replace keeps
     /// what it wrote (there's nothing to go back to).
-    private func takeBackIfCancelled(_ job: UploadJob, objectKey: String, provider: S3Provider, shortening: ShortLinkService.Attempt? = nil, destination: DestinationConfig? = nil) async throws {
+    private func takeBackIfCancelled(_ job: UploadJob, objectKey: String, provider: any StorageBackend, shortening: ShortLinkService.Attempt? = nil, destination: DestinationConfig? = nil) async throws {
         guard case .cancelled = job.state else { return }
         if job.input.replacing == nil {
             try? await provider.delete(objectKey: objectKey)
@@ -1082,7 +1092,7 @@ final class UploadManager {
 
     /// `key`, or "name 2.ext", "name 3.ext"... when it's taken, numbered the
     /// way the bucket browser numbers its uploads.
-    private static func freeKey(_ key: String, provider: S3Provider) async throws -> String {
+    private static func freeKey(_ key: String, provider: any StorageBackend) async throws -> String {
         let directory = (key as NSString).deletingLastPathComponent
         let name = (key as NSString).lastPathComponent
         let base = (name as NSString).deletingPathExtension
@@ -1293,7 +1303,7 @@ final class UploadManager {
     /// replaced) belongs to a file that was there before, so it goes.
     /// Returns the key of the thumbnail saved, for a share page.
     @discardableResult
-    func updateBucketThumbnails(_ thumbnail: GeneratedThumbnail?, objectKey: String, destination: DestinationConfig, provider: S3Provider) async -> String? {
+    func updateBucketThumbnails(_ thumbnail: GeneratedThumbnail?, objectKey: String, destination: DestinationConfig, provider: any StorageBackend) async -> String? {
         var stale = thumbnailPrefixes(for: destination)
         guard !stale.isEmpty else { return nil }
         var saved: String?
@@ -1546,7 +1556,7 @@ extension UploadManager {
             return
         }
         guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }) else { return }
-        let provider = S3Provider(config: destination, credentials: try KeychainService.load(for: destination.id))
+        let provider = StorageBackends.make(config: destination, credentials: try KeychainService.load(for: destination.id))
         try await BucketThumbnails.delete(for: key, prefixes: thumbnailPrefixes(for: destination), provider: provider)
         try await provider.delete(objectKey: key)
         RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: key)
@@ -1563,7 +1573,7 @@ extension UploadManager {
     func verifyUploaded(key: String, destinationID: UUID, size: Int64) async -> Bool {
         guard let destination = destinationStore.destinations.first(where: { $0.id == destinationID }),
               let credentials = try? KeychainService.load(for: destination.id) else { return false }
-        let provider = S3Provider(config: destination, credentials: credentials)
+        let provider = StorageBackends.make(config: destination, credentials: credentials)
         return (try? await provider.objectSize(key: key)) == size
     }
 }

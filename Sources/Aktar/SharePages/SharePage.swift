@@ -466,14 +466,14 @@ enum SharePages {
 enum SharePagePublisher {
     /// A plain PUT (the file's key was free, so this one is too), served
     /// inline as HTML with a short cache time.
-    static func write(_ page: SharePage, key: String, provider: S3Provider, template: String) async throws {
+    static func write(_ page: SharePage, key: String, provider: any StorageBackend, template: String) async throws {
         let html = SharePages.build(page, template: template)
         try await provider.putObject(data: Data(html.utf8), objectKey: key, contentType: SharePages.contentType, cacheControl: SharePages.cacheControl)
     }
 
     /// After a file is deleted: its page, unless another upload still
     /// points at it. One that's gone already is fine.
-    static func delete(pageKey: String, stillUsed: Bool, provider: S3Provider) async {
+    static func delete(pageKey: String, stillUsed: Bool, provider: any StorageBackend) async {
         guard !stillUsed else { return }
         try? await provider.delete(objectKey: pageKey)
     }

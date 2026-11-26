@@ -390,15 +390,17 @@ private struct TemporaryLinkMenu: View {
     let key: String
 
     var body: some View {
-        Menu("Copy Temporary Link") {
-            ForEach(TemporaryLinkDuration.allCases) { duration in
-                Button(duration.title) {
-                    Task {
-                        do {
-                            let url = try await model.temporaryURL(for: key, validFor: duration.rawValue)
-                            ClipboardService.copy(url.absoluteString)
-                        } catch {
-                            model.actionError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if model.destination.capabilities.temporaryLinks {
+            Menu("Copy Temporary Link") {
+                ForEach(TemporaryLinkDuration.allCases) { duration in
+                    Button(duration.title) {
+                        Task {
+                            do {
+                                let url = try await model.temporaryURL(for: key, validFor: duration.rawValue)
+                                ClipboardService.copy(url.absoluteString)
+                            } catch {
+                                model.actionError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                            }
                         }
                     }
                 }

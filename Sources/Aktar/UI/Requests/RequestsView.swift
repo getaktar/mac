@@ -22,7 +22,7 @@ struct RequestsListView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                     Button("Request Files\u{2026}") { isCreating = true }
-                        .disabled(appState.destinationStore.destinations.isEmpty)
+                        .disabled(!appState.destinationStore.destinations.contains { $0.capabilities.fileRequests })
                 }
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -39,7 +39,7 @@ struct RequestsListView: View {
         .toolbar {
             ToolbarItem {
                 Button("Request Files\u{2026}", systemImage: "plus") { isCreating = true }
-                    .disabled(appState.destinationStore.destinations.isEmpty)
+                    .disabled(!appState.destinationStore.destinations.contains { $0.capabilities.fileRequests })
             }
         }
         .sheet(isPresented: $isCreating) {
