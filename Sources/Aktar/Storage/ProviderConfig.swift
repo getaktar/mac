@@ -7,6 +7,10 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
     case backblazeB2
     case digitalOceanSpaces
     case customS3
+    /// Not S3: any WebDAV server (docs/storage-backends.md). Older versions
+    /// don't know this preset, so they keep such a destination unread
+    /// instead of treating it as S3.
+    case webdav
 
     var id: String { rawValue }
 
@@ -18,6 +22,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .backblazeB2: return "Backblaze B2"
         case .digitalOceanSpaces: return "DigitalOcean Spaces"
         case .customS3: return String(localized: "Other S3-Compatible")
+        case .webdav: return "WebDAV"
         }
     }
 
@@ -25,6 +30,8 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .cloudflareR2: return "auto"
         case .amazonS3: return "us-east-1"
+        // WebDAV has no regions; the field stays empty in the JSON.
+        case .webdav: return ""
         default: return "auto"
         }
     }
@@ -42,6 +49,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .backblazeB2: return "externaldrive.fill"
         case .digitalOceanSpaces: return "circle.hexagongrid.fill"
         case .customS3: return "cylinder.split.1x2.fill"
+        case .webdav: return "externaldrive.connected.to.line.below.fill"
         }
     }
 }

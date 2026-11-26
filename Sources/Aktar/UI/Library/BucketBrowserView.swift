@@ -331,19 +331,19 @@ struct BucketListView: View {
     private var scopeName: String {
         model.searchScope == .folder && !model.prefix.isEmpty
             ? "\u{201C}\(BucketBrowserModel.displayName(ofFolder: model.prefix))\u{201D}"
-            : model.destination.bucket
+            : model.destination.storageRootName
     }
 
     /// Where a search result lives, shown under its name: the bucket-relative
     /// folder path, or the bucket name for top-level items.
     private func locationText(forKey key: String) -> String {
         let parent = BucketBrowserModel.parent(ofKey: key)
-        return parent.isEmpty ? model.destination.bucket : String(parent.dropLast())
+        return parent.isEmpty ? model.destination.storageRootName : String(parent.dropLast())
     }
 
     private func locationText(forFolder folder: String) -> String {
         let parent = BucketBrowserModel.parent(ofFolder: folder)
-        return parent.isEmpty ? model.destination.bucket : String(parent.dropLast())
+        return parent.isEmpty ? model.destination.storageRootName : String(parent.dropLast())
     }
 
     private func chooseAndUpload() {
@@ -632,7 +632,7 @@ private struct BucketObjectDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: object.name).font(.title3.bold()).textSelection(.enabled)
-                    Text(verbatim: "\(model.destination.bucket)/\(BucketBrowserModel.parent(ofKey: object.key))")
+                    Text(verbatim: "\(model.destination.storageRootName)/\(BucketBrowserModel.parent(ofKey: object.key))")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

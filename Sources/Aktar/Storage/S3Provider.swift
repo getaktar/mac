@@ -500,7 +500,9 @@ final class S3Provider: StorageBackend, Sendable {
             .joined(separator: "/")
     }
 
-    private static func probe(url: URL) async -> PublicLinkCheck {
+    /// Opens `url` the way someone a link is shared with would. Used by
+    /// every kind's Test Connection.
+    static func probe(url: URL) async -> PublicLinkCheck {
         let head = await status(of: url, method: "HEAD")
         // Some servers and CDNs don't answer HEAD; ask again the way a
         // browser would before calling the link broken.

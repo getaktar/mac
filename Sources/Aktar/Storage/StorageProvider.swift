@@ -52,6 +52,14 @@ enum StorageError: Error, LocalizedError {
     case alreadyExists
     /// Every {short} key tried was taken; see `ShortKeys`.
     case noFreeShortKey
+    /// WebDAV's counterparts of `invalidCredentials`, `bucketNotFound` and
+    /// `accessDenied`, worded for a user name, a folder and an account
+    /// instead of keys and a bucket.
+    case wrongUserNameOrPassword
+    case folderNotFound
+    case writeNotAllowed
+    /// WebDAV's 507 Insufficient Storage.
+    case outOfSpace
     case unknown(String)
 
     var errorDescription: String? {
@@ -70,6 +78,14 @@ enum StorageError: Error, LocalizedError {
             return String(localized: "A file with this name is already in the bucket.")
         case .noFreeShortKey:
             return String(localized: "Couldn\u{2019}t find an unused short name for this file after \(ShortKeys.maxAttempts) tries. Nothing was overwritten. Try again.")
+        case .wrongUserNameOrPassword:
+            return String(localized: "Could not sign in. Check your user name and password.")
+        case .folderNotFound:
+            return String(localized: "Folder not found. Check the Server URL.")
+        case .writeNotAllowed:
+            return String(localized: "The server refused this. Check that this account can write to the folder.")
+        case .outOfSpace:
+            return String(localized: "The server is out of space.")
         case .unknown(let message):
             return message
         }

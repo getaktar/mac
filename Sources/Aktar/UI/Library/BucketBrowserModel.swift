@@ -109,7 +109,7 @@ final class BucketBrowserModel {
 
     /// Breadcrumb entries from the bucket root down to the current folder.
     var breadcrumbs: [(name: String, prefix: String)] {
-        var result: [(String, String)] = [(destination.bucket, "")]
+        var result: [(String, String)] = [(destination.storageRootName, "")]
         var running = ""
         for component in prefix.split(separator: "/") {
             running += component + "/"
@@ -309,7 +309,10 @@ final class BucketBrowserModel {
         return try await signer.temporaryURL(for: key, expiresIn: seconds)
     }
 
+    /// Where previews and Open load from: a presigned link, or the public
+    /// one for a kind of storage without them (WebDAV).
     func previewURL(for key: String) async -> URL? {
+        guard destination.capabilities.temporaryLinks else { return publicURL(for: key) }
         if let cached = temporaryURLs[key], cached.expires > .now { return cached.url }
         guard let url = try? await temporaryURL(for: key, validFor: 3600) else { return nil }
         temporaryURLs[key] = (url, Date.now.addingTimeInterval(3000))

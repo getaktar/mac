@@ -580,7 +580,7 @@ private struct DestinationRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(destination.name)
-                Text(verbatim: "\(destination.preset.displayName) · \(destination.bucket)")
+                Text(verbatim: "\(destination.preset.displayName) · \(destination.storageLocation)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

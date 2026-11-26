@@ -694,6 +694,7 @@ final class LocalAPIRouter {
         DestinationDTO(
             id: destination.id.uuidString,
             name: destination.name,
+            kind: destination.kind.rawValue,
             provider: destination.preset.rawValue,
             providerName: destination.preset.displayName,
             bucket: destination.bucket,
@@ -842,6 +843,9 @@ private struct EnabledBody: Decodable {
 private struct DestinationDTO: Encodable {
     let id: String
     let name: String
+    /// The kind of storage (`s3`, `webdav`), told by the preset in
+    /// `provider`; see docs/storage-backends.md.
+    let kind: String
     let provider: String
     let providerName: String
     let bucket: String

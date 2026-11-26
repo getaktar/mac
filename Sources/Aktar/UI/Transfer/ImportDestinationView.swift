@@ -279,7 +279,7 @@ struct ImportDestinationView: View {
             Form {
                 Section {
                     LabeledContent("Name", value: config.name)
-                    LabeledContent("Storage", value: "\(payload.endpointHost) \u{00B7} \(config.bucket)")
+                    LabeledContent("Storage", value: config.kind == .s3 ? "\(payload.endpointHost) \u{00B7} \(config.bucket)" : config.storageLocation)
                     LabeledContent("Links", value: payload.publicHost)
                     if let shortLinkHost = payload.shortLinkHost {
                         LabeledContent("Short Links", value: shortLinkHost)
@@ -424,7 +424,7 @@ struct ImportDestinationView: View {
                         systemImage: "checkmark.circle.fill"
                     )
                     .foregroundStyle(.green)
-                    Text(verbatim: "\(config.preset.displayName) · \(config.bucket)")
+                    Text(verbatim: "\(config.preset.displayName) · \(config.storageLocation)")
                         .foregroundStyle(.secondary)
                 }
 
@@ -437,7 +437,7 @@ struct ImportDestinationView: View {
                         }
                     }
                 } else {
-                    ConnectionTestSection(result: testResult, error: testError)
+                    ConnectionTestSection(result: testResult, error: testError, kind: config.kind)
                 }
             }
             .formStyle(.grouped)

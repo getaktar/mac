@@ -30,7 +30,7 @@ enum DestinationTransferError: Error, Equatable, LocalizedError {
 /// link. The format is shared with the other apps; see
 /// docs/destination-transfer.md.
 ///
-///     link  = "aktar://import#" + base64url([0x01][salt 16][nonce 12][ciphertext + tag 16])
+///     link  = "aktar://import#" + base64url([version][salt 16][nonce 12][ciphertext + tag 16])
 ///     key   = PBKDF2-HMAC-SHA256(code, salt, 20000 iterations, 32 bytes)
 ///     AES-256-GCM, additional data "aktar-transfer-v1"
 ///
@@ -48,7 +48,18 @@ enum DestinationTransfer {
         var expiresAt: Int? = nil
     }
 
-    static let formatVersion: UInt8 = 1
+    /// The newest format this app reads. Version 2 is version 1 for a
+    /// destination that isn't S3 (WebDAV): the same JSON, sent with 2 in
+    /// the envelope's first byte and in `v`, so an app that only knows S3
+    /// turns it down as made by a newer version instead of importing it
+    /// as S3 (docs/storage-backends.md, "Compatibility"). S3 destinations
+    /// keep version 1, so older apps still read them.
+    static let formatVersion: UInt8 = 2
+
+    /// The version a link for `destination` is sealed with.
+    static func formatVersion(for destination: DestinationConfig) -> UInt8 {
+        destination.kind == .s3 ? 1 : 2
+    }
     static let linkPrefix = "aktar://import#"
     /// Crockford base32, which leaves out I, L, O and U.
     static let codeAlphabet = Array("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
@@ -151,13 +162,19 @@ enum DestinationTransfer {
     static func seal(_ payload: Payload, code: String, now: Date = Date()) throws -> String {
         var payload = payload
         if payload.expiresAt == nil { payload.expiresAt = Int(now.timeIntervalSince1970 + lifetime) }
-        return try seal(plaintext: encodePayload(payload), code: code, salt: randomBytes(saltLength), nonce: randomBytes(nonceLength))
+        return try seal(
+            plaintext: encodePayload(payload),
+            code: code,
+            salt: randomBytes(saltLength),
+            nonce: randomBytes(nonceLength),
+            version: formatVersion(for: payload.destination)
+        )
     }
 
-    static func seal(plaintext: Data, code: String, salt: Data, nonce: Data) throws -> String {
+    static func seal(plaintext: Data, code: String, salt: Data, nonce: Data, version: UInt8 = 1) throws -> String {
         let key = deriveKey(code: code, salt: salt)
         let box = try AES.GCM.seal(plaintext, using: key, nonce: AES.GCM.Nonce(data: nonce), authenticating: additionalData)
-        var envelope = Data([formatVersion])
+        var envelope = Data([version])
         envelope.append(salt)
         envelope.append(nonce)
         envelope.append(box.ciphertext)
@@ -209,7 +226,7 @@ enum DestinationTransfer {
             throw DestinationTransferError.notAktarTransfer
         }
         switch data[data.startIndex] {
-        case formatVersion: return data
+        case 1...formatVersion: return data
         case let version where version > formatVersion: throw DestinationTransferError.newerVersion
         default: throw DestinationTransferError.notAktarTransfer
         }
@@ -299,7 +316,7 @@ enum DestinationTransfer {
             credentials["shortLinkToken"] = token
         }
 
-        var root: [String: Any] = ["v": Int(formatVersion), "destination": destination, "credentials": credentials]
+        var root: [String: Any] = ["v": Int(formatVersion(for: config)), "destination": destination, "credentials": credentials]
         if config.outputMode == .custom, let template = payload.customTemplate {
             root["customTemplate"] = template
         }
@@ -321,7 +338,8 @@ enum DestinationTransfer {
               let name = string(object["name"]),
               let preset = string(object["preset"]).flatMap(ProviderPreset.init(rawValue:)),
               let endpoint = string(object["endpoint"]),
-              let bucket = string(object["bucket"]),
+              // Only S3 has buckets; another kind sends an empty one.
+              let bucket = preset.kind == .s3 ? string(object["bucket"]) : object["bucket"] as? String ?? "",
               let publicBaseURL = string(object["publicBaseURL"]),
               PublicURLResolver.isValidBaseURL(publicBaseURL),
               let accessKeyId = string(keys["accessKeyId"]),

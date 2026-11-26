@@ -143,44 +143,19 @@ struct DestinationFormView: View {
                     TextField("Profile Name", text: $name, prompt: Text("Production Files"))
                 }
 
-                Section {
-                    if preset == .cloudflareR2 {
-                        TextField("Account ID", text: $accountID)
-                            .onChange(of: accountID) { _, newValue in
-                                endpoint = DestinationConfig.deriveR2Endpoint(accountID: newValue)
-                            }
-                    } else {
-                        TextField("Endpoint", text: $endpoint, prompt: Text("s3.example.com"))
-                    }
-                    TextField("Region", text: $region)
-                } header: {
-                    Text("Connection")
-                } footer: {
-                    if preset == .cloudflareR2 {
-                        Text(endpoint.isEmpty ? String(localized: "Endpoint is derived from the Account ID.") : endpoint)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                if preset.kind == .webdav {
+                    webdavConnectionSection
+                } else {
+                    s3ConnectionSections
                 }
 
                 Section {
-                    // Saved keys stay in the Keychain and aren't shown;
-                    // leaving both fields empty keeps them.
-                    TextField("Access Key ID", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
-                    SecureField(
-                        "Secret Access Key",
-                        text: $secretAccessKey,
-                        prompt: existing != nil ? Text("Unchanged") : nil
-                    )
-                } header: {
-                    Text("Credentials")
-                }
-
-                Section {
-                    TextField("Bucket", text: $bucket, prompt: Text("screenshots"))
+                    if preset.kind == .s3 {
+                        TextField("Bucket", text: $bucket, prompt: Text("screenshots"))
+                    }
                     TextField("Public Base URL", text: $publicBaseURL, prompt: Text("img.example.com"))
                 } header: {
-                    Text("Bucket")
+                    Text(preset.kind == .s3 ? LocalizedStringKey("Bucket") : LocalizedStringKey("Links"))
                 } footer: {
                     VStack(alignment: .leading, spacing: 4) {
                         if isPublicBaseURLInvalid {
@@ -188,7 +163,9 @@ struct DestinationFormView: View {
                                 .font(.caption)
                                 .foregroundStyle(.red)
                         }
-                        Text("The domain files are served from, for example a custom domain or CDN in front of the bucket.")
+                        Text(preset.kind == .s3
+                            ? String(localized: "The domain files are served from, for example a custom domain or CDN in front of the bucket.")
+                            : String(localized: "The web address this folder is served from. A file\u{2019}s path in the folder is added to it for its link."))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -252,7 +229,7 @@ struct DestinationFormView: View {
 
                 afterUploadSection
 
-                ConnectionTestSection(result: testResult, error: testError)
+                ConnectionTestSection(result: testResult, error: testError, kind: preset.kind)
             }
             .formStyle(.grouped)
             .onChange(of: endpoint) { connectionEdited() }
@@ -281,6 +258,76 @@ struct DestinationFormView: View {
             .padding()
         }
         .frame(width: 520, height: 580)
+    }
+
+    /// Endpoint, region and keys, for an S3 destination.
+    @ViewBuilder
+    private var s3ConnectionSections: some View {
+        Section {
+            if preset == .cloudflareR2 {
+                TextField("Account ID", text: $accountID)
+                    .onChange(of: accountID) { _, newValue in
+                        endpoint = DestinationConfig.deriveR2Endpoint(accountID: newValue)
+                    }
+            } else {
+                TextField("Endpoint", text: $endpoint, prompt: Text("s3.example.com"))
+            }
+            TextField("Region", text: $region)
+        } header: {
+            Text("Connection")
+        } footer: {
+            if preset == .cloudflareR2 {
+                Text(endpoint.isEmpty ? String(localized: "Endpoint is derived from the Account ID.") : endpoint)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+
+        Section {
+            // Saved keys stay in the Keychain and aren't shown;
+            // leaving both fields empty keeps them.
+            TextField("Access Key ID", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
+            SecureField(
+                "Secret Access Key",
+                text: $secretAccessKey,
+                prompt: existing != nil ? Text("Unchanged") : nil
+            )
+        } header: {
+            Text("Credentials")
+        }
+    }
+
+    /// The folder on a WebDAV server, with the user name and password that
+    /// go with every request (docs/storage-backends.md, "WebDAV").
+    private var webdavConnectionSection: some View {
+        Section {
+            TextField("Server URL", text: $endpoint, prompt: Text(verbatim: "https://cloud.example.com/remote.php/dav/files/me/aktar"))
+            // Saved ones stay in the Keychain and aren't shown; leaving
+            // both fields empty keeps them.
+            TextField("User Name", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
+            SecureField("Password", text: $secretAccessKey, prompt: existing != nil ? Text("Unchanged") : nil)
+        } header: {
+            Text("Server")
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                if let serverURLProblem {
+                    Text(serverURLProblem)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text("The address of the folder uploads go into, with its path. For Nextcloud and ownCloud: https://your-server/remote.php/dav/files/your-user-name/folder")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    /// Why the typed WebDAV Server URL can't be used, once there is one.
+    private var serverURLProblem: String? {
+        guard preset.kind == .webdav, !endpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return WebDAVBackend.problem(withServerURL: endpoint)
     }
 
     /// The public links' host when it's a domain of the user's own and the
@@ -782,7 +829,8 @@ struct DestinationFormView: View {
     }
 
     private var canTest: Bool {
-        !endpoint.isEmpty && !bucket.isEmpty && !accessKeyId.isEmpty && !secretAccessKey.isEmpty
+        !endpoint.isEmpty && (preset.kind != .s3 || !bucket.isEmpty) && serverURLProblem == nil
+            && !accessKeyId.isEmpty && !secretAccessKey.isEmpty
     }
 
     /// Typed but not an http(s) address with a host (and a valid port).
@@ -791,24 +839,27 @@ struct DestinationFormView: View {
     }
 
     private var canSave: Bool {
-        !name.isEmpty && !bucket.isEmpty && !endpoint.isEmpty && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
+        !name.isEmpty && (preset.kind != .s3 || !bucket.isEmpty) && !endpoint.isEmpty && serverURLProblem == nil
+            && !publicBaseURL.isEmpty && !isPublicBaseURLInvalid
             && thumbnailPrefixProblem == nil && useForProblem == nil && !HookListEditor.hasUnusableWebhook(hooks)
             && shortLinks.problem(hasSavedToken: savedShortLinkProvider != nil && savedShortLinkProvider == shortLinks.providerId) == nil
             && (existing != nil || (!accessKeyId.isEmpty && !secretAccessKey.isEmpty))
     }
 
     private func currentConfig() -> DestinationConfig {
-        DestinationConfig(
+        // Another kind than S3 keeps the S3 fields, empty (docs/storage-backends.md).
+        let isS3 = preset.kind == .s3
+        return DestinationConfig(
             id: destinationID,
             name: name,
             preset: preset,
             accountID: preset == .cloudflareR2 ? accountID : nil,
-            endpoint: endpoint,
-            region: region,
-            bucket: bucket,
+            endpoint: isS3 ? endpoint : endpoint.trimmingCharacters(in: .whitespacesAndNewlines),
+            region: isS3 ? region : "",
+            bucket: isS3 ? bucket : "",
             publicBaseURL: publicBaseURL,
             objectPathTemplate: objectPathTemplate,
-            forcePathStyle: forcePathStyle,
+            forcePathStyle: isS3 ? forcePathStyle : false,
             isDefault: existing?.isDefault ?? false,
             outputMode: outputMode,
             expiryDays: expiryDays,
@@ -828,7 +879,7 @@ struct DestinationFormView: View {
             encryption: encryption,
             // The CORS rule was set up for this bucket and these links.
             requestCorsOrigin: existing.flatMap { old in
-                Connection(old) == Connection(endpoint: endpoint, bucket: bucket, region: region)
+                isS3 && Connection(old) == Connection(endpoint: endpoint, bucket: bucket, region: region)
                     && old.publicBaseURL == publicBaseURL && old.temporaryLink == temporaryLink ? old.requestCorsOrigin : nil
             }
         )
@@ -882,7 +933,7 @@ struct DestinationFormView: View {
                 .foregroundStyle(.orange)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        if SharePages.isPathStyle(publicBaseURL: publicBaseURL, bucket: bucket) {
+        if SharePages.isPathStyle(publicBaseURL: publicBaseURL, bucket: preset.kind == .s3 ? bucket : "") {
             Label(
                 encrypted
                     ? String(localized: "Encrypted links need their own domain (or virtual-hosted URLs) to be safe here.")
@@ -974,7 +1025,10 @@ struct DestinationFormView: View {
         } else {
             credentials.shortLinkToken = nil
         }
-        if checkedExpiryRules, checkedConnection == Connection(config) {
+        if !config.capabilities.expiryRules {
+            // No lifecycle rules where the storage has none.
+            ExpiryRuleStore.shared.set(config.id, active: false)
+        } else if checkedExpiryRules, checkedConnection == Connection(config) {
             ExpiryRuleStore.shared.set(config.id, active: expiryRulesActive)
         } else if let existing, Connection(existing) == Connection(config), accessKeyId.isEmpty {
             // The saved bucket and key, back to what they were before any

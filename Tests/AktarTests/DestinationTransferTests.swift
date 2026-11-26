@@ -70,17 +70,101 @@ final class DestinationTransferTests: XCTestCase {
         }
     }
 
-    func testNewerVersion() {
+    /// The shared vectors with a 2 (in the envelope, and in `v`) were
+    /// "newer" until version 2 came for WebDAV (docs/storage-backends.md).
+    /// A receiver that knows version 2 reads S3 destinations in it too.
+    func testVersion2VectorsAreRead() throws {
         for url in [newerVersionURL, newerPayloadURL] {
+            let payload = try DestinationTransfer.open(url, code: code)
+            XCTAssertEqual(payload.destination.name, "Screenshots")
+            XCTAssertEqual(payload.destination.preset, .cloudflareR2)
+        }
+        XCTAssertNoThrow(try DestinationTransfer.envelope(from: newerVersionURL))
+    }
+
+    func testNewerVersion() throws {
+        let plaintext = try DestinationTransfer.encodePayload(.init(destination: Self.webdavDestination, credentials: Self.webdavCredentials, customTemplate: nil))
+        var root = try XCTUnwrap(JSONSerialization.jsonObject(with: plaintext) as? [String: Any])
+        root["v"] = 3
+        let newerJSON = try JSONSerialization.data(withJSONObject: root)
+        let salt = Data(repeating: 1, count: 16)
+        let nonce = Data(repeating: 2, count: 12)
+        let newerEnvelope = try DestinationTransfer.seal(plaintext: plaintext, code: sealCode, salt: salt, nonce: nonce, version: 3)
+        let newerPayload = try DestinationTransfer.seal(plaintext: newerJSON, code: sealCode, salt: salt, nonce: nonce, version: 2)
+        for url in [newerEnvelope, newerPayload] {
             XCTAssertThrowsError(try DestinationTransfer.open(url, code: code)) { error in
                 XCTAssertEqual(error as? DestinationTransferError, .newerVersion)
             }
         }
         // Turned away before a code is asked for.
-        XCTAssertThrowsError(try DestinationTransfer.envelope(from: newerVersionURL)) { error in
+        XCTAssertThrowsError(try DestinationTransfer.envelope(from: newerEnvelope)) { error in
             XCTAssertEqual(error as? DestinationTransferError, .newerVersion)
         }
     }
+
+    func testWebDAVTravelsAsVersion2() throws {
+        let link = try DestinationTransfer.seal(.init(destination: Self.webdavDestination, credentials: Self.webdavCredentials, customTemplate: nil), code: sealCode)
+        let envelope = try DestinationTransfer.envelope(from: link)
+        XCTAssertEqual(envelope.first, 2)
+        let plaintext = try DestinationTransfer.encodePayload(.init(destination: Self.webdavDestination, credentials: Self.webdavCredentials, customTemplate: nil))
+        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: plaintext) as? [String: Any])
+        XCTAssertEqual(root["v"] as? Int, 2)
+        let sent = try XCTUnwrap(root["destination"] as? [String: Any])
+        XCTAssertEqual(sent["preset"] as? String, "webdav")
+        XCTAssertEqual(sent["bucket"] as? String, "")
+        XCTAssertEqual(sent["region"] as? String, "")
+
+        let payload = try DestinationTransfer.open(link, code: code)
+        var expected = Self.webdavDestination
+        expected.isDefault = false
+        XCTAssertEqual(payload.destination, expected)
+        XCTAssertEqual(payload.destination.kind, .webdav)
+        XCTAssertEqual(payload.credentials.accessKeyId, "me")
+        XCTAssertEqual(payload.credentials.secretAccessKey, "app-password")
+    }
+
+    func testS3StaysVersion1() throws {
+        let s3 = try DestinationTransfer.open(fullURL, code: code)
+        let link = try DestinationTransfer.seal(s3, code: sealCode)
+        XCTAssertEqual(try DestinationTransfer.envelope(from: link).first, 1)
+        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: DestinationTransfer.encodePayload(s3)) as? [String: Any])
+        XCTAssertEqual(root["v"] as? Int, 1)
+    }
+
+    /// Only S3 needs a bucket: a WebDAV destination comes with an empty one,
+    /// or none.
+    func testWebDAVNeedsNoBucket() throws {
+        for bucket in ["", nil] as [String?] {
+            var destination: [String: Any] = ["id": "0e984725-c51c-4bf4-9960-e1c80e27aba0", "name": "A", "preset": "webdav", "endpoint": "https://dav.example.com/files", "publicBaseURL": "https://files.example.com"]
+            destination["bucket"] = bucket
+            let object: [String: Any] = ["v": 2, "destination": destination, "credentials": ["accessKeyId": "a", "secretAccessKey": "s"]]
+            let payload = try DestinationTransfer.decodePayload(JSONSerialization.data(withJSONObject: object))
+            XCTAssertEqual(payload.destination.bucket, "")
+            XCTAssertEqual(payload.destination.region, "")
+            XCTAssertFalse(payload.destination.forcePathStyle)
+        }
+    }
+
+    /// `seal` takes the code as `generateCode` makes it, without hyphens.
+    private var sealCode: String { DestinationTransfer.normalizeCode(code)! }
+
+    private static let webdavDestination = DestinationConfig(
+        id: UUID(uuidString: "3F2504E0-4F89-41D3-9A0C-0305E82C3301")!,
+        name: "Nextcloud",
+        preset: .webdav,
+        accountID: nil,
+        endpoint: "https://cloud.example.com/remote.php/dav/files/me/aktar",
+        region: "",
+        bucket: "",
+        publicBaseURL: "https://files.example.com/aktar",
+        objectPathTemplate: "{year}/{short}.{ext}",
+        forcePathStyle: false,
+        isDefault: true,
+        shortCache: true,
+        sharePage: true
+    )
+
+    private static let webdavCredentials = StorageCredentials(accessKeyId: "me", secretAccessKey: "app-password", sessionToken: nil)
 
     func testNotAktarTransfer() {
         var inputs = ["https://example.com", "aktar://import#", "aktar://import#AAAA", "hello"]

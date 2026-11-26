@@ -133,7 +133,7 @@ struct LibraryView: View {
                         } icon: {
                             Image(systemName: destination.preset.symbolName)
                         }
-                        .help(destination.bucket)
+                        .help(destination.storageLocation)
                         .tag(LibrarySource.bucket(destination.id))
                     }
                 }

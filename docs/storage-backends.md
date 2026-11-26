@@ -107,3 +107,75 @@ a case there.
   keep working for them.
 - Local API: `DestinationDTO` gains `kind` (`s3`, `webdav`, `sftp`).
   Endpoints a kind can't serve answer 409 with a message saying so.
+
+## WebDAV (phase 2)
+
+Preset `webdav`, display name "WebDAV". It works with any WebDAV server:
+Nextcloud and ownCloud (`https://host/remote.php/dav/files/<user>/<folder>`),
+Synology, Hetzner Storage Box, Apache `mod_dav`, nginx with the DAV module,
+`rclone serve webdav`.
+
+Fields in the form: **Server URL** (`endpoint`: the folder uploads go
+into, with its path), **User name** and **Password** (`accessKeyId`,
+`secretAccessKey`), **Public Base URL** and the path template as for S3.
+Bucket, region, access keys and path style are hidden. `https://` is
+required except for `localhost`, `127.0.0.1` and `::1`.
+
+Requests, with Basic authentication (`Authorization: Basic`) on each:
+
+| operation | request |
+|---|---|
+| upload | `MKCOL` each missing parent folder (201, or 405 when it exists), then `PUT <endpoint>/<key>` streamed with `Content-Type` and, where the destination sets it, `Cache-Control` |
+| put (pages, thumbnails) | same as upload, from memory |
+| get / download | `GET` |
+| delete | `DELETE` (404 counts as done) |
+| exists / info | `HEAD` (200: size from `Content-Length`, date from `Last-Modified`; 404: missing) |
+| list | `PROPFIND` with `Depth: 1` on the folder, asking for `resourcetype`, `getcontentlength`, `getlastmodified`; the folder's own entry is left out; no continuation (one page) |
+| listRecursively | `list` on each subfolder in turn (servers often refuse `Depth: infinity`) |
+| copy | `COPY` with `Destination: <absolute URL>` and `Overwrite: T`, after `MKCOL` of the target's parents |
+| createFolder | `MKCOL` with parents |
+| publicURL | `publicBaseURL` + key, exactly as for S3 |
+
+Keys map to URLs by percent-encoding each `/`-separated segment (RFC 3986
+unreserved characters stay). Hrefs in a `PROPFIND` answer can be absolute
+URLs or absolute paths, encoded or not: decode them, strip the endpoint's
+path, and the rest is the key. A trailing `/` or a `collection`
+resourcetype marks a folder.
+
+Redirects are not followed for `PUT`, `MKCOL`, `COPY`, `DELETE` (a 3xx is
+an error that names the new location), so credentials never go to another
+host.
+
+**Test Connection** for WebDAV: `PROPFIND Depth: 0` on the endpoint (401
+means wrong user name or password, 404 means the folder doesn't exist,
+other errors as they come), then the same test upload, public link check
+and delete as for S3, with the same result lines.
+
+Errors have their own WebDAV wording, since the S3 messages talk about
+access keys and buckets: 401 is "wrong user name or password", 403 "not
+allowed to write here", 404 on the endpoint "folder not found", 507 "the
+server is out of space"; other statuses are shown with their code. 5xx
+(except 507) and 429 are retried with the same backoff as S3.
+
+Capabilities for WebDAV: as the table above. Delete after, temporary
+links and Request Files are hidden. Files of any size go in one streamed
+`PUT` (no 64 MB limit, no resume).
+
+**QR transfer**: a WebDAV destination is sent with format version 2:
+both the envelope's first byte and the payload's `v` are 2, so an older
+app turns the link down before asking for the code. The AAD stays
+`aktar-transfer-v1`. The payload is the same JSON; `bucket` and `region`
+are empty or missing. S3 destinations keep version 1, and a receiver that
+knows version 2 accepts both.
+
+**Local API**: `DestinationDTO.kind` (`s3`, `webdav`) next to `provider`
+(the preset, `webdav`).
+
+New UI strings ("WebDAV", "Server URL", "User name", "Password",
+"Folder not found", the https rule, the out of space message and any
+other) are added in all 17 languages (en, tr, de, fr, es, pt-BR, ja,
+zh-Hans, zh-Hant, ko, it, nl, pl, ru, uk, id, vi).
+
+Testing: `rclone serve webdav <dir> --addr 127.0.0.1:<port> --user u
+--pass p` serves a folder over WebDAV; integration tests run against it
+the way the S3 tests run against MinIO or moto.

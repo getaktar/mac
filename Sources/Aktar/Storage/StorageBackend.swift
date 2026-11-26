@@ -14,6 +14,8 @@ extension ProviderPreset {
         switch self {
         case .cloudflareR2, .amazonS3, .minIO, .backblazeB2, .digitalOceanSpaces, .customS3:
             return .s3
+        case .webdav:
+            return .webdav
         }
     }
 }
@@ -84,6 +86,28 @@ struct StorageCapabilities: Equatable, Sendable {
 extension DestinationConfig {
     var kind: StorageKind { preset.kind }
     var capabilities: StorageCapabilities { StorageCapabilities(preset: preset) }
+
+    /// What the storage is called where S3 shows the bucket's name (the
+    /// bucket browser's root, a destination's row): the bucket, or for
+    /// another kind the server folder's own name (the host for its root).
+    var storageRootName: String {
+        guard kind != .s3 else { return bucket }
+        let trimmed = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let components = URLComponents(string: trimmed.contains("://") ? trimmed : "https://\(trimmed)") else { return trimmed }
+        let last = components.percentEncodedPath.split(separator: "/").last.map(String.init)
+        return (last?.removingPercentEncoding ?? last) ?? components.host ?? trimmed
+    }
+
+    /// Where uploads go, for a destination's row and an import's review:
+    /// the bucket for S3, the server and folder (without https://) for
+    /// another kind.
+    var storageLocation: String {
+        guard kind != .s3 else { return bucket }
+        var location = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let range = location.range(of: "://") { location = String(location[range.upperBound...]) }
+        while location.hasSuffix("/") { location.removeLast() }
+        return location.removingPercentEncoding ?? location
+    }
 }
 
 /// The operations every kind of storage has (docs/storage-backends.md,
@@ -175,8 +199,10 @@ enum StorageBackends {
         switch config.kind {
         case .s3:
             return S3Provider(config: config, credentials: credentials)
-        case .webdav, .sftp:
-            // No preset has these kinds yet (phase 2 adds WebDAV).
+        case .webdav:
+            return WebDAVBackend(config: config, credentials: credentials)
+        case .sftp:
+            // No preset has this kind yet (phase 3 adds SFTP).
             fatalError("No storage backend for \(config.kind.rawValue) destinations yet")
         }
     }
@@ -196,6 +222,6 @@ extension StorageError {
     /// What a destination's kind can't do; the control asking for it is
     /// normally hidden, so this is only reached by a stale setting.
     static var unsupported: StorageError {
-        .unknown("This destination\u{2019}s kind of storage can\u{2019}t do this.")
+        .unknown(String(localized: "This destination\u{2019}s kind of storage can\u{2019}t do this."))
     }
 }
