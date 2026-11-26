@@ -120,3 +120,45 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
         "https://\(accountID).r2.cloudflarestorage.com"
     }
 }
+
+extension DestinationConfig {
+    /// The fields every destination has must be there; a setting this
+    /// version can't read (a mode a newer one added, say) is off rather than
+    /// a destination that can't be read. See `DestinationsFile`.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        preset = try container.decode(ProviderPreset.self, forKey: .preset)
+        endpoint = try container.decode(String.self, forKey: .endpoint)
+        region = try container.decode(String.self, forKey: .region)
+        bucket = try container.decode(String.self, forKey: .bucket)
+        publicBaseURL = try container.decode(String.self, forKey: .publicBaseURL)
+        objectPathTemplate = try container.decode(String.self, forKey: .objectPathTemplate)
+        forcePathStyle = try container.decode(Bool.self, forKey: .forcePathStyle)
+        isDefault = container.lenient(Bool.self, .isDefault) ?? false
+        accountID = container.lenient(String.self, .accountID)
+        outputMode = container.lenient(OutputMode.self, .outputMode)
+        expiryDays = container.lenient(Int.self, .expiryDays)
+        temporaryLink = container.lenient(TemporaryLinkDuration.self, .temporaryLink)
+        imageMetadata = container.lenient(ImageMetadataPolicy.self, .imageMetadata)
+        folderUpload = container.lenient(FolderUploadMode.self, .folderUpload)
+        imageProcessing = container.lenient(ImageProcessing.self, .imageProcessing)
+        thumbnails = container.lenient(ThumbnailMode.self, .thumbnails)
+        thumbnailPrefix = container.lenient(String.self, .thumbnailPrefix)
+        useFor = container.lenient(FileRouting.self, .useFor)
+        shortCache = container.lenient(Bool.self, .shortCache)
+        cloudflareZoneId = container.lenient(String.self, .cloudflareZoneId)
+        hooks = container.lenient([WatchHook].self, .hooks)
+        shortLinks = container.lenient(ShortLinkSettings.self, .shortLinks)
+        sharePage = container.lenient(Bool.self, .sharePage)
+        encryption = container.lenient(ShareEncryption.Mode.self, .encryption)
+        requestCorsOrigin = container.lenient(String.self, .requestCorsOrigin)
+    }
+}
+
+private extension KeyedDecodingContainer {
+    func lenient<T: Decodable>(_ type: T.Type, _ key: Key) -> T? {
+        (try? decodeIfPresent(type, forKey: key)) ?? nil
+    }
+}

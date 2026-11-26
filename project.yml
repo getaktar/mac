@@ -9,8 +9,8 @@ options:
 # One version for the app and its Share extension, which must match.
 settings:
   base:
-    MARKETING_VERSION: "0.22.0"
-    CURRENT_PROJECT_VERSION: "30"
+    MARKETING_VERSION: "0.22.1"
+    CURRENT_PROJECT_VERSION: "31"
 
 packages:
   Soto:
@@ -174,6 +174,7 @@ targets:
       - path: Sources/Aktar/Upload/ContentHasher.swift
       - path: Sources/Aktar/Transfer/DestinationTransfer.swift
       - path: Sources/Aktar/Storage/ProviderConfig.swift
+      - path: Sources/Aktar/Storage/DestinationsFile.swift
       - path: Sources/Aktar/Security/KeychainService.swift
       - path: Sources/Aktar/Output/OutputFormatter.swift
       - path: Sources/Aktar/Upload/TemporaryLinkDuration.swift

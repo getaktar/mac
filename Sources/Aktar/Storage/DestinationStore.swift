@@ -12,6 +12,9 @@ final class DestinationStore {
     /// this (Settings shows the flag), and `syncDefaultFlags()` keeps the
     /// two in step after every change.
     private var defaultID: UUID?
+    /// Destinations this version can't read, kept for the next save; see
+    /// `DestinationsFile`.
+    private var unreadable: [Any] = []
 
     private let fileURL: URL
     /// Told after a saved destination changes, with what it was before.
@@ -103,22 +106,24 @@ final class DestinationStore {
         }
     }
 
-    private struct Wrapper: Codable {
-        var destinations: [DestinationConfig]
-        var defaultID: UUID?
-    }
-
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let wrapper = try? JSONDecoder().decode(Wrapper.self, from: data) else { return }
-        destinations = wrapper.destinations
-        defaultID = wrapper.defaultID
+        guard let data = try? Data(contentsOf: fileURL) else { return }
+        guard let contents = DestinationsFile.decode(data) else {
+            // Not a destinations file at all: keep a copy, since the next
+            // save replaces it.
+            let copy = fileURL.deletingLastPathComponent().appendingPathComponent("destinations.unreadable.json")
+            try? data.write(to: copy, options: .atomic)
+            return
+        }
+        destinations = contents.destinations
+        defaultID = contents.defaultID
+        unreadable = contents.unreadable
         syncDefaultFlags()
     }
 
     private func save() {
-        let wrapper = Wrapper(destinations: destinations, defaultID: defaultID)
-        guard let data = try? JSONEncoder().encode(wrapper) else { return }
+        let contents = DestinationsFile.Contents(destinations: destinations, defaultID: defaultID, unreadable: unreadable)
+        guard let data = DestinationsFile.encode(contents) else { return }
         try? data.write(to: fileURL, options: .atomic)
     }
 }
