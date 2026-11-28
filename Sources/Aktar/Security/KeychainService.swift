@@ -11,6 +11,9 @@ struct StorageCredentials: Codable {
     /// The API key, signature or token of the destination's link
     /// shortener (`DestinationConfig.shortLinks`).
     var shortLinkToken: String? = nil
+    /// For an SFTP destination whose `secretAccessKey` is an encrypted
+    /// private key: the key's passphrase.
+    var keyPassphrase: String? = nil
 }
 
 enum KeychainError: Error, LocalizedError {

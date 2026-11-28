@@ -24,6 +24,8 @@ struct ShareXImportView: View {
         var found: ShareXConfigImport.Destination
         var include: Bool
         var secret = ""
+        /// SFTP: a passphrase typed for the chosen key.
+        var passphrase = ""
         var duplicate: Bool
         var error: String?
         var savedID: UUID?
@@ -88,7 +90,7 @@ struct ShareXImportView: View {
     private var reviewSections: some View {
         if rows.isEmpty {
             Section {
-                Text("No Amazon S3 or Backblaze B2 uploader was found in these settings.")
+                Text("ShareX has no S3, Backblaze B2, SFTP or ownCloud uploaders set up.")
                     .foregroundStyle(.secondary)
             }
         }
@@ -102,8 +104,18 @@ struct ShareXImportView: View {
                     Text("Already in Aktar").font(.caption).foregroundStyle(.secondary)
                 }
                 LabeledContent("Provider", value: row.found.preset.displayName)
-                LabeledContent("Bucket", value: row.found.bucket)
-                if row.found.kind == .b2, row.found.endpoint.isEmpty {
+                switch row.found.kind {
+                case .s3, .b2:
+                    LabeledContent("Bucket", value: row.found.bucket)
+                case .sftp:
+                    LabeledContent("Folder", value: row.found.bucket.isEmpty ? String(localized: "Login folder") : row.found.bucket)
+                case .webdav:
+                    EmptyView()
+                }
+                if row.found.kind == .sftp || row.found.kind == .webdav {
+                    LabeledContent(row.found.kind == .sftp ? "Server" : "Server URL", value: row.found.endpoint)
+                    LabeledContent("User Name", value: row.found.accessKeyID)
+                } else if row.found.kind == .b2, row.found.endpoint.isEmpty {
                     TextField("Endpoint", text: $row.found.endpoint, prompt: Text(verbatim: "https://s3.us-west-004.backblazeb2.com"))
                     Text("Left empty, Aktar asks Backblaze for it with the key below.")
                         .font(.caption).foregroundStyle(.secondary)
@@ -112,10 +124,29 @@ struct ShareXImportView: View {
                 }
                 TextField("Public Base URL", text: $row.found.publicBaseURL, prompt: Text(row.found.kind == .b2 ? "Found with the key" : "img.example.com"))
                 LabeledContent("Object Path", value: row.found.objectPathTemplate)
-                if row.found.secretKey == nil {
-                    SecureField(row.found.kind == .b2 ? "Application Key" : "Secret Access Key", text: $row.secret)
+                if row.found.keyFile != nil {
+                    LabeledContent("Private Key") {
+                        HStack(spacing: 8) {
+                            Text(row.secret.isEmpty ? String(localized: "None") : DestinationFormView.keyDescription(row.secret))
+                                .foregroundStyle(.secondary)
+                            Button("Choose Key File\u{2026}") {
+                                if let text = SSHKeyFilePanel.choose() { row.secret = text.trimmingCharacters(in: .whitespacesAndNewlines) }
+                            }
+                        }
+                    }
+                    if row.found.keyPassphrase == nil {
+                        SecureField("Key Passphrase", text: $row.passphrase, prompt: Text("Only for an encrypted key."))
+                    }
+                } else if row.found.secretKey == nil {
+                    switch row.found.kind {
+                    case .b2: SecureField("Application Key", text: $row.secret)
+                    case .s3: SecureField("Secret Access Key", text: $row.secret)
+                    case .sftp, .webdav: SecureField("Password", text: $row.secret)
+                    }
                     if row.found.secretIsEncrypted {
-                        Text("ShareX encrypted this key for Windows. Paste it from your provider, or import on the Windows PC and use Share to Another Device.")
+                        Text(row.found.kind == .s3 || row.found.kind == .b2
+                            ? String(localized: "ShareX encrypted this key for Windows. Paste it from your provider, or import on the Windows PC and use Share to Another Device.")
+                            : String(localized: "ShareX encrypted this password for Windows. Type it here, or import on the Windows PC and use Share to Another Device."))
                             .font(.caption).foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -174,7 +205,9 @@ struct ShareXImportView: View {
                     Label(error, systemImage: "xmark.circle.fill").foregroundStyle(.red)
                 } else if let test = row.test {
                     Label(
-                        test.writable ? String(localized: "Uploads work") : String(localized: "This key can\u{2019}t upload files"),
+                        test.writable ? String(localized: "Uploads work")
+                            : row.found.kind == .sftp || row.found.kind == .webdav ? String(localized: "This account can\u{2019}t upload files")
+                            : String(localized: "This key can\u{2019}t upload files"),
                         systemImage: test.writable ? "checkmark.circle" : "xmark.circle.fill"
                     )
                     .foregroundStyle(test.writable ? Color.secondary : Color.red)
@@ -223,12 +256,40 @@ struct ShareXImportView: View {
         // Everything is checked first, so nothing is saved halfway.
         for index in rows.indices where rows[index].include {
             rows[index].error = nil
-            let secret = rows[index].found.secretKey ?? rows[index].secret.trimmingCharacters(in: .whitespacesAndNewlines)
+            let found = rows[index].found
+            let secret = found.secretKey ?? rows[index].secret.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !secret.isEmpty else {
-                rows[index].error = String(localized: "Enter the secret key.")
+                switch found.kind {
+                case .s3, .b2: rows[index].error = String(localized: "Enter the secret key.")
+                case .sftp: rows[index].error = found.keyFile != nil ? String(localized: "Choose the private key.") : String(localized: "Enter the password.")
+                case .webdav: rows[index].error = String(localized: "Enter the password.")
+                }
                 continue
             }
             rows[index].found.secretKey = secret
+            if found.kind == .sftp {
+                if let problem = SFTPAddress.problem(with: found.endpoint) {
+                    rows[index].error = problem
+                    continue
+                }
+                if found.keyFile != nil {
+                    let passphrase = found.keyPassphrase ?? rows[index].passphrase
+                    rows[index].found.keyPassphrase = passphrase.isEmpty ? nil : passphrase
+                    do {
+                        guard SSHPrivateKey.looksLikeKey(secret) else {
+                            throw StorageError.unknown(String(localized: "This file isn\u{2019}t a private key. Pick the key itself (such as id_ed25519), not the .pub file."))
+                        }
+                        _ = try SSHPrivateKey.parse(secret, passphrase: rows[index].found.keyPassphrase)
+                    } catch {
+                        rows[index].error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                        continue
+                    }
+                }
+            }
+            if found.kind == .webdav, let problem = WebDAVBackend.problem(withServerURL: found.endpoint) {
+                rows[index].error = problem
+                continue
+            }
             if rows[index].found.kind == .b2, rows[index].found.endpoint.isEmpty {
                 do {
                     rows[index].found = try await ShareXConfigImport.authorizeB2(rows[index].found)
@@ -248,7 +309,10 @@ struct ShareXImportView: View {
         let store = appState.destinationStore
         for index in rows.indices where rows[index].include {
             let config = rows[index].found.config()
-            let credentials = StorageCredentials(accessKeyId: rows[index].found.accessKeyID, secretAccessKey: rows[index].found.secretKey ?? "", sessionToken: nil)
+            var credentials = StorageCredentials(accessKeyId: rows[index].found.accessKeyID, secretAccessKey: rows[index].found.secretKey ?? "", sessionToken: nil)
+            if rows[index].found.kind == .sftp, rows[index].found.keyFile != nil {
+                credentials.keyPassphrase = rows[index].found.keyPassphrase
+            }
             try? KeychainService.save(credentials, for: config.id)
             ExpiryRuleStore.shared.set(config.id, active: false)
             // The first one becomes the default only when there was none.

@@ -11,6 +11,9 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
     /// don't know this preset, so they keep such a destination unread
     /// instead of treating it as S3.
     case webdav
+    /// Not S3: a folder on any SSH server with SFTP (docs/storage-backends.md,
+    /// "SFTP"). Unknown to versions before 0.24.0, which keep it unread.
+    case sftp
 
     var id: String { rawValue }
 
@@ -23,6 +26,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .digitalOceanSpaces: return "DigitalOcean Spaces"
         case .customS3: return String(localized: "Other S3-Compatible")
         case .webdav: return "WebDAV"
+        case .sftp: return "SFTP"
         }
     }
 
@@ -31,7 +35,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .cloudflareR2: return "auto"
         case .amazonS3: return "us-east-1"
         // WebDAV has no regions; the field stays empty in the JSON.
-        case .webdav: return ""
+        case .webdav, .sftp: return ""
         default: return "auto"
         }
     }
@@ -50,6 +54,7 @@ enum ProviderPreset: String, Codable, CaseIterable, Identifiable {
         case .digitalOceanSpaces: return "circle.hexagongrid.fill"
         case .customS3: return "cylinder.split.1x2.fill"
         case .webdav: return "externaldrive.connected.to.line.below.fill"
+        case .sftp: return "terminal.fill"
         }
     }
 }
@@ -116,6 +121,10 @@ struct DestinationConfig: Codable, Identifiable, Hashable {
     /// bucket; set again when it changes or a request fails. Not
     /// transferred.
     var requestCorsOrigin: String?
+    /// An SFTP server's public key in OpenSSH format (`ssh-ed25519 AAAA...`),
+    /// trusted on first use: a connection that sees another key is refused
+    /// before signing in. Not a secret; it travels in QR transfers.
+    var sshHostKey: String?
 
     /// The path template of a new destination. Saved ones keep theirs.
     static let defaultObjectPathTemplate = "{year}/{month}/{short}.{ext}"
@@ -162,6 +171,7 @@ extension DestinationConfig {
         sharePage = container.lenient(Bool.self, .sharePage)
         encryption = container.lenient(ShareEncryption.Mode.self, .encryption)
         requestCorsOrigin = container.lenient(String.self, .requestCorsOrigin)
+        sshHostKey = container.lenient(String.self, .sshHostKey)
     }
 }
 

@@ -309,10 +309,22 @@ final class BucketBrowserModel {
         return try await signer.temporaryURL(for: key, expiresIn: seconds)
     }
 
-    /// Where previews and Open load from: a presigned link, or the public
-    /// one for a kind of storage without them (WebDAV).
+    /// Where previews and Open load from: a presigned link, or for a kind
+    /// of storage without them (WebDAV, SFTP) the public one, or a copy
+    /// downloaded through the destination when that doesn't load.
     func previewURL(for key: String) async -> URL? {
-        guard destination.capabilities.temporaryLinks else { return publicURL(for: key) }
+        guard destination.capabilities.temporaryLinks else {
+            let object = objects.first { $0.key == key }
+            let name = (key as NSString).lastPathComponent
+            return await BackendPreview.url(
+                for: key,
+                destination: destination,
+                publicURL: publicURL(for: key),
+                size: object?.size,
+                modified: object?.lastModified,
+                media: MediaPreview.canPlay(filename: name)
+            )
+        }
         if let cached = temporaryURLs[key], cached.expires > .now { return cached.url }
         guard let url = try? await temporaryURL(for: key, validFor: 3600) else { return nil }
         temporaryURLs[key] = (url, Date.now.addingTimeInterval(3000))
@@ -450,7 +462,14 @@ final class BucketBrowserModel {
             let prefixes = thumbnailPrefixes()
             let records = repository.records(key: object.key, destinationID: destination.id)
             let plan = shortLinks.movePlan(key: object.key, destination: destination, records: records)
-            try await storage.copy(from: object.key, to: newKey)
+            // A rename on the server where there is one (SFTP), unless
+            // short links may have to keep pointing at the old file.
+            let renames = destination.capabilities.rename && plan != .update
+            if renames {
+                try await storage.move(from: object.key, to: newKey)
+            } else {
+                try await storage.copy(from: object.key, to: newKey)
+            }
             await BucketThumbnails.copy(from: object.key, to: newKey, prefixes: prefixes, provider: storage)
             var keepsOld = false
             if plan == .update, let newURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey) {
@@ -458,7 +477,7 @@ final class BucketBrowserModel {
             }
             if !keepsOld {
                 try await BucketThumbnails.delete(for: object.key, prefixes: prefixes, provider: storage)
-                try await storage.delete(objectKey: object.key)
+                if !renames { try await storage.delete(objectKey: object.key) }
                 RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: object.key)
             }
             if plan == .warn { shortLinks.orphanLinks(of: records) }

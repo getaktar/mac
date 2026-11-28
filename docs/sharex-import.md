@@ -1,7 +1,8 @@
 # Import from ShareX
 
 Moving from ShareX should take one click: Aktar reads ShareX's own settings
-and turns its S3 and Backblaze B2 uploaders into Aktar destinations, its
+and turns its S3 and Backblaze B2 uploaders, its SFTP accounts and its
+ownCloud / Nextcloud uploader (as WebDAV) into Aktar destinations, its
 URL-shortener custom uploaders into short link settings (short-links.md,
 ".sxcu"), and, on Windows, its upload history into Aktar's history.
 
@@ -14,7 +15,9 @@ URL-shortener custom uploaders into short link settings (short-links.md,
 Source of truth for ShareX's formats: the ShareX repo, `develop` branch
 (checked 2026-11-09): `ShareX.UploadersLib/FileUploaders/AmazonS3Settings.cs`,
 `AmazonS3.cs` (`GetUploadPath`, `GetObjectBaseURL`, `GetRegion`),
-`UploadersConfig.cs` (B2 fields), `ShareX.HelpersLib/Settings/DPAPIEncryptedStringValueProvider.cs`,
+`UploadersConfig.cs` (B2 and ownCloud fields), `FileUploaders/FTPAccount.cs`,
+`FileUploaders/SFTP.cs`, `FileUploaders/OwnCloud.cs` (checked 2026-11-27),
+`ShareX.HelpersLib/Settings/DPAPIEncryptedStringValueProvider.cs`,
 `ShareX.HistoryLib/Managers/HistoryManagerSQLite.cs`,
 `ShareX/Infrastructure/AppPaths.cs`, `PersonalPathManager.cs`, `ShareX/SettingManager.cs`.
 
@@ -94,6 +97,42 @@ empty and ask for it in the review. Public base URL: `B2CustomUrl` when
 `apiInfo.storageApi.downloadUrl`. Path template from `B2UploadPath` like
 `ObjectPrefix`. Preset Backblaze B2, name "ShareX: <bucket> (B2)".
 
+### SFTP accounts (`FTPAccountList`, `FTPAccount`)
+
+Each account whose `Protocol` is `SFTP` (written as a name, since
+ShareX's settings use a string enum converter; 2 in a numbered file)
+becomes an SFTP destination. `FTP` and `FTPS` accounts are listed as not
+imported ("Plain FTP and FTPS aren't supported. Use SFTP.").
+
+| ShareX | Aktar |
+|---|---|
+| `Host`, `Port` (FTPAccount's default is 21, kept as it is) | Server: `host`, or `host:port` when the port isn't 22 (`[v6]:port` for an IPv6 address) |
+| `Username` | User name |
+| `Password` (`[JsonEncrypt]`) | Password, when `Keypath` is empty |
+| `Keypath` (a file on the Windows PC) | Private key: the review asks for the key file on the Mac ("Choose Key File..."); the desktop app reads it when it's there |
+| `Passphrase` (`[JsonEncrypt]`) | Key Passphrase |
+| `SubFolderPath` (`%host` replaced; relative to the login folder unless it starts with `/`) | its fixed part (the folders before the first one with a `%` token) is the Folder; the rest is the path template, as for `ObjectPrefix` |
+| `HttpHomePath` (`%host` replaced) + `BrowserProtocol` | Public Base URL: the home path with its own scheme when it has one, else `BrowserProtocol`'s; empty home path: the host without a leading `ftp.`, as ShareX does. With `HttpHomePathAutoAddSubFolderPath` (default on), the Folder's fixed part is added to it. ShareX syntax (`$`, `{`, `%`, `?`) leaves it empty for the review |
+| `HttpHomePathAutoAddSubFolderPath` off | the link has no sub folder, so files go straight into the fixed part and the template is `{filename}.{ext}`; dated folders are mentioned as dropped |
+| `HttpHomePathNoExtension` | ignored (Aktar keeps extensions); mentioned |
+| `IsActive`, `FTPSEncryption`, `FTPSCertificateLocation` | ignored |
+
+Name: "ShareX: <Name>", or the host when the name is ShareX's default
+"New account". The host key isn't in ShareX's settings: it's trusted on
+the first connection (the import's Test Connection).
+
+### ownCloud / Nextcloud (`OwnCloudHost`, `OwnCloudUsername`, `OwnCloudPassword`, `OwnCloudPath`)
+
+Imported as a WebDAV destination when the host and user name are set.
+ShareX uploads to `<host>/remote.php/webdav/<path>` (OwnCloud.cs; `https://`
+added to a host without a scheme, as `URLHelpers.FixPrefix` does), so that's
+the Server URL. ShareX's links are share links it makes for each file
+through the OCS API (`OwnCloudCreateShare`, `OwnCloudDirectLink`, expiry),
+which Aktar doesn't make: the Public Base URL is left empty with a note,
+and the review asks for the web address the folder is served from. An
+`http://` host (other than this Mac) breaks the WebDAV https rule, and the
+review says so. Name: "ShareX: <host> (Nextcloud)".
+
 ### Path template
 
 ShareX's key is `<ObjectPrefix parsed>/<file name>`. Aktar's template is the
@@ -141,8 +180,9 @@ their names.
 ### Review
 
 One sheet listing what was found: each destination (name, provider, bucket,
-public URL, template, with a checkbox, on by default), each shortener, the
-history count (Windows), and the skipped items with a reason (FTP, Imgur,
+or server and folder, public URL, template, with a checkbox, on by
+default), each shortener, the history count (Windows), and the skipped
+items with a reason (FTP and FTPS accounts, Imgur,
 Google Drive, custom file uploaders, unrepresentable templates). Importing
 runs Test Connection for each new destination right away (as the QR import
 does) and marks failures. Nothing is imported twice: a destination with the
@@ -203,8 +243,14 @@ are counted as skipped.
   listed as skipped with that reason.
 - "Already in Aktar": same bucket and access key, and the same endpoint
   (for B2, whose endpoint isn't known yet, the bucket and key decide).
-- Skipped uploaders listed: FTP accounts, Imgur, Google Drive, Dropbox,
+- Skipped uploaders listed: FTP and FTPS accounts (each as "FTP account
+  <name>"), Imgur, Google Drive, Dropbox,
   OneDrive, Box, Google Cloud Storage, Azure Storage, Flickr, Photobucket
   (when their settings are filled in), custom file uploaders.
 - `.sxb`: a ZIP read in place; `UploadersConfig.json` at its root, stored or
   deflated; at most 5 MB.
+- SFTP with a key file (Mac): the review shows ShareX's key path and has
+  "Choose Key File..." and Key Passphrase (unless the file has the
+  passphrase in plain text); the key is checked (type, passphrase) before
+  anything is saved. A password or passphrase ShareX encrypted for Windows
+  is typed in, as for S3 keys.

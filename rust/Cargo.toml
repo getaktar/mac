@@ -1,0 +1,22 @@
+# The Rust side of the Mac app: SFTP destinations.
+#
+# sftp-core is an exact copy of crates/sftp-core in getaktar/desktop, the
+# source of truth (scripts/sync-sftp-core.sh copies it and checks it). Don't
+# edit it here. aktar-sftp-ffi wraps it for Swift with UniFFI, and
+# scripts/build-sftp-core.sh builds it and the Swift bindings into
+# build/sftp-core, which Xcode links (see project.yml).
+[workspace]
+resolver = "2"
+members = ["sftp-core", "aktar-sftp-ffi", "uniffi-bindgen"]
+
+# The static library linked into Aktar: small, with everything inlined
+# across crates. Panics stay unwinding: UniFFI turns them into errors.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+debug = false
+# Nothing to strip without debug info, and stripping (cargo's default
+# "debuginfo" here) breaks proc-macro libraries with the strip of Xcode 27,
+# whose metadata rustc then can't read. Xcode strips the app itself.
+strip = "none"

@@ -65,8 +65,13 @@ link   = "aktar://import#" + base64url(bytes)   (RFC 4648 URL alphabet, no paddi
   (`off` / `local` / `bucket`), `thumbnailPrefix` (see docs/thumbnails.md),
   `useFor` (`{kinds, extensions}`), `shortCache`, `cloudflareZoneId`, `hooks`
   (`[{kind, target, enabled}]`; see docs/destination-automation.md),
-  `shortLinks` (the short link settings object; see docs/short-links.md).
+  `shortLinks` (the short link settings object; see docs/short-links.md),
+  `sshHostKey` (an SFTP server's public key, `ssh-ed25519 AAAA...`; see
+  docs/storage-backends.md).
   Optional fields are omitted when unset. `isDefault` is never sent.
+- `keyPassphrase` (SFTP: the private key's passphrase) is omitted when
+  unset. A destination that isn't S3 travels as format 2
+  (docs/storage-backends.md, "Compatibility").
 - `sessionToken` is omitted when unset, and so is `cloudflareToken` (the
   Cloudflare cache purge token, see docs/destination-automation.md), and
   `shortLinkToken` (the link shortener's API key; also omitted when

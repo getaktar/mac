@@ -79,6 +79,24 @@ struct DestinationFormView: View {
     /// Stays the same for a new destination, so a result recorded before it
     /// was saved still belongs to it.
     @State private var destinationID: UUID
+    /// SFTP: signing in with a password or a private key; both are kept in
+    /// `secretAccessKey`.
+    @State private var sftpSignIn: SFTPSignIn
+    /// SFTP: a passphrase typed here; empty keeps the saved one.
+    @State private var keyPassphrase = ""
+    /// SFTP: what's known of the key in `secretAccessKey` (or the saved
+    /// one), for the form to show instead of the key itself.
+    @State private var keyStatus: String?
+    /// SFTP: the server key the last Test Connection saw, saved with the
+    /// destination.
+    @State private var testedHostKey: String?
+    /// SFTP: Test Connection found another key than the stored one.
+    @State private var hostKeyChange: SFTPHostKeyChanged?
+
+    enum SFTPSignIn: Hashable {
+        case password
+        case privateKey
+    }
 
     init(existing: DestinationConfig?, onSave: @escaping (DestinationConfig, StorageCredentials) -> Void) {
         self.existing = existing
@@ -117,6 +135,10 @@ struct DestinationFormView: View {
         _cleanURLSuggestionDismissed = State(initialValue: UserDefaults.standard.bool(forKey: Self.cleanURLSuggestionKey(id)))
         initialExpiryRulesActive = existing.map { ExpiryRuleStore.shared.isActive($0.id) } ?? false
         _expiryRulesActive = State(initialValue: initialExpiryRulesActive)
+        let savedSecret = existing?.kind == .sftp ? existing.flatMap { try? KeychainService.load(for: $0.id).secretAccessKey } : nil
+        let savedKey = savedSecret.map(SSHPrivateKey.looksLikeKey) ?? false
+        _sftpSignIn = State(initialValue: savedKey ? .privateKey : .password)
+        _keyStatus = State(initialValue: savedKey ? String(localized: "Saved key (unchanged)") : nil)
     }
 
     var body: some View {
@@ -143,10 +165,10 @@ struct DestinationFormView: View {
                     TextField("Profile Name", text: $name, prompt: Text("Production Files"))
                 }
 
-                if preset.kind == .webdav {
-                    webdavConnectionSection
-                } else {
-                    s3ConnectionSections
+                switch preset.kind {
+                case .webdav: webdavConnectionSection
+                case .sftp: sftpConnectionSection
+                case .s3: s3ConnectionSections
                 }
 
                 Section {
@@ -165,6 +187,8 @@ struct DestinationFormView: View {
                         }
                         Text(preset.kind == .s3
                             ? String(localized: "The domain files are served from, for example a custom domain or CDN in front of the bucket.")
+                            : preset.kind == .sftp
+                            ? String(localized: "The web address a web server serves this folder from: SFTP itself has no links. A file\u{2019}s path in the folder is added to it for its link.")
                             : String(localized: "The web address this folder is served from. A file\u{2019}s path in the folder is added to it for its link."))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -229,6 +253,9 @@ struct DestinationFormView: View {
 
                 afterUploadSection
 
+                if let hostKeyChange {
+                    hostKeyChangeSection(hostKeyChange)
+                }
                 ConnectionTestSection(result: testResult, error: testError, kind: preset.kind)
             }
             .formStyle(.grouped)
@@ -324,10 +351,160 @@ struct DestinationFormView: View {
         }
     }
 
-    /// Why the typed WebDAV Server URL can't be used, once there is one.
+    /// Why the typed Server URL (WebDAV) or Server (SFTP) can't be used,
+    /// once there is one.
     private var serverURLProblem: String? {
-        guard preset.kind == .webdav, !endpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
-        return WebDAVBackend.problem(withServerURL: endpoint)
+        guard !endpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        switch preset.kind {
+        case .webdav: return WebDAVBackend.problem(withServerURL: endpoint)
+        case .sftp: return SFTPAddress.problem(with: endpoint)
+        case .s3: return nil
+        }
+    }
+
+    /// A folder on an SSH server: where, who, and a password or a private
+    /// key (docs/storage-backends.md, "SFTP").
+    private var sftpConnectionSection: some View {
+        Section {
+            TextField("Server", text: $endpoint, prompt: Text(verbatim: "files.example.com"))
+            TextField("Folder", text: $bucket, prompt: Text(verbatim: "/var/www/files"))
+            // Saved ones stay in the Keychain and aren't shown; leaving
+            // them empty keeps them.
+            TextField("User Name", text: $accessKeyId, prompt: existing != nil ? Text("Unchanged") : nil)
+            Picker("Sign In With", selection: $sftpSignIn) {
+                Text("Password").tag(SFTPSignIn.password)
+                Text("Private Key").tag(SFTPSignIn.privateKey)
+            }
+            .onChange(of: sftpSignIn) { _, _ in
+                secretAccessKey = ""
+                keyPassphrase = ""
+                keyStatus = nil
+                connectionEdited()
+            }
+            if sftpSignIn == .password {
+                SecureField("Password", text: $secretAccessKey, prompt: existing != nil ? Text("Unchanged") : nil)
+            } else {
+                LabeledContent("Private Key") {
+                    HStack(spacing: 8) {
+                        Text(keyStatus ?? String(localized: "None"))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                        Button("Choose Key File\u{2026}") { chooseKeyFile() }
+                        Button("Paste") { pasteKey() }
+                    }
+                }
+                SecureField("Key Passphrase", text: $keyPassphrase, prompt: Text("Only for an encrypted key."))
+            }
+        } header: {
+            Text("Server")
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                if let serverURLProblem {
+                    Text(serverURLProblem)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text("The folder uploads go into, such as /var/www/files, or one in the login folder, such as files. Empty is the login folder.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if sftpSignIn == .privateKey {
+                    Text("An ed25519, RSA or ECDSA key, in OpenSSH or PEM format. Only the key is kept, in the Keychain; the file isn\u{2019}t.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    /// The server's key differs from the stored one.
+    private func hostKeyChangeSection(_ change: SFTPHostKeyChanged) -> some View {
+        Section {
+            Label("The server\u{2019}s identity has changed. Nothing was sent to it.", systemImage: "exclamationmark.shield.fill")
+                .foregroundStyle(.orange)
+            Text("Saved key: \(SSHHostKey.fingerprint(change.stored) ?? change.stored)")
+                .font(.caption.monospaced())
+                .textSelection(.enabled)
+            Text("Key it shows now: \(SSHHostKey.fingerprint(change.seen) ?? change.seen)")
+                .font(.caption.monospaced())
+                .textSelection(.enabled)
+        } footer: {
+            Text("If you expected this (the server was set up again or moved), test again to sign in with the new key, then save to keep it. If not, don\u{2019}t save: someone may be in between.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// Reads a private key file into the form; the file isn't kept.
+    private func chooseKeyFile() {
+        guard let text = SSHKeyFilePanel.choose() else { return }
+        guard !text.isEmpty else {
+            keyStatus = String(localized: "This file isn\u{2019}t a private key. Pick the key itself (such as id_ed25519), not the .pub file.")
+            secretAccessKey = ""
+            return
+        }
+        useKey(text)
+    }
+
+    private func pasteKey() {
+        useKey(NSPasteboard.general.string(forType: .string) ?? "")
+    }
+
+    private func useKey(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        connectionEdited()
+        guard SSHPrivateKey.looksLikeKey(trimmed) else {
+            secretAccessKey = ""
+            keyStatus = trimmed.hasPrefix("ssh-")
+                ? String(localized: "This file isn\u{2019}t a private key. Pick the key itself (such as id_ed25519), not the .pub file.")
+                : String(localized: "Paste the private key itself, starting with -----BEGIN, or choose its file.")
+            return
+        }
+        secretAccessKey = trimmed
+        keyStatus = Self.keyDescription(trimmed)
+    }
+
+    /// "ed25519 key", "RSA key, encrypted" and the like.
+    static func keyDescription(_ key: String) -> String {
+        if key.hasPrefix("-----BEGIN OPENSSH PRIVATE KEY-----"), let type = try? SSHPrivateKey.keyType(ofOpenSSH: key) {
+            let name = type == "ssh-ed25519" ? "ed25519" : type == "ssh-rsa" ? "RSA" : SSHPrivateKey.displayName(ofType: type)
+            return (try? SSHPrivateKey.isEncrypted(openSSH: key)) == true
+                ? String(localized: "\(name) key, encrypted")
+                : String(localized: "\(name) key")
+        }
+        if key.hasPrefix("-----BEGIN RSA PRIVATE KEY-----") { return String(localized: "\("RSA") key") }
+        return String(localized: "Private Key")
+    }
+
+    /// The SFTP sign-in: what's typed, else the saved one, with the typed
+    /// passphrase (or the saved one).
+    private func sftpCredentials() throws -> StorageCredentials {
+        let saved = existing?.kind == .sftp ? existing.flatMap { try? KeychainService.load(for: $0.id) } : nil
+        let user = accessKeyId.isEmpty ? saved?.accessKeyId ?? "" : accessKeyId
+        let secret = secretAccessKey.isEmpty ? saved?.secretAccessKey ?? "" : secretAccessKey
+        var credentials = StorageCredentials(accessKeyId: user, secretAccessKey: secret, sessionToken: nil)
+        if sftpSignIn == .privateKey, SSHPrivateKey.looksLikeKey(secret) {
+            if !keyPassphrase.isEmpty {
+                credentials.keyPassphrase = keyPassphrase
+            } else if secretAccessKey.isEmpty {
+                credentials.keyPassphrase = saved?.keyPassphrase
+            }
+        }
+        return credentials
+    }
+
+    /// The server key to save: the one Test Connection saw, otherwise the
+    /// saved one while the server stays the same.
+    private var currentHostKey: String? {
+        if let testedHostKey { return testedHostKey }
+        guard let existing, existing.kind == .sftp,
+              existing.endpoint.trimmingCharacters(in: .whitespacesAndNewlines) == endpoint.trimmingCharacters(in: .whitespacesAndNewlines) else { return nil }
+        // One that can't be read isn't kept: Test Connection trusts the
+        // key it sees instead.
+        return existing.sshHostKey.flatMap(SSHHostKey.normalized)
     }
 
     /// The public links' host when it's a domain of the user's own and the
@@ -733,6 +910,8 @@ struct DestinationFormView: View {
     private func connectionEdited() {
         testResult = nil
         testError = nil
+        testedHostKey = nil
+        hostKeyChange = nil
         guard checkedExpiryRules || expiryRulesActive || expiryRulesError != nil else { return }
         checkedExpiryRules = false
         checkedConnection = nil
@@ -829,7 +1008,14 @@ struct DestinationFormView: View {
     }
 
     private var canTest: Bool {
-        !endpoint.isEmpty && (preset.kind != .s3 || !bucket.isEmpty) && serverURLProblem == nil
+        if preset.kind == .sftp {
+            // Saved sign-ins can be tested without typing them again: an
+            // empty user name or password (or key) keeps the saved one.
+            let saved = existing?.kind == .sftp
+            return !endpoint.isEmpty && serverURLProblem == nil
+                && (!accessKeyId.isEmpty || saved) && (!secretAccessKey.isEmpty || saved)
+        }
+        return !endpoint.isEmpty && (preset.kind != .s3 || !bucket.isEmpty) && serverURLProblem == nil
             && !accessKeyId.isEmpty && !secretAccessKey.isEmpty
     }
 
@@ -849,6 +1035,7 @@ struct DestinationFormView: View {
     private func currentConfig() -> DestinationConfig {
         // Another kind than S3 keeps the S3 fields, empty (docs/storage-backends.md).
         let isS3 = preset.kind == .s3
+        let isSFTP = preset.kind == .sftp
         return DestinationConfig(
             id: destinationID,
             name: name,
@@ -856,7 +1043,8 @@ struct DestinationFormView: View {
             accountID: preset == .cloudflareR2 ? accountID : nil,
             endpoint: isS3 ? endpoint : endpoint.trimmingCharacters(in: .whitespacesAndNewlines),
             region: isS3 ? region : "",
-            bucket: isS3 ? bucket : "",
+            // SFTP keeps its folder in `bucket`.
+            bucket: isS3 ? bucket : isSFTP ? bucket.trimmingCharacters(in: .whitespacesAndNewlines) : "",
             publicBaseURL: publicBaseURL,
             objectPathTemplate: objectPathTemplate,
             forcePathStyle: isS3 ? forcePathStyle : false,
@@ -881,7 +1069,8 @@ struct DestinationFormView: View {
             requestCorsOrigin: existing.flatMap { old in
                 isS3 && Connection(old) == Connection(endpoint: endpoint, bucket: bucket, region: region)
                     && old.publicBaseURL == publicBaseURL && old.temporaryLink == temporaryLink ? old.requestCorsOrigin : nil
-            }
+            },
+            sshHostKey: isSFTP ? currentHostKey : nil
         )
     }
 
@@ -974,11 +1163,28 @@ struct DestinationFormView: View {
         isTesting = true
         defer { isTesting = false }
         let config = currentConfig()
-        let credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
+        var credentials = StorageCredentials(accessKeyId: accessKeyId, secretAccessKey: secretAccessKey, sessionToken: nil)
+        if config.kind == .sftp {
+            do {
+                credentials = try sftpCredentials()
+            } catch {
+                testError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                return
+            }
+        }
         let provider = StorageBackends.make(config: config, credentials: credentials)
         do {
             testResult = try await provider.testConnection()
             testError = nil
+            hostKeyChange = nil
+            if let hostKey = testResult?.sshHostKey { testedHostKey = hostKey }
+        } catch let change as SFTPHostKeyChanged {
+            // Shown with both fingerprints; another test trusts the new
+            // key, and so does saving.
+            testResult = nil
+            testError = nil
+            hostKeyChange = change
+            testedHostKey = change.seen
         } catch {
             testResult = nil
             testError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -1001,6 +1207,11 @@ struct DestinationFormView: View {
         if let existing, accessKeyId.isEmpty, secretAccessKey.isEmpty,
            let existingCredentials = try? KeychainService.load(for: existing.id) {
             credentials = existingCredentials
+        }
+        if preset.kind == .sftp, let sftp = try? sftpCredentials() {
+            credentials = sftp
+        } else if preset.kind != .sftp {
+            credentials.keyPassphrase = nil
         }
         let config = currentConfig()
         // The Cloudflare token: a typed one, otherwise the saved one, and
@@ -1039,5 +1250,24 @@ struct DestinationFormView: View {
             ExpiryRuleStore.shared.set(config.id, active: false)
         }
         onSave(config, credentials)
+    }
+}
+
+/// Picking a private key file (SFTP), for the destination form and the
+/// ShareX import. Only its text is used; the file isn't kept.
+enum SSHKeyFilePanel {
+    /// The file's text; nil when cancelled, empty when it can't be a key.
+    @MainActor
+    static func choose() -> String? {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.showsHiddenFiles = true
+        panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".ssh", isDirectory: true)
+        panel.message = String(localized: "Choose a private key file")
+        guard panel.runModal() == .OK, let url = panel.url else { return nil }
+        guard let data = try? Data(contentsOf: url), data.count < 64 * 1024, let text = String(data: data, encoding: .utf8) else { return "" }
+        return text
     }
 }

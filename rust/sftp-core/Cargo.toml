@@ -1,0 +1,29 @@
+[package]
+name = "aktar-sftp-core"
+version = "0.1.0"
+description = "SFTP destinations for Aktar: paths, keys, host keys, the connection pool and the file operations, shared by the desktop and Mac apps"
+authors = ["Mert Topuz"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.89"
+publish = false
+
+# The source of truth is getaktar/desktop (crates/sftp-core). The Mac app
+# keeps an exact copy (rust/sftp-core, scripts/sync-sftp-core.sh there):
+# change it here, then sync.
+
+[lib]
+name = "aktar_sftp_core"
+
+[dependencies]
+# russh's default crypto is aws-lc-rs, which needs CMake and NASM on
+# Windows, so it's ring here; "rsa" keeps RSA keys (pure Rust). No zlib
+# compression.
+russh = { version = "0.65", default-features = false, features = ["ring", "rsa"] }
+russh-sftp = "4"
+sha2 = "0.11"
+tokio = { version = "1", features = ["rt", "net", "io-util", "fs", "sync", "time", "macros"] }
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "fs", "sync", "time", "process"] }

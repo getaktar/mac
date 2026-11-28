@@ -20,6 +20,11 @@ struct ConnectionTestSection: View {
             }
         } else if let result {
             Section {
+                // SFTP: which server key this was, as `ssh-keygen -l` shows it.
+                if let hostKey = result.sshHostKey, let fingerprint = SSHHostKey.fingerprint(hostKey) {
+                    Label("Server key: \(fingerprint)", systemImage: "key.fill")
+                        .textSelection(.enabled)
+                }
                 if result.writable {
                     Label("Upload: works", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)

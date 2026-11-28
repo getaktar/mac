@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SFTP destinations: upload to a folder on any SSH server with SFTP
+  (OpenSSH on a VPS, Hetzner Storage Box, Synology, rclone) with a Server,
+  Folder, user name and a password or a private key (ed25519 or RSA in
+  OpenSSH format, encrypted keys with their passphrase, old PEM RSA keys).
+  "Choose Key File..." reads the key into the Keychain; the file isn't kept.
+  Links come from the Public Base URL. Files are written as a hidden part
+  file and renamed into place once complete, so a link never serves half a
+  file. One connection per server is reused and closed after a minute idle.
+- The server's host key is trusted on first use and saved with the
+  destination; Test Connection shows its SHA-256 fingerprint. A server that
+  shows another key is refused before signing in, and Test Connection shows
+  the old and new fingerprints so the new key can be trusted by saving.
+- Share to Another Device sends SFTP destinations (with the host key) as
+  transfer format 2; the local API reports `kind: "sftp"`.
+- Import from ShareX brings SFTP accounts along as SFTP destinations and the
+  ownCloud / Nextcloud uploader as a WebDAV destination. FTP and FTPS
+  accounts are listed as not imported.
+- The bucket browser and history show previews of WebDAV and SFTP files
+  whose public link doesn't load, by downloading them through the
+  destination (25 MB for images, PDFs and text, 200 MB for video and audio).
+
+### Changed
+
+- Moving or renaming a file on an SFTP destination renames it on the server
+  instead of copying it through the Mac.
+- The local API answers 409 "This destination can't delete uploads after a
+  while" for `expires` on a WebDAV or SFTP destination, instead of asking to
+  set up auto-delete, which those can't have.
+
 ## [0.23.0] - 2026-11-26
 
 ### Added

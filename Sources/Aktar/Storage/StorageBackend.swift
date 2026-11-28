@@ -16,6 +16,8 @@ extension ProviderPreset {
             return .s3
         case .webdav:
             return .webdav
+        case .sftp:
+            return .sftp
         }
     }
 }
@@ -49,6 +51,9 @@ struct StorageCapabilities: Equatable, Sendable {
     var sharePages: Bool
     /// Set Up Cloudflare R2.
     var cloudflareSetup: Bool
+    /// Renaming on the server, so a move doesn't copy the file through this
+    /// Mac first (SFTP, which has no server-side copy).
+    var rename: Bool
 
     init(kind: StorageKind, preset: ProviderPreset) {
         switch kind {
@@ -64,6 +69,7 @@ struct StorageCapabilities: Equatable, Sendable {
             bucketThumbnails = true
             sharePages = true
             cloudflareSetup = preset == .cloudflareR2
+            rename = false
         case .webdav, .sftp:
             list = true
             copy = true
@@ -75,6 +81,7 @@ struct StorageCapabilities: Equatable, Sendable {
             bucketThumbnails = true
             sharePages = true
             cloudflareSetup = false
+            rename = kind == .sftp
         }
     }
 
@@ -92,6 +99,10 @@ extension DestinationConfig {
     /// another kind the server folder's own name (the host for its root).
     var storageRootName: String {
         guard kind != .s3 else { return bucket }
+        if kind == .sftp {
+            let folder = bucket.split(separator: "/").last.map(String.init)
+            return folder ?? SFTPAddress(endpoint)?.host ?? endpoint
+        }
         let trimmed = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let components = URLComponents(string: trimmed.contains("://") ? trimmed : "https://\(trimmed)") else { return trimmed }
         let last = components.percentEncodedPath.split(separator: "/").last.map(String.init)
@@ -103,6 +114,12 @@ extension DestinationConfig {
     /// another kind.
     var storageLocation: String {
         guard kind != .s3 else { return bucket }
+        if kind == .sftp {
+            let folder = bucket.trimmingCharacters(in: .whitespacesAndNewlines)
+            let server = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !folder.isEmpty else { return server }
+            return server + (folder.hasPrefix("/") ? "" : "/") + folder
+        }
         var location = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
         if let range = location.range(of: "://") { location = String(location[range.upperBound...]) }
         while location.hasSuffix("/") { location.removeLast() }
@@ -149,6 +166,9 @@ protocol StorageBackend: Sendable {
     /// Everything under `prefix`, a page at a time.
     func listRecursively(prefix: String, continuationToken: String?) async throws -> BucketListing
     func copy(from sourceKey: String, to destinationKey: String) async throws
+    /// Moves an object: a rename on the server where `rename` is a
+    /// capability, otherwise a copy and a delete.
+    func move(from sourceKey: String, to destinationKey: String) async throws
     func createFolder(prefix: String) async throws
     /// The link to `objectKey` under the destination's Public Base URL, or
     /// nil when that isn't a valid address.
@@ -163,6 +183,11 @@ extension StorageBackend {
         progress: (@MainActor (Double) -> Void)?
     ) async throws -> UploadResult {
         try await upload(fileURL: fileURL, objectKey: objectKey, contentType: contentType, onlyIfNew: false, progress: progress)
+    }
+
+    func move(from sourceKey: String, to destinationKey: String) async throws {
+        try await copy(from: sourceKey, to: destinationKey)
+        try await delete(objectKey: sourceKey)
     }
 
     func putObject(data: Data, objectKey: String, contentType: String) async throws {
@@ -202,8 +227,7 @@ enum StorageBackends {
         case .webdav:
             return WebDAVBackend(config: config, credentials: credentials)
         case .sftp:
-            // No preset has this kind yet (phase 3 adds SFTP).
-            fatalError("No storage backend for \(config.kind.rawValue) destinations yet")
+            return SFTPBackend(config: config, credentials: credentials)
         }
     }
 

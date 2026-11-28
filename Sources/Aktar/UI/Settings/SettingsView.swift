@@ -343,6 +343,7 @@ private struct GeneralSettingsView: View {
     private func clearThumbnails() {
         ThumbnailStore.shared.removeAll()
         RemoteThumbnailLoader.shared.removeAll()
+        BackendPreview.removeAll()
         Task { thumbnailUsage = await ThumbnailStore.diskUsage() }
     }
 

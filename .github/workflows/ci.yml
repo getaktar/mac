@@ -23,6 +23,22 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      # The SFTP core (rust/) is built by the SFTPCore target in project.yml;
+      # the runner has rustup, so only the Mac targets are added.
+      - name: Set up Rust
+        run: |
+          rustup show active-toolchain || rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Cache Rust build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: sftp-core-${{ runner.os }}-${{ hashFiles('rust/Cargo.lock') }}
+
       - name: Generate Xcode project
         run: xcodegen generate
 

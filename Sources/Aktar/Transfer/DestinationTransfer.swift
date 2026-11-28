@@ -49,7 +49,7 @@ enum DestinationTransfer {
     }
 
     /// The newest format this app reads. Version 2 is version 1 for a
-    /// destination that isn't S3 (WebDAV): the same JSON, sent with 2 in
+    /// destination that isn't S3 (WebDAV, SFTP): the same JSON, sent with 2 in
     /// the envelope's first byte and in `v`, so an app that only knows S3
     /// turns it down as made by a newer version instead of importing it
     /// as S3 (docs/storage-backends.md, "Compatibility"). S3 destinations
@@ -295,6 +295,8 @@ enum DestinationTransfer {
         }
         if config.sharePage == true { destination["sharePage"] = true }
         if let encryption = config.encryption { destination["encryption"] = encryption.rawValue }
+        // An SFTP server's key travels with it (docs/storage-backends.md).
+        if let hostKey = config.sshHostKey.flatMap(SSHHostKey.normalized) { destination["sshHostKey"] = hostKey }
         // The same JSON as destinations.json; see docs/short-links.md.
         if let shortLinks = config.shortLinks,
            let data = try? JSONEncoder().encode(shortLinks),
@@ -314,6 +316,9 @@ enum DestinationTransfer {
         }
         if let token = payload.credentials.shortLinkToken, !token.isEmpty, config.shortLinks != nil {
             credentials["shortLinkToken"] = token
+        }
+        if let passphrase = payload.credentials.keyPassphrase, !passphrase.isEmpty {
+            credentials["keyPassphrase"] = passphrase
         }
 
         var root: [String: Any] = ["v": Int(formatVersion(for: config)), "destination": destination, "credentials": credentials]
@@ -377,14 +382,16 @@ enum DestinationTransfer {
             hooks: hooks(object["hooks"]),
             shortLinks: shortLinks(object["shortLinks"]),
             sharePage: bool(object["sharePage"]) == true ? true : nil,
-            encryption: string(object["encryption"]).flatMap(ShareEncryption.Mode.init(rawValue:))
+            encryption: string(object["encryption"]).flatMap(ShareEncryption.Mode.init(rawValue:)),
+            sshHostKey: preset.kind == .sftp ? string(object["sshHostKey"]).flatMap(SSHHostKey.normalized) : nil
         )
         let credentials = StorageCredentials(
             accessKeyId: accessKeyId,
             secretAccessKey: secretAccessKey,
             sessionToken: string(keys["sessionToken"]),
             cloudflareToken: string(keys["cloudflareToken"]),
-            shortLinkToken: destination.shortLinks == nil ? nil : string(keys["shortLinkToken"])
+            shortLinkToken: destination.shortLinks == nil ? nil : string(keys["shortLinkToken"]),
+            keyPassphrase: preset.kind == .sftp ? string(keys["keyPassphrase"]) : nil
         )
         return Payload(
             destination: destination,

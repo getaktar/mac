@@ -6,6 +6,9 @@ struct ConnectionResult {
     /// What opening the test file's public link returned. Nil when nothing
     /// was uploaded to open.
     let publicLink: PublicLinkCheck?
+    /// SFTP: the server's public key the test connected to, in OpenSSH
+    /// format, for the form to show (its fingerprint) and save.
+    var sshHostKey: String? = nil
 }
 
 /// The outcome of opening a link the way someone it's shared with would.
@@ -60,6 +63,14 @@ enum StorageError: Error, LocalizedError {
     case writeNotAllowed
     /// WebDAV's 507 Insufficient Storage.
     case outOfSpace
+    /// SFTP: the server turned the user name with the password or key down.
+    case sshAuthenticationFailed
+    /// SFTP: an encrypted private key without its passphrase, or a wrong one.
+    case keyPassphrase
+    /// SFTP: a private key of a type or format Aktar can't use, by name.
+    case unsupportedKey(String)
+    /// SFTP: the destination's Folder isn't on the server.
+    case serverFolderNotFound(String)
     case unknown(String)
 
     var errorDescription: String? {
@@ -86,6 +97,14 @@ enum StorageError: Error, LocalizedError {
             return String(localized: "The server refused this. Check that this account can write to the folder.")
         case .outOfSpace:
             return String(localized: "The server is out of space.")
+        case .sshAuthenticationFailed:
+            return String(localized: "Could not sign in. Check your user name, password or key.")
+        case .keyPassphrase:
+            return String(localized: "The key\u{2019}s passphrase is missing or wrong.")
+        case .unsupportedKey(let name):
+            return String(localized: "Aktar can\u{2019}t use this type of key (\(name)). Use an ed25519 or RSA key.")
+        case .serverFolderNotFound(let path):
+            return String(localized: "Folder not found on the server (\(path)). Check the Folder.")
         case .unknown(let message):
             return message
         }

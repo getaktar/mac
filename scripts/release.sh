@@ -7,6 +7,8 @@
 #     --key <path-to-AuthKey.p8> --key-id <key-id> --issuer <issuer-id>
 #   Sparkle's EdDSA private key in the login Keychain (created once with
 #   Sparkle's generate_keys; its public half is SUPublicEDKey in project.yml)
+#   Rust for the SFTP core (https://rustup.rs), then
+#     rustup target add aarch64-apple-darwin x86_64-apple-darwin
 #
 # Usage: scripts/release.sh
 set -euo pipefail
@@ -52,6 +54,16 @@ fi
 echo "==> Cleaning $DIST"
 rm -rf "$DIST"
 mkdir -p "$DIST"
+
+echo "==> Checking the SFTP core"
+# rust/sftp-core must be the desktop repo's crates/sftp-core, byte for byte.
+if [ -d ../windows/crates/sftp-core ] || [ -d ../desktop/crates/sftp-core ] || [ -n "${DESKTOP_REPO:-}" ]; then
+  scripts/sync-sftp-core.sh --check
+else
+  echo "The desktop repo isn't next to this one; skipping the SFTP core check." >&2
+fi
+# Both archs, from scratch: the archive's SFTPCore target then only checks.
+scripts/build-sftp-core.sh --archs "arm64 x86_64" --force
 
 echo "==> Regenerating Xcode project"
 xcodegen generate

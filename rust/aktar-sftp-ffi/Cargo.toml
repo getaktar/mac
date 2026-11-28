@@ -1,0 +1,20 @@
+[package]
+name = "aktar-sftp-ffi"
+version = "0.1.0"
+description = "Swift bindings (UniFFI) for Aktar's SFTP core"
+authors = ["Mert Topuz"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.89"
+publish = false
+
+[lib]
+name = "aktar_sftp_ffi"
+# A static library for the app (macOS now, iOS later); Swift calls it
+# through the bindings scripts/build-sftp-core.sh generates.
+crate-type = ["staticlib"]
+
+[dependencies]
+aktar-sftp-core = { path = "../sftp-core" }
+uniffi = "0.33"
+tokio = { version = "1", features = ["rt-multi-thread", "time"] }

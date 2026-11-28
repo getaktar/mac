@@ -35,3 +35,6 @@ dist/
 .env
 .env.*
 *.netrc
+
+# Rust build output (scripts/build-sftp-core.sh)
+rust/target/

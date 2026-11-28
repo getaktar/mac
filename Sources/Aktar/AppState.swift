@@ -53,6 +53,17 @@ final class AppState {
             self?.destinationUpdated(from: old, to: new)
         }
         destinationStore.onListChange = { [weak self] in self?.registerDestinationShortcuts() }
+        // SFTP trust on first use: a key seen by a destination that had
+        // none is saved with it, so a later change is noticed.
+        let store = destinationStore
+        SFTPBackend.hostKeyLearned = { id, endpoint, hostKey in
+            Task { @MainActor in
+                guard var destination = store.destinations.first(where: { $0.id == id }), destination.kind == .sftp,
+                      destination.sshHostKey == nil, destination.endpoint == endpoint else { return }
+                destination.sshHostKey = hostKey
+                store.update(destination)
+            }
+        }
         registerDestinationShortcuts()
         Self.current = self
         let destinations = destinationStore.destinations

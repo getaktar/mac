@@ -1161,6 +1161,9 @@ private struct UploadDetailView: View {
     let removeFromHistory: () -> Void
 
     @State private var justCopiedURL = false
+    /// Where a WebDAV or SFTP upload's preview loads from, once known
+    /// (`BackendPreview`); S3 previews load from the public link as before.
+    @State private var resolvedPreview: (id: UUID, url: URL?)?
     @Environment(AppState.self) private var appState
 
     var body: some View {
@@ -1180,6 +1183,34 @@ private struct UploadDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .toolbar { toolbarContent }
+        .task(id: record.id) {
+            guard let destination = backendDestination, !record.isEncrypted else { return }
+            let url = await BackendPreview.url(
+                for: record.objectKey,
+                destination: destination,
+                publicURL: record.publicURL,
+                size: Int64(record.byteSize),
+                modified: record.writtenAt,
+                media: MediaPreview.canPlay(filename: record.localFilename)
+            )
+            resolvedPreview = (record.id, url)
+        }
+    }
+
+    /// The upload's destination when it's a kind of storage without
+    /// temporary links (WebDAV, SFTP).
+    private var backendDestination: DestinationConfig? {
+        appState.destinationStore.destinations.first { $0.id == record.destinationID && $0.kind != .s3 }
+    }
+
+    /// The public link, or for WebDAV and SFTP what `BackendPreview` found.
+    private var previewSource: URL? {
+        guard backendDestination != nil else { return record.publicURL }
+        return resolvedPreview?.id == record.id ? resolvedPreview?.url : nil
+    }
+
+    private var isResolvingPreview: Bool {
+        backendDestination != nil && !record.isEncrypted && resolvedPreview?.id != record.id
     }
 
     private var header: some View {
@@ -1198,6 +1229,14 @@ private struct UploadDetailView: View {
         /// A video or audio file AVFoundation can play.
         case media
         case unsupported
+
+        /// Loads the file itself (media load theirs when played).
+        var loadsFile: Bool {
+            switch self {
+            case .image, .pdf, .text: return true
+            case .media, .unsupported: return false
+            }
+        }
     }
 
     private var previewKind: PreviewKind {
@@ -1217,12 +1256,23 @@ private struct UploadDetailView: View {
 
     @ViewBuilder
     private var preview: some View {
+        if isResolvingPreview, previewKind.loadsFile {
+            ProgressView()
+                .frame(maxWidth: .infinity)
+                .frame(height: 320)
+        } else {
+            loadedPreview
+        }
+    }
+
+    @ViewBuilder
+    private var loadedPreview: some View {
         switch previewKind {
         case .image:
             Button(action: requestZoom) {
                 ZStack {
                     CheckerboardBackground()
-                    RemoteImage(url: record.publicURL) { phase in
+                    RemoteImage(url: previewSource) { phase in
                         switch phase {
                         case .success(let image):
                             image.resizable().aspectRatio(contentMode: .fit)
@@ -1248,7 +1298,7 @@ private struct UploadDetailView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
         case .pdf:
-            RemoteFileLoader(url: record.publicURL, knownSize: Int64(record.byteSize)) { phase in
+            RemoteFileLoader(url: previewSource, knownSize: Int64(record.byteSize)) { phase in
                 switch phase {
                 case .success(let data):
                     PDFKitView(data: data)
@@ -1263,7 +1313,7 @@ private struct UploadDetailView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
         case .text(let markdown):
-            RemoteFileLoader(url: record.publicURL, knownSize: Int64(record.byteSize)) { phase in
+            RemoteFileLoader(url: previewSource, knownSize: Int64(record.byteSize)) { phase in
                 switch phase {
                 case .success(let data):
                     TextFilePreview(data: data, renderMarkdown: markdown)
@@ -1280,8 +1330,19 @@ private struct UploadDetailView: View {
 
         case .media:
             MediaPreview(filename: record.localFilename, poster: ThumbnailStore.shared.image(for: record.id)) {
-                // Presigned, so a private bucket plays too.
-                (try? await appState.uploadManager.temporaryURL(for: record, validFor: .hour)) ?? record.publicURL
+                // Presigned, so a private bucket plays too; WebDAV and SFTP
+                // play a downloaded copy when the link doesn't load.
+                if let destination = backendDestination {
+                    return await BackendPreview.url(
+                        for: record.objectKey,
+                        destination: destination,
+                        publicURL: record.publicURL,
+                        size: Int64(record.byteSize),
+                        modified: record.writtenAt,
+                        media: true
+                    )
+                }
+                return (try? await appState.uploadManager.temporaryURL(for: record, validFor: .hour)) ?? record.publicURL
             }
             .id(record.id)
             .frame(maxWidth: .infinity)
@@ -1508,6 +1569,9 @@ private struct ZoomedPreviewView: View {
     let record: UploadRecord
     let dismiss: () -> Void
 
+    @Environment(AppState.self) private var appState
+    @State private var source: URL??
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -1516,7 +1580,7 @@ private struct ZoomedPreviewView: View {
                 Button("Done", action: dismiss)
             }
             .padding()
-            RemoteImage(url: record.publicURL) { phase in
+            RemoteImage(url: source ?? record.publicURL) { phase in
                 switch phase {
                 case .success(let image):
                     image.resizable().aspectRatio(contentMode: .fit)
@@ -1541,6 +1605,20 @@ private struct ZoomedPreviewView: View {
             .padding()
         }
         .frame(minWidth: 480, idealWidth: 760, minHeight: 360, idealHeight: 600)
+        .task(id: record.id) {
+            // As in the detail view: WebDAV and SFTP may need a copy.
+            guard let destination = appState.destinationStore.destinations.first(where: { $0.id == record.destinationID && $0.kind != .s3 }) else {
+                source = .some(record.publicURL)
+                return
+            }
+            source = .some(await BackendPreview.url(
+                for: record.objectKey,
+                destination: destination,
+                publicURL: record.publicURL,
+                size: Int64(record.byteSize),
+                modified: record.writtenAt
+            ))
+        }
     }
 }
 

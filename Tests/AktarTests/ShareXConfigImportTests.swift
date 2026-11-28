@@ -145,7 +145,7 @@ final class ShareXConfigImportTests: XCTestCase {
         XCTAssertEqual(result.shorteners[0].name, "My Shlink")
         XCTAssertEqual(result.shorteners[0].imported.host, "s.example.com")
         XCTAssertEqual(result.shorteners[0].imported.token, "secret123")
-        XCTAssertEqual(Set(result.skipped.map(\.name)), ["My Host", "FTP", "Imgur"])
+        XCTAssertEqual(Set(result.skipped.map(\.name)), ["My Host", String(localized: "FTP account ftp"), "Imgur"], "an FTP account is listed by its name")
     }
 
     func testNotShareX() {

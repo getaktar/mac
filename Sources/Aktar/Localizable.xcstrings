@@ -104,6 +104,206 @@
         }
       }
     },
+    "%@ couldn’t be found. Check the server name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wurde nicht gefunden. Überprüfe den Servernamen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encuentra %@. Revisa el nombre del servidor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est introuvable. Vérifiez le nom du serveur."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tidak ditemukan. Periksa nama server."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile trovare %@. Controlla il nome del server."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ が見つかりません。サーバー名を確認してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@을(를) 찾을 수 없습니다. 서버 이름을 확인하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is niet gevonden. Controleer de servernaam."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie znaleziono %@. Sprawdź nazwę serwera."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível encontrar %@. Verifique o nome do servidor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось найти %@. Проверьте имя сервера."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bulunamadı. Sunucu adını kontrol et."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося знайти %@. Перевірте ім’я сервера."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tìm thấy %@. Hãy kiểm tra tên máy chủ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 %@。请检查服务器名称。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 %@。請檢查伺服器名稱。"
+          }
+        }
+      }
+    },
+    "%@ didn’t answer in time." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat nicht rechtzeitig geantwortet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no respondió a tiempo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas répondu à temps."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tidak menjawab tepat waktu."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non ha risposto in tempo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ から時間内に応答がありませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@이(가) 제시간에 응답하지 않았습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ antwoordde niet op tijd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nie odpowiedział na czas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não respondeu a tempo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не ответил вовремя."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ zamanında yanıt vermedi."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ не відповів вчасно."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ không trả lời kịp thời."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 未及时响应。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 未及時回應。"
+          }
+        }
+      }
+    },
     "%@ didn’t open. Check that it’s set up as Settings > General > Capture tool describes, or pick another tool there." : {
       "localizations" : {
         "de" : {
@@ -404,6 +604,306 @@
         }
       }
     },
+    "%@ key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-Schlüssel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 鍵"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 키"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-sleutel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ anahtarı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 密钥"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 金鑰"
+          }
+        }
+      }
+    },
+    "%@ key, encrypted" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-Schlüssel, verschlüsselt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave %@, cifrada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé %@, chiffrée"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci %@, terenkripsi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave %@, cifrata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 鍵（暗号化済み）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 키, 암호화됨"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-sleutel, versleuteld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz %@, zaszyfrowany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave %@, criptografada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ %@, зашифрован"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ anahtarı, şifreli"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ %@, зашифрований"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa %@, đã mã hóa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 密钥（已加密）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 金鑰（已加密）"
+          }
+        }
+      }
+    },
+    "%@ refused the connection. Check the server and port." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat die Verbindung abgelehnt. Überprüfe Server und Port."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ rechazó la conexión. Revisa el servidor y el puerto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ a refusé la connexion. Vérifiez le serveur et le port."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ menolak koneksi. Periksa server dan port."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ha rifiutato la connessione. Controlla il server e la porta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ に接続を拒否されました。サーバーとポートを確認してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@이(가) 연결을 거부했습니다. 서버와 포트를 확인하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ weigerde de verbinding. Controleer de server en poort."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ odrzucił połączenie. Sprawdź serwer i port."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ recusou a conexão. Verifique o servidor e a porta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ отклонил подключение. Проверьте сервер и порт."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bağlantıyı reddetti. Sunucuyu ve portu kontrol et."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ відхилив з’єднання. Перевірте сервер і порт."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ đã từ chối kết nối. Hãy kiểm tra máy chủ và cổng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 拒绝了连接。请检查服务器和端口。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 拒絕了連線。請檢查伺服器和連接埠。"
+          }
+        }
+      }
+    },
     "A small script in Aktar’s Application Scripts folder that starts Flameshot’s capture. Aktar can’t put it there by itself." : {
       "localizations" : {
         "de" : {
@@ -500,6 +1000,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktar 的「Application Scripts」檔案夾中用來開始 Flameshot 擷取的一個小指令碼。Aktar 無法自行把它放到那裡。"
+          }
+        }
+      }
+    },
+    "Aktar can’t use this type of key (%@). Use an ed25519 or RSA key." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar kann diesen Schlüsseltyp nicht verwenden (%@). Verwende einen ed25519- oder RSA-Schlüssel."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar no puede usar este tipo de clave (%@). Usa una clave ed25519 o RSA."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar ne peut pas utiliser ce type de clé (%@). Utilisez une clé ed25519 ou RSA."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar tidak dapat memakai jenis kunci ini (%@). Gunakan kunci ed25519 atau RSA."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar non può usare questo tipo di chiave (%@). Usa una chiave ed25519 o RSA."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar はこの種類の鍵（%@）を使えません。ed25519 または RSA の鍵を使ってください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar는 이 유형의 키(%@)를 사용할 수 없습니다. ed25519 또는 RSA 키를 사용하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar kan dit type sleutel niet gebruiken (%@). Gebruik een ed25519- of RSA-sleutel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar nie może użyć tego typu klucza (%@). Użyj klucza ed25519 lub RSA."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Aktar não pode usar este tipo de chave (%@). Use uma chave ed25519 ou RSA."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar не может использовать ключ этого типа (%@). Используйте ключ ed25519 или RSA."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar bu tür anahtarı kullanamıyor (%@). ed25519 ya da RSA anahtarı kullan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar не може використати ключ цього типу (%@). Використайте ключ ed25519 або RSA."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar không dùng được loại khóa này (%@). Hãy dùng khóa ed25519 hoặc RSA."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 无法使用这种类型的密钥（%@）。请使用 ed25519 或 RSA 密钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktar 無法使用這種類型的金鑰（%@）。請使用 ed25519 或 RSA 金鑰。"
+          }
+        }
+      }
+    },
+    "An ed25519, RSA or ECDSA key, in OpenSSH or PEM format. Only the key is kept, in the Keychain; the file isn’t." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein ed25519-, RSA- oder ECDSA-Schlüssel im OpenSSH- oder PEM-Format. Nur der Schlüssel wird im Schlüsselbund gespeichert, nicht die Datei."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una clave ed25519, RSA o ECDSA en formato OpenSSH o PEM. Solo se guarda la clave, en el llavero; el archivo no."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une clé ed25519, RSA ou ECDSA au format OpenSSH ou PEM. Seule la clé est conservée, dans le trousseau ; le fichier ne l’est pas."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci ed25519, RSA, atau ECDSA dalam format OpenSSH atau PEM. Hanya kuncinya yang disimpan, di Rantai Kunci; filenya tidak."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una chiave ed25519, RSA o ECDSA in formato OpenSSH o PEM. Viene conservata solo la chiave, nel Portachiavi; il file no."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenSSH または PEM 形式の ed25519、RSA、ECDSA の鍵。保存されるのは鍵だけで、キーチェーンに入ります。ファイルは保存されません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenSSH 또는 PEM 형식의 ed25519, RSA 또는 ECDSA 키입니다. 키만 키체인에 보관되며 파일은 보관되지 않습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een ed25519-, RSA- of ECDSA-sleutel in OpenSSH- of PEM-formaat. Alleen de sleutel wordt bewaard, in de sleutelhanger; het bestand niet."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz ed25519, RSA lub ECDSA w formacie OpenSSH lub PEM. Przechowywany jest tylko klucz, w pęku kluczy; plik nie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma chave ed25519, RSA ou ECDSA no formato OpenSSH ou PEM. Só a chave é guardada, nas Chaves; o arquivo não."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ ed25519, RSA или ECDSA в формате OpenSSH или PEM. Хранится только сам ключ, в Связке ключей; файл не сохраняется."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenSSH ya da PEM biçiminde bir ed25519, RSA ya da ECDSA anahtarı. Yalnızca anahtar Anahtar Zinciri'nde saklanır; dosya saklanmaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ ed25519, RSA або ECDSA у форматі OpenSSH або PEM. Зберігається лише сам ключ, у Связці ключів; файл не зберігається."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa ed25519, RSA hoặc ECDSA ở định dạng OpenSSH hoặc PEM. Chỉ khóa được giữ lại, trong Chuỗi khóa; tệp thì không."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenSSH 或 PEM 格式的 ed25519、RSA 或 ECDSA 密钥。只保存密钥本身，存于钥匙串；不保存文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenSSH 或 PEM 格式的 ed25519、RSA 或 ECDSA 金鑰。只保存金鑰本身，存於鑰匙圈；不保存檔案。"
           }
         }
       }
@@ -1004,6 +1704,206 @@
         }
       }
     },
+    "Choose Key File…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlüsseldatei auswählen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir archivo de clave…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un fichier de clé…"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih File Kunci…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli file di chiave…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵ファイルを選択…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키 파일 선택…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies sleutelbestand…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz plik klucza…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher arquivo de chave…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать файл ключа…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Dosyası Seç…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати файл ключа…"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn tệp khóa…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择密钥文件…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇金鑰檔案…"
+          }
+        }
+      }
+    },
+    "Choose a private key file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei mit privatem Schlüssel auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un archivo de clave privada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un fichier de clé privée"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih file kunci privat"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli un file di chiave privata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秘密鍵ファイルを選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 키 파일 선택"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies een bestand met een privésleutel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz plik klucza prywatnego"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um arquivo de chave privada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите файл закрытого ключа"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel anahtar dosyası seç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть файл закритого ключа"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn tệp khóa riêng tư"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择私钥文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇私密金鑰檔案"
+          }
+        }
+      }
+    },
     "Choose the folder %@ saves screenshots to." : {
       "localizations" : {
         "de" : {
@@ -1100,6 +2000,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選擇 %@ 儲存截圖的檔案夾。"
+          }
+        }
+      }
+    },
+    "Choose the private key." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den privaten Schlüssel aus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la clave privada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez la clé privée."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih kunci privat."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la chiave privata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秘密鍵を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 키를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies de privésleutel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz klucz prywatny."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha a chave privada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите закрытый ключ."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel anahtarı seç."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть закритий ключ."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy chọn khóa riêng tư."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择私钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇私密金鑰。"
           }
         }
       }
@@ -1404,6 +2404,206 @@
         }
       }
     },
+    "Could not sign in. Check your user name, password or key." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldung fehlgeschlagen. Überprüfe Benutzername, Passwort oder Schlüssel."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido iniciar sesión. Revisa tu nombre de usuario, tu contraseña o tu clave."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la connexion. Vérifiez votre nom d’utilisateur, votre mot de passe ou votre clé."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak dapat masuk. Periksa nama pengguna, kata sandi, atau kunci Anda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesso non riuscito. Controlla nome utente, password o chiave."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サインインできませんでした。ユーザー名、パスワード、または鍵を確認してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인할 수 없습니다. 사용자 이름, 암호 또는 키를 확인하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan niet inloggen. Controleer je gebruikersnaam, wachtwoord of sleutel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logowanie nie powiodło się. Sprawdź nazwę użytkownika, hasło lub klucz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível entrar. Verifique seu nome de usuário, sua senha ou sua chave."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось войти. Проверьте имя пользователя, пароль или ключ."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum açılamadı. Kullanıcı adını, parolayı ya da anahtarı kontrol et."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося увійти. Перевірте ім’я користувача, пароль або ключ."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không thể đăng nhập. Hãy kiểm tra tên người dùng, mật khẩu hoặc khóa."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法登录。请检查用户名、密码或密钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法登入。請檢查你的使用者名稱、密碼或金鑰。"
+          }
+        }
+      }
+    },
+    "Couldn’t connect to %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Verbindung zu %@ möglich."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de se connecter à %@."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak dapat terhubung ke %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile connettersi a %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ に接続できませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에 연결할 수 없습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan geen verbinding maken met %@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie można połączyć się z %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível conectar a %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключиться к %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ile bağlantı kurulamadı."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося під’єднатися до %@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không kết nối được với %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接到 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法連線到 %@。"
+          }
+        }
+      }
+    },
     "Enter the folder’s full address, such as https://cloud.example.com/remote.php/dav/files/me/aktar." : {
       "localizations" : {
         "de" : {
@@ -1500,6 +2700,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請輸入資料夾的完整位址，例如 https://cloud.example.com/remote.php/dav/files/me/aktar。"
+          }
+        }
+      }
+    },
+    "Enter the password." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib das Passwort ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe la contraseña."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le mot de passe."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masukkan kata sandi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci la password."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスワードを入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "암호를 입력하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vul het wachtwoord in."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wpisz hasło."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite a senha."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите пароль."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parolayı gir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть пароль."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy nhập mật khẩu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入密码。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請輸入密碼。"
+          }
+        }
+      }
+    },
+    "Enter the server as a host name, such as files.example.com or files.example.com:2222." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib den Server als Hostnamen ein, etwa files.example.com oder files.example.com:2222."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe el servidor como nombre de host, por ejemplo files.example.com o files.example.com:2222."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le serveur sous forme de nom d’hôte, par exemple files.example.com ou files.example.com:2222."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masukkan server sebagai nama host, misalnya files.example.com atau files.example.com:2222."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci il server come nome host, ad esempio files.example.com o files.example.com:2222."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーは files.example.com や files.example.com:2222 のようなホスト名で入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버를 files.example.com 또는 files.example.com:2222와 같은 호스트 이름으로 입력하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vul de server in als hostnaam, zoals files.example.com of files.example.com:2222."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wpisz serwer jako nazwę hosta, na przykład files.example.com lub files.example.com:2222."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite o servidor como nome de host, por exemplo files.example.com ou files.example.com:2222."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите сервер как имя хоста, например files.example.com или files.example.com:2222."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucuyu files.example.com ya da files.example.com:2222 gibi bir ana bilgisayar adı olarak gir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть сервер як ім’я хоста, наприклад files.example.com або files.example.com:2222."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy nhập máy chủ dưới dạng tên máy chủ, ví dụ files.example.com hoặc files.example.com:2222."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请以主机名的形式输入服务器，例如 files.example.com 或 files.example.com:2222。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請以主機名稱的形式輸入伺服器，例如 files.example.com 或 files.example.com:2222。"
           }
         }
       }
@@ -1904,6 +3304,206 @@
         }
       }
     },
+    "FTP account %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP-Konto %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta FTP %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte FTP %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akun FTP %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account FTP %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP アカウント %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP 계정 %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP-account %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konto FTP %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta FTP %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Учетная запись FTP %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP hesabı %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис FTP %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tài khoản FTP %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP 帐户 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP 帳號 %@"
+          }
+        }
+      }
+    },
+    "Folder not found on the server (%@). Check the Folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner auf dem Server nicht gefunden (%@). Überprüfe den Ordner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encuentra la carpeta en el servidor (%@). Revisa la Carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossier introuvable sur le serveur (%@). Vérifiez le champ Dossier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder tidak ditemukan di server (%@). Periksa Folder."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartella non trovata sul server (%@). Controlla il campo Cartella."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバー上にフォルダが見つかりません(%@)。「フォルダ」を確認してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버에서 폴더를 찾을 수 없습니다(%@). 폴더를 확인하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map niet gevonden op de server (%@). Controleer de map."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie znaleziono folderu na serwerze (%@). Sprawdź pole Folder."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta não encontrada no servidor (%@). Verifique a Pasta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка не найдена на сервере (%@). Проверьте поле «Папка»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasör sunucuda bulunamadı (%@). Klasör alanını kontrol et."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теку не знайдено на сервері (%@). Перевірте поле «Папка»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tìm thấy thư mục trên máy chủ (%@). Hãy kiểm tra Thư mục."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在服务器上找不到文件夹（%@）。请检查“文件夹”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在伺服器上找不到資料夾（%@）。請檢查「資料夾」。"
+          }
+        }
+      }
+    },
     "Get %@" : {
       "localizations" : {
         "de" : {
@@ -2100,6 +3700,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "如果沒有反應，請在 macshot 的設定中開啟 URL 協定。macshot 內建的上傳請保持關閉。"
+          }
+        }
+      }
+    },
+    "If you expected this (the server was set up again or moved), test again to sign in with the new key, then save to keep it. If not, don’t save: someone may be in between." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du das erwartet hast (der Server wurde neu eingerichtet oder ist umgezogen), teste erneut, um dich mit dem neuen Schlüssel anzumelden, und speichere dann, um ihn zu behalten. Wenn nicht, speichere nicht: Jemand könnte sich dazwischengeschaltet haben."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si lo esperabas (el servidor se volvió a configurar o se trasladó), vuelve a probar para iniciar sesión con la nueva clave y luego guarda para conservarla. Si no, no guardes: puede que alguien se haya interpuesto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si vous vous y attendiez (le serveur a été réinstallé ou déplacé), testez à nouveau pour vous connecter avec la nouvelle clé, puis enregistrez pour la conserver. Sinon, n’enregistrez pas : quelqu’un s’est peut-être interposé."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jika Anda memang mengharapkan ini (server disiapkan ulang atau dipindahkan), uji lagi untuk masuk dengan kunci baru, lalu simpan untuk mempertahankannya. Jika tidak, jangan simpan: mungkin ada pihak lain di tengah koneksi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se te lo aspettavi (il server è stato riconfigurato o spostato), verifica di nuovo per accedere con la nuova chiave, poi salva per conservarla. Altrimenti non salvare: qualcuno potrebbe essersi messo in mezzo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "想定どおりの変更(サーバーの再セットアップや移転)であれば、もう一度テストして新しい鍵でサインインし、保存して鍵を保持してください。そうでなければ保存しないでください。第三者が通信の間に入っている可能性があります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예상한 변경이라면(서버를 다시 설정했거나 옮긴 경우) 다시 테스트하여 새 키로 로그인한 다음 저장하여 키를 유지하십시오. 그렇지 않다면 저장하지 마십시오. 누군가 중간에 끼어들었을 수 있습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als je dit verwachtte (de server is opnieuw ingericht of verhuisd), test dan opnieuw om met de nieuwe sleutel in te loggen en sla daarna op om hem te bewaren. Zo niet, sla dan niet op: iemand zit mogelijk tussen jou en de server."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeśli się tego spodziewałeś (serwer został skonfigurowany od nowa lub przeniesiony), przetestuj ponownie, aby zalogować się nowym kluczem, a potem zapisz, aby go zachować. Jeśli nie, nie zapisuj: ktoś może się wpinać w połączenie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se você esperava por isso (o servidor foi reconfigurado ou mudou de lugar), teste de novo para entrar com a nova chave e depois salve para mantê-la. Se não, não salve: alguém pode estar no meio."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вы этого ожидали (сервер настроили заново или перенесли), проверьте еще раз, чтобы войти с новым ключом, а затем сохраните, чтобы оставить его. Если нет, не сохраняйте: возможно, кто-то вмешивается в соединение."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bunu bekliyorsan (sunucu yeniden kuruldu ya da taşındı), yeni anahtarla oturum açmak için yeniden test et, sonra anahtarı saklamak için kaydet. Beklemiyorsan kaydetme: araya biri girmiş olabilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо ви цього очікували (сервер налаштували заново або перенесли), перевірте ще раз, щоб увійти з новим ключем, а потім збережіть, щоб залишити його. Якщо ні, не зберігайте: можливо, хтось втручається в з’єднання."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nếu bạn đã dự đoán điều này (máy chủ được thiết lập lại hoặc chuyển đi), hãy kiểm tra lại để đăng nhập bằng khóa mới, rồi lưu để giữ khóa đó. Nếu không, đừng lưu: có thể có ai đó đang đứng giữa."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果这在你的预期之中（服务器已重新设置或迁移），请再次测试，用新密钥登录，然后保存以保留它。如果不是，请不要保存：可能有人在中间拦截。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果這在你的預期之中（伺服器已重新設定或搬移），請再次測試，用新金鑰登入，然後儲存以保留它。如果不是，請不要儲存：可能有人在中間攔截。"
           }
         }
       }
@@ -2504,6 +4204,906 @@
         }
       }
     },
+    "Key Passphrase" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlüssel-Passphrase"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frase de contraseña de la clave"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phrase secrète de la clé"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frasa Sandi Kunci"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passphrase della chiave"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵のパスフレーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키 암호"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wachtwoordzin van sleutel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasło klucza"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frase secreta da chave"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Парольная фраза ключа"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Parolası"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Парольна фраза ключа"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cụm mật khẩu khóa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密钥密码短语"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金鑰密語"
+          }
+        }
+      }
+    },
+    "Key it shows now: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt gezeigter Schlüssel: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave que muestra ahora: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé présentée maintenant : %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci yang ditunjukkan sekarang: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave mostrata ora: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在提示されている鍵: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 제시된 키: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleutel die hij nu toont: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz, który pokazuje teraz: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave que ele mostra agora: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ, который он показывает сейчас: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu an gösterdiği anahtar: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ, який він показує зараз: %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa máy chủ đang hiển thị: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它现在出示的密钥：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它現在出示的金鑰：%@"
+          }
+        }
+      }
+    },
+    "Login folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldeordner"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta de inicio de sesión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossier de connexion"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder login"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartella di accesso"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインフォルダ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 폴더"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inlogmap"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder logowania"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta de login"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка входа"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giriş klasörü"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тека входу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư mục đăng nhập"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录文件夹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入資料夾"
+          }
+        }
+      }
+    },
+    "Only for an encrypted key." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur für einen verschlüsselten Schlüssel."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo para una clave cifrada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uniquement pour une clé chiffrée."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hanya untuk kunci yang terenkripsi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo per una chiave cifrata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暗号化された鍵の場合のみ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "암호화된 키에만 필요합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen voor een versleutelde sleutel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tylko dla zaszyfrowanego klucza."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só para uma chave criptografada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только для зашифрованного ключа."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca şifrelenmiş bir anahtar için."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лише для зашифрованого ключа."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉ dành cho khóa đã mã hóa."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅用于加密的密钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅用於加密的金鑰。"
+          }
+        }
+      }
+    },
+    "Paste the private key itself, starting with -----BEGIN, or choose its file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge den privaten Schlüssel selbst ein, beginnend mit -----BEGIN, oder wähle seine Datei aus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pega la propia clave privada, que empieza por -----BEGIN, o elige su archivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collez la clé privée elle-même, qui commence par -----BEGIN, ou choisissez son fichier."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempel kunci privatnya sendiri, yang diawali -----BEGIN, atau pilih filenya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla la chiave privata vera e propria, che inizia con -----BEGIN, oppure scegli il suo file."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-----BEGIN で始まる秘密鍵そのものを貼り付けるか、そのファイルを選択してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-----BEGIN으로 시작하는 개인 키 자체를 붙여 넣거나 키 파일을 선택하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plak de privésleutel zelf, beginnend met -----BEGIN, of kies het bestand."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wklej sam klucz prywatny, zaczynający się od -----BEGIN, albo wybierz jego plik."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole a própria chave privada, que começa com -----BEGIN, ou escolha o arquivo dela."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставьте сам закрытый ключ, начинающийся с -----BEGIN, или выберите его файл."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel anahtarın kendisini -----BEGIN ile başlayacak şekilde yapıştır ya da dosyasını seç."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставте сам закритий ключ, що починається з -----BEGIN, або виберіть його файл."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy dán chính khóa riêng tư, bắt đầu bằng -----BEGIN, hoặc chọn tệp của nó."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴私钥本身（以 -----BEGIN 开头），或选择它的文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼上私密金鑰本身（以 -----BEGIN 開頭），或選擇它的檔案。"
+          }
+        }
+      }
+    },
+    "Plain FTP and FTPS aren’t supported. Use SFTP." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfaches FTP und FTPS werden nicht unterstützt. Verwende SFTP."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se admiten FTP simple ni FTPS. Usa SFTP."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le FTP simple et le FTPS ne sont pas pris en charge. Utilisez SFTP."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP biasa dan FTPS tidak didukung. Gunakan SFTP."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP semplice e FTPS non sono supportati. Usa SFTP."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常の FTP と FTPS には対応していません。SFTP を使ってください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반 FTP와 FTPS는 지원되지 않습니다. SFTP를 사용하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewone FTP en FTPS worden niet ondersteund. Gebruik SFTP."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwykłe FTP i FTPS nie są obsługiwane. Użyj SFTP."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FTP simples e FTPS não são compatíveis. Use SFTP."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обычный FTP и FTPS не поддерживаются. Используйте SFTP."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düz FTP ve FTPS desteklenmiyor. SFTP kullan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звичайний FTP і FTPS не підтримуються. Використайте SFTP."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không hỗ trợ FTP thường và FTPS. Hãy dùng SFTP."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支持普通 FTP 和 FTPS。请使用 SFTP。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支援一般 FTP 和 FTPS。請使用 SFTP。"
+          }
+        }
+      }
+    },
+    "Private Key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privater Schlüssel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave privada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé privée"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci Privat"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave privata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秘密鍵"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 키"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privésleutel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz prywatny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave privada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрытый ключ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel Anahtar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закритий ключ"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa riêng tư"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私钥"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私密金鑰"
+          }
+        }
+      }
+    },
+    "Saved key (unchanged)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeicherter Schlüssel (unverändert)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave guardada (sin cambios)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé enregistrée (inchangée)"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci tersimpan (tidak berubah)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave salvata (invariata)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存済みの鍵（変更なし）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 키(변경 없음)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen sleutel (ongewijzigd)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapisany klucz (bez zmian)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave salva (sem alteração)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённый ключ (без изменений)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlı anahtar (değişmedi)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Збережений ключ (без змін)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa đã lưu (không đổi)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已保存的密钥（未更改）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已儲存的金鑰（未變更）"
+          }
+        }
+      }
+    },
+    "Saved key: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeicherter Schlüssel: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave guardada: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé enregistrée : %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci tersimpan: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave salvata: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存済みの鍵: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 키: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen sleutel: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapisany klucz: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave salva: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохраненный ключ: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlı anahtar: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Збережений ключ: %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa đã lưu: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已保存的密钥：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已儲存的金鑰：%@"
+          }
+        }
+      }
+    },
     "Server" : {
       "localizations" : {
         "de" : {
@@ -2604,6 +5204,106 @@
         }
       }
     },
+    "Server key: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverschlüssel: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clave del servidor: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé du serveur : %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci server: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave del server: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの鍵: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 키: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serversleutel: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucz serwera: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chave do servidor: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ сервера: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu anahtarı: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключ сервера: %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khóa máy chủ: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器密钥：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器金鑰：%@"
+          }
+        }
+      }
+    },
     "Server URL" : {
       "localizations" : {
         "de" : {
@@ -2700,6 +5400,906 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "伺服器 URL"
+          }
+        }
+      }
+    },
+    "ShareX encrypted this password for Windows. Type it here, or import on the Windows PC and use Share to Another Device." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX hat dieses Passwort für Windows verschlüsselt. Gib es hier ein oder importiere auf dem Windows-PC und verwende „Mit anderem Gerät teilen“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX cifró esta contraseña para Windows. Escríbela aquí, o importa en el PC con Windows y usa Compartir con otro dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX a chiffré ce mot de passe pour Windows. Saisissez-le ici, ou importez sur le PC Windows et utilisez Partager avec un autre appareil."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX mengenkripsi kata sandi ini untuk Windows. Ketik di sini, atau impor di PC Windows lalu gunakan Bagikan ke Perangkat Lain."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX ha cifrato questa password per Windows. Inseriscila qui, oppure importa sul PC Windows e usa Condividi con un altro dispositivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX はこのパスワードを Windows 用に暗号化しています。ここに入力するか、Windows PC で読み込んで「別のデバイスと共有」を使ってください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX가 이 암호를 Windows용으로 암호화했습니다. 여기에 입력하거나, Windows PC에서 가져온 뒤 다른 기기와 공유를 사용하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX heeft dit wachtwoord voor Windows versleuteld. Typ het hier, of importeer op de Windows-pc en gebruik Delen met ander apparaat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX zaszyfrował to hasło dla Windows. Wpisz je tutaj albo zaimportuj na komputerze z Windows i użyj Udostępnij na inne urządzenie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ShareX criptografou esta senha para o Windows. Digite-a aqui, ou importe no PC com Windows e use Compartilhar com Outro Dispositivo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX зашифровал этот пароль для Windows. Введите его здесь или импортируйте на ПК с Windows и используйте «Передать на другое устройство»."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX bu parolayı Windows için şifrelemiş. Buraya yaz ya da Windows bilgisayarda içe aktarıp Başka Bir Cihazla Paylaş'ı kullan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX зашифрував цей пароль для Windows. Введіть його тут або імпортуйте на ПК з Windows і скористайтеся «Передати на інший пристрій»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX đã mã hóa mật khẩu này cho Windows. Hãy nhập ở đây, hoặc nhập trên máy Windows rồi dùng Chia sẻ sang thiết bị khác."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 已为 Windows 加密了这个密码。请在此输入，或在 Windows 电脑上导入后使用“共享到其他设备”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 已為 Windows 加密了這個密碼。請在此輸入，或在 Windows 電腦上匯入後使用「分享到其他裝置」。"
+          }
+        }
+      }
+    },
+    "ShareX has no S3, Backblaze B2, SFTP or ownCloud uploaders set up." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In ShareX ist kein S3-, Backblaze-B2-, SFTP- oder ownCloud-Uploader eingerichtet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX no tiene configurado ningún servicio de subida S3, Backblaze B2, SFTP ni ownCloud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX n’a aucun service d’envoi S3, Backblaze B2, SFTP ou ownCloud configuré."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX tidak memiliki pengunggah S3, Backblaze B2, SFTP, atau ownCloud yang diatur."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX non ha uploader S3, Backblaze B2, SFTP o ownCloud configurati."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX に S3、Backblaze B2、SFTP、ownCloud のアップローダーは設定されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX에 설정된 S3, Backblaze B2, SFTP 또는 ownCloud 업로더가 없습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX heeft geen S3-, Backblaze B2-, SFTP- of ownCloud-uploaders ingesteld."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX nie ma skonfigurowanych usług przesyłania S3, Backblaze B2, SFTP ani ownCloud."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ShareX não tem nenhum serviço de envio S3, Backblaze B2, SFTP ou ownCloud configurado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В ShareX не настроены загрузчики S3, Backblaze B2, SFTP или ownCloud."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX'te ayarlanmış bir S3, Backblaze B2, SFTP ya da ownCloud yükleyicisi yok."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У ShareX не налаштовано завантажувачів S3, Backblaze B2, SFTP або ownCloud."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX chưa thiết lập trình tải lên S3, Backblaze B2, SFTP hoặc ownCloud nào."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 中没有设置 S3、Backblaze B2、SFTP 或 ownCloud 上传器。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 中沒有設定 S3、Backblaze B2、SFTP 或 ownCloud 上傳器。"
+          }
+        }
+      }
+    },
+    "ShareX linked to these files with %@://. Enter the web address they’re served from as the Public Base URL." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX hat diese Dateien mit %@:// verlinkt. Gib die Webadresse, unter der sie bereitgestellt werden, als Öffentliche Basis-URL ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX enlazaba estos archivos con %@://. Escribe como URL base pública la dirección web desde la que se sirven."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX créait les liens vers ces fichiers avec %@://. Saisissez comme URL de base publique l’adresse web depuis laquelle ils sont servis."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX menautkan file ini dengan %@://. Masukkan alamat web tempat file tersebut disajikan sebagai URL Dasar Publik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX creava i link a questi file con %@://. Inserisci come URL di base pubblico l’indirizzo web da cui vengono serviti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX はこれらのファイルに %@:// でリンクしていました。ファイルを配信している Web アドレスを公開ベースURLとして入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX는 이 파일들을 %@://로 링크했습니다. 파일이 제공되는 웹 주소를 공개 기본 URL로 입력하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX linkte naar deze bestanden met %@://. Vul het webadres waarop ze worden aangeboden in als openbare basis-URL."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX linkował do tych plików przez %@://. Wpisz jako Publiczny bazowy URL adres internetowy, pod którym są udostępniane."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ShareX criava links para esses arquivos com %@://. Digite como URL base pública o endereço web de onde eles são servidos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX ссылался на эти файлы через %@://. Введите веб-адрес, с которого они доступны, как публичный базовый URL."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX bu dosyalara %@:// ile bağlantı veriyordu. Dosyaların sunulduğu web adresini Genel Temel URL olarak gir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX посилався на ці файли через %@://. Введіть вебадресу, з якої вони доступні, як публічну базову URL-адресу."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX liên kết đến các tệp này bằng %@://. Hãy nhập địa chỉ web phục vụ các tệp đó làm URL cơ sở công khai."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 使用 %@:// 链接到这些文件。请将提供这些文件的网址输入为公开基础 URL。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 使用 %@:// 連結到這些檔案。請將提供這些檔案的網址輸入為公開基礎 URL。"
+          }
+        }
+      }
+    },
+    "ShareX made a share link for each file. Aktar links to files at the Public Base URL: enter the web address this folder is served from." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX hat für jede Datei einen Freigabelink erstellt. Aktar verlinkt Dateien über die Öffentliche Basis-URL: Gib die Webadresse ein, unter der dieser Ordner bereitgestellt wird."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX creaba un enlace para compartir cada archivo. Aktar enlaza los archivos en la URL base pública: escribe la dirección web desde la que se sirve esta carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX créait un lien de partage pour chaque fichier. Aktar crée les liens vers les fichiers à partir de l’URL de base publique : saisissez l’adresse web depuis laquelle ce dossier est servi."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX membuat tautan berbagi untuk setiap file. Aktar menautkan file melalui URL Dasar Publik: masukkan alamat web tempat folder ini disajikan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX creava un link di condivisione per ogni file. Aktar crea i link ai file a partire dall’URL di base pubblico: inserisci l’indirizzo web da cui viene servita questa cartella."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX はファイルごとに共有リンクを作成していました。Aktar は公開ベースURLでファイルにリンクします。このフォルダを配信している Web アドレスを入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX는 파일마다 공유 링크를 만들었습니다. Aktar는 공개 기본 URL로 파일을 링크합니다. 이 폴더가 제공되는 웹 주소를 입력하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX maakte voor elk bestand een deellink. Aktar linkt naar bestanden via de openbare basis-URL: vul het webadres in waarop deze map wordt aangeboden."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX tworzył link udostępniania dla każdego pliku. Aktar linkuje do plików przez Publiczny bazowy URL: wpisz adres internetowy, pod którym udostępniany jest ten folder."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ShareX criava um link de compartilhamento para cada arquivo. O Aktar cria links para os arquivos na URL base pública: digite o endereço web de onde esta pasta é servida."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX создавал ссылку для общего доступа к каждому файлу. Aktar ссылается на файлы через публичный базовый URL: введите веб-адрес, с которого доступна эта папка."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX her dosya için bir paylaşım bağlantısı oluşturuyordu. Aktar dosyalara Genel Temel URL üzerinden bağlantı verir: bu klasörün sunulduğu web adresini gir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX створював посилання для спільного доступу до кожного файлу. Aktar посилається на файли через публічну базову URL-адресу: введіть вебадресу, з якої доступна ця тека."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX đã tạo một liên kết chia sẻ cho mỗi tệp. Aktar liên kết đến tệp qua URL cơ sở công khai: hãy nhập địa chỉ web phục vụ thư mục này."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 为每个文件创建了共享链接。Aktar 通过公开基础 URL 链接到文件：请输入提供此文件夹的网址。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 為每個檔案建立了分享連結。Aktar 透過公開基礎 URL 連結到檔案：請輸入提供此資料夾的網址。"
+          }
+        }
+      }
+    },
+    "ShareX signed in with the key file %@. Choose that key on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX hat sich mit der Schlüsseldatei %@ angemeldet. Wähle diesen Schlüssel auf diesem Mac aus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX iniciaba sesión con el archivo de clave %@. Elige esa clave en este Mac."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX se connectait avec le fichier de clé %@. Choisissez cette clé sur ce Mac."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX masuk dengan file kunci %@. Pilih kunci itu di Mac ini."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX accedeva con il file di chiave %@. Scegli quella chiave su questo Mac."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX は鍵ファイル %@ でサインインしていました。この Mac でその鍵を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX는 키 파일 %@(으)로 로그인했습니다. 이 Mac에서 그 키를 선택하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX meldde zich aan met het sleutelbestand %@. Kies die sleutel op deze Mac."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX logował się plikiem klucza %@. Wybierz ten klucz na tym Macu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ShareX entrava com o arquivo de chave %@. Escolha essa chave neste Mac."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX входил с файлом ключа %@. Выберите этот ключ на этом Mac."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX %@ anahtar dosyasıyla oturum açıyordu. Bu Mac'te o anahtarı seç."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX входив із файлом ключа %@. Виберіть цей ключ на цьому Mac."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX đăng nhập bằng tệp khóa %@. Hãy chọn khóa đó trên máy Mac này."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 使用密钥文件 %@ 登录。请在这台 Mac 上选择该密钥。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 使用金鑰檔案 %@ 登入。請在這台 Mac 上選擇該金鑰。"
+          }
+        }
+      }
+    },
+    "ShareX: %@ (Nextcloud)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX : %@ (Nextcloud)"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@（Nextcloud）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX: %@ (Nextcloud)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX：%@（Nextcloud）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX：%@（Nextcloud）"
+          }
+        }
+      }
+    },
+    "ShareX’s folder %@ changes with each upload. Aktar uploads into %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der ShareX-Ordner %1$@ ändert sich bei jedem Upload. Aktar lädt in %2$@ hoch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta %1$@ de ShareX cambia con cada subida. Aktar sube a %2$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dossier ShareX %1$@ change à chaque envoi. Aktar envoie dans %2$@."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder ShareX %1$@ berubah di setiap unggahan. Aktar mengunggah ke %2$@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cartella %1$@ di ShareX cambia a ogni caricamento. Aktar carica in %2$@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX のフォルダ %1$@ はアップロードのたびに変わります。Aktar は %2$@ にアップロードします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX의 폴더 %1$@은(는) 업로드할 때마다 바뀝니다. Aktar는 %2$@에 업로드합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De ShareX-map %1$@ verandert bij elke upload. Aktar uploadt naar %2$@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder ShareX %1$@ zmienia się przy każdym przesłaniu. Aktar przesyła do %2$@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pasta %1$@ do ShareX muda a cada envio. O Aktar envia para %2$@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка ShareX %1$@ меняется при каждой загрузке. Aktar загружает в %2$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX'in %1$@ klasörü her yüklemede değişiyor. Aktar %2$@ içine yükler."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тека ShareX %1$@ змінюється з кожним вивантаженням. Aktar вивантажує в %2$@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư mục %1$@ của ShareX thay đổi sau mỗi lần tải lên. Aktar tải lên vào %2$@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 的文件夹 %1$@ 每次上传都会变化。Aktar 会上传到 %2$@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ShareX 的資料夾 %1$@ 每次上傳都會改變。Aktar 會上傳到 %2$@。"
+          }
+        }
+      }
+    },
+    "Sign In With" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmelden mit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar sesión con"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter avec"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masuk Dengan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi con"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サインイン方法"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 방식"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inloggen met"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logowanie za pomocą"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar com"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Способ входа"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum Açma Yöntemi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спосіб входу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đăng nhập bằng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录方式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入方式"
+          }
+        }
+      }
+    },
+    "The HTTP home path uses ShareX syntax, so enter the public base URL yourself." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der HTTP-Basispfad verwendet ShareX-Syntax, gib die öffentliche Basis-URL daher selbst ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ruta HTTP de inicio usa sintaxis de ShareX, así que escribe tú la URL base pública."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le chemin HTTP utilise la syntaxe de ShareX : saisissez vous-même l’URL publique de base."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jalur beranda HTTP memakai sintaks ShareX, jadi masukkan sendiri URL dasar publiknya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il percorso HTTP iniziale usa la sintassi di ShareX, quindi inserisci tu l’URL di base pubblico."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP ホームパスに ShareX の構文が使われているため、公開ベース URL を自分で入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP 홈 경로에 ShareX 구문이 쓰여 있으므로 공개 기본 URL을 직접 입력하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het HTTP-thuispad gebruikt ShareX-syntaxis, dus vul de openbare basis-URL zelf in."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ścieżka HTTP używa składni ShareX, więc wpisz publiczny bazowy URL samodzielnie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O caminho HTTP inicial usa sintaxe do ShareX, então digite você mesmo a URL base pública."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домашний HTTP-путь использует синтаксис ShareX, поэтому введите публичный базовый URL сами."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP ana yolu ShareX sözdizimi kullanıyor, bu yüzden genel temel URL'yi kendin gir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домашній HTTP-шлях використовує синтаксис ShareX, тож введіть публічну базову URL-адресу самостійно."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đường dẫn HTTP gốc dùng cú pháp ShareX, nên hãy tự nhập URL cơ sở công khai."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP 主路径使用了 ShareX 语法，请自行输入公开基础 URL。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP 主路徑使用了 ShareX 語法，請自行輸入公開基礎 URL。"
           }
         }
       }
@@ -3604,6 +7204,1306 @@
         }
       }
     },
+    "The SFTP server refused this (code %u)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der SFTP-Server hat das abgelehnt (Code %u)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servidor SFTP lo rechazó (código %u)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur SFTP a refusé (code %u)."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server SFTP menolak ini (kode %u)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il server SFTP l’ha rifiutato (codice %u)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP サーバーに拒否されました（コード %u）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP 서버가 거부했습니다(코드 %u)."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De SFTP-server heeft dit geweigerd (code %u)."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serwer SFTP odmówił (kod %u)."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O servidor SFTP recusou isto (código %u)."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP-сервер отказал (код %u)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP sunucusu bunu reddetti (kod %u)."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP-сервер відмовив (код %u)."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máy chủ SFTP đã từ chối (mã %u)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP 服务器拒绝了此操作（代码 %u）。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP 伺服器拒絕了此操作（代碼 %u）。"
+          }
+        }
+      }
+    },
+    "The connection to %@ failed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zu %@ ist fehlgeschlagen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La conexión con %@ falló."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion à %@ a échoué."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koneksi ke %@ gagal."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connessione a %@ non è riuscita."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ への接続に失敗しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 연결에 실패했습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De verbinding met %@ is mislukt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połączenie z %@ nie powiodło się."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão com %@ falhou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось соединиться с %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bağlantısı başarısız oldu."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "З’єднання з %@ не вдалося."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kết nối tới %@ không thành công."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与 %@ 的连接失败。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "與 %@ 的連線失敗。"
+          }
+        }
+      }
+    },
+    "The connection to %@ failed: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zu %1$@ ist fehlgeschlagen: %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La conexión con %1$@ falló: %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion à %1$@ a échoué : %2$@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koneksi ke %1$@ gagal: %2$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connessione a %1$@ non è riuscita: %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ への接続に失敗しました: %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 연결에 실패했습니다: %2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De verbinding met %1$@ is mislukt: %2$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połączenie z %1$@ nie powiodło się: %2$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão com %1$@ falhou: %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось соединиться с %1$@: %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ bağlantısı başarısız oldu: %2$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "З’єднання з %1$@ не вдалося: %2$@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kết nối tới %1$@ không thành công: %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与 %1$@ 的连接失败：%2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "與 %1$@ 的連線失敗：%2$@"
+          }
+        }
+      }
+    },
+    "The connection to %@ was lost." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zu %@ wurde unterbrochen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se perdió la conexión con %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion à %@ a été perdue."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koneksi ke %@ terputus."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connessione a %@ si è interrotta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ との接続が切れました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@과(와)의 연결이 끊어졌습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De verbinding met %@ is verbroken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połączenie z %@ zostało przerwane."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão com %@ caiu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соединение с %@ прервано."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bağlantısı koptu."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "З’єднання з %@ перервано."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mất kết nối tới %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与 %@ 的连接已断开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "與 %@ 的連線已中斷。"
+          }
+        }
+      }
+    },
+    "The file isn’t on the server." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei ist nicht auf dem Server."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo no está en el servidor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier n’est pas sur le serveur."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File tidak ada di server."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il file non è sul server."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファイルがサーバー上にありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "파일이 서버에 없습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het bestand staat niet op de server."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pliku nie ma na serwerze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo não está no servidor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файла нет на сервере."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosya sunucuda yok."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файлу немає на сервері."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tệp không có trên máy chủ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该文件不在服务器上。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該檔案不在伺服器上。"
+          }
+        }
+      }
+    },
+    "The file to copy isn’t there any more." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zu kopierende Datei ist nicht mehr da."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo que se iba a copiar ya no está."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier à copier n’existe plus."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File yang akan disalin sudah tidak ada."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il file da copiare non c’è più."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーするファイルがもうありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사할 파일이 더 이상 없습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het te kopiëren bestand is er niet meer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pliku do skopiowania już nie ma."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo a copiar não está mais lá."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копируемого файла больше нет."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopyalanacak dosya artık orada değil."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файлу для копіювання вже немає."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tệp cần sao chép không còn nữa."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要复制的文件已不存在。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要複製的檔案已不存在。"
+          }
+        }
+      }
+    },
+    "The folder uploads go into, such as /var/www/files, or one in the login folder, such as files. Empty is the login folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ordner für Uploads, etwa /var/www/files, oder einer im Anmeldeordner, etwa files. Leer bedeutet der Anmeldeordner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta a la que van las subidas, por ejemplo /var/www/files, o una dentro de la carpeta de inicio de sesión, por ejemplo files. Si está vacío, se usa la carpeta de inicio de sesión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dossier où vont les envois, par exemple /var/www/files, ou un dossier dans le dossier de connexion, par exemple files. Vide correspond au dossier de connexion."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder tujuan unggahan, misalnya /var/www/files, atau folder di dalam folder login, misalnya files. Kosong berarti folder login."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cartella in cui vanno i caricamenti, ad esempio /var/www/files, oppure una nella cartella di accesso, ad esempio files. Se è vuoto, si usa la cartella di accesso."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード先のフォルダです。/var/www/files のようなフォルダか、ログインフォルダ内の files のようなフォルダを指定します。空の場合はログインフォルダです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업로드할 폴더입니다. /var/www/files와 같은 폴더 또는 로그인 폴더 안의 files와 같은 폴더를 입력합니다. 비워 두면 로그인 폴더입니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De map waar uploads in komen, zoals /var/www/files, of een map in de inlogmap, zoals files. Leeg is de inlogmap."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder, do którego trafiają przesłane pliki, na przykład /var/www/files, albo folder w folderze logowania, na przykład files. Puste oznacza folder logowania."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pasta para onde vão os envios, por exemplo /var/www/files, ou uma dentro da pasta de login, por exemplo files. Vazio é a pasta de login."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папка для загрузок, например /var/www/files, или папка внутри папки входа, например files. Если пусто, используется папка входа."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemelerin gideceği klasör: /var/www/files gibi ya da giriş klasörünün içinde files gibi bir klasör. Boş bırakılırsa giriş klasörü kullanılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тека, куди йдуть вивантаження, наприклад /var/www/files, або тека в теці входу, наприклад files. Якщо порожньо, використовується тека входу."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư mục chứa các tệp tải lên, ví dụ /var/www/files, hoặc một thư mục trong thư mục đăng nhập, ví dụ files. Để trống là thư mục đăng nhập."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传到的文件夹，例如 /var/www/files，或登录文件夹中的某个文件夹，例如 files。留空则为登录文件夹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上傳到的資料夾，例如 /var/www/files，或登入資料夾中的某個資料夾，例如 files。留空則為登入資料夾。"
+          }
+        }
+      }
+    },
+    "The key’s passphrase is missing or wrong." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Passphrase des Schlüssels fehlt oder ist falsch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falta la frase de contraseña de la clave o es incorrecta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La phrase secrète de la clé est manquante ou incorrecte."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frasa sandi kunci tidak ada atau salah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La passphrase della chiave manca o è errata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵のパスフレーズが入力されていないか、間違っています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키 암호가 없거나 올바르지 않습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De wachtwoordzin van de sleutel ontbreekt of is onjuist."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brak hasła klucza lub jest ono nieprawidłowe."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A frase secreta da chave está faltando ou incorreta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Парольная фраза ключа отсутствует или неверна."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtarın parolası eksik ya da yanlış."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Парольна фраза ключа відсутня або неправильна."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cụm mật khẩu của khóa bị thiếu hoặc sai."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密钥的密码短语缺失或错误。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金鑰的密語缺少或錯誤。"
+          }
+        }
+      }
+    },
+    "The private key can’t be read. Paste it in OpenSSH format, starting with -----BEGIN." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der private Schlüssel kann nicht gelesen werden. Füge ihn im OpenSSH-Format ein, beginnend mit -----BEGIN."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se puede leer la clave privada. Pégala en formato OpenSSH, empezando por -----BEGIN."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La clé privée est illisible. Collez-la au format OpenSSH, en commençant par -----BEGIN."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci privat tidak dapat dibaca. Tempel dalam format OpenSSH, diawali -----BEGIN."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile leggere la chiave privata. Incollala in formato OpenSSH, a partire da -----BEGIN."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秘密鍵を読み取れません。-----BEGIN で始まる OpenSSH 形式で貼り付けてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 키를 읽을 수 없습니다. -----BEGIN으로 시작하는 OpenSSH 형식으로 붙여 넣으십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De privésleutel kan niet worden gelezen. Plak hem in OpenSSH-indeling, beginnend met -----BEGIN."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie można odczytać klucza prywatnego. Wklej go w formacie OpenSSH, zaczynając od -----BEGIN."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não é possível ler a chave privada. Cole-a no formato OpenSSH, começando com -----BEGIN."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удается прочитать закрытый ключ. Вставьте его в формате OpenSSH, начиная с -----BEGIN."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel anahtar okunamıyor. -----BEGIN ile başlayan OpenSSH biçiminde yapıştır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдається прочитати закритий ключ. Вставте його у форматі OpenSSH, починаючи з -----BEGIN."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không đọc được khóa riêng tư. Hãy dán khóa ở định dạng OpenSSH, bắt đầu bằng -----BEGIN."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取私钥。请以 OpenSSH 格式粘贴，以 -----BEGIN 开头。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法讀取私密金鑰。請以 OpenSSH 格式貼上，以 -----BEGIN 開頭。"
+          }
+        }
+      }
+    },
+    "The saved server key can’t be read. Run Test Connection again and save." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der gespeicherte Serverschlüssel kann nicht gelesen werden. Teste die Verbindung erneut und sichere."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se puede leer la clave del servidor guardada. Vuelve a probar la conexión y guarda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La clé de serveur enregistrée est illisible. Relancez Tester la connexion et enregistrez."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunci server yang tersimpan tidak dapat dibaca. Jalankan Uji Koneksi lagi lalu simpan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La chiave del server salvata non è leggibile. Esegui di nuovo Prova connessione e salva."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存されたサーバーの鍵を読み取れません。もう一度「接続をテスト」を実行して保存してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 서버 키를 읽을 수 없습니다. 연결 테스트를 다시 실행하고 저장하세요."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De opgeslagen serversleutel is onleesbaar. Test de verbinding opnieuw en bewaar."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie można odczytać zapisanego klucza serwera. Uruchom ponownie Testuj połączenie i zapisz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A chave do servidor salva não pode ser lida. Teste a conexão de novo e salve."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удаётся прочитать сохранённый ключ сервера. Снова проверьте подключение и сохраните."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlı sunucu anahtarı okunamıyor. Bağlantıyı Test Et'i yeniden çalıştır ve kaydet."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдається прочитати збережений ключ сервера. Знову перевірте з’єднання і збережіть."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không đọc được khóa máy chủ đã lưu. Hãy chạy lại Kiểm tra kết nối rồi lưu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取已保存的服务器密钥。请再次运行“测试连接”并保存。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法讀取已儲存的伺服器金鑰。請再次執行「測試連線」並儲存。"
+          }
+        }
+      }
+    },
+    "The server answered: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server antwortete: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servidor respondió: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur a répondu : %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jawaban server: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il server ha risposto: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの応答: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 응답: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De server antwoordde: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serwer odpowiedział: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O servidor respondeu: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ответ сервера: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun yanıtı: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відповідь сервера: %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máy chủ trả lời: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器回应：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器回應：%@"
+          }
+        }
+      }
+    },
+    "The server’s identity has changed (%@). If you expected this, run Test Connection again and save." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Identität des Servers hat sich geändert (%@). Wenn du das erwartet hast, führe „Verbindung testen“ erneut aus und speichere."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La identidad del servidor ha cambiado (%@). Si lo esperabas, vuelve a usar Probar conexión y guarda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’identité du serveur a changé (%@). Si vous vous y attendiez, relancez Tester la connexion et enregistrez."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identitas server telah berubah (%@). Jika Anda memang mengharapkan ini, jalankan Uji Koneksi lagi lalu simpan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’identità del server è cambiata (%@). Se te lo aspettavi, esegui di nuovo Verifica connessione e salva."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの身元が変わりました(%@)。想定どおりの変更であれば、もう一度「接続をテスト」を実行して保存してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버의 신원이 변경되었습니다(%@). 예상한 변경이라면 연결 테스트를 다시 실행하고 저장하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De identiteit van de server is veranderd (%@). Als je dit verwachtte, voer Test verbinding opnieuw uit en sla op."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tożsamość serwera się zmieniła (%@). Jeśli się tego spodziewałeś, uruchom ponownie Testuj połączenie i zapisz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A identidade do servidor mudou (%@). Se você esperava por isso, execute Testar conexão de novo e salve."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подлинность сервера изменилась (%@). Если вы этого ожидали, снова запустите «Проверить подключение» и сохраните."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun kimliği değişti (%@). Bunu bekliyorsan Bağlantıyı Test Et'i yeniden çalıştır ve kaydet."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ідентичність сервера змінилася (%@). Якщо ви цього очікували, знову запустіть «Перевірити з’єднання» і збережіть."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danh tính của máy chủ đã thay đổi (%@). Nếu bạn đã dự đoán điều này, hãy chạy lại Kiểm tra kết nối và lưu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器的身份已更改（%@）。如果这在你的预期之中，请再次运行“测试连接”并保存。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器的身分已變更（%@）。如果這在你的預期之中，請再次執行「測試連線」並儲存。"
+          }
+        }
+      }
+    },
+    "The server’s identity has changed. Nothing was sent to it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Identität des Servers hat sich geändert. Es wurde nichts an ihn gesendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La identidad del servidor ha cambiado. No se le ha enviado nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’identité du serveur a changé. Rien ne lui a été envoyé."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identitas server telah berubah. Tidak ada yang dikirim ke server."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’identità del server è cambiata. Non gli è stato inviato nulla."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの身元が変わりました。サーバーには何も送信していません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버의 신원이 변경되었습니다. 서버로 아무것도 전송하지 않았습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De identiteit van de server is veranderd. Er is niets naartoe gestuurd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tożsamość serwera się zmieniła. Nic do niego nie wysłano."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A identidade do servidor mudou. Nada foi enviado a ele."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подлинность сервера изменилась. Ему ничего не отправлено."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun kimliği değişti. Sunucuya hiçbir şey gönderilmedi."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ідентичність сервера змінилася. Йому нічого не надіслано."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danh tính của máy chủ đã thay đổi. Không có gì được gửi đến máy chủ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器的身份已更改。没有向它发送任何内容。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器的身分已變更。沒有傳送任何內容給它。"
+          }
+        }
+      }
+    },
     "The test file was uploaded, but it isn’t at the Public Base URL. Check that the URL points to this folder." : {
       "localizations" : {
         "de" : {
@@ -3700,6 +8600,106 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "測試檔案已上傳，但不在公開基礎 URL 下。請檢查該 URL 是否指向此資料夾。"
+          }
+        }
+      }
+    },
+    "The web address a web server serves this folder from: SFTP itself has no links. A file’s path in the folder is added to it for its link." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Webadresse, unter der ein Webserver diesen Ordner bereitstellt: SFTP selbst hat keine Links. Für den Link einer Datei wird ihr Pfad im Ordner daran angehängt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dirección web desde la que un servidor web sirve esta carpeta: SFTP no tiene enlaces propios. Para el enlace de un archivo se le añade su ruta dentro de la carpeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’adresse web depuis laquelle un serveur web sert ce dossier : SFTP lui-même n’a pas de liens. Le chemin d’un fichier dans le dossier y est ajouté pour former son lien."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alamat web tempat server web menyajikan folder ini: SFTP sendiri tidak memiliki tautan. Jalur file di dalam folder ditambahkan ke alamat ini untuk tautannya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’indirizzo web da cui un server web serve questa cartella: SFTP di per sé non ha link. Per il link di un file vi si aggiunge il suo percorso nella cartella."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web サーバーがこのフォルダを配信している Web アドレスです。SFTP 自体にはリンクがありません。ファイルのリンクは、このアドレスにフォルダ内のパスを付けたものになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "웹 서버가 이 폴더를 제공하는 웹 주소입니다. SFTP 자체에는 링크가 없습니다. 파일의 링크는 이 주소에 폴더 안의 파일 경로를 붙여 만듭니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het webadres waarop een webserver deze map aanbiedt: SFTP zelf heeft geen links. Voor de link van een bestand wordt het pad in de map hieraan toegevoegd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres internetowy, pod którym serwer WWW udostępnia ten folder: samo SFTP nie ma linków. Link do pliku powstaje przez dodanie do niego ścieżki pliku w folderze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O endereço web de onde um servidor web serve esta pasta: o SFTP em si não tem links. O caminho de um arquivo na pasta é adicionado a ele para formar o link."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Веб-адрес, с которого веб-сервер отдает эту папку: у самого SFTP ссылок нет. Ссылка на файл получается добавлением к нему пути файла в папке."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir web sunucusunun bu klasörü sunduğu web adresi: SFTP'nin kendi bağlantıları yoktur. Bir dosyanın bağlantısı, klasördeki yolu bu adrese eklenerek oluşur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вебадреса, з якої вебсервер віддає цю теку: сам SFTP посилань не має. Посилання на файл утворюється додаванням до неї шляху файлу в теці."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Địa chỉ web mà một máy chủ web dùng để phục vụ thư mục này: bản thân SFTP không có liên kết. Liên kết của một tệp là địa chỉ này cộng với đường dẫn của tệp trong thư mục."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web 服务器提供此文件夹所用的网址：SFTP 本身没有链接。文件的链接由此网址加上文件在文件夹中的路径组成。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "網頁伺服器提供此資料夾所用的網址：SFTP 本身沒有連結。檔案的連結由此網址加上檔案在資料夾中的路徑組成。"
           }
         }
       }
@@ -3804,6 +8804,106 @@
         }
       }
     },
+    "This account can’t upload files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Konto kann keine Dateien hochladen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta cuenta no puede subir archivos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce compte ne peut pas envoyer de fichiers"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akun ini tidak dapat mengunggah file"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo account non può caricare file"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアカウントはファイルをアップロードできません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 계정은 파일을 업로드할 수 없습니다"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit account kan geen bestanden uploaden"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To konto nie może przesyłać plików"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta conta não pode enviar arquivos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта учётная запись не может загружать файлы"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu hesap dosya yükleyemiyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей обліковий запис не може завантажувати файли"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tài khoản này không tải tệp lên được"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此账户无法上传文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此帳號無法上傳檔案"
+          }
+        }
+      }
+    },
     "This destination’s kind of storage can’t do this." : {
       "localizations" : {
         "de" : {
@@ -3900,6 +9000,506 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此目的地的儲存類型無法執行此操作。"
+          }
+        }
+      }
+    },
+    "This file isn’t a private key. Pick the key itself (such as id_ed25519), not the .pub file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Datei ist kein privater Schlüssel. Wähle den Schlüssel selbst (etwa id_ed25519), nicht die .pub-Datei."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este archivo no es una clave privada. Elige la propia clave (por ejemplo id_ed25519), no el archivo .pub."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier n’est pas une clé privée. Choisissez la clé elle-même (par exemple id_ed25519), pas le fichier .pub."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File ini bukan kunci privat. Pilih kuncinya sendiri (misalnya id_ed25519), bukan file .pub."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo file non è una chiave privata. Scegli la chiave vera e propria (ad esempio id_ed25519), non il file .pub."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このファイルは秘密鍵ではありません。.pub ファイルではなく、鍵そのもの(id_ed25519 など)を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 파일은 개인 키가 아닙니다. .pub 파일이 아닌 키 자체(예: id_ed25519)를 선택하십시오."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit bestand is geen privésleutel. Kies de sleutel zelf (zoals id_ed25519), niet het .pub-bestand."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ten plik nie jest kluczem prywatnym. Wybierz sam klucz (na przykład id_ed25519), a nie plik .pub."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este arquivo não é uma chave privada. Escolha a própria chave (por exemplo id_ed25519), não o arquivo .pub."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот файл не является закрытым ключом. Выберите сам ключ (например id_ed25519), а не файл .pub."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu dosya bir özel anahtar değil. .pub dosyasını değil, anahtarın kendisini (id_ed25519 gibi) seç."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей файл не є закритим ключем. Виберіть сам ключ (наприклад id_ed25519), а не файл .pub."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tệp này không phải là khóa riêng tư. Hãy chọn chính khóa đó (ví dụ id_ed25519), không phải tệp .pub."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件不是私钥。请选择密钥本身（例如 id_ed25519），而不是 .pub 文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此檔案不是私密金鑰。請選擇金鑰本身（例如 id_ed25519），而不是 .pub 檔案。"
+          }
+        }
+      }
+    },
+    "This name can’t be used on an SFTP server: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Name kann auf einem SFTP-Server nicht verwendet werden: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este nombre no se puede usar en un servidor SFTP: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce nom ne peut pas être utilisé sur un serveur SFTP : %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nama ini tidak dapat digunakan di server SFTP: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo nome non può essere usato su un server SFTP: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この名前は SFTP サーバーでは使えません: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 이름은 SFTP 서버에서 사용할 수 없습니다: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze naam kan niet worden gebruikt op een SFTP-server: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tej nazwy nie można użyć na serwerze SFTP: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este nome não pode ser usado em um servidor SFTP: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это имя нельзя использовать на SFTP-сервере: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu ad bir SFTP sunucusunda kullanılamaz: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Це ім’я не можна використати на SFTP-сервері: %@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không thể dùng tên này trên máy chủ SFTP: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此名称无法在 SFTP 服务器上使用：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此名稱無法在 SFTP 伺服器上使用：%@"
+          }
+        }
+      }
+    },
+    "a file with several keys" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eine Datei mit mehreren Schlüsseln"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un archivo con varias claves"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un fichier contenant plusieurs clés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "file berisi beberapa kunci"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un file con più chiavi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数の鍵を含むファイル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여러 키가 들어 있는 파일"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "een bestand met meerdere sleutels"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "plik z kilkoma kluczami"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "um arquivo com várias chaves"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "файл с несколькими ключами"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "birden çok anahtar içeren bir dosya"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "файл із кількома ключами"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tệp chứa nhiều khóa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包含多个密钥的文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包含多個金鑰的檔案"
+          }
+        }
+      }
+    },
+    "encrypted PEM; convert it with ssh-keygen -p -f <key file>" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "verschlüsseltes PEM; wandle es mit ssh-keygen -p -f <Schlüsseldatei> um"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM cifrado; conviértelo con ssh-keygen -p -f <archivo de clave>"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM chiffré ; convertissez-le avec ssh-keygen -p -f <fichier de clé>"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM terenkripsi; ubah dengan ssh-keygen -p -f <file kunci>"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM cifrato; convertilo con ssh-keygen -p -f <file di chiave>"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暗号化された PEM。ssh-keygen -p -f <鍵ファイル> で変換してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "암호화된 PEM. ssh-keygen -p -f <키 파일>로 변환하세요"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "versleutelde PEM; zet hem om met ssh-keygen -p -f <sleutelbestand>"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zaszyfrowany PEM; przekonwertuj go poleceniem ssh-keygen -p -f <plik klucza>"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM criptografado; converta com ssh-keygen -p -f <arquivo da chave>"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "зашифрованный PEM; преобразуйте его командой ssh-keygen -p -f <файл ключа>"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "şifreli PEM; ssh-keygen -p -f <anahtar dosyası> ile dönüştür"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "зашифрований PEM; перетворіть його командою ssh-keygen -p -f <файл ключа>"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEM đã mã hóa; hãy chuyển đổi bằng ssh-keygen -p -f <tệp khóa>"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加密的 PEM；请用 ssh-keygen -p -f <密钥文件> 转换"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加密的 PEM；請用 ssh-keygen -p -f <金鑰檔案> 轉換"
+          }
+        }
+      }
+    },
+    "security key (%@)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherheitsschlüssel (%@)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "llave de seguridad (%@)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "clé de sécurité (%@)"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kunci keamanan (%@)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chiave di sicurezza (%@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セキュリティキー（%@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보안 키(%@)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "beveiligingssleutel (%@)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klucz bezpieczeństwa (%@)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chave de segurança (%@)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ключ безопасности (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "güvenlik anahtarı (%@)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ключ безпеки (%@)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "khóa bảo mật (%@)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全密钥（%@）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全金鑰（%@）"
           }
         }
       }
@@ -38013,9 +43613,7 @@
         }
       }
     },
-    "Get the last ${count} uploads to ${destination}" : {
-
-    },
+    "Get the last ${count} uploads to ${destination}" : {},
     "GitHub" : {
       "shouldTranslate" : false
     },
@@ -56231,9 +61829,7 @@
         }
       }
     },
-    "Replace ${upload} with ${file}" : {
-
-    },
+    "Replace ${upload} with ${file}" : {},
     "Replace File" : {
       "localizations" : {
         "de" : {
@@ -78338,9 +83934,7 @@
         }
       }
     },
-    "Upload ${files} to ${destination}" : {
-
-    },
+    "Upload ${files} to ${destination}" : {},
     "Upload again with a new link" : {
       "localizations" : {
         "de" : {
@@ -80341,9 +85935,7 @@
         }
       }
     },
-    "Upload the clipboard to ${destination}" : {
-
-    },
+    "Upload the clipboard to ${destination}" : {},
     "Upload Them" : {
       "localizations" : {
         "de" : {

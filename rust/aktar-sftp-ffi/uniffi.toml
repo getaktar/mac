@@ -1,0 +1,5 @@
+# The C module Swift imports the generated header through (see
+# scripts/build-sftp-core.sh, which writes its module map).
+[bindings.swift]
+ffi_module_name = "AktarSFTPFFI"
+ffi_module_filename = "AktarSFTPFFI"

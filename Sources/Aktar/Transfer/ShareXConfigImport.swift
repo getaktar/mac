@@ -3,7 +3,8 @@ import Foundation
 
 /// "Import from ShareX" (docs/sharex-import.md): ShareX's
 /// `UploadersConfig.json`, or a `.sxb` backup that has it, read into
-/// destinations (its Amazon S3 and Backblaze B2 uploaders), URL shorteners
+/// destinations (its Amazon S3 and Backblaze B2 uploaders, SFTP accounts and
+/// the ownCloud / Nextcloud uploader as WebDAV), URL shorteners
 /// (custom uploaders, through the `.sxcu` import) and the things that
 /// can't come along. Nothing is saved here; the review does that.
 enum ShareXConfigImport {
@@ -15,7 +16,7 @@ enum ShareXConfigImport {
     static let defaultObjectPrefix = "ShareX/%y/%mo"
 
     struct Destination: Identifiable, Equatable {
-        enum Kind: Equatable { case s3, b2 }
+        enum Kind: Equatable { case s3, b2, sftp, webdav }
 
         let id = UUID()
         var kind: Kind
@@ -38,11 +39,19 @@ enum ShareXConfigImport {
         var secretIsEncrypted: Bool
         /// What the review says about it (template parts dropped, ...).
         var notes: [String]
+        /// SFTP: the account signs in with a key file, which is on the
+        /// Windows PC (`Keypath`); the review asks for the key itself.
+        var keyFile: String? = nil
+        /// SFTP: the key's passphrase, when the file has it in plain text.
+        var keyPassphrase: String? = nil
+        /// SFTP: the passphrase is there, encrypted for Windows.
+        var passphraseIsEncrypted = false
 
         static func == (lhs: Destination, rhs: Destination) -> Bool {
             lhs.kind == rhs.kind && lhs.name == rhs.name && lhs.endpoint == rhs.endpoint && lhs.bucket == rhs.bucket
                 && lhs.publicBaseURL == rhs.publicBaseURL && lhs.objectPathTemplate == rhs.objectPathTemplate
                 && lhs.accessKeyID == rhs.accessKeyID && lhs.secretKey == rhs.secretKey && lhs.region == rhs.region
+                && lhs.keyFile == rhs.keyFile && lhs.keyPassphrase == rhs.keyPassphrase
         }
 
         /// As a destination, once the endpoint and base URL are known.
@@ -117,7 +126,7 @@ enum ShareXConfigImport {
         guard data.count <= maxConfigBytes,
               let root = (try? JSONSerialization.jsonObject(with: stripBOM(data))) as? [String: Any] else { throw Failure.notShareX }
         // Something only ShareX's uploader settings have.
-        let known = ["AmazonS3Settings", "B2ApplicationKeyId", "CustomUploadersList", "FTPAccountList", "ImgurAccountType"]
+        let known = ["AmazonS3Settings", "B2ApplicationKeyId", "CustomUploadersList", "FTPAccountList", "ImgurAccountType", "OwnCloudHost"]
         guard known.contains(where: { root[$0] != nil }) else { throw Failure.notShareX }
 
         var result = Result()
@@ -125,6 +134,12 @@ enum ShareXConfigImport {
             result.destinations.append(destination)
         }
         if let destination = backblazeB2(root) {
+            result.destinations.append(destination)
+        }
+        let ftp = ftpAccounts(root["FTPAccountList"] as? [Any] ?? [])
+        result.destinations += ftp.destinations
+        result.skipped += ftp.skipped
+        if let destination = ownCloud(root) {
             result.destinations.append(destination)
         }
         for item in root["CustomUploadersList"] as? [Any] ?? [] {
@@ -306,6 +321,157 @@ enum ShareXConfigImport {
         return authorized
     }
 
+    // MARK: - SFTP accounts
+
+    /// ShareX's FTP accounts (`FTPAccountList`, ShareX.UploadersLib
+    /// FTPAccount.cs): those with `Protocol` SFTP become SFTP destinations;
+    /// plain FTP and FTPS are listed as skipped.
+    static func ftpAccounts(_ accounts: [Any]) -> (destinations: [Destination], skipped: [Skipped]) {
+        var destinations: [Destination] = []
+        var skipped: [Skipped] = []
+        for item in accounts {
+            guard let account = item as? [String: Any] else { continue }
+            let host = string(account["Host"])
+            let accountName = string(account["Name"])
+            let label = accountName.isEmpty || accountName == "New account" ? (host.isEmpty ? "FTP" : host) : accountName
+            guard ftpProtocol(account["Protocol"]) == "sftp" else {
+                skipped.append(Skipped(name: String(localized: "FTP account \(label)"), reason: String(localized: "Plain FTP and FTPS aren\u{2019}t supported. Use SFTP.")))
+                continue
+            }
+            guard !host.isEmpty else { continue }
+            if let destination = sftp(account, host: host, label: label) {
+                destinations.append(destination)
+            }
+        }
+        return (destinations, skipped)
+    }
+
+    /// "SFTP", 2 (the enum's number in older files) or "FTP"/"FTPS".
+    private static func ftpProtocol(_ value: Any?) -> String {
+        if let text = value as? String { return text.lowercased() }
+        if let number = value as? Int { return [0: "ftp", 1: "ftps", 2: "sftp"][number] ?? "" }
+        return "ftp"
+    }
+
+    /// An SFTP account. ShareX's link is `HttpHomePath` + (the sub folder,
+    /// when `HttpHomePathAutoAddSubFolderPath`) + the file name; its file
+    /// goes to `SubFolderPath` + the file name, relative to the login
+    /// folder unless it starts with `/`. Aktar's Folder is the sub folder's
+    /// fixed part, the path template its dated part, and the Public Base
+    /// URL the home path with the fixed part.
+    static func sftp(_ account: [String: Any], host: String, label: String) -> Destination? {
+        var notes: [String] = []
+        // FTPAccount's default port is 21, even for SFTP; kept as it is.
+        let port = (account["Port"] as? Int) ?? 21
+        let endpoint = port == 22 ? host : (host.contains(":") ? "[\(host)]:\(port)" : "\(host):\(port)")
+
+        var subFolder = string(account["SubFolderPath"]).replacingOccurrences(of: "%host", with: host).replacingOccurrences(of: "\\", with: "/")
+        while subFolder.count > 1, subFolder.hasSuffix("/") { subFolder.removeLast() }
+        let parts = subFolder.split(separator: "/", omittingEmptySubsequences: true)
+        let fixedParts = parts.prefix { !$0.contains("%") }
+        let datedParts = parts.dropFirst(fixedParts.count)
+        let fixed = (subFolder.hasPrefix("/") ? "/" : "") + fixedParts.joined(separator: "/")
+        let autoAddSubFolder = account["HttpHomePathAutoAddSubFolderPath"] as? Bool ?? true
+
+        let folder = fixed
+        let template: (template: String, notes: [String])
+        if autoAddSubFolder {
+            template = pathTemplate(fromPrefix: datedParts.joined(separator: "/"))
+        } else {
+            // The link leaves the sub folder out, so files go straight into it.
+            template = ("{filename}.{ext}", [])
+            if !datedParts.isEmpty {
+                notes.append(String(localized: "ShareX\u{2019}s folder \(subFolder) changes with each upload. Aktar uploads into \(fixed.isEmpty ? "." : fixed)."))
+            }
+        }
+        notes += template.notes
+
+        // The web address: the home path, or the host as ShareX falls back
+        // to, with the scheme ShareX was set to.
+        var publicBaseURL = ""
+        let home = string(account["HttpHomePath"]).replacingOccurrences(of: "%host", with: host)
+        let scheme = (account["BrowserProtocol"] as? String)?.lowercased() ?? ((account["BrowserProtocol"] as? Int) == 1 ? "https" : "http")
+        if home.contains("$") || home.contains("{") || home.contains("%") || home.contains("?") {
+            notes.append(String(localized: "The HTTP home path uses ShareX syntax, so enter the public base URL yourself."))
+        } else if !["http", "https"].contains(scheme) {
+            notes.append(String(localized: "ShareX linked to these files with \(scheme)://. Enter the web address they\u{2019}re served from as the Public Base URL."))
+        } else {
+            var base = home.isEmpty ? (host.hasPrefix("ftp.") ? String(host.dropFirst(4)) : host) : home
+            if !base.contains("://") { base = "\(scheme)://" + base }
+            base = trimmedSlashes(base)
+            if autoAddSubFolder, !fixedParts.isEmpty {
+                base += "/" + fixedParts.joined(separator: "/")
+            }
+            publicBaseURL = PublicURLResolver.isValidBaseURL(base) ? base : ""
+        }
+        if account["HttpHomePathNoExtension"] as? Bool == true {
+            notes.append(String(localized: "ShareX removed some file extensions; Aktar keeps them."))
+        }
+
+        let keyPath = string(account["Keypath"])
+        let (password, passwordEncrypted) = secret(account["Password"])
+        let (passphrase, passphraseEncrypted) = secret(account["Passphrase"])
+        let usesKey = !keyPath.isEmpty
+        if usesKey {
+            notes.append(String(localized: "ShareX signed in with the key file \(keyPath). Choose that key on this Mac."))
+        }
+        return Destination(
+            kind: .sftp,
+            name: String(localized: "ShareX: \(label)"),
+            preset: .sftp,
+            accountID: nil,
+            endpoint: endpoint,
+            region: "",
+            bucket: folder,
+            publicBaseURL: publicBaseURL,
+            objectPathTemplate: template.template,
+            forcePathStyle: false,
+            accessKeyID: string(account["Username"]),
+            secretKey: usesKey ? nil : password,
+            secretIsEncrypted: !usesKey && passwordEncrypted,
+            notes: notes,
+            keyFile: usesKey ? keyPath : nil,
+            keyPassphrase: usesKey ? passphrase : nil,
+            passphraseIsEncrypted: usesKey && passphraseEncrypted
+        )
+    }
+
+    // MARK: - ownCloud / Nextcloud
+
+    /// ShareX's ownCloud / Nextcloud uploader (`OwnCloudHost`,
+    /// `OwnCloudUsername`, `OwnCloudPassword`, `OwnCloudPath`): files go to
+    /// `<host>/remote.php/webdav<path>` over WebDAV, as ShareX's OwnCloud.cs
+    /// sends them. ShareX's links were Nextcloud shares, which Aktar doesn't
+    /// make, so the review asks for a web address that serves the folder.
+    static func ownCloud(_ root: [String: Any]) -> Destination? {
+        let rawHost = string(root["OwnCloudHost"])
+        let user = string(root["OwnCloudUsername"])
+        guard !rawHost.isEmpty, !user.isEmpty else { return nil }
+        let host = trimmedSlashes(rawHost.contains("://") ? rawHost : "https://" + rawHost)
+        var path = string(root["OwnCloudPath"])
+        if path.isEmpty { path = "/" }
+        if !path.hasPrefix("/") { path = "/" + path }
+        let endpoint = trimmedSlashes(host + "/remote.php/webdav" + path)
+        let (password, encrypted) = secret(root["OwnCloudPassword"])
+        let hostName = URLComponents(string: host)?.host ?? host
+        return Destination(
+            kind: .webdav,
+            name: String(localized: "ShareX: \(hostName) (Nextcloud)"),
+            preset: .webdav,
+            accountID: nil,
+            endpoint: endpoint,
+            region: "",
+            bucket: "",
+            publicBaseURL: "",
+            objectPathTemplate: "{filename}.{ext}",
+            forcePathStyle: false,
+            accessKeyID: user,
+            secretKey: password,
+            secretIsEncrypted: encrypted,
+            notes: [String(localized: "ShareX made a share link for each file. Aktar links to files at the Public Base URL: enter the web address this folder is served from.")]
+        )
+    }
+
     // MARK: - Path template
 
     /// ShareX's ObjectPrefix as an Aktar template: the prefix converted,
@@ -375,9 +541,6 @@ enum ShareXConfigImport {
     private static func otherUploaders(_ root: [String: Any]) -> [Skipped] {
         var skipped: [Skipped] = []
         let notSupported = String(localized: "Not an S3-compatible uploader.")
-        if let accounts = root["FTPAccountList"] as? [Any], !accounts.isEmpty {
-            skipped.append(Skipped(name: "FTP", reason: notSupported))
-        }
         let services: [(String, String)] = [
             ("ImgurOAuth2Info", "Imgur"), ("GoogleDriveOAuth2Info", "Google Drive"), ("DropboxOAuth2Info", "Dropbox"),
             ("OneDriveV2OAuth2Info", "OneDrive"), ("BoxOAuth2Info", "Box"), ("GoogleCloudStorageOAuth2Info", "Google Cloud Storage"),

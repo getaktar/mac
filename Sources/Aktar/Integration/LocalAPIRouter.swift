@@ -323,8 +323,8 @@ final class LocalAPIRouter {
         guard let expiryDays = Self.expiryDays(request) else {
             return .error(400, Self.invalidExpiryMessage)
         }
-        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
-            return .error(409, Self.expiryNotSetUpMessage)
+        if let problem = Self.expiryProblem(expiryDays, destination: destination) {
+            return problem
         }
         if expiryDays > 0, request.query["prefix"] != nil {
             return .error(400, "The expires and prefix query parameters can't be combined.")
@@ -369,9 +369,9 @@ final class LocalAPIRouter {
             TempFiles.removeIfOwned(input.fileURL)
             return .error(404, "No destination to upload to. Add one in Aktar's Settings.")
         }
-        if expiryDays > 0, !ExpiryRuleStore.shared.isActive(destination.id) {
+        if let problem = Self.expiryProblem(expiryDays, destination: destination) {
             TempFiles.removeIfOwned(input.fileURL)
-            return .error(409, Self.expiryNotSetUpMessage)
+            return problem
         }
         if let problem = Self.checkShortLinks(short, destination: destination) {
             TempFiles.removeIfOwned(input.fileURL)
@@ -428,6 +428,20 @@ final class LocalAPIRouter {
         guard let raw = request.query["expires"], !raw.isEmpty else { return 0 }
         guard let days = Int(raw), UploadExpiry.isValid(days) else { return nil }
         return days
+    }
+
+    /// Why `expires` can't be honoured here: a kind of storage without
+    /// lifecycle rules (WebDAV, SFTP) can't do it at all, and an S3 bucket
+    /// can once its rules are set up. Same wording as the desktop app.
+    private static func expiryProblem(_ expiryDays: Int, destination: DestinationConfig) -> HTTPResponse? {
+        guard expiryDays > 0 else { return nil }
+        guard destination.capabilities.expiryRules else {
+            return .error(409, "This destination can't delete uploads after a while (its storage has no lifecycle rules).")
+        }
+        guard ExpiryRuleStore.shared.isActive(destination.id) else {
+            return .error(409, expiryNotSetUpMessage)
+        }
+        return nil
     }
 
     private static let expiryNotSetUpMessage = "Auto-delete isn't set up for this destination. Set it up from Aktar's menu bar (Delete after) or the destination's settings."
@@ -556,7 +570,13 @@ final class LocalAPIRouter {
                 let shortLinks = appState.uploadManager.shortLinks
                 let records = appState.repository.records(key: body.from, destinationID: destination.id)
                 let plan = shortLinks.movePlan(key: body.from, destination: destination, records: records)
-                try await storage.copy(from: body.from, to: newKey)
+                // A rename on the server where there is one (SFTP).
+                let renames = destination.capabilities.rename && plan != .update
+                if renames {
+                    try await storage.move(from: body.from, to: newKey)
+                } else {
+                    try await storage.copy(from: body.from, to: newKey)
+                }
                 await BucketThumbnails.copy(from: body.from, to: newKey, prefixes: thumbnailPrefixes, provider: storage)
                 var shortLinkStatus = "none"
                 if plan == .update, let newURL = PublicURLResolver.resolve(baseURL: destination.publicBaseURL, objectKey: newKey) {
@@ -567,7 +587,7 @@ final class LocalAPIRouter {
                 // object, so that stays.
                 if shortLinkStatus != "notUpdated" {
                     try await BucketThumbnails.delete(for: body.from, prefixes: thumbnailPrefixes, provider: storage)
-                    try await storage.delete(objectKey: body.from)
+                    if !renames { try await storage.delete(objectKey: body.from) }
                     RemoteThumbnailLoader.shared.forget(destinationID: destination.id, key: body.from)
                 }
                 if plan == .warn {
