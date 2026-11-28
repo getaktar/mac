@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-11-28
+
 ### Added
 
 - SFTP destinations: upload to a folder on any SSH server with SFTP
   (OpenSSH on a VPS, Hetzner Storage Box, Synology, rclone) with a Server,
-  Folder, user name and a password or a private key (ed25519 or RSA in
-  OpenSSH format, encrypted keys with their passphrase, old PEM RSA keys).
+  Folder, user name and a password or a private key (ed25519, RSA or
+  ECDSA, in OpenSSH or PEM format, encrypted keys with their passphrase).
   "Choose Key File..." reads the key into the Keychain; the file isn't kept.
   Links come from the Public Base URL. Files are written as a hidden part
   file and renamed into place once complete, so a link never serves half a
