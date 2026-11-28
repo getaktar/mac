@@ -49,6 +49,13 @@ aggregateTargets:
           "$SRCROOT/scripts/build-sftp-core.sh"
         basedOnDependencyAnalysis: false
         showEnvVars: false
+        # Declared so a clean checkout plans the build: the targets that
+        # compile AktarSFTP.swift then wait for this script to make it.
+        outputFiles:
+          - $(SRCROOT)/build/sftp-core/swift/AktarSFTP.swift
+          - $(SRCROOT)/build/sftp-core/include/AktarSFTPFFI.h
+          - $(SRCROOT)/build/sftp-core/include/module.modulemap
+          - $(SRCROOT)/build/sftp-core/lib/libaktar_sftp_ffi.a
     settings:
       base:
         ENABLE_USER_SCRIPT_SANDBOXING: NO
